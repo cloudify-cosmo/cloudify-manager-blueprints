@@ -1,0 +1,106 @@
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+    - file:///home/dan/dev/cloudify/cloudify-manager/resources/rest-service/cloudify/types/types.yaml
+    - file:///home/dan/dev/cloudify/cloudify-fabric-plugin/plugin.yaml.template
+
+inputs:
+
+    public_ip:
+        default: 11.0.0.7
+
+    private_ip:
+        default: localhost
+
+    ssh_user:
+        default: vagrant
+
+    ssh_key_filename:
+        default: ~/work/vagrant/cloudify-manager/insecure_private_key
+
+    cloudify_packages:
+        default:
+            server:
+                components_package_url: http://11.0.0.1:8000/cloudify-components_amd64.deb
+                core_package_url: http://11.0.0.1:8000/cloudify-core_amd64.deb
+                ui_package_url: http://11.0.0.1:8000/cloudify-ui_amd64.deb
+            agents:
+                ubuntu_agent_url: http://11.0.0.1:8000/cloudify-ubuntu-agent_amd64.deb
+                centos_agent_url: http://11.0.0.1:8000/cloudify-centos-agent_amd64.deb
+                windows_agent_url: http://11.0.0.1:8000/cloudify-windows-agent_amd64.deb
+
+outputs:
+
+    cloudify:
+        value:
+            resources_prefix: ''
+
+            cloudify_agent:
+                min_workers: 2
+                max_workers: 5
+                remote_execution_port: 22
+                agent_key_path: { get_attribute: [manager, agent_key_path] }
+                user: vagrant
+
+            workflows:
+                task_retries: -1  # this means forever
+                task_retry_interval: 30
+
+            policy_engine:
+                start_timeout: 30
+
+    provider:
+        value:
+            name: simple
+            context: { get_attribute: [manager, provider_context] }
+
+    management_endpoint:
+#        value: { get_attribute: [manager, management_endpoint] }
+        value:
+            manager_ip: { get_input: public_ip }
+            manager_user: { get_input: ssh_user }
+            manager_key_path: { get_input: ssh_key_filename }
+
+node_templates:
+    manager_host:
+        type: cloudify.types.host
+        properties:
+            install_agent: false
+            ip: { get_input: public_ip }
+
+    manager:
+        type: cloudify.types.middleware_server
+        relationships:
+            -   type: cloudify.relationships.contained_in
+                target: manager_host
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                # -   create:
+                #         mapping: fabric.fabric_plugin.tasks.run_commands
+                #         properties:
+                #             commands:
+                #                 - echo "just because I can" > ~/just_because
+                #                 - ls /
+                #                 - fda
+                #             fabric_env:
+                #                 user: { get_input: ssh_user }
+                #                 key_filename: { get_input: ssh_key_filename }
+                -   configure:
+                        mapping: fabric.fabric_plugin.tasks.run_task
+                        properties:
+                            tasks_file: scripts/configure.py
+                            task_name: configure
+                            task_properties:
+                                private_ip: { get_input: private_ip }
+                            fabric_env:
+                                user: { get_input: ssh_user }
+                                key_filename: { get_input: ssh_key_filename }
+                -   start:
+                        mapping: fabric.fabric_plugin.tasks.run_module_task
+                        properties:
+                            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+                            task_properties:
+                                cloudify_packages: { get_input: cloudify_packages }
+                            fabric_env:
+                                user: { get_input: ssh_user }
+                                key_filename: { get_input: ssh_key_filename }

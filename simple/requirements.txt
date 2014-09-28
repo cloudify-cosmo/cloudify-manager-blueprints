@@ -1,1 +1,1 @@
-cloudify-fabric-plugin==3.0
+-e git+https://github.com/cloudify-cosmo/cloudify-fabric-plugin@master#egg=cloudify-fabric-plugin==3.1a4
