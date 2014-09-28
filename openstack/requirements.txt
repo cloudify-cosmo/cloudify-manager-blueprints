@@ -1,0 +1,2 @@
+cloudify-fabric-plugin==3.0
+cloudify-openstack-plugin==3.0

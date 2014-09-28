@@ -1,0 +1,1 @@
+cloudify-fabric-plugin==3.0
