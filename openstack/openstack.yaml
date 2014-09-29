@@ -239,7 +239,6 @@ node_templates:
                 image: { get_input: image_id }
                 flavor: { get_input: flavor_id }
                 key_name: { get_input: manager_public_key_name }
-                security_groups: ['cloudify-sg-management']
             management_network_name: { get_property: [management_network, resource_id] }
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
         relationships:
@@ -250,7 +249,7 @@ node_templates:
             - target: management_subnet
               type: cloudify.relationships.depends_on
             - target: management_security_group
-              type: cloudify.relationships.depends_on
+              type: cloudify.openstack.server_connected_to_security_group
 
     external_network:
         type: cloudify.openstack.network
