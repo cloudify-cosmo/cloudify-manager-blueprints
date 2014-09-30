@@ -216,8 +216,6 @@ node_templates:
               type: cloudify.relationships.contained_in
             - target: manager_server_ip
               type: cloudify.relationships.depends_on
-            - target: management_network
-              type: cloudify.relationships.depends_on
 
         interfaces:
             cloudify.interfaces.lifecycle:

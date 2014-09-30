@@ -28,18 +28,12 @@ from openstack_plugin_common import (
     USE_EXTERNAL_RESOURCE_PROPERTY,
     Config
 )
-from nova_plugin.server import (
-    NETWORKS_PROPERTY,
-    SERVER_OPENSTACK_TYPE
-)
 from neutron_plugin.floatingip import (
     FLOATINGIP_OPENSTACK_TYPE,
     IP_ADDRESS_PROPERTY
 )
-from neutron_plugin.network import NETWORK_OPENSTACK_TYPE
 from cloudify_cli.bootstrap.tasks import (
     PUBLIC_IP_RUNTIME_PROPERTY,
-    PRIVATE_IP_RUNTIME_PROPERTY,
     PROVIDER_RUNTIME_PROPERTY
 )
 
@@ -47,33 +41,28 @@ from cloudify_cli.bootstrap.tasks import (
 def configure(openstack_config, manager_public_key_name,
               agent_public_key_name):
 
-    # configure public ip
+    manager_public_ip = _configure_public_ip()
+
+    _set_provider_context(manager_public_key_name, agent_public_key_name)
+
+    _copy_openstack_configuration_to_manager(manager_public_ip,
+                                             openstack_config)
+
+
+def _configure_public_ip():
     floatingip_runtime_props = \
         _get_runtime_props_by_node_name_and_openstack_type(
             'manager_server_ip', FLOATINGIP_OPENSTACK_TYPE)
     manager_public_ip = floatingip_runtime_props[IP_ADDRESS_PROPERTY]
     ctx.runtime_properties[PUBLIC_IP_RUNTIME_PROPERTY] = manager_public_ip
+    return manager_public_ip
 
-    # configure private ip
-    manager_server_networks = \
-        _get_runtime_props_by_node_name_and_openstack_type(
-            'manager_server', SERVER_OPENSTACK_TYPE)[NETWORKS_PROPERTY]
-    management_network = \
-        _get_runtime_props_by_node_name_and_openstack_type(
-            'management_network',
-            NETWORK_OPENSTACK_TYPE)[OPENSTACK_NAME_PROPERTY]
-    private_ip = manager_server_networks[management_network][0]
-    ctx.runtime_properties[PRIVATE_IP_RUNTIME_PROPERTY] = private_ip
 
-    # set provider context
-    _set_provider_context(manager_public_key_name, agent_public_key_name)
-
-    # place openstack configuration on manager server
+def _copy_openstack_configuration_to_manager(manager_public_ip,
+                                             openstack_config):
     tmp = tempfile.mktemp()
-
     with open(tmp, 'w') as f:
         json.dump(openstack_config, f)
-
     with settings(host_string=manager_public_ip):
         fabric.api.put(tmp, Config.OPENSTACK_CONFIG_PATH_DEFAULT_PATH)
 
