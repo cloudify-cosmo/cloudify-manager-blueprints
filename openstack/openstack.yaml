@@ -82,7 +82,6 @@ inputs:
                 min_workers: 2
                 max_workers: 5
                 remote_execution_port: 22
-                agent_key_path: { get_attribute: [manager, agent_key_path] }
                 user: ubuntu
 
             workflows:
@@ -94,65 +93,6 @@ inputs:
 
 
 outputs:
-    cloudify:
-        value: { get_input: cloudify }
-
-    provider:
-        value:
-            name: openstack
-            context:
-                resources:
-                    subnet:
-                        external_resource: { get_property: [management_subnet, use_external_resource] }
-                        type: { get_attribute: [management_subnet, external_type] }
-                        id: { get_attribute: [management_subnet, external_id] }
-                        name: { get_attribute: [management_subnet, external_name] }
-                    int_network:
-                        external_resource: { get_property: [management_network, use_external_resource] }
-                        type: { get_attribute: [management_network, external_type] }
-                        id: { get_attribute: [management_network, external_id] }
-                        name: { get_attribute: [management_network, external_name] }
-                    management_server:
-                        external_resource: { get_property: [manager_server, use_external_resource] }
-                        type: { get_attribute: [manager_server, external_type] }
-                        id: { get_attribute: [manager_server, external_id] }
-                        name: { get_attribute: [manager_server, external_name] }
-                    agents_security_group:
-                        external_resource: { get_property: [agents_security_group, use_external_resource] }
-                        type: { get_attribute: [agents_security_group, external_type] }
-                        id: { get_attribute: [agents_security_group, external_id] }
-                        name: { get_attribute: [agents_security_group, external_name] }
-                    management_security_group:
-                        external_resource: { get_property: [management_security_group, use_external_resource] }
-                        type: { get_attribute: [management_security_group, external_type] }
-                        id: { get_attribute: [management_security_group, external_id] }
-                        name: { get_attribute: [management_security_group, external_name] }
-                    floating_ip:
-                        external_resource: { get_property: [manager_server_ip, use_external_resource] }
-                        type: { get_attribute: [manager_server_ip, external_type] }
-                        id: { get_attribute: [manager_server_ip, external_id] }
-                        ip: { get_attribute: [manager_server_ip, floating_ip_address] }
-                    ext_network:
-                        external_resource: { get_property: [external_network, use_external_resource] }
-                        type: { get_attribute: [external_network, external_type] }
-                        id: { get_attribute: [external_network, external_id] }
-                        name: { get_attribute: [external_network, external_name] }
-                    router:
-                        external_resource: { get_property: [router, use_external_resource] }
-                        type: { get_attribute: [router, external_type] }
-                        id: { get_attribute: [router, external_id] }
-                        name: { get_attribute: [router, external_name] }
-                    management_keypair:
-                        external_resource: true
-                        type: keypair
-                        id: { get_input: manager_public_key_name }
-                        name: { get_input: manager_public_key_name }
-                    agents_keypair:
-                        external_resource: true
-                        type: keypair
-                        id: { get_input: agents_public_key_name }
-                        name: { get_input: agents_public_key_name }
-
     management_endpoint:
         value:
             manager_ip: { get_attribute: [manager_server_ip, floating_ip_address] }
@@ -270,7 +210,10 @@ node_templates:
                 neutron_url: { get_input: neutron_url }
 
     manager:
-        type: cloudify.types.middleware_server
+        type: manager
+        properties:
+            cloudify: { get_input: cloudify }
+
         relationships:
             - target: manager_server
               type: cloudify.relationships.contained_in
@@ -289,6 +232,8 @@ node_templates:
                             task_properties:
                                 openstack_config: { get_property: [openstack_configuration, openstack_config] }
                                 agents_private_key_path: { get_input: agents_private_key_path }
+                                manager_public_key_name: { get_input: manager_public_key_name }
+                                agents_public_key_name: { get_input: agents_public_key_name }
                             fabric_env:
                                 user: { get_input: manager_server_user }
                                 key_filename: { get_input: manager_private_key_path }
@@ -307,3 +252,7 @@ node_types:
         derived_from: cloudify.types.base
         properties:
             openstack_config: {}
+    manager:
+        derived_from: cloudify.types.middleware_server
+        properties:
+            cloudify: {}

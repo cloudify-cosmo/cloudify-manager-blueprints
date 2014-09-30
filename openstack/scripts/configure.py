@@ -22,8 +22,10 @@ from fabric.context_managers import settings
 
 from cloudify import ctx
 from openstack_plugin_common import (
+    OPENSTACK_ID_PROPERTY,
     OPENSTACK_NAME_PROPERTY,
     OPENSTACK_TYPE_PROPERTY,
+    USE_EXTERNAL_RESOURCE_PROPERTY,
     Config
 )
 from nova_plugin.server import (
@@ -37,7 +39,8 @@ from neutron_plugin.floatingip import (
 from neutron_plugin.network import NETWORK_OPENSTACK_TYPE
 
 
-def configure(openstack_config, agents_private_key_path):
+def configure(openstack_config, agents_private_key_path,
+              manager_public_key_name, agents_public_key_name):
 
     # configure local
     ctx.runtime_properties['local_agent_key_path'] = agents_private_key_path
@@ -60,6 +63,9 @@ def configure(openstack_config, agents_private_key_path):
     private_ip = manager_server_networks[management_network][0]
     ctx.runtime_properties['private_ip'] = private_ip
 
+    # set provider context
+    _set_provider_context(manager_public_key_name, agents_public_key_name)
+
     # place openstack configuration on manager server
     tmp = tempfile.mktemp()
 
@@ -76,3 +82,61 @@ def _get_runtime_props_by_node_name_and_openstack_type(
                           if k.startswith(node_name) and
                           v[OPENSTACK_TYPE_PROPERTY] == node_openstack_type][0]
     return node_runtime_props
+
+
+def _set_provider_context(manager_public_key_name, agents_public_key_name):
+    resources = dict()
+
+    node_instances = ctx._endpoint.storage.get_node_instances()
+    nodes_by_id = \
+        {node.id: node for node in ctx._endpoint.storage.get_nodes()}
+
+    node_id_to_provider_context_field = {
+        'management_subnet': 'subnet',
+        'management_network': 'int_network',
+        'router': 'router',
+        'agents_security_group': 'agents_security_group',
+        'management_security_group': 'management_security_group',
+        'manager_server_ip': 'floating_ip',
+        'external_network': 'ext_network',
+        'manager_server': 'management_server'
+    }
+    for node_instance in node_instances:
+        if node_instance.node_id in node_id_to_provider_context_field:
+            run_props = node_instance.runtime_properties
+            props = nodes_by_id[node_instance.node_id].properties
+            provider_context_field = \
+                node_id_to_provider_context_field[node_instance.node_id]
+            resources[provider_context_field] = {
+                'external_resource': props[USE_EXTERNAL_RESOURCE_PROPERTY],
+                'type': run_props[OPENSTACK_TYPE_PROPERTY],
+                'id': run_props[OPENSTACK_ID_PROPERTY],
+            }
+            if node_instance.node_id == 'manager_server_ip':
+                resources[provider_context_field]['ip'] = \
+                    run_props[IP_ADDRESS_PROPERTY]
+            else:
+                resources[provider_context_field]['name'] = \
+                    run_props[OPENSTACK_NAME_PROPERTY]
+
+    resources['management_keypair'] = {
+        'external_resource': True,
+        'type': 'keypair',
+        'id': manager_public_key_name,
+        'name': manager_public_key_name
+    }
+    resources['agent_keypair'] = {
+        'external_resource': True,
+        'type': 'keypair',
+        'id': agents_public_key_name,
+        'name': agents_public_key_name
+    }
+
+    provider = {
+        'name': 'openstack',
+        'context': {
+            'resources': resources
+        }
+    }
+
+    ctx.runtime_properties['provider'] = provider
