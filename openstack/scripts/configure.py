@@ -37,20 +37,22 @@ from neutron_plugin.floatingip import (
     IP_ADDRESS_PROPERTY
 )
 from neutron_plugin.network import NETWORK_OPENSTACK_TYPE
+from cloudify_cli.bootstrap.tasks import (
+    PUBLIC_IP_RUNTIME_PROPERTY,
+    PRIVATE_IP_RUNTIME_PROPERTY,
+    PROVIDER_RUNTIME_PROPERTY
+)
 
 
-def configure(openstack_config, agents_private_key_path,
-              manager_public_key_name, agents_public_key_name):
-
-    # configure local
-    ctx.runtime_properties['local_agent_key_path'] = agents_private_key_path
+def configure(openstack_config, manager_public_key_name,
+              agent_public_key_name):
 
     # configure public ip
     floatingip_runtime_props = \
         _get_runtime_props_by_node_name_and_openstack_type(
             'manager_server_ip', FLOATINGIP_OPENSTACK_TYPE)
     manager_public_ip = floatingip_runtime_props[IP_ADDRESS_PROPERTY]
-    ctx.runtime_properties['public_ip'] = manager_public_ip
+    ctx.runtime_properties[PUBLIC_IP_RUNTIME_PROPERTY] = manager_public_ip
 
     # configure private ip
     manager_server_networks = \
@@ -61,10 +63,10 @@ def configure(openstack_config, agents_private_key_path,
             'management_network',
             NETWORK_OPENSTACK_TYPE)[OPENSTACK_NAME_PROPERTY]
     private_ip = manager_server_networks[management_network][0]
-    ctx.runtime_properties['private_ip'] = private_ip
+    ctx.runtime_properties[PRIVATE_IP_RUNTIME_PROPERTY] = private_ip
 
     # set provider context
-    _set_provider_context(manager_public_key_name, agents_public_key_name)
+    _set_provider_context(manager_public_key_name, agent_public_key_name)
 
     # place openstack configuration on manager server
     tmp = tempfile.mktemp()
@@ -84,7 +86,10 @@ def _get_runtime_props_by_node_name_and_openstack_type(
     return node_runtime_props
 
 
-def _set_provider_context(manager_public_key_name, agents_public_key_name):
+def _set_provider_context(manager_public_key_name, agent_public_key_name):
+    # Do not use this code section as a reference - it is a workaround for a
+    #  deprecated feature and will be removed in the near future
+
     resources = dict()
 
     node_instances = ctx._endpoint.storage.get_node_instances()
@@ -128,8 +133,8 @@ def _set_provider_context(manager_public_key_name, agents_public_key_name):
     resources['agent_keypair'] = {
         'external_resource': True,
         'type': 'keypair',
-        'id': agents_public_key_name,
-        'name': agents_public_key_name
+        'id': agent_public_key_name,
+        'name': agent_public_key_name
     }
 
     provider = {
@@ -139,4 +144,4 @@ def _set_provider_context(manager_public_key_name, agents_public_key_name):
         }
     }
 
-    ctx.runtime_properties['provider'] = provider
+    ctx.runtime_properties[PROVIDER_RUNTIME_PROPERTY] = provider

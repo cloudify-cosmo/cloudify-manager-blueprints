@@ -33,7 +33,7 @@ inputs:
     manager_public_key_name:
         type: string
 
-    agents_public_key_name:
+    agent_public_key_name:
         type: string
 
     image_id:
@@ -55,8 +55,8 @@ inputs:
         default: ~/.ssh/cloudify-manager-kp.pem
         type: string
 
-    agents_private_key_path:
-        default: ~/.ssh/cloudify-agents-kp.pem
+    agent_private_key_path:
+        default: ~/.ssh/cloudify-agent-kp.pem
         type: string
 
     external_network_name:
@@ -93,11 +93,8 @@ inputs:
 
 
 outputs:
-    management_endpoint:
-        value:
-            manager_ip: { get_attribute: [manager_server_ip, floating_ip_address] }
-            manager_user: { get_input: manager_server_user }
-            manager_key_path: { get_input: manager_private_key_path } 
+    manager_ip:
+        value: { get_attribute: [manager_server_ip, floating_ip_address] }
 
 
 node_templates:
@@ -231,9 +228,8 @@ node_templates:
                             task_name: configure
                             task_properties:
                                 openstack_config: { get_property: [openstack_configuration, openstack_config] }
-                                agents_private_key_path: { get_input: agents_private_key_path }
                                 manager_public_key_name: { get_input: manager_public_key_name }
-                                agents_public_key_name: { get_input: agents_public_key_name }
+                                agent_public_key_name: { get_input: agent_public_key_name }
                             fabric_env:
                                 user: { get_input: manager_server_user }
                                 key_filename: { get_input: manager_private_key_path }
@@ -243,6 +239,7 @@ node_templates:
                             task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
                             task_properties:
                                 cloudify_packages: { get_input: cloudify_packages }
+                                agent_local_key_path: { get_input: agent_private_key_path }
                             fabric_env:
                                 user: { get_input: manager_server_user }
                                 key_filename: { get_input: manager_private_key_path }
