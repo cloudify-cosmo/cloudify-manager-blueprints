@@ -81,6 +81,8 @@ def _set_provider_context(manager_public_key_name, agent_public_key_name):
 
     resources = dict()
 
+    # the reference to storage only works the workflow is executed as a
+    # local workflow (i.e. in a local environment context)
     node_instances = ctx._endpoint.storage.get_node_instances()
     nodes_by_id = \
         {node.id: node for node in ctx._endpoint.storage.get_nodes()}

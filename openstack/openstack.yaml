@@ -207,7 +207,7 @@ node_templates:
                 neutron_url: { get_input: neutron_url }
 
     manager:
-        type: manager
+        type: cloudify_manager
         properties:
             cloudify: { get_input: cloudify }
 
@@ -247,7 +247,7 @@ node_types:
         derived_from: cloudify.types.base
         properties:
             openstack_config: {}
-    manager:
+    cloudify_manager:
         derived_from: cloudify.types.middleware_server
         properties:
             cloudify: {}
