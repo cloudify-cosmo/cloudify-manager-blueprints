@@ -129,10 +129,7 @@ def _set_provider_context(manager_public_key_name, agent_public_key_name):
     }
 
     provider = {
-        'name': 'openstack',
-        'context': {
-            'resources': resources
-        }
+        'resources': resources
     }
 
     ctx.runtime_properties[PROVIDER_RUNTIME_PROPERTY] = provider

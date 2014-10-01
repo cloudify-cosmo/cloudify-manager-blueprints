@@ -15,8 +15,7 @@
 
 from cloudify import ctx
 from cloudify_cli.bootstrap.tasks import (
-    PRIVATE_IP_RUNTIME_PROPERTY,
-    PROVIDER_RUNTIME_PROPERTY
+    PRIVATE_IP_RUNTIME_PROPERTY
 )
 
 
@@ -24,10 +23,3 @@ def configure(private_ip):
 
     # set private ip for manager server
     ctx.runtime_properties[PRIVATE_IP_RUNTIME_PROPERTY] = private_ip
-
-    # set provider context
-    provider = {
-        'name': 'simple',
-        'context': dict()
-    }
-    ctx.runtime_properties[PROVIDER_RUNTIME_PROPERTY] = provider
