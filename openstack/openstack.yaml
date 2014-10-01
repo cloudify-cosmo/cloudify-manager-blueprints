@@ -27,9 +27,6 @@ inputs:
         default: RegionOne
         type: string
 
-    neutron_url:
-        type: string
-
     manager_public_key_name:
         type: string
 
@@ -204,7 +201,6 @@ node_templates:
                 tenant_name: { get_input: keystone_tenant_name }
                 auth_url: { get_input: keystone_url }
                 region: { get_input: region }
-                neutron_url: { get_input: neutron_url }
 
     manager:
         type: cloudify.types.cloudify_manager
