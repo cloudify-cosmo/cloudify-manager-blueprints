@@ -66,13 +66,11 @@ inputs:
     cloudify_packages:
         default:
             server:
-                components_package_url: http://repository.cloudifysource.org/org/cloudify3/nightly/cloudify-components_amd64.deb
-                core_package_url: http://repository.cloudifysource.org/org/cloudify3/nightly/cloudify-core_amd64.deb
-                ui_package_url: http://repository.cloudifysource.org/org/cloudify3/nightly/cloudify-ui_amd64.deb
+                components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-components_amd64.deb
+                core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-core_amd64.deb
+                ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-ui_amd64.deb
             agents:
-                ubuntu_agent_url: http://repository.cloudifysource.org/org/cloudify3/nightly/cloudify-ubuntu-agent_amd64.deb
-                centos_agent_url: http://repository.cloudifysource.org/org/cloudify3/nightly/cloudify-centos-agent_amd64.deb
-                windows_agent_url: http://repository.cloudifysource.org/org/cloudify3/nightly/cloudify-windows-agent_amd64.deb
+                ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-ubuntu-agent_amd64.deb
 
     cloudify:
         default:
@@ -207,7 +205,7 @@ node_templates:
                 neutron_url: { get_input: neutron_url }
 
     manager:
-        type: cloudify_manager
+        type: cloudify.types.cloudify_manager
         properties:
             cloudify: { get_input: cloudify }
 
@@ -247,7 +245,7 @@ node_types:
         derived_from: cloudify.types.base
         properties:
             openstack_config: {}
-    cloudify_manager:
+    cloudify.types.cloudify_manager:
         derived_from: cloudify.types.middleware_server
         properties:
             cloudify: {}

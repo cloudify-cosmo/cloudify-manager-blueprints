@@ -1,46 +1,46 @@
 tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
-    - file:///home/dan/dev/cloudify/cloudify-manager/resources/rest-service/cloudify/types/types.yaml
-    - file:///home/dan/dev/cloudify/cloudify-fabric-plugin/plugin.yaml.template
+    - http://www.getcloudify.org/spec/cloudify/3.1/types.yaml
+    - http://www.getcloudify.org/spec/fabric-plugin/1.1/plugin.yaml
+
 
 inputs:
 
     public_ip:
         default: 11.0.0.7
+        type: string
 
     private_ip:
         default: localhost
+        type: string
 
     ssh_user:
         default: vagrant
+        type: string
 
     ssh_key_filename:
         default: ~/work/vagrant/cloudify-manager/insecure_private_key
+        type: string
 
     cloudify_packages:
         default:
             server:
-                components_package_url: http://11.0.0.1:8000/cloudify-components_amd64.deb
-                core_package_url: http://11.0.0.1:8000/cloudify-core_amd64.deb
-                ui_package_url: http://11.0.0.1:8000/cloudify-ui_amd64.deb
+                components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-components_amd64.deb
+                core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-core_amd64.deb
+                ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-ui_amd64.deb
             agents:
-                ubuntu_agent_url: http://11.0.0.1:8000/cloudify-ubuntu-agent_amd64.deb
-                centos_agent_url: http://11.0.0.1:8000/cloudify-centos-agent_amd64.deb
-                windows_agent_url: http://11.0.0.1:8000/cloudify-windows-agent_amd64.deb
-
-outputs:
+                ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-ubuntu-agent_amd64.deb
 
     cloudify:
-        value:
+        default:
             resources_prefix: ''
 
             cloudify_agent:
                 min_workers: 2
                 max_workers: 5
                 remote_execution_port: 22
-                agent_key_path: { get_attribute: [manager, agent_key_path] }
-                user: vagrant
+                user: ubuntu
 
             workflows:
                 task_retries: -1  # this means forever
@@ -49,17 +49,11 @@ outputs:
             policy_engine:
                 start_timeout: 30
 
-    provider:
-        value:
-            name: simple
-            context: { get_attribute: [manager, provider_context] }
+outputs:
 
-    management_endpoint:
-#        value: { get_attribute: [manager, management_endpoint] }
-        value:
-            manager_ip: { get_input: public_ip }
-            manager_user: { get_input: ssh_user }
-            manager_key_path: { get_input: ssh_key_filename }
+    manager_ip:
+        value: { get_input: public_ip }
+
 
 node_templates:
     manager_host:
@@ -69,22 +63,14 @@ node_templates:
             ip: { get_input: public_ip }
 
     manager:
-        type: cloudify.types.middleware_server
+        type: cloudify.types.cloudify_manager
+        properties:
+            cloudify: { get_input: cloudify }
         relationships:
             -   type: cloudify.relationships.contained_in
                 target: manager_host
         interfaces:
             cloudify.interfaces.lifecycle:
-                # -   create:
-                #         mapping: fabric.fabric_plugin.tasks.run_commands
-                #         properties:
-                #             commands:
-                #                 - echo "just because I can" > ~/just_because
-                #                 - ls /
-                #                 - fda
-                #             fabric_env:
-                #                 user: { get_input: ssh_user }
-                #                 key_filename: { get_input: ssh_key_filename }
                 -   configure:
                         mapping: fabric.fabric_plugin.tasks.run_task
                         properties:
@@ -101,6 +87,13 @@ node_templates:
                             task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
                             task_properties:
                                 cloudify_packages: { get_input: cloudify_packages }
+                                agent_local_key_path: { get_input: ssh_key_filename }
                             fabric_env:
                                 user: { get_input: ssh_user }
                                 key_filename: { get_input: ssh_key_filename }
+
+node_types:
+    cloudify.types.cloudify_manager:
+        derived_from: cloudify.types.middleware_server
+        properties:
+            cloudify: {}
