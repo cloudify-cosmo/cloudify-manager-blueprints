@@ -48,7 +48,7 @@ inputs:
 outputs:
 
     manager_ip:
-        value: { get_input: public_ip }
+        value: { get_property: [manager_host, ip] }
 
 
 node_templates:
