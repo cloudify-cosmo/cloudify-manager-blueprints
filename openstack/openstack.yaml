@@ -71,6 +71,8 @@ inputs:
                 ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-ui_amd64.deb
             agents:
                 ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-ubuntu-agent_amd64.deb
+                centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-centos-agent_amd64.deb
+                windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/nightly/cloudify-windows-agent_amd64.deb
 
     cloudify:
         default:

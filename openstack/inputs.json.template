@@ -1,0 +1,10 @@
+{
+    "keystone_username": "",
+    "keystone_password": "",
+    "keystone_tenant_name": "",
+    "keystone_url": "",
+    "neutron_url": "",
+    "manager_public_key_name": "",
+    "agent_public_key_name": "",
+    "image_id": ""
+}
