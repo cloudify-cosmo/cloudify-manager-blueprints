@@ -8,19 +8,15 @@ imports:
 inputs:
 
     public_ip:
-        default: 11.0.0.7
         type: string
 
     private_ip:
-        default: localhost
         type: string
 
     ssh_user:
-        default: vagrant
         type: string
 
     ssh_key_filename:
-        default: ~/work/vagrant/cloudify-manager/insecure_private_key
         type: string
 
     cloudify_packages:
