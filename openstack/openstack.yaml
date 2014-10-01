@@ -245,7 +245,3 @@ node_types:
         derived_from: cloudify.types.base
         properties:
             openstack_config: {}
-    cloudify.types.cloudify_manager:
-        derived_from: cloudify.types.middleware_server
-        properties:
-            cloudify: {}

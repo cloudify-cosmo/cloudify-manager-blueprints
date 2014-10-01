@@ -91,9 +91,3 @@ node_templates:
                             fabric_env:
                                 user: { get_input: ssh_user }
                                 key_filename: { get_input: ssh_key_filename }
-
-node_types:
-    cloudify.types.cloudify_manager:
-        derived_from: cloudify.types.middleware_server
-        properties:
-            cloudify: {}
