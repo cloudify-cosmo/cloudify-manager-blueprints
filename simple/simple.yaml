@@ -47,11 +47,6 @@ inputs:
             policy_engine:
                 start_timeout: 30
 
-outputs:
-
-    manager_ip:
-        value: { get_property: [manager_host, ip] }
-
 
 node_templates:
     manager_host:
@@ -89,3 +84,8 @@ node_templates:
                             fabric_env:
                                 user: { get_input: ssh_user }
                                 key_filename: { get_input: ssh_key_filename }
+
+
+outputs:
+    manager_ip:
+        value: { get_property: [manager_host, ip] }

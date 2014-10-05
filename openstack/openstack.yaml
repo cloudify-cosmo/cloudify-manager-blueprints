@@ -89,11 +89,6 @@ inputs:
                 start_timeout: 30
 
 
-outputs:
-    manager_ip:
-        value: { get_attribute: [manager_server_ip, floating_ip_address] }
-
-
 node_templates:
     management_network:
         type: cloudify.openstack.network
@@ -243,3 +238,8 @@ node_types:
         derived_from: cloudify.types.base
         properties:
             openstack_config: {}
+
+
+outputs:
+    manager_ip:
+        value: { get_attribute: [manager_server_ip, floating_ip_address] }
