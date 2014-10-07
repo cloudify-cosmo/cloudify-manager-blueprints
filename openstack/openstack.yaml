@@ -24,7 +24,6 @@ inputs:
         type: string
 
     region:
-        default: RegionOne
         type: string
 
     manager_public_key_name:
@@ -37,7 +36,9 @@ inputs:
         type: string
 
     flavor_id:
-        default: 102
+        type: string
+
+    external_network_name:
         type: string
 
     manager_server_user:
@@ -54,10 +55,6 @@ inputs:
 
     agent_private_key_path:
         default: ~/.ssh/cloudify-agent-kp.pem
-        type: string
-
-    external_network_name:
-        default: Ext-Net
         type: string
 
     cloudify_packages:
