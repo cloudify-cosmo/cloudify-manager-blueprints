@@ -121,7 +121,7 @@ def _set_provider_context(manager_public_key_name, agent_public_key_name):
         'id': manager_public_key_name,
         'name': manager_public_key_name
     }
-    resources['agent_keypair'] = {
+    resources['agents_keypair'] = {
         'external_resource': True,
         'type': 'keypair',
         'id': agent_public_key_name,
