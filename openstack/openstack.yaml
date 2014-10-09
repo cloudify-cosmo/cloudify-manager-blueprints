@@ -116,6 +116,13 @@ node_templates:
                     network_name: { get_input: external_network_name }
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
+    external_network:
+        type: cloudify.openstack.network
+        properties:
+            use_external_resource: true
+            resource_id: { get_input: external_network_name }
+            openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
     agents_security_group:
         type: cloudify.openstack.security_group
         properties:
@@ -148,7 +155,6 @@ node_templates:
                   remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
-
     manager_server_ip:
         type: cloudify.openstack.floatingip
         properties:
@@ -176,13 +182,6 @@ node_templates:
               type: cloudify.relationships.depends_on
             - target: management_security_group
               type: cloudify.openstack.server_connected_to_security_group
-
-    external_network:
-        type: cloudify.openstack.network
-        properties:
-            use_external_resource: True
-            resource_id: { get_input: external_network_name }
-            openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
     openstack_configuration:
         type: openstack_configuration
