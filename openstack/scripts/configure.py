@@ -54,7 +54,8 @@ def _configure_public_ip():
         _get_runtime_props_by_node_name_and_openstack_type(
             'manager_server_ip', FLOATINGIP_OPENSTACK_TYPE)
     manager_public_ip = floatingip_runtime_props[IP_ADDRESS_PROPERTY]
-    ctx.runtime_properties[PUBLIC_IP_RUNTIME_PROPERTY] = manager_public_ip
+    ctx.instance.runtime_properties[PUBLIC_IP_RUNTIME_PROPERTY] = \
+        manager_public_ip
     return manager_public_ip
 
 
@@ -132,4 +133,4 @@ def _set_provider_context(manager_public_key_name, agent_public_key_name):
         'resources': resources
     }
 
-    ctx.runtime_properties[PROVIDER_RUNTIME_PROPERTY] = provider
+    ctx.instance.runtime_properties[PROVIDER_RUNTIME_PROPERTY] = provider
