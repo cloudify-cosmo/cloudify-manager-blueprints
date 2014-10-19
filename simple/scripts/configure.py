@@ -22,4 +22,4 @@ from cloudify_cli.bootstrap.tasks import (
 def configure(private_ip):
 
     # set private ip for manager server
-    ctx.runtime_properties[PRIVATE_IP_RUNTIME_PROPERTY] = private_ip
+    ctx.instance.runtime_properties[PRIVATE_IP_RUNTIME_PROPERTY] = private_ip

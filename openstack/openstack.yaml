@@ -228,6 +228,11 @@ node_templates:
                             fabric_env:
                                 user: { get_input: manager_server_user }
                                 key_filename: { get_input: manager_private_key_path }
+            cloudify.interfaces.validation:
+                -   creation:
+                        mapping: cli.cloudify_cli.bootstrap.tasks.creation_validation
+                        properties:
+                            cloudify_packages: { get_input: cloudify_packages }
 
 node_types:
     openstack_configuration:
@@ -235,6 +240,10 @@ node_types:
         properties:
             openstack_config: {}
 
+plugins:
+    cli:
+        install: false
+        executor: central_deployment_agent
 
 outputs:
     manager_ip:
