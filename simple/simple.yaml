@@ -64,31 +64,31 @@ node_templates:
                 target: manager_host
         interfaces:
             cloudify.interfaces.lifecycle:
-                -   configure:
-                        mapping: fabric.fabric_plugin.tasks.run_task
-                        properties:
-                            tasks_file: scripts/configure.py
-                            task_name: configure
-                            task_properties:
-                                private_ip: { get_input: private_ip }
-                            fabric_env:
-                                user: { get_input: ssh_user }
-                                key_filename: { get_input: ssh_key_filename }
-                -   start:
-                        mapping: fabric.fabric_plugin.tasks.run_module_task
-                        properties:
-                            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
-                            task_properties:
-                                cloudify_packages: { get_input: cloudify_packages }
-                                agent_local_key_path: { get_input: ssh_key_filename }
-                            fabric_env:
-                                user: { get_input: ssh_user }
-                                key_filename: { get_input: ssh_key_filename }
-            cloudify.interfaces.validation:
-                -   creation:
-                        mapping: cli.cloudify_cli.bootstrap.tasks.creation_validation
-                        properties:
+                configure:
+                    implementation: fabric.fabric_plugin.tasks.run_task
+                    inputs:
+                        tasks_file: scripts/configure.py
+                        task_name: configure
+                        task_properties:
+                            private_ip: { get_input: private_ip }
+                        fabric_env:
+                            user: { get_input: ssh_user }
+                            key_filename: { get_input: ssh_key_filename }
+                start:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+                        task_properties:
                             cloudify_packages: { get_input: cloudify_packages }
+                            agent_local_key_path: { get_input: ssh_key_filename }
+                        fabric_env:
+                            user: { get_input: ssh_user }
+                            key_filename: { get_input: ssh_key_filename }
+            cloudify.interfaces.validation:
+                creation:
+                    implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+                    inputs:
+                        cloudify_packages: { get_input: cloudify_packages }
 
 plugins:
     cli:
