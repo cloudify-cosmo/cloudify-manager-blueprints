@@ -252,15 +252,6 @@ node_templates:
                             user: { get_input: manager_server_user }
                             key_filename: { get_property: [management_keypair, private_key_path] }
             cloudify.interfaces.validation:
-                -   creation:
-                        mapping: cli.cloudify_cli.bootstrap.tasks.creation_validation
-                        properties:
-                            cloudify_packages: { get_input: cloudify_packages }
-                            agent_local_key_path: { get_input: agent_private_key_path }
-                        fabric_env:
-                            user: { get_input: manager_server_user }
-                            key_filename: { get_input: manager_private_key_path }
-            cloudify.interfaces.validation:
                 creation:
                     implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
                     inputs:
