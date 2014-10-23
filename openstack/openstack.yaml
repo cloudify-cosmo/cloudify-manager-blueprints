@@ -41,6 +41,14 @@ inputs:
     external_network_name:
         type: string
 
+    use_existing_manager_keypair:
+        type: boolean
+        default: false
+
+    use_existing_agent_keypair:
+        type: boolean
+        default: false
+
     manager_server_user:
         default: ubuntu
         type: string
@@ -87,6 +95,22 @@ inputs:
 
 
 node_templates:
+    management_keypair:
+        type: cloudify.openstack.keypair
+        properties:
+            use_external_resource: { get_input: use_existing_manager_keypair }
+            resource_id: { get_input: manager_public_key_name }
+            private_key_path: { get_input: manager_private_key_path }
+            openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
+    agent_keypair:
+        type: cloudify.openstack.keypair
+        properties:
+            use_external_resource: { get_input: use_existing_agent_keypair }
+            resource_id: { get_input: agent_public_key_name }
+            private_key_path: { get_input: agent_private_key_path }
+            openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
     management_network:
         type: cloudify.openstack.network
         properties:
@@ -170,7 +194,6 @@ node_templates:
             server:
                 image: { get_input: image_id }
                 flavor: { get_input: flavor_id }
-                key_name: { get_input: manager_public_key_name }
             management_network_name: { get_property: [management_network, resource_id] }
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
         relationships:
@@ -182,6 +205,8 @@ node_templates:
               type: cloudify.relationships.depends_on
             - target: management_security_group
               type: cloudify.openstack.server_connected_to_security_group
+            - target: management_keypair
+              type: cloudify.openstack.server_connected_to_keypair
 
     openstack_configuration:
         type: openstack_configuration
@@ -213,21 +238,19 @@ node_templates:
                             task_name: configure
                             task_properties:
                                 openstack_config: { get_property: [openstack_configuration, openstack_config] }
-                                manager_public_key_name: { get_input: manager_public_key_name }
-                                agent_public_key_name: { get_input: agent_public_key_name }
                             fabric_env:
                                 user: { get_input: manager_server_user }
-                                key_filename: { get_input: manager_private_key_path }
+                                key_filename: { get_property: [management_keypair, private_key_path] }
                 -   start:
                         mapping: fabric.fabric_plugin.tasks.run_module_task
                         properties:
                             task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
                             task_properties:
                                 cloudify_packages: { get_input: cloudify_packages }
-                                agent_local_key_path: { get_input: agent_private_key_path }
+                                agent_local_key_path: { get_property: [agent_keypair, private_key_path] }
                             fabric_env:
                                 user: { get_input: manager_server_user }
-                                key_filename: { get_input: manager_private_key_path }
+                                key_filename: { get_property: [management_keypair, private_key_path] }
             cloudify.interfaces.validation:
                 -   creation:
                         mapping: cli.cloudify_cli.bootstrap.tasks.creation_validation
