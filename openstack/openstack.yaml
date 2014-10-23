@@ -231,6 +231,7 @@ node_templates:
 
         interfaces:
             cloudify.interfaces.lifecycle:
+<<<<<<< HEAD
                 -   configure:
                         mapping: fabric.fabric_plugin.tasks.run_task
                         properties:
@@ -255,7 +256,35 @@ node_templates:
                 -   creation:
                         mapping: cli.cloudify_cli.bootstrap.tasks.creation_validation
                         properties:
+=======
+                configure:
+                    implementation: fabric.fabric_plugin.tasks.run_task
+                    inputs:
+                        tasks_file: scripts/configure.py
+                        task_name: configure
+                        task_properties:
+                            openstack_config: { get_property: [openstack_configuration, openstack_config] }
+                            manager_public_key_name: { get_input: manager_public_key_name }
+                            agent_public_key_name: { get_input: agent_public_key_name }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                start:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+                        task_properties:
+>>>>>>> master
                             cloudify_packages: { get_input: cloudify_packages }
+                            agent_local_key_path: { get_input: agent_private_key_path }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+            cloudify.interfaces.validation:
+                creation:
+                    implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+                    inputs:
+                        cloudify_packages: { get_input: cloudify_packages }
 
 node_types:
     openstack_configuration:
