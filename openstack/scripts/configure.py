@@ -38,12 +38,11 @@ from cloudify_cli.bootstrap.tasks import (
 )
 
 
-def configure(openstack_config, manager_public_key_name,
-              agent_public_key_name):
+def configure(openstack_config):
 
     manager_public_ip = _configure_public_ip()
 
-    _set_provider_context(manager_public_key_name, agent_public_key_name)
+    _set_provider_context()
 
     _copy_openstack_configuration_to_manager(manager_public_ip,
                                              openstack_config)
@@ -76,7 +75,7 @@ def _get_runtime_props_by_node_name_and_openstack_type(
     return node_runtime_props
 
 
-def _set_provider_context(manager_public_key_name, agent_public_key_name):
+def _set_provider_context():
     # Do not use this code section as a reference - it is a workaround for a
     #  deprecated feature and will be removed in the near future
 
@@ -96,7 +95,9 @@ def _set_provider_context(manager_public_key_name, agent_public_key_name):
         'management_security_group': 'management_security_group',
         'manager_server_ip': 'floating_ip',
         'external_network': 'ext_network',
-        'manager_server': 'management_server'
+        'manager_server': 'management_server',
+        'management_keypair': 'management_keypair',
+        'agent_keypair': 'agents_keypair'
     }
     for node_instance in node_instances:
         if node_instance.node_id in node_id_to_provider_context_field:
@@ -115,19 +116,6 @@ def _set_provider_context(manager_public_key_name, agent_public_key_name):
             else:
                 resources[provider_context_field]['name'] = \
                     run_props[OPENSTACK_NAME_PROPERTY]
-
-    resources['management_keypair'] = {
-        'external_resource': True,
-        'type': 'keypair',
-        'id': manager_public_key_name,
-        'name': manager_public_key_name
-    }
-    resources['agents_keypair'] = {
-        'external_resource': True,
-        'type': 'keypair',
-        'id': agent_public_key_name,
-        'name': agent_public_key_name
-    }
 
     provider = {
         'resources': resources
