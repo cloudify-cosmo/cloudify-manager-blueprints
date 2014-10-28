@@ -65,33 +65,13 @@ inputs:
         default: ~/.ssh/cloudify-agent-kp.pem
         type: string
 
-    cloudify_packages:
-        default:
-            server:
-                components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-components_3.1.0-rc1-b83_amd64.deb
-                core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-core_3.1.0-rc1-b83_amd64.deb
-                ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-ui_3.1.0-rc1-b83_amd64.deb
-            agents:
-                ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-ubuntu-agent_3.1.0-rc1-b83_amd64.deb
-                centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-centos-agent_3.1.0-rc1-b83_amd64.deb
-                windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-windows-agent_3.1.0-rc1-b83_amd64.deb
+    agents_user:
+        default: ubuntu
+        type: string
 
-    cloudify:
-        default:
-            resources_prefix: ''
-
-            cloudify_agent:
-                min_workers: 2
-                max_workers: 5
-                remote_execution_port: 22
-                user: ubuntu
-
-            workflows:
-                task_retries: -1  # this means forever
-                task_retry_interval: 30
-
-            policy_engine:
-                start_timeout: 30
+    resources_prefix:
+        default: ''
+        type: string
 
 
 node_templates:
@@ -221,7 +201,31 @@ node_templates:
     manager:
         type: cloudify.nodes.CloudifyManager
         properties:
-            cloudify: { get_input: cloudify }
+            cloudify_packages:
+                server:
+                    components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-components_3.1.0-rc1-b83_amd64.deb
+                    core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-core_3.1.0-rc1-b83_amd64.deb
+                    ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-ui_3.1.0-rc1-b83_amd64.deb
+                agents:
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-ubuntu-agent_3.1.0-rc1-b83_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-centos-agent_3.1.0-rc1-b83_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-windows-agent_3.1.0-rc1-b83_amd64.deb
+
+            cloudify:
+                resources_prefix: { get_input: resources_prefix }
+
+                cloudify_agent:
+                    min_workers: 2
+                    max_workers: 5
+                    remote_execution_port: 22
+                    user: { get_input: agents_user }
+
+                workflows:
+                    task_retries: -1  # this means forever
+                    task_retry_interval: 30
+
+                policy_engine:
+                    start_timeout: 30
 
         relationships:
             - target: manager_server
@@ -246,7 +250,7 @@ node_templates:
                     inputs:
                         task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
                         task_properties:
-                            cloudify_packages: { get_input: cloudify_packages }
+                            cloudify_packages: { get_property: [manager, cloudify_packages] }
                             agent_local_key_path: { get_property: [agent_keypair, private_key_path] }
                         fabric_env:
                             user: { get_input: manager_server_user }
@@ -255,7 +259,7 @@ node_templates:
                 creation:
                     implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
                     inputs:
-                        cloudify_packages: { get_input: cloudify_packages }
+                        cloudify_packages: { get_property: [manager, cloudify_packages] }
 
 node_types:
     openstack_configuration:

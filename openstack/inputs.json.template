@@ -8,5 +8,14 @@
     "agent_public_key_name": "",
     "image_id": "",
     "flavor_id": "",
-    "external_network_name": ""
+    "external_network_name": "",
+
+    "use_existing_manager_keypair": "false",
+    "use_existing_agent_keypair": "false",
+    "manager_server_user": "ubuntu",
+    "manager_server_user_home": "/home/ubuntu",
+    "manager_private_key_path": "~/.ssh/cloudify-manager-kp.pem",
+    "agent_private_key_path": "~/.ssh/cloudify-agent-kp.pem",
+    "agents_user": "ubuntu",
+    "resources_prefix": ""
 }
