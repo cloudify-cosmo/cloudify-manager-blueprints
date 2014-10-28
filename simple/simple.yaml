@@ -50,13 +50,13 @@ inputs:
 
 node_templates:
     manager_host:
-        type: cloudify.types.host
+        type: cloudify.nodes.Compute
         properties:
             install_agent: false
             ip: { get_input: public_ip }
 
     manager:
-        type: cloudify.types.cloudify_manager
+        type: cloudify.nodes.CloudifyManager
         properties:
             cloudify: { get_input: cloudify }
         relationships:

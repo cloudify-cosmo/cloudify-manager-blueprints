@@ -96,7 +96,7 @@ inputs:
 
 node_templates:
     management_keypair:
-        type: cloudify.openstack.keypair
+        type: cloudify.openstack.nodes.KeyPair
         properties:
             use_external_resource: { get_input: use_existing_manager_keypair }
             resource_id: { get_input: manager_public_key_name }
@@ -104,7 +104,7 @@ node_templates:
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
     agent_keypair:
-        type: cloudify.openstack.keypair
+        type: cloudify.openstack.nodes.KeyPair
         properties:
             use_external_resource: { get_input: use_existing_agent_keypair }
             resource_id: { get_input: agent_public_key_name }
@@ -112,13 +112,13 @@ node_templates:
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
     management_network:
-        type: cloudify.openstack.network
+        type: cloudify.openstack.nodes.Network
         properties:
             resource_id: cloudify-management-network
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
     management_subnet:
-        type: cloudify.openstack.subnet
+        type: cloudify.openstack.nodes.Subnet
         properties:
             resource_id: cloudify-management-network-subnet
             subnet:
@@ -132,7 +132,7 @@ node_templates:
               type: cloudify.openstack.subnet_connected_to_router
 
     router:
-        type: cloudify.openstack.router
+        type: cloudify.openstack.nodes.Router
         properties:
             resource_id: cloudify-router
             router:
@@ -141,14 +141,14 @@ node_templates:
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
     external_network:
-        type: cloudify.openstack.network
+        type: cloudify.openstack.nodes.Network
         properties:
             use_external_resource: true
             resource_id: { get_input: external_network_name }
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
     agents_security_group:
-        type: cloudify.openstack.security_group
+        type: cloudify.openstack.nodes.SecurityGroup
         properties:
             resource_id: cloudify-sg-agents
             security_group:
@@ -161,7 +161,7 @@ node_templates:
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
     management_security_group:
-        type: cloudify.openstack.security_group
+        type: cloudify.openstack.nodes.SecurityGroup
         properties:
             resource_id: cloudify-sg-management
             security_group:
@@ -180,14 +180,14 @@ node_templates:
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
     manager_server_ip:
-        type: cloudify.openstack.floatingip
+        type: cloudify.openstack.nodes.FloatingIP
         properties:
             floatingip:
                 floating_network_name: { get_input: external_network_name }
             openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
     manager_server:
-        type: cloudify.openstack.server
+        type: cloudify.openstack.nodes.Server
         properties:
             resource_id: cloudify-management-server
             install_agent: false
@@ -219,7 +219,7 @@ node_templates:
                 region: { get_input: region }
 
     manager:
-        type: cloudify.types.cloudify_manager
+        type: cloudify.nodes.CloudifyManager
         properties:
             cloudify: { get_input: cloudify }
 
@@ -259,7 +259,7 @@ node_templates:
 
 node_types:
     openstack_configuration:
-        derived_from: cloudify.types.base
+        derived_from: cloudify.nodes.Root
         properties:
             openstack_config: {}
 
