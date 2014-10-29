@@ -1,0 +1,10 @@
+{
+    "cs_api_url": "",
+    "cs_api_key": "",
+    "cs_secret_key": "",
+    "region": "",
+    "manager_public_key_name": "",
+    "agent_public_key_name": "",
+    "image_id": "",
+    "service_offering": ""
+}
