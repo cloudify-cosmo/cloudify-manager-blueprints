@@ -10,8 +10,8 @@
     "flavor_id": "",
     "external_network_name": "",
 
-    "use_existing_manager_keypair": "false",
-    "use_existing_agent_keypair": "false",
+    "use_existing_manager_keypair": false,
+    "use_existing_agent_keypair": false,
     "manager_server_name": "cloudify-management-server",
     "manager_server_user": "ubuntu",
     "manager_server_user_home": "/home/ubuntu",
