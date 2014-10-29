@@ -49,6 +49,10 @@ inputs:
         type: boolean
         default: false
 
+    manager_server_name:
+        default: cloudify-management-server
+        type: string
+
     manager_server_user:
         default: ubuntu
         type: string
@@ -169,7 +173,7 @@ node_templates:
     manager_server:
         type: cloudify.openstack.nodes.Server
         properties:
-            resource_id: cloudify-management-server
+            resource_id: { get_input: manager_server_name }
             install_agent: false
             server:
                 image: { get_input: image_id }
