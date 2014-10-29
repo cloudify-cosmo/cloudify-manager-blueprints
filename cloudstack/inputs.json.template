@@ -1,10 +1,11 @@
 {
-    "cs_api_url": "",
-    "cs_api_key": "",
-    "cs_secret_key": "",
-    "region": "",
+    "cloudstack_api_url": "",
+    "cloudstack_key": "",
+    "cloudstack_secret": "",
+    "zone": "",
     "manager_public_key_name": "",
     "agent_public_key_name": "",
     "image_id": "",
-    "service_offering": ""
+    "service_offering": "",
+    'network_offering": ""'
 }
