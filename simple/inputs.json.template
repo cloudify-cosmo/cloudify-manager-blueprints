@@ -2,5 +2,8 @@
     "public_ip": "",
     "private_ip": "",
     "ssh_user": "",
-    "ssh_key_filename": ""
+    "ssh_key_filename": "",
+
+    "agents_user": "ubuntu",
+    "resources_prefix": ""
 }
