@@ -110,7 +110,7 @@ node_templates:
     management_network:
         type: cloudify.cloudstack.network
         properties:
-            resource_id: cfy-mgmt
+            resource_id: cloudify-management
             network:
                 #name: cloudify-management-network2
                 service_offering: { get_input: network_offering }
@@ -120,7 +120,11 @@ node_templates:
             firewall:
                 - type: ingress
                   protocol: TCP
-                  cidr: 0.0.0.0/0
+                  cidr: 94.211.5.21/32
+                  ports: [5555, 5672, 53229, 22, 8100, 80]
+                - type: ingress
+                  protocol: TCP
+                  cidr: 195.66.90.0/24
                   ports: [5555, 5672, 53229, 22, 8100, 80]
                 - type: egress
                   protocol: TCP
@@ -148,7 +152,7 @@ node_templates:
     manager_server:
         type: cloudify.cloudstack.virtual_machine
         properties:
-            resource_id: cfy-manager
+            resource_id: cloudify-mgr
             install_agent: false
             portmaps:
                 - protocol: TCP
