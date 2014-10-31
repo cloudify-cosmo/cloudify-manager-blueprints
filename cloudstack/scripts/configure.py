@@ -15,6 +15,8 @@
 
 import tempfile
 import json
+import logging
+from subprocess import call
 
 import fabric
 import fabric.api
@@ -46,7 +48,17 @@ def configure(cloudstack_config):
 
     _copy_cloudstack_configuration_to_manager(manager_public_ip,
                                              cloudstack_config)
+    _configure_eth1(manager_public_ip)
 
+def _configure_eth1(manager_public_ip):
+
+    plog = logging.getLogger('paramiko.transport')
+    if not plog.handlers: 
+        plog.addHandler(logging.NullHandler())       
+
+    with settings(host_string=manager_public_ip):
+        fabric.api.run('sleep 5')
+        fabric.api.run('dhclient eth1')
 
 def _configure_public_ip():
     floatingip_runtime_props = \
@@ -63,7 +75,7 @@ def _copy_cloudstack_configuration_to_manager(manager_public_ip,
     tmp = tempfile.mktemp()
     with open(tmp, 'w') as f:
         json.dump(cloudstack_config, f)
-    with settings(host_string=manager_public_ip):
+    with settings(host_string=manager_public_ip,connection_attempts=5, timeout=5, keepalive=1):
         fabric.api.put(tmp, Config.CLOUDSTACK_CONFIG_PATH_DEFAULT_PATH)
 
 

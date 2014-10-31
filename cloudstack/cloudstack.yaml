@@ -64,13 +64,13 @@ inputs:
     cloudify_packages:
         default:
             server:
-                components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-components_3.1.0-rc1-b83_amd64.deb
-                core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-core_3.1.0-rc1-b83_amd64.deb
-                ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-ui_3.1.0-rc1-b83_amd64.deb
+                components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-components_3.1.0-m5-b82_amd64.deb
+                core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-core_3.1.0-m5-b82_amd64.deb
+                ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-ui_3.1.0-m5-b82_amd64.deb
             agents:
-                ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-ubuntu-agent_3.1.0-rc1-b83_amd64.deb
-                centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-centos-agent_3.1.0-rc1-b83_amd64.deb
-                windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-windows-agent_3.1.0-rc1-b83_amd64.deb
+                ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-ubuntu-agent_3.1.0-m5-b82_amd64.deb
+                centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-centos-agent_3.1.0-m5-b82_amd64.deb
+                windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-windows-agent_3.1.0-m5-b82_amd64.deb
 
     cloudify:
         default:
@@ -110,11 +110,13 @@ node_templates:
     management_network:
         type: cloudify.cloudstack.network
         properties:
-            resource_id: cloudify-management-network2
+            resource_id: cfy-mgmt
             network:
                 #name: cloudify-management-network2
                 service_offering: { get_input: network_offering }
                 zone: { get_input: zone }
+                netmask: 255.255.255.0
+                gateway: 10.2.1.1
             firewall:
                 - type: ingress
                   protocol: TCP
@@ -125,70 +127,17 @@ node_templates:
                   cidr: 0.0.0.0/0
                   ports: [80, 443]
 
-
-
-
-    # management_subnet:
-    #     type: cloudify.openstack.subnet
+    # agent_network:
+    #     type: cloudify.cloudstack.network
     #     properties:
-    #         resource_id: cloudify-management-network-subnet
-    #         subnet:
-    #             ip_version: 4
-    #             cidr: 10.67.79.0/24
-    #         openstack_config: { get_property: [openstack_configuration, openstack_config] }
-    #     relationships:
-    #         - target: management_network
-    #           type: cloudify.relationships.contained_in
-    #         - target: router
-    #           type: cloudify.openstack.subnet_connected_to_router
+    #         esource_id: cfy-agent
+    #         network:
+    #             #name: cloudify-management-network2
+    #             service_offering: { get_input: network_offering }
+    #             zone: { get_input: zone }
+    #             netmask: 255.255.255.0
+    #             gateway: 10.3.1.1
 
-    # router:
-    #     type: cloudify.openstack.router
-    #     properties:
-    #         resource_id: cloudify-router
-    #         router:
-    #             external_gateway_info:
-    #                 network_name: { get_input: external_network_name }
-    #         openstack_config: { get_property: [openstack_configuration, openstack_config] }
-
-    # external_network:
-    #     type: cloudify.openstack.network
-    #     properties:
-    #         use_external_resource: true
-    #         resource_id: { get_input: external_network_name }
-    #         openstack_config: { get_property: [openstack_configuration, openstack_config] }
-
-    # agents_security_group:
-    #     type: cloudify.openstack.security_group
-    #     properties:
-    #         resource_id: cloudify-sg-agents
-    #         security_group:
-    #             description: Security group for Cloudify agent VMs
-    #         rules:
-    #             - port: 22
-    #               remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
-    #             - port: 5985
-    #               remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
-    #         openstack_config: { get_property: [openstack_configuration, openstack_config] }
-
-    # management_security_group:
-    #     type: cloudify.openstack.security_group
-    #     properties:
-    #         resource_id: cloudify-sg-management
-    #         security_group:
-    #             description: Security group for Cloudify Management VM
-    #         rules:
-    #             - port: 80
-    #               remote_ip_prefix: 0.0.0.0/0
-    #             - port: 22
-    #               remote_ip_prefix: 0.0.0.0/0
-    #             - port: 5555
-    #               remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
-    #             - port: 5672
-    #               remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
-    #             - port: 53229
-    #               remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
-    #         openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
     manager_server_ip:
         type: cloudify.cloudstack.floatingip
@@ -219,6 +168,8 @@ node_templates:
               type: cloudify.cloudstack.virtual_machine_connected_to_floating_ip
             - target: management_network
               type: cloudify.relationships.connected_to
+            # - target: agent_network
+            #   type: cloudify.cloudstack.virtual_machine_connected_to_network
             # - target: management_subnet
             #   type: cloudify.relationships.depends_on
             # - target: management_security_group
