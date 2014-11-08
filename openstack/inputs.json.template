@@ -18,5 +18,6 @@
     "manager_private_key_path": "~/.ssh/cloudify-manager-kp.pem",
     "agent_private_key_path": "~/.ssh/cloudify-agent-kp.pem",
     "agents_user": "ubuntu",
+    "neutron_url": "",
     "resources_prefix": ""
 }
