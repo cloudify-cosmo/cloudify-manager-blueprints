@@ -91,21 +91,19 @@ inputs:
 
 
 node_templates:
-    # management_keypair:
-    #     type: cloudify.openstack.keypair
-    #     properties:
-    #         use_external_resource: { get_input: use_existing_manager_keypair }
-    #         resource_id: { get_input: manager_public_key_name }
-    #         private_key_path: { get_input: manager_private_key_path }
-    #         openstack_config: { get_property: [openstack_configuration, openstack_config] }
+    management_keypair:
+        type: cloudify.cloudstack.keypair
+        properties:
+            use_external_resource: { get_input: use_existing_manager_keypair }
+            resource_id: { get_input: manager_public_key_name }
+            private_key_path: { get_input: manager_private_key_path }
 
-    # agent_keypair:
-    #     type: cloudify.openstack.keypair
-    #     properties:
-    #         use_external_resource: { get_input: use_existing_agent_keypair }
-    #         resource_id: { get_input: agent_public_key_name }
-    #         private_key_path: { get_input: agent_private_key_path }
-    #         openstack_config: { get_property: [openstack_configuration, openstack_config] }
+    agent_keypair:
+        type: cloudify.cloudstack.keypair
+        properties:
+            use_external_resource: { get_input: use_existing_agent_keypair }
+            resource_id: { get_input: agent_public_key_name }
+            private_key_path: { get_input: agent_private_key_path }
 
     management_network:
         type: cloudify.cloudstack.network
@@ -180,6 +178,7 @@ node_templates:
                 image_id: { get_input: image_id }
                 size: { get_input: service_offering }
                 keypair_name: { get_input: manager_public_key_name }
+                expunge: True
             network:
                 default_network: { get_property: [management_network, resource_id] }
         relationships:
@@ -187,14 +186,15 @@ node_templates:
               type: cloudify.cloudstack.virtual_machine_connected_to_floating_ip
             - target: management_network
               type: cloudify.relationships.connected_to
+            - target: management_keypair
+              type: cloudify.cloudstack.virtual_machine_connected_to_keypair
             # - target: agent_network
             #   type: cloudify.cloudstack.virtual_machine_connected_to_network
             # - target: management_subnet
             #   type: cloudify.relationships.depends_on
             # - target: management_security_group
             #   type: cloudify.openstack.server_connected_to_security_group
-            # - target: management_keypair
-            #   type: cloudify.openstack.server_connected_to_keypair
+            
 
     cloudstack_configuration:
         type: cloudstack_configuration

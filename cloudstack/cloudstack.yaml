@@ -91,21 +91,21 @@ inputs:
 
 
 node_templates:
-    # management_keypair:
-    #     type: cloudify.openstack.keypair
-    #     properties:
-    #         use_external_resource: { get_input: use_existing_manager_keypair }
-    #         resource_id: { get_input: manager_public_key_name }
-    #         private_key_path: { get_input: manager_private_key_path }
-    #         openstack_config: { get_property: [openstack_configuration, openstack_config] }
+    management_keypair:
+        type: cloudify.cloudstack.keypair
+        properties:
+            use_external_resource: { get_input: use_existing_manager_keypair }
+            resource_id: { get_input: manager_public_key_name }
+            private_key_path: { get_input: manager_private_key_path }
+            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
 
-    # agent_keypair:
-    #     type: cloudify.openstack.keypair
-    #     properties:
-    #         use_external_resource: { get_input: use_existing_agent_keypair }
-    #         resource_id: { get_input: agent_public_key_name }
-    #         private_key_path: { get_input: agent_private_key_path }
-    #         openstack_config: { get_property: [openstack_configuration, openstack_config] }
+    agent_keypair:
+        type: cloudify.cloudstack.keypair
+        properties:
+            use_external_resource: { get_input: use_existing_agent_keypair }
+            resource_id: { get_input: agent_public_key_name }
+            private_key_path: { get_input: agent_private_key_path }
+            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
 
     management_network:
         type: cloudify.cloudstack.network
@@ -130,6 +130,7 @@ node_templates:
                   protocol: TCP
                   cidr: 0.0.0.0/0
                   ports: [80, 443]
+            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
 
     # agent_network:
     #     type: cloudify.cloudstack.network
@@ -145,6 +146,8 @@ node_templates:
 
     manager_server_ip:
         type: cloudify.cloudstack.floatingip
+        properties:
+            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
         relationships:
           - target: management_network
             type: cloudify.cloudstack.floating_ip_connected_to_network
@@ -165,21 +168,17 @@ node_templates:
                 image_id: { get_input: image_id }
                 size: { get_input: service_offering }
                 keypair_name: { get_input: manager_public_key_name }
+                expunge: True
             network:
                 default_network: { get_property: [management_network, resource_id] }
+            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
         relationships:
             - target: manager_server_ip
               type: cloudify.cloudstack.virtual_machine_connected_to_floating_ip
             - target: management_network
               type: cloudify.relationships.connected_to
-            # - target: agent_network
-            #   type: cloudify.cloudstack.virtual_machine_connected_to_network
-            # - target: management_subnet
-            #   type: cloudify.relationships.depends_on
-            # - target: management_security_group
-            #   type: cloudify.openstack.server_connected_to_security_group
-            # - target: management_keypair
-            #   type: cloudify.openstack.server_connected_to_keypair
+            - target: management_keypair
+              type: cloudify.cloudstack.virtual_machine_connected_to_keypair
 
     cloudstack_configuration:
         type: cloudstack_configuration
