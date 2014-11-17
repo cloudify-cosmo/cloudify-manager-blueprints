@@ -28,7 +28,7 @@ from openstack_plugin_common import (
     USE_EXTERNAL_RESOURCE_PROPERTY,
     Config
 )
-from neutron_plugin.floatingip import (
+from openstack_plugin_common.floatingip import (
     FLOATINGIP_OPENSTACK_TYPE,
     IP_ADDRESS_PROPERTY
 )
