@@ -87,14 +87,10 @@ def _set_provider_context():
     nodes_by_id = \
         {node.id: node for node in ctx._endpoint.storage.get_nodes()}
 
-    node_id_to_provider_context_field = {
-        'management_subnet': 'subnet',
-        'management_network': 'int_network',
-        'router': 'router',
+    node_id_to_provider_context_field = {        
         'agents_security_group': 'agents_security_group',
         'management_security_group': 'management_security_group',
-        'manager_server_ip': 'floating_ip',
-        'external_network': 'ext_network',
+        'manager_server_ip': 'floating_ip',        
         'manager_server': 'management_server',
         'management_keypair': 'management_keypair',
         'agent_keypair': 'agents_keypair'
