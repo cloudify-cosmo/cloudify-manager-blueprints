@@ -69,16 +69,6 @@ node_templates:
         target: manager_host
     interfaces:
       cloudify.interfaces.lifecycle:
-        configure:
-          implementation: fabric.fabric_plugin.tasks.run_task
-          inputs:
-            tasks_file: scripts/configure.py
-            task_name: configure
-            task_properties:
-              private_ip: { get_input: private_ip }
-            fabric_env:
-              user: { get_input: ssh_user }
-              key_filename: { get_input: ssh_key_filename }
         start:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
@@ -86,6 +76,7 @@ node_templates:
             task_properties:
               cloudify_packages: { get_property: [manager, cloudify_packages] }
               agent_local_key_path: { get_input: ssh_key_filename }
+              manager_private_ip: { get_input: private_ip }
             fabric_env:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
