@@ -1,27 +1,14 @@
 {
-    "location": "",
-    "domain": "",
-    "ram": 0,
-    "os": 0,
-    "cpu": 0,
-    "disk": 0,
-    "port_speed": 0,
-
-    "quantity": 1,
-    "use_hourly_pricing": true,
-    "private_network_only": true,
-    "provision_scripts": [],
-    "image_template_global_identifier": 0,
-    "image_template_id": 0,
-    "ssh_keys": [],
-    "bandwidth": 439,
-    "pri_ip_addresses": 15,
-    "monitoring": 49,
-    "notification": 51,
-    "response": 52,
-    "remote_management": 503,
-    "vulnerability_scanner": 307,
-    "vpn_management": 309,
-    "additional_ids": []
-
+ "location":"352494",
+  "domain": "test.cloudify.org",
+  "ram": 864,
+  "os": 4248,
+  "cpu": 859,
+  "disk": 1178,
+  "port_speed": 187,
+  "private_network_only": false,
+  "public_vlan": "",
+  "additional_ids": [
+      397
+    ]
 }
