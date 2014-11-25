@@ -1,8 +1,8 @@
 tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.1rc2/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.1rc2/plugin.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.1ga/types.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/3.1ga/plugin.yaml
 
 
 inputs:
