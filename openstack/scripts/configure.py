@@ -18,7 +18,6 @@ import json
 
 import fabric
 import fabric.api
-from fabric.context_managers import settings
 
 from cloudify import ctx
 from openstack_plugin_common import (
@@ -28,51 +27,23 @@ from openstack_plugin_common import (
     USE_EXTERNAL_RESOURCE_PROPERTY,
     Config
 )
-from openstack_plugin_common.floatingip import (
-    FLOATINGIP_OPENSTACK_TYPE,
-    IP_ADDRESS_PROPERTY
-)
-from cloudify_cli.bootstrap.tasks import (
-    PUBLIC_IP_RUNTIME_PROPERTY,
-    PROVIDER_RUNTIME_PROPERTY
-)
+from openstack_plugin_common.floatingip import IP_ADDRESS_PROPERTY
+
+PROVIDER_CONTEXT_RUNTIME_PROPERTY = 'provider_context'
 
 
 def configure(openstack_config):
 
-    manager_public_ip = _configure_public_ip()
-
     _set_provider_context()
 
-    _copy_openstack_configuration_to_manager(manager_public_ip,
-                                             openstack_config)
+    _copy_openstack_configuration_to_manager(openstack_config)
 
 
-def _configure_public_ip():
-    floatingip_runtime_props = \
-        _get_runtime_props_by_node_name_and_openstack_type(
-            'manager_server_ip', FLOATINGIP_OPENSTACK_TYPE)
-    manager_public_ip = floatingip_runtime_props[IP_ADDRESS_PROPERTY]
-    ctx.instance.runtime_properties[PUBLIC_IP_RUNTIME_PROPERTY] = \
-        manager_public_ip
-    return manager_public_ip
-
-
-def _copy_openstack_configuration_to_manager(manager_public_ip,
-                                             openstack_config):
+def _copy_openstack_configuration_to_manager(openstack_config):
     tmp = tempfile.mktemp()
     with open(tmp, 'w') as f:
         json.dump(openstack_config, f)
-    with settings(host_string=manager_public_ip):
-        fabric.api.put(tmp, Config.OPENSTACK_CONFIG_PATH_DEFAULT_PATH)
-
-
-def _get_runtime_props_by_node_name_and_openstack_type(
-        node_name, node_openstack_type):
-    node_runtime_props = [v for k, v in ctx.capabilities.get_all().iteritems()
-                          if k.startswith(node_name) and
-                          v[OPENSTACK_TYPE_PROPERTY] == node_openstack_type][0]
-    return node_runtime_props
+    fabric.api.put(tmp, Config.OPENSTACK_CONFIG_PATH_DEFAULT_PATH)
 
 
 def _set_provider_context():
@@ -121,4 +92,5 @@ def _set_provider_context():
         'resources': resources
     }
 
-    ctx.instance.runtime_properties[PROVIDER_RUNTIME_PROPERTY] = provider
+    ctx.instance.runtime_properties[PROVIDER_CONTEXT_RUNTIME_PROPERTY] = \
+        provider
