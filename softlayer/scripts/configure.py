@@ -19,8 +19,8 @@ import json
 import fabric
 import fabric.api
 from fabric.context_managers import settings
-#
-# from cloudify import ctx
+
+from cloudify import ctx
 # from openstack_plugin_common import (
 #     OPENSTACK_ID_PROPERTY,
 #     OPENSTACK_NAME_PROPERTY,
@@ -32,49 +32,48 @@ from fabric.context_managers import settings
 #     FLOATINGIP_OPENSTACK_TYPE,
 #     IP_ADDRESS_PROPERTY
 # )
-# from cloudify_cli.bootstrap.tasks import (
-#     PUBLIC_IP_RUNTIME_PROPERTY,
-#     PROVIDER_RUNTIME_PROPERTY
-# )
+from cloudify_cli.bootstrap.tasks import (
+    PUBLIC_IP_RUNTIME_PROPERTY,
+    PROVIDER_RUNTIME_PROPERTY
+)
 #
 #
 def configure(softlayer_config):
-    pass
-    # manager_public_ip = _configure_public_ip()
+     manager_public_ip = _configure_public_ip()
     #
     # _set_provider_context()
     #
-    # _copy_openstack_configuration_to_manager(manager_public_ip,
-    #                                          softlayer_config)
+     _copy_softlayer_configuration_to_manager(manager_public_ip,
+                                              softlayer_config)
 
 
-# def _configure_public_ip():
-#     floatingip_runtime_props = \
-#         _get_runtime_props_by_node_name_and_openstack_type(
-#             'manager_server_ip', FLOATINGIP_OPENSTACK_TYPE)
-#     manager_public_ip = floatingip_runtime_props[IP_ADDRESS_PROPERTY]
-#     ctx.instance.runtime_properties[PUBLIC_IP_RUNTIME_PROPERTY] = \
-#         manager_public_ip
-#     return manager_public_ip
-#
-#
-# def _copy_openstack_configuration_to_manager(manager_public_ip,
-#                                              softlayer_config):
-#     tmp = tempfile.mktemp()
-#     with open(tmp, 'w') as f:
-#         json.dump(softlayer_config, f)
-#     with settings(host_string=manager_public_ip):
-#         fabric.api.put(tmp, Config.OPENSTACK_CONFIG_PATH_DEFAULT_PATH)
-#
-#
-# def _get_runtime_props_by_node_name_and_openstack_type(
-#         node_name, node_openstack_type):
-#     node_runtime_props = [v for k, v in ctx.capabilities.get_all().iteritems()
-#                           if k.startswith(node_name) and
-#                           v[OPENSTACK_TYPE_PROPERTY] == node_openstack_type][0]
-#     return node_runtime_props
-#
-#
+def _configure_public_ip():
+    floatingip_runtime_props = \
+        _get_runtime_props_by_node_name_and_openstack_type(
+            'manager_server_ip', FLOATINGIP_OPENSTACK_TYPE)
+    manager_public_ip = floatingip_runtime_props[IP_ADDRESS_PROPERTY]
+    ctx.instance.runtime_properties[PUBLIC_IP_RUNTIME_PROPERTY] = \
+        manager_public_ip
+    return manager_public_ip
+
+
+def _copy_softlayer_configuration_to_manager(manager_public_ip,
+                                             softlayer_config):
+    tmp = tempfile.mktemp()
+    with open(tmp, 'w') as f:
+        json.dump(softlayer_config, f)
+    with settings(host_string=manager_public_ip):
+        fabric.api.put(tmp, '~/softlayer_config.json')
+
+
+def _get_runtime_props_by_node_name_and_openstack_type(
+        node_name, node_openstack_type):
+    node_runtime_props = [v for k, v in ctx.capabilities.get_all().iteritems()
+                          if k.startswith(node_name) and
+                          v[OPENSTACK_TYPE_PROPERTY] == node_openstack_type][0]
+    return node_runtime_props
+
+
 # def _set_provider_context():
 #     # Do not use this code section as a reference - it is a workaround for a
 #     #  deprecated feature and will be removed in the near future
