@@ -205,10 +205,10 @@ node_templates:
             task_name: configure
             task_properties:
               openstack_config: { get_property: [openstack_configuration, openstack_config] }
-              manager_public_ip: { get_attribute: [manager_server_ip, floating_ip_address] }
             fabric_env:
               user: { get_input: manager_server_user }
               key_filename: { get_property: [management_keypair, private_key_path] }
+              host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
         start:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
@@ -216,11 +216,11 @@ node_templates:
             task_properties:
               cloudify_packages: { get_property: [manager, cloudify_packages] }
               agent_local_key_path: { get_property: [agent_keypair, private_key_path] }
-              manager_public_ip: { get_attribute: [manager_server_ip, floating_ip_address] }
               provider_context: { get_attribute: [manager, provider_context] }
             fabric_env:
               user: { get_input: manager_server_user }
               key_filename: { get_property: [management_keypair, private_key_path] }
+              host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
       cloudify.interfaces.validation:
         creation:
           implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation

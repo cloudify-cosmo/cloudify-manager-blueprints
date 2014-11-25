@@ -18,7 +18,6 @@ import json
 
 import fabric
 import fabric.api
-from fabric.context_managers import settings
 
 from cloudify import ctx
 from openstack_plugin_common import (
@@ -33,21 +32,18 @@ from openstack_plugin_common.floatingip import IP_ADDRESS_PROPERTY
 PROVIDER_CONTEXT_RUNTIME_PROPERTY = 'provider_context'
 
 
-def configure(openstack_config, manager_public_ip):
+def configure(openstack_config):
 
     _set_provider_context()
 
-    _copy_openstack_configuration_to_manager(manager_public_ip,
-                                             openstack_config)
+    _copy_openstack_configuration_to_manager(openstack_config)
 
 
-def _copy_openstack_configuration_to_manager(manager_public_ip,
-                                             openstack_config):
+def _copy_openstack_configuration_to_manager(openstack_config):
     tmp = tempfile.mktemp()
     with open(tmp, 'w') as f:
         json.dump(openstack_config, f)
-    with settings(host_string=manager_public_ip):
-        fabric.api.put(tmp, Config.OPENSTACK_CONFIG_PATH_DEFAULT_PATH)
+    fabric.api.put(tmp, Config.OPENSTACK_CONFIG_PATH_DEFAULT_PATH)
 
 
 def _set_provider_context():
