@@ -14,6 +14,7 @@ inputs:
 
   domain:
     default: 'test.cloudify.org'
+
   ram:
     default: 864
     type: integer
@@ -44,8 +45,12 @@ inputs:
     # 486454 # Public VLAN 862 on fcr01a.hkg02
   additional_ids:
     default: [
-      397 #McAfee VirusScan Anti-Virus - Windows
+      #397 #McAfee VirusScan Anti-Virus - Windows
     ]
+
+  agents_user:
+    default: ubuntu
+    type: string
 
   ssh_user:
     default: 'root'
@@ -69,6 +74,12 @@ node_templates:
             public_vlan: {get_input: public_vlan}
             install_agent: false
 
+    softlayer_configuration:
+      type: softlayer_configuration
+      properties:
+        softlayer_config:
+           ssh_user: { get_input: ssh_user }
+           ssh_key_filename: { get_input: ssh_key_filename }
 
     manager:
         type: cloudify.nodes.CloudifyManager
@@ -90,7 +101,7 @@ node_templates:
                     min_workers: 2
                     max_workers: 5
                     remote_execution_port: 22
-                    #user: { get_input: agents_user }
+                    user: { get_input: agents_user }
 
                 workflows:
                     task_retries: -1  # this means forever
@@ -109,11 +120,13 @@ node_templates:
                     inputs:
                         tasks_file: scripts/configure.py
                         task_name: configure
-                        #task_properties:
+                        task_properties:
+                          softlayer_config: { get_property: [softlayer_configuration, softlayer_config] }
                         #    private_ip: { get_input: private_ip }
                         fabric_env:
                             user: { get_input: ssh_user }
                             key_filename: { get_input: ssh_key_filename }
+                            host_string: { get_attribute: [manager_host, public_ip] }
                 start:
                     implementation: fabric.fabric_plugin.tasks.run_module_task
                     inputs:
@@ -124,11 +137,18 @@ node_templates:
                         fabric_env:
                             user: { get_input: ssh_user }
                             key_filename: { get_input: ssh_key_filename }
+                            host_string: { get_attribute: [manager_host, public_ip] }
             cloudify.interfaces.validation:
                 creation:
                     implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
                     inputs:
                         cloudify_packages: { get_property: [manager, cloudify_packages] }
+
+node_types:
+  softlayer_configuration:
+    derived_from: cloudify.nodes.Root
+    properties:
+      softlayer_config: {}
 
 plugins:
     cli:
