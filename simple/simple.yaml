@@ -65,7 +65,7 @@ node_templates:
           start_timeout: 30
 
     relationships:
-      -   type: cloudify.relationships.contained_in
+      - type: cloudify.relationships.contained_in
         target: manager_host
     interfaces:
       cloudify.interfaces.lifecycle:
