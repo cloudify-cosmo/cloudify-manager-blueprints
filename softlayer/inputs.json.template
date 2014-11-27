@@ -2,13 +2,9 @@
  "location":"352494",
   "domain": "test.cloudify.org",
   "ram": 864,
-  "os": 4248,
+  "os": 4174,
   "cpu": 859,
   "disk": 1178,
   "port_speed": 187,
-  "private_network_only": false,
-  "public_vlan": "",
-  "additional_ids": [
-      397
-    ]
+  "private_network_only": false
 }

@@ -55,8 +55,11 @@ inputs:
   ssh_user:
     default: 'root'
 
+  ssh_keys:
+    default: ['cloudify-dev']
+
   ssh_key_filename:
-    default: 'id_rsa'
+    default: '~/.ssh/id_rsa'
 
 node_templates:
     manager_host:

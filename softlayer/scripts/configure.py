@@ -20,13 +20,6 @@ import fabric
 import fabric.api
 
 from cloudify import ctx
-# from openstack_plugin_common import (
-#     OPENSTACK_ID_PROPERTY,
-#     OPENSTACK_NAME_PROPERTY,
-#     OPENSTACK_TYPE_PROPERTY,
-#     USE_EXTERNAL_RESOURCE_PROPERTY,
-#     Config
-# )
 # from softlayer_plugin_common.floatingip import IP_ADDRESS_PROPERTY
 
 PROVIDER_CONTEXT_RUNTIME_PROPERTY = 'provider_context'
