@@ -230,7 +230,7 @@ node_templates:
         resources_prefix: { get_input: resources_prefix }
 
         cloudify_agent:
-          min_workers: 2
+          min_workers: 0
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: agents_user }
