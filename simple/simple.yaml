@@ -47,6 +47,11 @@ node_templates:
           ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-ubuntu-precise-agent_3.1.0-ga-b85_amd64.deb
           centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-centos-final-agent_3.1.0-ga-b85_amd64.deb
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-windows-agent_3.1.0-ga-b85_amd64.deb
+        # For bootstrapping the manager on a Docker container, comment out the above server package config and uncomment the docker config.
+        # In addition, change the manager bootstrap task mapping below.
+        # docker:
+        #   docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify_docker_3.1.0-ga-b85_amd64.tar
+        #   docker_data_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify_docker_data_3.1.0-ga-b85_amd64.tar
 
       cloudify:
         resources_prefix: { get_input: resources_prefix }
@@ -72,11 +77,17 @@ node_templates:
         start:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
+            # For bootstrapping the manager on a Docker container, comment out the default 'task_mapping' and uncomment the below bootstrap_docker task.
+            # Also, make sure to uncomment the docker config under 'cloudify_packages'.
+            # task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
             task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
             task_properties:
               cloudify_packages: { get_property: [manager, cloudify_packages] }
               agent_local_key_path: { get_input: ssh_key_filename }
               manager_private_ip: { get_input: private_ip }
+              # Optional Docker related properties
+              # docker_path: docker
+              # use_sudo: true
             fabric_env:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
