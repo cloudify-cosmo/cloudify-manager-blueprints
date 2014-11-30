@@ -49,14 +49,18 @@ inputs:
     ]
 
   agents_user:
-    default: ubuntu
+    default: 'root'
     type: string
 
   ssh_user:
     default: 'root'
 
   ssh_keys:
-    default: ['cloudify-dev']
+    # this is a {'label':id} dictionary. for example:
+    default: {
+      'cloudify-dev':116386,
+      'p305': 73986
+    }
 
   ssh_key_filename:
     default: '~/.ssh/id_rsa'
@@ -76,6 +80,10 @@ node_templates:
             private_network_only: {get_input: private_network_only}
             public_vlan: {get_input: public_vlan}
             install_agent: false
+            agents_user: { get_input: agents_user }
+            ssh_user: { get_input: ssh_user }
+            ssh_keys: { get_input: ssh_keys }
+            ssh_key_filename: { get_input: ssh_key_filename }
 
     softlayer_configuration:
       type: softlayer_configuration
