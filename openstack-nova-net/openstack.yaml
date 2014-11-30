@@ -225,7 +225,7 @@ node_templates:
               cloudify_packages: { get_property: [manager, cloudify_packages] }
               agent_local_key_path: { get_property: [agent_keypair, private_key_path] }
               provider_context: { get_attribute: [manager, provider_context] }
-              # Docker related properties
+              # Optional Docker related properties
               # docker_path: docker
               # use_sudo: true
             fabric_env:
