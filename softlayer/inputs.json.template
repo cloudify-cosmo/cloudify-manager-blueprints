@@ -1,6 +1,6 @@
 {
  "location":"352494",
-  "domain": "test.cloudify.org",
+  "domain": "cloudify.org",
   "ram": 864,
   "os": 4174,
   "cpu": 859,
