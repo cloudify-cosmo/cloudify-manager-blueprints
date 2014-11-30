@@ -175,7 +175,7 @@ node_templates:
           ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-ubuntu-precise-agent_3.1.0-ga-b85_amd64.deb
           centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-centos-final-agent_3.1.0-ga-b85_amd64.deb
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-windows-agent_3.1.0-ga-b85_amd64.deb
-        # For Bootstrapping using Docker, comment out the above server package config and uncomment docker config.
+        # For bootstrapping the manager on a Docker container, comment out the above server package config and uncomment docker config.
         # In addition, change the manager bootstrap task mapping below.
         # docker:
         #   docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify_docker_3.1.0-ga-b85_amd64.tar
@@ -217,7 +217,7 @@ node_templates:
         start:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
-            # For Bootstrapping using Docker, comment out default 'task_mapping' and uncomment the below bootstrap_docker task.
+            # For bootstrapping the manager on a Docker container, comment out the default 'task_mapping' and uncomment the below bootstrap_docker task.
             # Also, make sure to uncomment the docker config under 'cloudify_packages'.
             # task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
             task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
