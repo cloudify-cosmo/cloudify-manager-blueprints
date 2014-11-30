@@ -268,7 +268,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
             # For Bootstrapping using Docker, comment out default 'task_mapping' and uncomment the below bootstrap_docker task.
-            # Also, make sure to uncomment the docker config under 'cloudify_packages'
+            # Also, make sure to uncomment the docker config under 'cloudify_packages'.
             # task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
             task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
             task_properties:
