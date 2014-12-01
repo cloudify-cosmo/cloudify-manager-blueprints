@@ -228,8 +228,8 @@ node_templates:
         # For bootstrapping the manager on a Docker container, comment out the above server package config and uncomment the docker config.
         # In addition, change the manager bootstrap task mapping below.
         # docker:
-        #   docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify_docker_3.1.0-ga-b85_amd64.tar
-        #   docker_data_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify_docker_data_3.1.0-ga-b85_amd64.tar
+        #   docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify_docker_3.1.0-ga-b85.tar
+        #   docker_data_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify_docker_data_3.1.0-ga-b85.tar
 
       cloudify:
         resources_prefix: { get_input: resources_prefix }
