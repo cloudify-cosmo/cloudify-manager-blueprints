@@ -39,12 +39,21 @@ inputs:
       #397 #McAfee VirusScan Anti-Virus - Windows
     ]
   agents_user:
-    default: ubuntu
+    default: 'root'
     type: string
   ssh_user:
     default: 'root'
   ssh_keys:
+<<<<<<< HEAD
     default: [116386]
+=======
+    # this is a {'label':id} dictionary. for example:
+    default: {
+      'cloudify-dev':116386,
+      'p305': 73986
+    }
+
+>>>>>>> master
   ssh_key_filename:
     default: '~/.ssh/id_rsa'
 
