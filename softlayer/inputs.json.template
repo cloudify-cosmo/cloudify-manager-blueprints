@@ -1,10 +1,12 @@
 {
- "location":"352494",
-  "domain": "cloudify.org",
-  "ram": 864,
-  "os": 4174,
-  "cpu": 859,
-  "disk": 1178,
-  "port_speed": 187,
-  "private_network_only": false
+    "location": "ENTER_LOCATION_ID",
+    "domain": "ENTER_DOMAIN_NAME",
+    "ram": "ENTER_RAM_ITEM_ID",
+    "cpu": "ENTER_CPU_ITEM_ID",
+    "disk": "ENTER_DISK_ITEM_ID",
+    "os": "ENTER_OS_ITEM_ID_OR_EMPTY_STRING",
+    "image_template_global_identifier": "ENTER_IMAGE_ID_OR_EMPTY_STRING",
+    "image_template_id": "ENTER_IMAGE_ID_OR_EMPTY_STRING",
+    "provision_scripts": [],
+    "ssh_keys": []
 }
