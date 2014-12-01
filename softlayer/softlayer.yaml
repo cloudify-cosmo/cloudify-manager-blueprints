@@ -115,7 +115,7 @@ node_templates:
             fabric_env:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
-              host_string: { get_attribute: [manager_host, public_ip] }
+              host_string: { get_attribute: [manager_host, ip] }
         start:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
@@ -126,7 +126,7 @@ node_templates:
             fabric_env:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
-              host_string: { get_attribute: [manager_host, public_ip] }
+              host_string: { get_attribute: [manager_host, ip] }
       cloudify.interfaces.validation:
         creation:
           implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
