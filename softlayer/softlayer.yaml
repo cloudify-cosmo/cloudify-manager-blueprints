@@ -3,7 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_0
 imports:
     - http://www.getcloudify.org/spec/cloudify/3.1/types.yaml
     #- http://www.getcloudify.org/spec/softlayer-plugin/1.1rc2/plugin.yaml
-    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-softlayer-plugin/master/plugin.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-softlayer-plugin/CFY-1688-manager-blueprint/plugin.yaml
     - http://www.getcloudify.org/spec/fabric-plugin/1.1/plugin.yaml
 
 inputs:
@@ -127,7 +127,7 @@ node_templates:
             fabric_env:
               user: { get_input: agents_user }
               key_filename: { get_input: ssh_key_filename }
-              host_string: { get_attribute: [manager_host, ip] }
+              host_string: { get_attribute: [manager_host, public_ip] }
         start:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
