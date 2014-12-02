@@ -1,4 +1,7 @@
 {
+    "username": "ENTER_USERNAME",
+    "api_key": "ENTER_API_KEY",
+    "endpoint_url": "ENTER_API_ENDPOINT_URL",
     "location": "ENTER_LOCATION_ID",
     "domain": "ENTER_DOMAIN_NAME",
     "ram": "ENTER_RAM_ITEM_ID",
@@ -7,6 +10,14 @@
     "os": "ENTER_OS_ITEM_ID_OR_EMPTY_STRING",
     "image_template_global_identifier": "ENTER_IMAGE_ID_OR_EMPTY_STRING",
     "image_template_id": "ENTER_IMAGE_ID_OR_EMPTY_STRING",
+
+    "private_network_only": false,
+    "port_speed": 187,
+    "private_vlan": "",
+    "public_vlan": "",
     "provision_scripts": [],
-    "ssh_keys": []
+    "ssh_keys": [],
+    "agents_user": "root",
+    "ssh_key_filename": "~/.ssh/id_rsa"
 }
+
