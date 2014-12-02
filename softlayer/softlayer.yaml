@@ -7,70 +7,71 @@ imports:
     - http://www.getcloudify.org/spec/fabric-plugin/1.1/plugin.yaml
 
 inputs:
-  location:
-    default: '352494' # Hong Kong 2
-  domain:
-    default: 'test.cloudify.org'
-  ram:
-    default: 864
-    type: integer
   os:
-    default: 4174 # Ubuntu Linux 12.04 LTS Precise Pangolin - Minimal Install (64 bit)
+    type: integer
+  image_template_global_identifier:
+    type: integer
+  image_template_id:
+    type: integer
+  location:
+    type: string
+  domain:
+    type: string
+  ram:
     type: integer
   cpu:
-    default: 859
     type: integer
   disk:
-    default: 1178
     type: integer
-  port_speed:
-    default: 187
-    type: integer
-    # 497 - 100 Mbps Private Network Uplink
-    # 187 - 100 Mbps Public & Private Network Uplinks
   private_network_only:
-    default: false
     type: boolean
+    default: false
+  port_speed:
+    type: integer
+    default: 187
+  private_vlan:
+    default: ''
   public_vlan:
     default: ''
-    # 486454 # Public VLAN 862 on fcr01a.hkg02
-  additional_ids:
-    default: [
-      #397 #McAfee VirusScan Anti-Virus - Windows
-    ]
-  agents_user:
-    default: 'root'
-    type: string
-  ssh_user:
-    default: 'root'
+  provision_scripts:
+    default: []
   ssh_keys:
-    default: [116386]
+    default: []
+  agents_user:
+    type: string
+    default: 'root'
   ssh_key_filename:
+    type: string
     default: '~/.ssh/id_rsa'
 
 node_templates:
   manager_host:
     type: cloudify.softlayer.nodes.VirtualServer
     properties:
+      install_agent: false
+
       location: { get_input: location }
       domain: { get_input: domain }
       ram: { get_input: ram }
-      os: { get_input: os }
       cpu: { get_input: cpu }
       disk: { get_input: disk }
+      os: { get_input: os }
+      image_template_global_identifier: { get_input: image_template_global_identifier }
+      image_template_id: { get_input: image_template_id }
+      private_network_only: { get_input: private_network_only }
       port_speed: { get_input: port_speed }
-      additional_ids: {get_input: additional_ids}
-      private_network_only: {get_input: private_network_only}
-      public_vlan: {get_input: public_vlan}
-      ssh_keys: {get_input: ssh_keys}
-      install_agent: false
+      private_vlan: { get_input: private_vlan }
+      public_vlan: { get_input: public_vlan }
+      provision_scripts: { get_input: provision_scripts }
+      ssh_keys: { get_input: ssh_keys }
 
-  softlayer_configuration:
-    type: softlayer_configuration
+  ssh_configuration:
+    type: ssh_configuration
     properties:
-      softlayer_config:
-        ssh_user: { get_input: ssh_user }
+      ssh_config:
+        agents_user: { get_input: agents_user }
         ssh_key_filename: { get_input: ssh_key_filename }
+        ssh_keys: {get_input: ssh_keys}
 
   manager:
     type: cloudify.nodes.CloudifyManager
@@ -86,12 +87,12 @@ node_templates:
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc2-RELEASE/cloudify-windows-agent_3.1.0-rc2-b84_amd64.deb
 
       cloudify:
-        #resources_prefix: { get_input: resources_prefix }
         cloudify_agent:
           min_workers: 2
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: agents_user }
+          agent_key_path: {get_input: ssh_key_filename}
         workflows:
           task_retries: -1  # this means forever
           task_retry_interval: 30
@@ -110,10 +111,9 @@ node_templates:
             tasks_file: scripts/configure.py
             task_name: configure
             task_properties:
-              softlayer_config: { get_property: [softlayer_configuration, softlayer_config] }
-              #    private_ip: { get_input: private_ip }
+              ssh_config: { get_property: [ssh_configuration, ssh_config] }
             fabric_env:
-              user: { get_input: ssh_user }
+              user: { get_input: agents_user }
               key_filename: { get_input: ssh_key_filename }
               host_string: { get_attribute: [manager_host, ip] }
         start:
@@ -124,7 +124,7 @@ node_templates:
               cloudify_packages: { get_property: [manager, cloudify_packages] }
               agent_local_key_path: { get_input: ssh_key_filename }
             fabric_env:
-              user: { get_input: ssh_user }
+              user: { get_input: agents_user }
               key_filename: { get_input: ssh_key_filename }
               host_string: { get_attribute: [manager_host, ip] }
       cloudify.interfaces.validation:
@@ -134,10 +134,10 @@ node_templates:
             cloudify_packages: { get_property: [manager, cloudify_packages] }
 
 node_types:
-  softlayer_configuration:
+  ssh_configuration:
     derived_from: cloudify.nodes.Root
     properties:
-      softlayer_config: {}
+      ssh_config: {}
 
 plugins:
   cli:
@@ -146,4 +146,4 @@ plugins:
 
 outputs:
   manager_ip:
-    value: { get_property: [manager_host, ip] }
+    value: { get_attribute: [manager_host, ip] }
