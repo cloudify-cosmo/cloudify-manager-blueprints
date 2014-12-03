@@ -7,10 +7,10 @@
     "ram": "ENTER_RAM_ITEM_ID",
     "cpu": "ENTER_CPU_ITEM_ID",
     "disk": "ENTER_DISK_ITEM_ID",
-    "os": "ENTER_OS_ITEM_ID_OR_EMPTY_STRING",
-    "image_template_global_identifier": "ENTER_IMAGE_ID_OR_EMPTY_STRING",
-    "image_template_id": "ENTER_IMAGE_ID_OR_EMPTY_STRING",
+    "os": "ENTER_OS_ITEM_ID",
 
+    "image_template_global_identifier": "ENTER_IMAGE_ID",
+    "image_template_id": "ENTER_IMAGE_ID",
     "private_network_only": false,
     "port_speed": 187,
     "private_vlan": "",
