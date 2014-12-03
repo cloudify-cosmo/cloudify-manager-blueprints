@@ -31,8 +31,8 @@ inputs:
     type: string
     default: ''
   image_template_global_identifier:
-      type: string
-      default: ''
+    type: string
+    default: ''
   private_network_only:
     type: boolean
     default: false
@@ -140,6 +140,7 @@ node_templates:
               cloudify_packages: { get_property: [manager, cloudify_packages] }
               agent_local_key_path: { get_input: ssh_key_filename }
               manager_private_ip: { get_attribute: [manager_host, ip]}
+              provider_context: { get_attribute: [manager, provider_context] }
             fabric_env:
               user: { get_input: agents_user }
               key_filename: { get_input: ssh_key_filename }
