@@ -9,8 +9,8 @@
     "disk": "ENTER_DISK_ITEM_ID",
     "os": "ENTER_OS_ITEM_ID",
 
-    "image_template_global_identifier": "ENTER_IMAGE_ID",
-    "image_template_id": "ENTER_IMAGE_ID",
+    "image_template_global_identifier": "",
+    "image_template_id": "",
     "private_network_only": false,
     "port_speed": 187,
     "private_vlan": "",
