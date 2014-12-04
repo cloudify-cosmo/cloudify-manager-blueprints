@@ -127,7 +127,7 @@ node_templates:
             task_name: configure
             task_properties:
               softlayer_config: { get_property: [softlayer_configuration, config] }
-              ssh_keys: { get_inpute: ssh_keys }
+              ssh_keys: { get_input: ssh_keys }
             fabric_env:
               user: { get_input: agents_user }
               key_filename: { get_input: ssh_key_filename }
