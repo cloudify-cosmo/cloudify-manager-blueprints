@@ -1,18 +1,19 @@
 tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
-    - http://www.getcloudify.org/spec/cloudify/3.1/types.yaml
-    #- http://www.getcloudify.org/spec/softlayer-plugin/1.1rc2/plugin.yaml
-    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-softlayer-plugin/master/plugin.yaml
-    - http://www.getcloudify.org/spec/fabric-plugin/1.1/plugin.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.1/types.yaml
+  #- http://www.getcloudify.org/spec/softlayer-plugin/1.1/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-softlayer-plugin/master/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.1/plugin.yaml
 
 inputs:
-  os:
-    type: integer
-  image_template_global_identifier:
-    type: integer
-  image_template_id:
-    type: integer
+  username:
+    type: string
+  api_key:
+    type: string
+  endpoint_url:
+    type: string
+
   location:
     type: string
   domain:
@@ -23,6 +24,15 @@ inputs:
     type: integer
   disk:
     type: integer
+  os:
+    type: integer
+
+  image_template_id:
+    type: string
+    default: ''
+  image_template_global_identifier:
+    type: string
+    default: ''
   private_network_only:
     type: boolean
     default: false
@@ -37,12 +47,13 @@ inputs:
     default: []
   ssh_keys:
     default: []
+
   agents_user:
     type: string
-    default: 'root'
+    default: root
   ssh_key_filename:
     type: string
-    default: '~/.ssh/id_rsa'
+    default: ~/.ssh/id_rsa
 
 node_templates:
   manager_host:
@@ -50,14 +61,18 @@ node_templates:
     properties:
       install_agent: false
 
+      username: { get_input: username }
+      api_key: { get_input: api_key }
+      endpoint_url: { get_input: endpoint_url }
+
       location: { get_input: location }
       domain: { get_input: domain }
       ram: { get_input: ram }
       cpu: { get_input: cpu }
       disk: { get_input: disk }
       os: { get_input: os }
-      image_template_global_identifier: { get_input: image_template_global_identifier }
       image_template_id: { get_input: image_template_id }
+      image_template_global_identifier: { get_input: image_template_global_identifier }
       private_network_only: { get_input: private_network_only }
       port_speed: { get_input: port_speed }
       private_vlan: { get_input: private_vlan }
@@ -65,26 +80,26 @@ node_templates:
       provision_scripts: { get_input: provision_scripts }
       ssh_keys: { get_input: ssh_keys }
 
-  ssh_configuration:
-    type: ssh_configuration
+  softlayer_configuration:
+    type: softlayer_configuration
     properties:
-      ssh_config:
-        agents_user: { get_input: agents_user }
-        ssh_key_filename: { get_input: ssh_key_filename }
-        ssh_keys: {get_input: ssh_keys}
+      config:
+        username: { get_input: username }
+        api_key: { get_input: api_key }
+        endpoint_url: { get_input: endpoint_url }
 
   manager:
     type: cloudify.nodes.CloudifyManager
     properties:
       cloudify_packages:
         server:
-          components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc2-RELEASE/cloudify-components_3.1.0-rc2-b84_amd64.deb
-          core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc2-RELEASE/cloudify-core_3.1.0-rc2-b84_amd64.deb
-          ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc2-RELEASE/cloudify-ui_3.1.0-rc2-b84_amd64.deb
+          components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-components_3.1.0-ga-b85_amd64.deb
+          core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-core_3.1.0-ga-b85_amd64.deb
+          ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-ui_3.1.0-ga-b85_amd64.deb
         agents:
-          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc2-RELEASE/cloudify-ubuntu-precise-agent_3.1.0-rc2-b84_amd64.deb
-          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc2-RELEASE/cloudify-centos-final-agent_3.1.0-rc2-b84_amd64.deb
-          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc2-RELEASE/cloudify-windows-agent_3.1.0-rc2-b84_amd64.deb
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-ubuntu-precise-agent_3.1.0-ga-b85_amd64.deb
+          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-centos-final-agent_3.1.0-ga-b85_amd64.deb
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-windows-agent_3.1.0-ga-b85_amd64.deb
 
       cloudify:
         cloudify_agent:
@@ -100,8 +115,8 @@ node_templates:
           start_timeout: 30
 
     relationships:
-            -   type: cloudify.relationships.contained_in
-                target: manager_host
+      -  type: cloudify.relationships.contained_in
+         target: manager_host
 
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -111,11 +126,12 @@ node_templates:
             tasks_file: scripts/configure.py
             task_name: configure
             task_properties:
-              ssh_config: { get_property: [ssh_configuration, ssh_config] }
+              softlayer_config: { get_property: [softlayer_configuration, config] }
+              ssh_keys: { get_input: ssh_keys }
             fabric_env:
               user: { get_input: agents_user }
               key_filename: { get_input: ssh_key_filename }
-              host_string: { get_attribute: [manager_host, ip] }
+              host_string: { get_attribute: [manager_host, public_ip] }
         start:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
@@ -123,10 +139,12 @@ node_templates:
             task_properties:
               cloudify_packages: { get_property: [manager, cloudify_packages] }
               agent_local_key_path: { get_input: ssh_key_filename }
+              manager_private_ip: { get_attribute: [manager_host, ip]}
+              provider_context: { get_attribute: [manager, provider_context] }
             fabric_env:
               user: { get_input: agents_user }
               key_filename: { get_input: ssh_key_filename }
-              host_string: { get_attribute: [manager_host, ip] }
+              host_string: { get_attribute: [manager_host, public_ip] }
       cloudify.interfaces.validation:
         creation:
           implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
@@ -134,10 +152,10 @@ node_templates:
             cloudify_packages: { get_property: [manager, cloudify_packages] }
 
 node_types:
-  ssh_configuration:
+  softlayer_configuration:
     derived_from: cloudify.nodes.Root
     properties:
-      ssh_config: {}
+      config: {}
 
 plugins:
   cli:
@@ -146,4 +164,4 @@ plugins:
 
 outputs:
   manager_ip:
-    value: { get_attribute: [manager_host, ip] }
+    value: { get_attribute: [manager_host, public_ip] }
