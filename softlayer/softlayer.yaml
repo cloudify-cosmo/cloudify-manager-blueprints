@@ -61,9 +61,7 @@ node_templates:
     properties:
       install_agent: false
 
-      username: { get_input: username }
-      api_key: { get_input: api_key }
-      endpoint_url: { get_input: endpoint_url }
+      api_config: { get_property: [softlayer_configuration, api_config] }
 
       location: { get_input: location }
       domain: { get_input: domain }
@@ -83,7 +81,7 @@ node_templates:
   softlayer_configuration:
     type: softlayer_configuration
     properties:
-      config:
+      api_config:
         username: { get_input: username }
         api_key: { get_input: api_key }
         endpoint_url: { get_input: endpoint_url }
@@ -126,7 +124,7 @@ node_templates:
             tasks_file: scripts/configure.py
             task_name: configure
             task_properties:
-              softlayer_config: { get_property: [softlayer_configuration, config] }
+              softlayer_api_config: { get_property: [softlayer_configuration, api_config] }
               ssh_keys: { get_input: ssh_keys }
             fabric_env:
               user: { get_input: agents_user }
@@ -150,12 +148,6 @@ node_templates:
           implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
           inputs:
             cloudify_packages: { get_property: [manager, cloudify_packages] }
-
-node_types:
-  softlayer_configuration:
-    derived_from: cloudify.nodes.Root
-    properties:
-      config: {}
 
 plugins:
   cli:

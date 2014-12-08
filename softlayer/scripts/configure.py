@@ -20,16 +20,17 @@ import fabric
 import fabric.api
 
 from cloudify import ctx
+from softlayer_plugin.properties_constants import SOFTLAYER_CONFIG_PATH_DEFAULT_PATH
 
 PROVIDER_CONTEXT_RUNTIME_PROPERTY = 'provider_context'
 SOFTLAYER_CONFIG_PATH_DEFAULT_PATH = '~/softlayer_config.json'
 
 
-def configure(softlayer_config, ssh_keys):
+def configure(softlayer_api_config, ssh_keys):
 
     _set_provider_context(ssh_keys)
 
-    _copy_softlayer_configuration_to_manager(softlayer_config)
+    _copy_softlayer_configuration_to_manager(softlayer_api_config)
 
 
 def _set_provider_context(ssh_keys):
@@ -40,8 +41,8 @@ def _set_provider_context(ssh_keys):
         PROVIDER_CONTEXT_RUNTIME_PROPERTY] = provider
 
 
-def _copy_softlayer_configuration_to_manager(softlayer_config):
+def _copy_softlayer_configuration_to_manager(softlayer_api_config):
     tmp = tempfile.mktemp()
     with open(tmp, 'w') as f:
-        json.dump(softlayer_config, f)
+        json.dump(softlayer_api_config, f)
     fabric.api.put(tmp, SOFTLAYER_CONFIG_PATH_DEFAULT_PATH)
