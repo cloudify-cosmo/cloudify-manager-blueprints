@@ -1,100 +1,107 @@
 tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
-    - http://www.getcloudify.org/spec/cloudify/3.1rc1/types.yaml
-    - http://www.getcloudify.org/spec/fabric-plugin/1.1rc1/plugin.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.1/types.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.1/plugin.yaml
 
 
 inputs:
 
-    public_ip:
-        type: string
+  public_ip:
+    type: string
 
-    private_ip:
-        type: string
+  private_ip:
+    type: string
 
-    ssh_user:
-        type: string
+  ssh_user:
+    type: string
 
-    ssh_key_filename:
-        type: string
+  ssh_key_filename:
+    type: string
 
-    cloudify_packages:
-        default:
-            server:
-                components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-components_3.1.0-rc1-b83_amd64.deb
-                core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-core_3.1.0-rc1-b83_amd64.deb
-                ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-ui_3.1.0-rc1-b83_amd64.deb
-            agents:
-                ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-ubuntu-agent_3.1.0-rc1-b83_amd64.deb
-                centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-centos-agent_3.1.0-rc1-b83_amd64.deb
-                windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/rc1-RELEASE/cloudify-windows-agent_3.1.0-rc1-b83_amd64.deb
+  agents_user:
+    default: ubuntu
+    type: string
 
-    cloudify:
-        default:
-            resources_prefix: ''
-
-            cloudify_agent:
-                min_workers: 2
-                max_workers: 5
-                remote_execution_port: 22
-                user: ubuntu
-
-            workflows:
-                task_retries: -1  # this means forever
-                task_retry_interval: 30
-
-            policy_engine:
-                start_timeout: 30
+  resources_prefix:
+    default: ''
+    type: string
 
 
 node_templates:
-    manager_host:
-        type: cloudify.types.host
-        properties:
-            install_agent: false
-            ip: { get_input: public_ip }
+  manager_host:
+    type: cloudify.nodes.Compute
+    properties:
+      install_agent: false
+      ip: { get_input: public_ip }
 
-    manager:
-        type: cloudify.types.cloudify_manager
-        properties:
-            cloudify: { get_input: cloudify }
-        relationships:
-            -   type: cloudify.relationships.contained_in
-                target: manager_host
-        interfaces:
-            cloudify.interfaces.lifecycle:
-                configure:
-                    implementation: fabric.fabric_plugin.tasks.run_task
-                    inputs:
-                        tasks_file: scripts/configure.py
-                        task_name: configure
-                        task_properties:
-                            private_ip: { get_input: private_ip }
-                        fabric_env:
-                            user: { get_input: ssh_user }
-                            key_filename: { get_input: ssh_key_filename }
-                start:
-                    implementation: fabric.fabric_plugin.tasks.run_module_task
-                    inputs:
-                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
-                        task_properties:
-                            cloudify_packages: { get_input: cloudify_packages }
-                            agent_local_key_path: { get_input: ssh_key_filename }
-                        fabric_env:
-                            user: { get_input: ssh_user }
-                            key_filename: { get_input: ssh_key_filename }
-            cloudify.interfaces.validation:
-                creation:
-                    implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
-                    inputs:
-                        cloudify_packages: { get_input: cloudify_packages }
+  manager:
+    type: cloudify.nodes.CloudifyManager
+    properties:
+      cloudify_packages:
+        server:
+          components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-components_3.1.0-ga-b85_amd64.deb
+          core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-core_3.1.0-ga-b85_amd64.deb
+          ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-ui_3.1.0-ga-b85_amd64.deb
+        agents:
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-ubuntu-agent_3.1.0-ga-b85_amd64.deb
+          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-centos-final-agent_3.1.0-ga-b85_amd64.deb
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-windows-agent_3.1.0-ga-b85_amd64.deb
+        # For bootstrapping the manager on a Docker container, comment out the above server package config and uncomment the docker config.
+        # In addition, change the manager bootstrap task mapping below.
+        # docker:
+        #   docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-docker_3.1.0-ga-b85.tar
+        #   docker_data_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-docker-data_3.1.0-ga-b85.tar
+
+      cloudify:
+        resources_prefix: { get_input: resources_prefix }
+
+        cloudify_agent:
+          min_workers: 0
+          max_workers: 5
+          remote_execution_port: 22
+          user: { get_input: agents_user }
+
+        workflows:
+          task_retries: -1  # this means forever
+          task_retry_interval: 30
+
+        policy_engine:
+          start_timeout: 30
+
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            # For bootstrapping the manager on a Docker container, comment out the default 'task_mapping' and uncomment the below bootstrap_docker task.
+            # Also, make sure to uncomment the docker config under 'cloudify_packages'.
+            # task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
+            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+            task_properties:
+              cloudify_packages: { get_property: [manager, cloudify_packages] }
+              agent_local_key_path: { get_input: ssh_key_filename }
+              manager_private_ip: { get_input: private_ip }
+              # Optional Docker related properties
+              # docker_path: docker
+              # use_sudo: true
+            fabric_env:
+              user: { get_input: ssh_user }
+              key_filename: { get_input: ssh_key_filename }
+      cloudify.interfaces.validation:
+        creation:
+          implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+          inputs:
+            cloudify_packages: { get_property: [manager, cloudify_packages] }
 
 plugins:
-    cli:
-        install: false
-        executor: central_deployment_agent
+  cli:
+    install: false
+    executor: central_deployment_agent
 
 outputs:
-    manager_ip:
-        value: { get_property: [manager_host, ip] }
+  manager_ip:
+    value: { get_property: [manager_host, ip] }

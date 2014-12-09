@@ -31,8 +31,7 @@ inputs:
     default: ''
     type: string
 
-  neutron_url:
-    default: ''
+  internal_cidr:
     type: string
 
   manager_public_key_name:
@@ -45,9 +44,6 @@ inputs:
     type: string
 
   flavor_id:
-    type: string
-
-  external_network_name:
     type: string
 
   use_existing_manager_keypair:
@@ -104,79 +100,39 @@ node_templates:
       private_key_path: { get_input: agent_private_key_path }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
-  management_network:
-    type: cloudify.openstack.nodes.Network
-    properties:
-      resource_id: cloudify-management-network
-      openstack_config: { get_property: [openstack_configuration, openstack_config] }
-
-  management_subnet:
-    type: cloudify.openstack.nodes.Subnet
-    properties:
-      resource_id: cloudify-management-network-subnet
-      subnet:
-        ip_version: 4
-        cidr: 10.67.79.0/24
-      openstack_config: { get_property: [openstack_configuration, openstack_config] }
-    relationships:
-      - target: management_network
-        type: cloudify.relationships.contained_in
-      - target: router
-        type: cloudify.openstack.subnet_connected_to_router
-
-  router:
-    type: cloudify.openstack.nodes.Router
-    properties:
-      resource_id: cloudify-router
-      router:
-        external_gateway_info:
-          network_name: { get_input: external_network_name }
-      openstack_config: { get_property: [openstack_configuration, openstack_config] }
-
-  external_network:
-    type: cloudify.openstack.nodes.Network
-    properties:
-      use_external_resource: true
-      resource_id: { get_input: external_network_name }
-      openstack_config: { get_property: [openstack_configuration, openstack_config] }
-
   agents_security_group:
-    type: cloudify.openstack.nodes.SecurityGroup
+    type: cloudify.openstack.nova_net.nodes.SecurityGroup
     properties:
       resource_id: cloudify-sg-agents
-      security_group:
-        description: Security group for Cloudify agent VMs
+      description: Security group for Cloudify agent VMs
       rules:
         - port: 22
-          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+          cidr: { get_input: internal_cidr }
         - port: 5985
-          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+          cidr: { get_input: internal_cidr }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
   management_security_group:
-    type: cloudify.openstack.nodes.SecurityGroup
+    type: cloudify.openstack.nova_net.nodes.SecurityGroup
     properties:
       resource_id: cloudify-sg-management
-      security_group:
-        description: Security group for Cloudify Management VM
+      description: Security group for Cloudify Management VM
       rules:
         - port: 80
-          remote_ip_prefix: 0.0.0.0/0
+          cidr: 0.0.0.0/0
         - port: 22
-          remote_ip_prefix: 0.0.0.0/0
+          cidr: 0.0.0.0/0
         - port: 5555
-          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+          cidr: { get_input: internal_cidr }
         - port: 5672
-          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+          cidr: { get_input: internal_cidr }
         - port: 53229
-          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+          cidr: { get_input: internal_cidr }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
   manager_server_ip:
-    type: cloudify.openstack.nodes.FloatingIP
+    type: cloudify.openstack.nova_net.nodes.FloatingIP
     properties:
-      floatingip:
-        floating_network_name: { get_input: external_network_name }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
   manager_server:
@@ -187,15 +143,10 @@ node_templates:
       server:
         image: { get_input: image_id }
         flavor: { get_input: flavor_id }
-      management_network_name: { get_property: [management_network, resource_id] }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
     relationships:
       - target: manager_server_ip
         type: cloudify.openstack.server_connected_to_floating_ip
-      - target: management_network
-        type: cloudify.relationships.connected_to
-      - target: management_subnet
-        type: cloudify.relationships.depends_on
       - target: management_security_group
         type: cloudify.openstack.server_connected_to_security_group
       - target: management_keypair
@@ -211,7 +162,6 @@ node_templates:
         auth_url: { get_input: keystone_url }
         region: { get_input: region }
         nova_url: { get_input: nova_url }
-        neutron_url: { get_input: neutron_url }
 
   manager:
     type: cloudify.nodes.CloudifyManager

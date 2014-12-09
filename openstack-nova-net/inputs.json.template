@@ -4,11 +4,11 @@
     "keystone_tenant_name": "",
     "keystone_url": "",
     "region": "",
+    "internal_cidr": "",
     "manager_public_key_name": "",
     "agent_public_key_name": "",
     "image_id": "",
-    "flavor_id": "",
-    "external_network_name": "",
+    "flavor_id": "",    
 
     "use_existing_manager_keypair": false,
     "use_existing_agent_keypair": false,
@@ -19,6 +19,5 @@
     "agent_private_key_path": "~/.ssh/cloudify-agent-kp.pem",
     "agents_user": "ubuntu",
     "nova_url": "",
-    "neutron_url": "",
     "resources_prefix": ""
 }
