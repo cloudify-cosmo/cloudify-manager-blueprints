@@ -100,7 +100,7 @@ inputs:
 
 node_templates:
     management_keypair:
-        type: cloudify.cloudstack.keypair
+        type: cloudify.cloudstack.nodes.KeyPair
         properties:
             use_external_resource: { get_input: use_existing_manager_keypair }
             resource_id: { get_input: manager_public_key_name }
@@ -108,7 +108,7 @@ node_templates:
             cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
 
     agent_keypair:
-        type: cloudify.cloudstack.keypair
+        type: cloudify.cloudstack.nodes.KeyPair
         properties:
             use_external_resource: { get_input: use_existing_agent_keypair }
             resource_id: { get_input: agent_public_key_name }
@@ -116,7 +116,7 @@ node_templates:
             cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
 
     management_network:
-        type: cloudify.cloudstack.network
+        type: cloudify.cloudstack.nodes.Network
         properties:
             resource_id: cloudify-management
             network:
@@ -153,7 +153,7 @@ node_templates:
 
 
     manager_server_ip:
-        type: cloudify.cloudstack.floatingip
+        type: cloudify.cloudstack.nodes.FloatingIP
         properties:
             cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
         relationships:
@@ -161,7 +161,7 @@ node_templates:
             type: cloudify.cloudstack.floating_ip_connected_to_network
 
     manager_server:
-        type: cloudify.cloudstack.virtual_machine
+        type: cloudify.cloudstack.nodes.VirtualMachine
         properties:
             resource_id: cloudify-manager
             install_agent: false
