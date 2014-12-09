@@ -1,0 +1,4 @@
+-e git+https://github.com/cloudify-cosmo/cloudify-rest-client@master#egg=cloudify-rest-client==3.1m5
+-e git+https://github.com/cloudify-cosmo/cloudify-plugins-common@master#egg=cloudify-plugins-common==3.1m5
+-e git+https://github.com/cloudify-cosmo/cloudify-fabric-plugin@master#egg=cloudify-fabric-plugin==1.1m5
+-e git+https://github.com/schubergphilis/cloudify-cloudstack-plugin@3.1m5#egg=cloudify-cloudstack-plugin==3.1m5

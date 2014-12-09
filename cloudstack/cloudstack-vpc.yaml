@@ -1,0 +1,259 @@
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+    - http://www.getcloudify.org/spec/cloudify/3.1m5/types.yaml
+    - https://raw.githubusercontent.com/schubergphilis/cloudify-cloudstack-plugin/3.1m5/plugin.yaml.template
+    - http://www.getcloudify.org/spec/fabric-plugin/1.1m5/plugin.yaml
+
+
+inputs:
+    cloudstack_api_url:
+        default: ''
+        type: string
+
+    cloudstack_key:
+        default: ''
+        type: string
+
+    cloudstack_secret:
+        default: ''
+        type: string
+
+    zone:
+        type: string
+
+    manager_public_key_name:
+        type: string
+
+    agent_public_key_name:
+        type: string
+
+    image_id:
+        type: string
+
+    service_offering:
+        type: string
+
+    network_offering:
+        type: string
+
+    use_existing_manager_keypair:
+        type: boolean
+        default: false
+
+    use_existing_agent_keypair:
+        type: boolean
+        default: false
+
+    manager_server_user:
+        default: root
+        type: string
+
+    manager_server_user_home:
+        default: /home/root
+        type: string
+
+    manager_private_key_path:
+        default: ~/.ssh/cloudify-management-kp.pem
+        type: string
+
+    agent_private_key_path:
+        default: ~/.ssh/cloudify-agents-kp.pem
+        type: string
+
+    cloudify_packages:
+        default:
+            server:
+                components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-components_3.1.0-m5-b82_amd64.deb
+                core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-core_3.1.0-m5-b82_amd64.deb
+                ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-ui_3.1.0-m5-b82_amd64.deb
+            agents:
+                ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-ubuntu-agent_3.1.0-m5-b82_amd64.deb
+                centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-centos-agent_3.1.0-m5-b82_amd64.deb
+                windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-windows-agent_3.1.0-m5-b82_amd64.deb
+
+    cloudify:
+        default:
+            resources_prefix: ''
+
+            cloudify_agent:
+                min_workers: 2
+                max_workers: 5
+                remote_execution_port: 22
+                user: ubuntu
+
+            workflows:
+                task_retries: -1  # this means forever
+                task_retry_interval: 30
+
+            policy_engine:
+                start_timeout: 30
+
+
+node_templates:
+    management_keypair:
+        type: cloudify.cloudstack.keypair
+        properties:
+            use_external_resource: { get_input: use_existing_manager_keypair }
+            resource_id: { get_input: manager_public_key_name }
+            private_key_path: { get_input: manager_private_key_path }
+
+    agent_keypair:
+        type: cloudify.cloudstack.keypair
+        properties:
+            use_external_resource: { get_input: use_existing_agent_keypair }
+            resource_id: { get_input: agent_public_key_name }
+            private_key_path: { get_input: agent_private_key_path }
+
+    management_network:
+        type: cloudify.cloudstack.network
+        properties:
+            resource_id: cloudify-management
+            network:
+                #name: cloudify-management-network2
+                service_offering: NiciraNvpVpcNetwork
+                zone: { get_input: zone }
+                netmask: 255.255.255.0
+                gateway: 10.2.1.1
+                vpc: { get_property: [management_vpc, resource_id] }
+            firewall:
+                - type: ingress
+                  protocol: TCP
+                  cidr: 94.211.5.21/32
+                  ports: [5555, 5672, 53229, 22, 8100, 80]
+                - type: ingress
+                  protocol: TCP
+                  cidr: 195.66.90.0/24
+                  ports: [5555, 5672, 53229, 22, 8100, 80]
+                - type: egress
+                  protocol: TCP
+                  cidr: 0.0.0.0/0
+                  ports: [80, 443, 22]
+        relationships:
+            - target: management_vpc
+              type: cloudify.relationships.contained_in
+
+    management_vpc:
+        type: cloudify.cloudstack.vpc
+        properties: 
+            resource_id: cloudify-management-vpc
+            network:
+                #name: VPC_cfy-mgt
+                service_offering: 'Default VPC offering'
+                zone: { get_input: zone }
+                cidr: 10.2.0.0/16
+
+
+    # agent_network:
+    #     type: cloudify.cloudstack.network
+    #     properties:
+    #         esource_id: cfy-agent
+    #         network:
+    #             #name: cloudify-management-network2
+    #             service_offering: { get_input: network_offering }
+    #             zone: { get_input: zone }
+    #             netmask: 255.255.255.0
+    #             gateway: 10.3.1.1
+
+
+    manager_server_ip:
+        type: cloudify.cloudstack.floatingip
+        relationships:
+          - target: management_network
+            type: cloudify.cloudstack.floating_ip_connected_to_network
+
+    manager_server:
+        type: cloudify.cloudstack.virtual_machine
+        properties:
+            resource_id: cloudify-mgr
+            install_agent: false
+            portmaps:
+                - protocol: TCP
+                  private_port: 80
+                  public_port: 80
+                - protocol: TCP
+                  private_port: 22
+                  public_port: 22
+            server:
+                image_id: { get_input: image_id }
+                size: { get_input: service_offering }
+                keypair_name: { get_input: manager_public_key_name }
+                expunge: True
+            network:
+                default_network: { get_property: [management_network, resource_id] }
+        relationships:
+            - target: manager_server_ip
+              type: cloudify.cloudstack.virtual_machine_connected_to_floating_ip
+            - target: management_network
+              type: cloudify.relationships.connected_to
+            - target: management_keypair
+              type: cloudify.cloudstack.virtual_machine_connected_to_keypair
+            # - target: agent_network
+            #   type: cloudify.cloudstack.virtual_machine_connected_to_network
+            # - target: management_subnet
+            #   type: cloudify.relationships.depends_on
+            # - target: management_security_group
+            #   type: cloudify.openstack.server_connected_to_security_group
+            
+
+    cloudstack_configuration:
+        type: cloudstack_configuration
+        properties:
+            cloudstack_config:
+                cs_api_url: { get_input: cloudstack_api_url }
+                cs_api_key: { get_input: cloudstack_key }
+                cs_api_secret: { get_input: cloudstack_secret }
+                zone: { get_input: zone }
+
+    manager:
+        type: cloudify.types.cloudify_manager
+        properties:
+            cloudify: { get_input: cloudify }
+
+        relationships:
+            - target: manager_server
+              type: cloudify.relationships.contained_in
+            - target: manager_server_ip
+              type: cloudify.relationships.depends_on
+
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                configure:
+                    implementation: fabric.fabric_plugin.tasks.run_task
+                    inputs:
+                        tasks_file: scripts/configure.py
+                        task_name: configure
+                        task_properties:
+                            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                start:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+                        task_properties:
+                            cloudify_packages: { get_input: cloudify_packages }
+                            agent_local_key_path: { get_input: agent_private_key_path }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+            cloudify.interfaces.validation:
+                creation:
+                    implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+                    inputs:
+                        cloudify_packages: { get_input: cloudify_packages }
+node_types:
+    cloudstack_configuration:
+        derived_from: cloudify.types.base
+        properties:
+            cloudstack_config: {}
+
+plugins:
+    cli:
+        install: false
+        executor: central_deployment_agent
+
+outputs:
+    manager_ip:
+        value: { get_attribute: [manager_server_ip, floating_ip_address] }
