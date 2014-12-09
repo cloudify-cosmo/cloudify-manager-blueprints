@@ -15,12 +15,13 @@
 
 import tempfile
 import json
-import logging
-from subprocess import call
+
+# import logging
+# from subprocess import call
 
 import fabric
 import fabric.api
-from fabric.context_managers import settings
+# from fabric.context_managers import settings
 
 from cloudify import ctx
 from cloudstack_plugin.cloudstack_common import (
@@ -34,46 +35,45 @@ from cloudstack_plugin.floatingip import (
     FLOATINGIP_CLOUDSTACK_TYPE,
     IP_ADDRESS_PROPERTY
 )
-from cloudify_cli.bootstrap.tasks import (
-    PUBLIC_IP_RUNTIME_PROPERTY,
-    PROVIDER_RUNTIME_PROPERTY
-)
+# from cloudify_cli.bootstrap.tasks import (
+#     PUBLIC_IP_RUNTIME_PROPERTY,
+#     PROVIDER_RUNTIME_PROPERTY
+# )
 
+PROVIDER_CONTEXT_RUNTIME_PROPERTY = 'provider_context'
 
 def configure(cloudstack_config):
 
-    manager_public_ip = _configure_public_ip()
+    # manager_public_ip = _configure_public_ip()
 
     _set_provider_context()
 
-    _copy_cloudstack_configuration_to_manager(manager_public_ip,
-                                             cloudstack_config)
+    _copy_cloudstack_configuration_to_manager(cloudstack_config)
 
-def _configure_public_ip():
-    floatingip_runtime_props = \
-        _get_runtime_props_by_node_name_and_cloudstack_type(
-            'manager_server_ip', FLOATINGIP_CLOUDSTACK_TYPE)
-    manager_public_ip = floatingip_runtime_props[IP_ADDRESS_PROPERTY]
-    ctx.instance.runtime_properties[PUBLIC_IP_RUNTIME_PROPERTY] = \
-        manager_public_ip
-    return manager_public_ip
+# def _configure_public_ip():
+#     floatingip_runtime_props = \
+#         _get_runtime_props_by_node_name_and_cloudstack_type(
+#             'manager_server_ip', FLOATINGIP_CLOUDSTACK_TYPE)
+#     manager_public_ip = floatingip_runtime_props[IP_ADDRESS_PROPERTY]
+#     ctx.instance.runtime_properties[PUBLIC_IP_RUNTIME_PROPERTY] = \
+#         manager_public_ip
+#     return manager_public_ip
 
 
-def _copy_cloudstack_configuration_to_manager(manager_public_ip,
-                                             cloudstack_config):
+def _copy_cloudstack_configuration_to_manager(cloudstack_config):
     tmp = tempfile.mktemp()
     with open(tmp, 'w') as f:
         json.dump(cloudstack_config, f)
-    with settings(host_string=manager_public_ip,connection_attempts=5, timeout=5, keepalive=1):
-        fabric.api.put(tmp, Config.CLOUDSTACK_CONFIG_PATH_DEFAULT_PATH)
+    # with settings(host_string=manager_public_ip,connection_attempts=5, timeout=5, keepalive=1):
+    fabric.api.put(tmp, Config.CLOUDSTACK_CONFIG_PATH_DEFAULT_PATH)
 
 
-def _get_runtime_props_by_node_name_and_cloudstack_type(
-        node_name, node_cloudstack_type):
-    node_runtime_props = [v for k, v in ctx.capabilities.get_all().iteritems()
-                          if k.startswith(node_name) and
-                          v[CLOUDSTACK_TYPE_PROPERTY] == node_cloudstack_type][0]
-    return node_runtime_props
+# def _get_runtime_props_by_node_name_and_cloudstack_type(
+#         node_name, node_cloudstack_type):
+#     node_runtime_props = [v for k, v in ctx.capabilities.get_all().iteritems()
+#                           if k.startswith(node_name) and
+#                           v[CLOUDSTACK_TYPE_PROPERTY] == node_cloudstack_type][0]
+#     return node_runtime_props
 
 
 def _set_provider_context():
@@ -122,4 +122,5 @@ def _set_provider_context():
         'resources': resources
     }
 
-    ctx.instance.runtime_properties[PROVIDER_RUNTIME_PROPERTY] = provider
+    ctx.instance.runtime_properties[PROVIDER_CONTEXT_RUNTIME_PROPERTY] = \
+        provider
