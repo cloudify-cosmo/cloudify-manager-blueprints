@@ -163,7 +163,7 @@ node_templates:
     manager_server:
         type: cloudify.cloudstack.nodes.VirtualMachine
         properties:
-            resource_id: cloudify-manager
+            resource_id: cloudify-manager3
             install_agent: false
             portmaps:
                 - protocol: TCP
