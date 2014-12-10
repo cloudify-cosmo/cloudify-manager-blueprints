@@ -7,53 +7,73 @@ imports:
   - http://www.getcloudify.org/spec/fabric-plugin/1.1/plugin.yaml
 
 inputs:
+
   username:
     type: string
+
   api_key:
     type: string
+
   endpoint_url:
     type: string
 
   location:
     type: string
+
   domain:
     type: string
+
   ram:
     type: integer
+
   cpu:
     type: integer
+
   disk:
     type: integer
+
   os:
     type: integer
 
   image_template_id:
     type: string
     default: ''
+
   image_template_global_identifier:
     type: string
     default: ''
+
   private_network_only:
     type: boolean
     default: false
+
   port_speed:
     type: integer
     default: 187
+
   private_vlan:
     default: ''
+
   public_vlan:
     default: ''
+
   provision_scripts:
     default: []
+
   ssh_keys:
     default: []
 
   agents_user:
     type: string
     default: root
+
   ssh_key_filename:
     type: string
     default: ~/.ssh/id_rsa
+
+  resources_prefix:
+    default: ''
+    type: string
 
 node_templates:
   manager_host:
@@ -100,15 +120,19 @@ node_templates:
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-windows-agent_3.1.0-ga-b85_amd64.deb
 
       cloudify:
+        resources_prefix: { get_input: resources_prefix }
+
         cloudify_agent:
           min_workers: 2
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: agents_user }
           agent_key_path: {get_input: ssh_key_filename}
+
         workflows:
           task_retries: -1  # this means forever
           task_retry_interval: 30
+
         policy_engine:
           start_timeout: 30
 
