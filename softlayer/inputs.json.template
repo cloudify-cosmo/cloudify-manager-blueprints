@@ -18,6 +18,7 @@
     "provision_scripts": [],
     "ssh_keys": [],
     "agents_user": "root",
-    "ssh_key_filename": "~/.ssh/id_rsa"
+    "ssh_key_filename": "~/.ssh/id_rsa",
+    "resources_prefix": ""
 }
 
