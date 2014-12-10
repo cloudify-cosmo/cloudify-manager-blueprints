@@ -2,7 +2,7 @@ tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
     - http://www.getcloudify.org/spec/cloudify/3.1m5/types.yaml
-    - https://raw.githubusercontent.com/schubergphilis/cloudify-cloudstack-plugin/3.1m5/plugin.yaml.template
+    - https://raw.githubusercontent.com/schubergphilis/cloudify-cloudstack-plugin/master/plugin.yaml.template
     - http://www.getcloudify.org/spec/fabric-plugin/1.1m5/plugin.yaml
 
 
