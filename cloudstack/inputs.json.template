@@ -1,0 +1,13 @@
+{
+    "cloudstack_api_url": "https://cloudstack.org/client/api",
+    "cloudstack_key": "your cloudstack api key",
+    "cloudstack_secret": "your cloudstack secret key",
+    "zone": "BETA-SBP-DC-1",
+    "manager_public_key_name": "cfy-management-kp1",
+    "agent_public_key_name": "cfy-agents-kp1",
+    "image_id": "1046fbb6-2f2f-49f1-8b64-6c1d6a620597",
+    "service_offering": "employee-medium-ha",
+    "network_offering": "SourceNatNiciraNvpNetwork",
+    "manager_private_key_path": "~/.ssh/cfy-management-kp1.pem",
+    "agent_private_key_path": "~/.ssh/cfy-agents-kp1.pem"
+}
