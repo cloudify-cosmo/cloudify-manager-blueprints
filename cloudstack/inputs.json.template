@@ -9,5 +9,6 @@
     "service_offering": "employee-medium-ha",
     "network_offering": "SourceNatNiciraNvpNetwork",
     "manager_private_key_path": "~/.ssh/cfy-management-kp1.pem",
-    "agent_private_key_path": "~/.ssh/cfy-agents-kp1.pem"
+    "agent_private_key_path": "~/.ssh/cfy-agents-kp1.pem", 
+    "management_network_fw_cidr": "the ip address of the machine from which you're bootstrapping"
 }
