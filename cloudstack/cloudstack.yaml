@@ -110,7 +110,7 @@ node_templates:
                   ports: [80, 443]
             cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
 
-     manager_server_ip:
+    manager_server_ip:
         type: cloudify.cloudstack.nodes.FloatingIP
         properties:
             cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
