@@ -2,7 +2,7 @@ tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
     - http://www.getcloudify.org/spec/cloudify/3.1/types.yaml
-    - https://raw.githubusercontent.com/schubergphilis/cloudify-cloudstack-plugin/master/plugin.yaml.template
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-cloudstack-plugin/master/plugin.yaml.template
     - http://www.getcloudify.org/spec/fabric-plugin/1.1/plugin.yaml
 
 
@@ -69,34 +69,8 @@ inputs:
         default: ''
         type: string
 
-    # cloudify_packages:
-    #     default:
-    #         server:
-    #             components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-components_3.1.0-m5-b82_amd64.deb
-    #             core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-core_3.1.0-m5-b82_amd64.deb
-    #             ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-ui_3.1.0-m5-b82_amd64.deb
-    #         agents:
-    #             ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-ubuntu-agent_3.1.0-m5-b82_amd64.deb
-    #             centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-centos-agent_3.1.0-m5-b82_amd64.deb
-    #             windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/m5-RELEASE/cloudify-windows-agent_3.1.0-m5-b82_amd64.deb
-
-    # cloudify:
-    #     default:
-    #         resources_prefix: ''
-
-    #         cloudify_agent:
-    #             min_workers: 2
-    #             max_workers: 5
-    #             remote_execution_port: 22
-    #             user: ubuntu
-
-    #         workflows:
-    #             task_retries: -1  # this means forever
-    #             task_retry_interval: 30
-
-    #         policy_engine:
-    #             start_timeout: 30
-
+    management_network_fw_cidr:
+        type: string
 
 node_templates:
     management_keypair:
@@ -128,11 +102,7 @@ node_templates:
             firewall:
                 - type: ingress
                   protocol: TCP
-                  cidr: 94.211.5.21/32
-                  ports: [5555, 5672, 53229, 22, 8100, 80]
-                - type: ingress
-                  protocol: TCP
-                  cidr: 195.66.90.0/24
+                  cidr: { get_input: management_network_fw_cidr }
                   ports: [5555, 5672, 53229, 22, 8100, 80]
                 - type: egress
                   protocol: TCP
@@ -140,19 +110,7 @@ node_templates:
                   ports: [80, 443]
             cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
 
-    # agent_network:
-    #     type: cloudify.cloudstack.network
-    #     properties:
-    #         esource_id: cfy-agent
-    #         network:
-    #             #name: cloudify-management-network2
-    #             service_offering: { get_input: network_offering }
-    #             zone: { get_input: zone }
-    #             netmask: 255.255.255.0
-    #             gateway: 10.3.1.1
-
-
-    manager_server_ip:
+     manager_server_ip:
         type: cloudify.cloudstack.nodes.FloatingIP
         properties:
             cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
