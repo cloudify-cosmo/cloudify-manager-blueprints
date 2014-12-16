@@ -110,7 +110,7 @@ node_templates:
                   ports: [80, 443]
             cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
 
-     manager_server_ip:
+    manager_server_ip:
         type: cloudify.cloudstack.nodes.FloatingIP
         properties:
             cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
@@ -121,7 +121,7 @@ node_templates:
     manager_server:
         type: cloudify.cloudstack.nodes.VirtualMachine
         properties:
-            resource_id: cloudify-manager3
+            resource_id: cloudify-manager
             install_agent: false
             portmaps:
                 - protocol: TCP
