@@ -1,0 +1,292 @@
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.2m1/types.yaml
+  - http://www.getcloudify.org/spec/openstack-plugin/1.2m1/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.2m1/plugin.yaml
+
+
+inputs:
+  keystone_username:
+    default: ''
+    type: string
+
+  keystone_password:
+    default: ''
+    type: string
+
+  keystone_tenant_name:
+    default: ''
+    type: string
+
+  keystone_url:
+    default: ''
+    type: string
+
+  region:
+    default: ''
+    type: string
+
+  nova_url:
+    default: ''
+    type: string
+
+  neutron_url:
+    default: ''
+    type: string
+
+  manager_public_key_name:
+    type: string
+
+  agent_public_key_name:
+    type: string
+
+  image_id:
+    type: string
+
+  flavor_id:
+    type: string
+
+  external_network_name:
+    type: string
+
+  use_existing_manager_keypair:
+    type: boolean
+    default: false
+
+  use_existing_agent_keypair:
+    type: boolean
+    default: false
+
+  manager_server_name:
+    default: cloudify-management-server
+    type: string
+
+  manager_server_user:
+    default: ubuntu
+    type: string
+
+  manager_server_user_home:
+    default: /home/ubuntu
+    type: string
+
+  manager_private_key_path:
+    default: ~/.ssh/cloudify-manager-kp.pem
+    type: string
+
+  agent_private_key_path:
+    default: ~/.ssh/cloudify-agent-kp.pem
+    type: string
+
+  agents_user:
+    default: ubuntu
+    type: string
+
+  resources_prefix:
+    default: ''
+    type: string
+
+
+node_templates:
+  management_keypair:
+    type: cloudify.openstack.nodes.KeyPair
+    properties:
+      use_external_resource: { get_input: use_existing_manager_keypair }
+      resource_id: { get_input: manager_public_key_name }
+      private_key_path: { get_input: manager_private_key_path }
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
+  agent_keypair:
+    type: cloudify.openstack.nodes.KeyPair
+    properties:
+      use_external_resource: { get_input: use_existing_agent_keypair }
+      resource_id: { get_input: agent_public_key_name }
+      private_key_path: { get_input: agent_private_key_path }
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
+  management_network:
+    type: cloudify.openstack.nodes.Network
+    properties:
+      resource_id: cloudify-management-network
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
+  management_subnet:
+    type: cloudify.openstack.nodes.Subnet
+    properties:
+      resource_id: cloudify-management-network-subnet
+      subnet:
+        ip_version: 4
+        cidr: 10.67.79.0/24
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
+    relationships:
+      - target: management_network
+        type: cloudify.relationships.contained_in
+      - target: router
+        type: cloudify.openstack.subnet_connected_to_router
+
+  router:
+    type: cloudify.openstack.nodes.Router
+    properties:
+      resource_id: cloudify-router
+      router:
+        external_gateway_info:
+          network_name: { get_input: external_network_name }
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
+  external_network:
+    type: cloudify.openstack.nodes.Network
+    properties:
+      use_external_resource: true
+      resource_id: { get_input: external_network_name }
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
+  agents_security_group:
+    type: cloudify.openstack.nodes.SecurityGroup
+    properties:
+      resource_id: cloudify-sg-agents
+      security_group:
+        description: Security group for Cloudify agent VMs
+      rules:
+        - port: 22
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 5985
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
+  management_security_group:
+    type: cloudify.openstack.nodes.SecurityGroup
+    properties:
+      resource_id: cloudify-sg-management
+      security_group:
+        description: Security group for Cloudify Management VM
+      rules:
+        - port: 80
+          remote_ip_prefix: 0.0.0.0/0
+        - port: 22
+          remote_ip_prefix: 0.0.0.0/0
+        - port: 5555
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 5672
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 53229
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
+  manager_server_ip:
+    type: cloudify.openstack.nodes.FloatingIP
+    properties:
+      floatingip:
+        floating_network_name: { get_input: external_network_name }
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
+
+  manager_server:
+    type: cloudify.openstack.nodes.Server
+    properties:
+      resource_id: { get_input: manager_server_name }
+      install_agent: false
+      server:
+        image: { get_input: image_id }
+        flavor: { get_input: flavor_id }
+      management_network_name: { get_property: [management_network, resource_id] }
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
+    relationships:
+      - target: manager_server_ip
+        type: cloudify.openstack.server_connected_to_floating_ip
+      - target: management_network
+        type: cloudify.relationships.connected_to
+      - target: management_subnet
+        type: cloudify.relationships.depends_on
+      - target: management_security_group
+        type: cloudify.openstack.server_connected_to_security_group
+      - target: management_keypair
+        type: cloudify.openstack.server_connected_to_keypair
+
+  openstack_configuration:
+    type: openstack_configuration
+    properties:
+      openstack_config:
+        username: { get_input: keystone_username }
+        password: { get_input: keystone_password }
+        tenant_name: { get_input: keystone_tenant_name }
+        auth_url: { get_input: keystone_url }
+        region: { get_input: region }
+        nova_url: { get_input: nova_url }
+        neutron_url: { get_input: neutron_url }
+
+  manager:
+    type: cloudify.nodes.CloudifyManager
+    properties:
+      cloudify_packages:
+        agents:
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-ubuntu-agent_3.2.0-m1-b170_amd64.deb
+          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-centos-final-agent_3.2.0-m1-b170_amd64.deb
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-windows-agent_3.2.0-m1-b170_amd64.deb
+        docker:
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-docker_3.2.0-m1-b170.tar
+           docker_data_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-docker-data_3.2.0-m1-b170.tar
+
+      cloudify:
+        resources_prefix: { get_input: resources_prefix }
+
+        cloudify_agent:
+          min_workers: 0
+          max_workers: 5
+          remote_execution_port: 22
+          user: { get_input: agents_user }
+
+        workflows:
+          task_retries: -1  # this means forever
+          task_retry_interval: 30
+
+        policy_engine:
+          start_timeout: 30
+
+    relationships:
+      - target: manager_server
+        type: cloudify.relationships.contained_in
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file: scripts/configure.py
+            task_name: configure
+            task_properties:
+              openstack_config: { get_property: [openstack_configuration, openstack_config] }
+            fabric_env:
+              user: { get_input: manager_server_user }
+              key_filename: { get_property: [management_keypair, private_key_path] }
+              host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
+            task_properties:
+              cloudify_packages: { get_property: [manager, cloudify_packages] }
+              agent_local_key_path: { get_property: [agent_keypair, private_key_path] }
+              provider_context: { get_attribute: [manager, provider_context] }
+            fabric_env:
+              user: { get_input: manager_server_user }
+              key_filename: { get_property: [management_keypair, private_key_path] }
+              host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
+      cloudify.interfaces.validation:
+        creation:
+          implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+          inputs:
+            cloudify_packages: { get_property: [manager, cloudify_packages] }
+
+node_types:
+  openstack_configuration:
+    derived_from: cloudify.nodes.Root
+    properties:
+      openstack_config: {}
+
+plugins:
+  cli:
+    install: false
+    executor: central_deployment_agent
+
+outputs:
+  manager_ip:
+    value: { get_attribute: [manager_server_ip, floating_ip_address] }
