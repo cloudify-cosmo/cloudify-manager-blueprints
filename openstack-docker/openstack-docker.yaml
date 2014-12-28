@@ -128,10 +128,10 @@ node_templates:
     type: cloudify.openstack.nodes.Router
     properties:
       resource_id: cloudify-router
-      router:
-        external_gateway_info:
-          network_name: { get_input: external_network_name }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
+    relationships:
+      - target: external_network
+        type: cloudify.relationships.connected_to
 
   external_network:
     type: cloudify.openstack.nodes.Network
