@@ -38,7 +38,7 @@ inputs:
     type: string
     default: ''
 
-  image_template_global_identifier:
+  image_template_global_id:
     type: string
     default: ''
 
@@ -89,7 +89,7 @@ node_templates:
       disk: { get_input: disk }
       os: { get_input: os }
       image_template_id: { get_input: image_template_id }
-      image_template_global_identifier: { get_input: image_template_global_identifier }
+      image_template_global_id: { get_input: image_template_global_id }
       private_network_only: { get_input: private_network_only }
       port_speed: { get_input: port_speed }
       private_vlan: { get_input: private_vlan }

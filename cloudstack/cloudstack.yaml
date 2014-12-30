@@ -1,0 +1,243 @@
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+    - http://www.getcloudify.org/spec/cloudify/3.1/types.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-cloudstack-plugin/master/plugin.yaml.template
+    - http://www.getcloudify.org/spec/fabric-plugin/1.1/plugin.yaml
+
+
+inputs:
+    cloudstack_api_url:
+        default: ''
+        type: string
+
+    cloudstack_key:
+        default: ''
+        type: string
+
+    cloudstack_secret:
+        default: ''
+        type: string
+
+    zone:
+        type: string
+
+    manager_public_key_name:
+        type: string
+
+    agent_public_key_name:
+        type: string
+
+    image_id:
+        type: string
+
+    service_offering:
+        type: string
+
+    network_offering:
+        type: string
+
+    use_existing_manager_keypair:
+        type: boolean
+        default: false
+
+    use_existing_agent_keypair:
+        type: boolean
+        default: false
+
+    manager_server_user:
+        default: root
+        type: string
+
+    manager_server_user_home:
+        default: /home/root
+        type: string
+
+    manager_private_key_path:
+        default: ~/.ssh/cloudify-management-kp.pem
+        type: string
+
+    agent_private_key_path:
+        default: ~/.ssh/cloudify-agents-kp.pem
+        type: string
+
+    agents_user:
+        default: ubuntu
+        type: string
+
+    resources_prefix:
+        default: ''
+        type: string
+
+    management_network_fw_cidr:
+        type: string
+
+node_templates:
+    management_keypair:
+        type: cloudify.cloudstack.nodes.KeyPair
+        properties:
+            use_external_resource: { get_input: use_existing_manager_keypair }
+            resource_id: { get_input: manager_public_key_name }
+            private_key_path: { get_input: manager_private_key_path }
+            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
+
+    agent_keypair:
+        type: cloudify.cloudstack.nodes.KeyPair
+        properties:
+            use_external_resource: { get_input: use_existing_agent_keypair }
+            resource_id: { get_input: agent_public_key_name }
+            private_key_path: { get_input: agent_private_key_path }
+            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
+
+    management_network:
+        type: cloudify.cloudstack.nodes.Network
+        properties:
+            resource_id: cloudify-management
+            network:
+                #name: cloudify-management-network2
+                service_offering: { get_input: network_offering }
+                zone: { get_input: zone }
+                netmask: 255.255.255.0
+                gateway: 10.2.1.1
+            firewall:
+                - type: ingress
+                  protocol: TCP
+                  cidr: { get_input: management_network_fw_cidr }
+                  ports: [5555, 5672, 53229, 22, 8100, 80]
+                - type: egress
+                  protocol: TCP
+                  cidr: 0.0.0.0/0
+                  ports: [80, 443]
+            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
+
+    manager_server_ip:
+        type: cloudify.cloudstack.nodes.FloatingIP
+        properties:
+            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
+        relationships:
+          - target: management_network
+            type: cloudify.cloudstack.floating_ip_connected_to_network
+
+    manager_server:
+        type: cloudify.cloudstack.nodes.VirtualMachine
+        properties:
+            resource_id: cloudify-manager
+            install_agent: false
+            portmaps:
+                - protocol: TCP
+                  private_port: 80
+                  public_port: 80
+                - protocol: TCP
+                  private_port: 22
+                  public_port: 22
+            server:
+                image_id: { get_input: image_id }
+                size: { get_input: service_offering }
+                keypair_name: { get_input: manager_public_key_name }
+                expunge: True
+                zone: { get_input: zone}
+            network:
+                default_network: { get_property: [management_network, resource_id] }
+            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
+        relationships:
+            - target: manager_server_ip
+              type: cloudify.cloudstack.virtual_machine_connected_to_floating_ip
+            - target: management_network
+              type: cloudify.relationships.connected_to
+            - target: management_keypair
+              type: cloudify.cloudstack.virtual_machine_connected_to_keypair
+
+    cloudstack_configuration:
+        type: cloudstack_configuration
+        properties:
+            cloudstack_config:
+                cs_api_url: { get_input: cloudstack_api_url }
+                cs_api_key: { get_input: cloudstack_key }
+                cs_api_secret: { get_input: cloudstack_secret }
+                zone: { get_input: zone }
+
+    manager:
+        type: cloudify.nodes.CloudifyManager
+        properties:
+            cloudify_packages:
+                server:
+                    components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-components_3.1.0-ga-b85_amd64.deb
+                    core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-core_3.1.0-ga-b85_amd64.deb
+                    ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-ui_3.1.0-ga-b85_amd64.deb
+                agents:
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-ubuntu-agent_3.1.0-ga-b85_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-centos-final-agent_3.1.0-ga-b85_amd64.deb
+                windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.1.0/ga-RELEASE/cloudify-windows-agent_3.1.0-ga-b85_amd64.deb
+  
+            cloudify: 
+                resources_prefix: { get_input: resources_prefix }
+
+                cloudify_agent:
+                    min_workers: 0
+                    max_workers: 5
+                    remote_execution_port: 22
+                    user: { get_input: agents_user }
+
+                workflows:
+                    task_retries: -1  # this means forever
+                    task_retry_interval: 30
+
+                policy_engine:
+                    start_timeout: 30
+
+        relationships:
+            - target: manager_server
+              type: cloudify.relationships.contained_in
+            - target: manager_server_ip
+              type: cloudify.relationships.depends_on
+
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                configure:
+                    implementation: fabric.fabric_plugin.tasks.run_task
+                    inputs:
+                        # For bootstrapping the manager on a Docker container, comment out the default 'task_mapping' and uncomment the below bootstrap_docker task.
+                        # Also, make sure to uncomment the docker config under 'cloudify_packages'.
+                        # task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
+                        tasks_file: scripts/configure.py
+                        task_name: configure
+                        task_properties:
+                            cloudstack_config: { get_property: [cloudstack_configuration, cloudstack_config] }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_property: [management_keypair, private_key_path] }
+                            host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
+                start:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+                        task_properties:
+                            cloudify_packages: { get_property: [manager, cloudify_packages] }
+                            agent_local_key_path: { get_property: [agent_keypair, private_key_path]}
+                            provider_context: { get_attribute: [manager, provider_context] }
+                            # Optional Docker related properties
+                            # docker_path: docker
+                            # use_sudo: true
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_property: [management_keypair, private_key_path] }
+                            host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
+            cloudify.interfaces.validation:
+                creation:
+                    implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+                    inputs:
+                        cloudify_packages: { get_property: [manager, cloudify_packages] }
+node_types:
+    cloudstack_configuration:
+        derived_from: cloudify.nodes.Root
+        properties:
+            cloudstack_config: {}
+
+plugins:
+    cli:
+        install: false
+        executor: central_deployment_agent
+
+outputs:
+    manager_ip:
+        value: { get_attribute: [manager_server_ip, floating_ip_address] }
