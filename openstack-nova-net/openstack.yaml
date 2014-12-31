@@ -62,10 +62,6 @@ inputs:
     default: ubuntu
     type: string
 
-  manager_server_user_home:
-    default: /home/ubuntu
-    type: string
-
   manager_private_key_path:
     default: ~/.ssh/cloudify-manager-kp.pem
     type: string
