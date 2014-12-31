@@ -82,6 +82,26 @@ inputs:
     default: ''
     type: string
 
+  management_network_name:
+    default: cloudify-management-network
+    type: string
+
+  management_subnet_name:
+    default: cloudify-management-network-subnet
+    type: string
+
+  management_router:
+    default: cloudify-management-router
+    type: string
+
+  manager_security_group_name:
+    default: cloudify-sg-manager
+    type: string
+
+  agents_security_group_name:
+    default: cloudify-sg-agents
+    type: string
+
 
 node_templates:
   management_keypair:
@@ -103,13 +123,13 @@ node_templates:
   management_network:
     type: cloudify.openstack.nodes.Network
     properties:
-      resource_id: cloudify-management-network
+      resource_id: { get_input: management_network_name }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
   management_subnet:
     type: cloudify.openstack.nodes.Subnet
     properties:
-      resource_id: cloudify-management-network-subnet
+      resource_id: { get_input: management_subnet_name }
       subnet:
         ip_version: 4
         cidr: 10.67.79.0/24
@@ -123,7 +143,7 @@ node_templates:
   router:
     type: cloudify.openstack.nodes.Router
     properties:
-      resource_id: cloudify-router
+      resource_id: { get_input: management_router }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
     relationships:
       - target: external_network
@@ -139,7 +159,7 @@ node_templates:
   agents_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
     properties:
-      resource_id: cloudify-sg-agents
+      resource_id: { get_input: agents_security_group_name }
       security_group:
         description: Security group for Cloudify agent VMs
       rules:
@@ -152,7 +172,7 @@ node_templates:
   management_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
     properties:
-      resource_id: cloudify-sg-management
+      resource_id: { get_input: manager_security_group_name }
       security_group:
         description: Security group for Cloudify Management VM
       rules:

@@ -55,7 +55,7 @@ inputs:
     default: false
 
   manager_server_name:
-    default: cloudify-management-server
+    default: cloudify-manager-server
     type: string
 
   manager_server_user:
@@ -76,6 +76,14 @@ inputs:
 
   resources_prefix:
     default: ''
+    type: string
+
+  manager_security_group_name:
+    default: cloudify-sg-manager
+    type: string
+
+  agents_security_group_name:
+    default: cloudify-sg-agents
     type: string
 
 
@@ -99,7 +107,7 @@ node_templates:
   agents_security_group:
     type: cloudify.openstack.nova_net.nodes.SecurityGroup
     properties:
-      resource_id: cloudify-sg-agents
+      resource_id: { get_input: agents_security_group_name }
       description: Security group for Cloudify agent VMs
       rules:
         - port: 22
@@ -111,8 +119,8 @@ node_templates:
   management_security_group:
     type: cloudify.openstack.nova_net.nodes.SecurityGroup
     properties:
-      resource_id: cloudify-sg-management
-      description: Security group for Cloudify Management VM
+      resource_id: { get_input: manager_security_group_name }
+      description: Security group for Cloudify Manager VM
       rules:
         - port: 80
           cidr: 0.0.0.0/0
