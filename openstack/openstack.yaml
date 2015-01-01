@@ -1,9 +1,9 @@
 tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.2m1/types.yaml
-  - http://www.getcloudify.org/spec/openstack-plugin/1.2m1/plugin.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.2m1/plugin.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.2m2/types.yaml
+  - http://www.getcloudify.org/spec/openstack-plugin/1.2m2/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.2m2/plugin.yaml
 
 
 inputs:
@@ -66,10 +66,6 @@ inputs:
     default: ubuntu
     type: string
 
-  manager_server_user_home:
-    default: /home/ubuntu
-    type: string
-
   manager_private_key_path:
     default: ~/.ssh/cloudify-manager-kp.pem
     type: string
@@ -84,6 +80,26 @@ inputs:
 
   resources_prefix:
     default: ''
+    type: string
+
+  management_network_name:
+    default: cloudify-management-network
+    type: string
+
+  management_subnet_name:
+    default: cloudify-management-network-subnet
+    type: string
+
+  management_router:
+    default: cloudify-management-router
+    type: string
+
+  manager_security_group_name:
+    default: cloudify-sg-manager
+    type: string
+
+  agents_security_group_name:
+    default: cloudify-sg-agents
     type: string
 
 
@@ -107,13 +123,13 @@ node_templates:
   management_network:
     type: cloudify.openstack.nodes.Network
     properties:
-      resource_id: cloudify-management-network
+      resource_id: { get_input: management_network_name }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
   management_subnet:
     type: cloudify.openstack.nodes.Subnet
     properties:
-      resource_id: cloudify-management-network-subnet
+      resource_id: { get_input: management_subnet_name }
       subnet:
         ip_version: 4
         cidr: 10.67.79.0/24
@@ -127,7 +143,7 @@ node_templates:
   router:
     type: cloudify.openstack.nodes.Router
     properties:
-      resource_id: cloudify-router
+      resource_id: { get_input: management_router }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
     relationships:
       - target: external_network
@@ -143,7 +159,7 @@ node_templates:
   agents_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
     properties:
-      resource_id: cloudify-sg-agents
+      resource_id: { get_input: agents_security_group_name }
       security_group:
         description: Security group for Cloudify agent VMs
       rules:
@@ -156,7 +172,7 @@ node_templates:
   management_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
     properties:
-      resource_id: cloudify-sg-management
+      resource_id: { get_input: manager_security_group_name }
       security_group:
         description: Security group for Cloudify Management VM
       rules:
@@ -218,13 +234,13 @@ node_templates:
     properties:
       cloudify_packages:
         server:
-          components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-components_3.2.0-m1-b170_amd64.deb
-          core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-core_3.2.0-m1-b170_amd64.deb
-          ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-ui_3.2.0-m1-b170_amd64.deb
+          components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m2-RELEASE/cloudify-components_3.2.0-m2-b171_amd64.deb
+          core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m2-RELEASE/cloudify-core_3.2.0-m2-b171_amd64.deb
+          ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m2-RELEASE/cloudify-ui_3.2.0-m2-b171_amd64.deb
         agents:
-          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-ubuntu-agent_3.2.0-m1-b170_amd64.deb
-          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-centos-final-agent_3.2.0-m1-b170_amd64.deb
-          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m1-RELEASE/cloudify-windows-agent_3.2.0-m1-b170_amd64.deb
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m2-RELEASE/cloudify-ubuntu-agent_3.2.0-m2-b171_amd64.deb
+          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m2-RELEASE/cloudify-centos-final-agent_3.2.0-m2-b171_amd64.deb
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m2-RELEASE/cloudify-windows-agent_3.2.0-m2-b171_amd64.deb
 
       cloudify:
         resources_prefix: { get_input: resources_prefix }
