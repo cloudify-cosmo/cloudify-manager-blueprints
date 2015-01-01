@@ -102,8 +102,17 @@ inputs:
     default: cloudify-sg-agents
     type: string
 
+  manager_volume_size:
+    default: 10
+
+  manager_data_fs_type:
+    default: ext4
+
+  manager_data_mount_path:
+    default: ext4
 
 node_templates:
+
   management_keypair:
     type: cloudify.openstack.nodes.KeyPair
     properties:
@@ -228,6 +237,26 @@ node_templates:
         region: { get_input: region }
         nova_url: { get_input: nova_url }
         neutron_url: { get_input: neutron_url }
+
+  manager_volume:
+    type: cloudify.openstack.nodes.Volume
+    properties:
+      volume:
+        size: { get_input: manager_volume_size }
+    relationships:
+      - target: manager_server
+        type: cloudify.openstack.volume_attached_to_server
+
+  manager_data:
+    type: cloudify.nodes.FileSystem
+    properties:
+      fs_type: { get_input: manager_data_fs_type }
+      fs_mount_path: /var/lib/docker
+    relationships:
+      - type: cloudify.relationships.file_system_depends_on_volume
+        target: manager_volume
+      - type: cloudify.relationships.file_system_contained_in_compute
+        target: manager_server
 
   manager:
     type: cloudify.nodes.CloudifyManager
