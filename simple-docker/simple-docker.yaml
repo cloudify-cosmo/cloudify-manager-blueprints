@@ -70,10 +70,7 @@ node_templates:
         start:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
-            # For bootstrapping the manager on a Docker container, comment out the default 'task_mapping' and uncomment the below bootstrap_docker task.
-            # Also, make sure to uncomment the docker config under 'cloudify_packages'.
-            # task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
-            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
             task_properties:
               cloudify_packages: { get_property: [manager, cloudify_packages] }
               agent_local_key_path: { get_input: ssh_key_filename }
