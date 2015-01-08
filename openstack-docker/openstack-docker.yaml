@@ -102,15 +102,6 @@ inputs:
     default: cloudify-sg-agents
     type: string
 
-  manager_volume_size:
-    default: 10
-
-  manager_data_fs_type:
-    default: ext4
-
-  manager_data_mount_path:
-    default: ext4
-
 node_templates:
 
   management_keypair:
@@ -238,24 +229,31 @@ node_templates:
         nova_url: { get_input: nova_url }
         neutron_url: { get_input: neutron_url }
 
-  manager_volume:
+  volume:
     type: cloudify.openstack.nodes.Volume
     properties:
       volume:
-        size: { get_input: manager_volume_size }
+        size: 10
+      openstack_config: { get_property: [openstack_configuration, openstack_config] }
     relationships:
-      - target: manager_server
-        type: cloudify.openstack.volume_attached_to_server
+      - type: cloudify.openstack.volume_attached_to_server
+        target: manager_server
 
   manager_data:
     type: cloudify.nodes.FileSystem
     properties:
-      fs_type: { get_input: manager_data_fs_type }
+      fs_type: ext4
       fs_mount_path: /var/lib/docker
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/resources/rest-service/cloudify/fs/mkfs.sh
     relationships:
-      - type: cloudify.relationships.file_system_depends_on_volume
-        target: manager_volume
-      - type: cloudify.relationships.file_system_contained_in_compute
+      - type: manager_data_depends_on_volume
+        target: volume
+      - type: manager_data_contained_in_manager_server
         target: manager_server
 
   manager:
@@ -325,6 +323,36 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       openstack_config: {}
+
+relationships:
+
+  manager_data_depends_on_volume:
+    derived_from: cloudify.relationships.depends_on
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/resources/rest-service/cloudify/fs/fdisk.sh
+            device_name:
+              default: { get_attribute: [TARGET, device_name] }
+
+  manager_data_contained_in_manager_server:
+    derived_from: cloudify.relationships.contained_in
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        establish:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/resources/rest-service/cloudify/fs/mount.sh
+        unlink:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/resources/rest-service/cloudify/fs/unmount.sh
+
 
 plugins:
   cli:
