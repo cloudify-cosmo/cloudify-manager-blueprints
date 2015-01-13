@@ -269,9 +269,7 @@ node_templates:
               user: { get_input: manager_server_user }
               key_filename: { get_property: [management_keypair, private_key_path] }
               host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
-
     relationships:
-
       - type: cloudify.relationships.file_system_depends_on_volume
         target: volume
         source_interfaces:
@@ -340,8 +338,7 @@ node_templates:
         type: cloudify.relationships.contained_in
       - target: manager_data
         type: cloudify.relationships.depends_on
-
-
+        
     interfaces:
       cloudify.interfaces.lifecycle:
         configure:
