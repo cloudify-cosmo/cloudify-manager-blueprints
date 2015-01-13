@@ -20,3 +20,4 @@ script:
     - cfy blueprints validate -p simple/simple.yaml
     - cfy blueprints validate -p simple/simple-docker.yaml
     - cfy blueprints validate -p softlayer/softlayer.yaml
+
