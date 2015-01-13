@@ -1,0 +1,23 @@
+language: python
+sudo: false
+
+python:
+  - 2.7
+
+install:
+    - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2m2.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.2m2.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2m2.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.2m2.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/3.2m2.zip
+
+script:
+    - cfy init
+    - cfy blueprints validate -p cloudstack/cloudstack.yaml
+    - cfy blueprints validate -p openstack/openstack.yaml
+    - cfy blueprints validate -p openstack-docker/openstack-docker.yaml
+    - cfy blueprints validate -p openstack-nova-net/openstack.yaml
+    - cfy blueprints validate -p simple/simple.yaml
+    - cfy blueprints validate -p simple/simple-docker.yaml
+    - cfy blueprints validate -p softlayer/softlayer.yaml
+
