@@ -366,7 +366,7 @@ node_templates:
         stop:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
-            task_mapping: cloudify_cli.bootstrap.tasks.stop_docker
+            task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
             fabric_env:
               user: { get_input: manager_server_user }
               key_filename: { get_property: [management_keypair, private_key_path] }
@@ -374,7 +374,7 @@ node_templates:
         delete:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
-            task_mapping: cloudify_cli.bootstrap.tasks.delete_docker
+            task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
             fabric_env:
               user: { get_input: manager_server_user }
               key_filename: { get_property: [management_keypair, private_key_path] }
