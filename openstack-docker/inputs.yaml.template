@@ -21,6 +21,7 @@ management_subnet_name: cloudify-management-network-subnet
 management_router: cloudify-management-router
 manager_security_group_name: cloudify-sg-manager
 agents_security_group_name: cloudify-sg-agents
+management_port_name: cloudify-manager-port
 nova_url: ''
 neutron_url: ''
 resources_prefix: ''
