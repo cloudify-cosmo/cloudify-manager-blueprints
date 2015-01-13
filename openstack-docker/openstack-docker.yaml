@@ -102,6 +102,10 @@ inputs:
     default: cloudify-sg-agents
     type: string
 
+  management_port_name:
+    default: cloudify-manager-port
+    type: string
+
 node_templates:
 
   management_keypair:
@@ -144,7 +148,7 @@ node_templates:
     type: cloudify.openstack.nodes.Port
     properties:
       port:
-        name: cloudify-manager-port
+        name: { get_input: management_port_name }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
     relationships:
       - type: cloudify.relationships.contained_in
@@ -313,7 +317,7 @@ node_templates:
           centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m2-RELEASE/cloudify-centos-final-agent_3.2.0-m2-b171_amd64.deb
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m2-RELEASE/cloudify-windows-agent_3.2.0-m2-b171_amd64.deb
         docker:
-           docker_url: http://192.168.10.13/builds/GigaSpacesBuilds/cloudify3/3.2.0/m2-RELEASE/cloudify-docker_3.2.0-m2-b171.tar
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m2-RELEASE/cloudify-docker_3.2.0-m2-b171.tar
 
       cloudify:
         resources_prefix: { get_input: resources_prefix }

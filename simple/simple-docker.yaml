@@ -78,6 +78,22 @@ node_templates:
             fabric_env:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
+            fabric_env:
+              user: { get_input: manager_server_user }
+              key_filename: { get_property: [management_keypair, private_key_path] }
+              host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
+            fabric_env:
+              user: { get_input: manager_server_user }
+              key_filename: { get_property: [management_keypair, private_key_path] }
+              host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
       cloudify.interfaces.validation:
         creation:
           implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
