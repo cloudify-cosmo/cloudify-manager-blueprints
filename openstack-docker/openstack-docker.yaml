@@ -102,8 +102,12 @@ inputs:
     default: cloudify-sg-agents
     type: string
 
-  management_port_name:
+  manager_port_name:
     default: cloudify-manager-port
+    type: string
+
+  manager_volume_name:
+    default: cloudify-manager-volume
     type: string
 
 node_templates:
@@ -147,9 +151,8 @@ node_templates:
   manager_port:
     type: cloudify.openstack.nodes.Port
     properties:
-      port:
-        name: { get_input: management_port_name }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
+      resource_id: { get_input: manager_port_name }
     relationships:
       - type: cloudify.relationships.contained_in
         target: management_network
@@ -250,6 +253,7 @@ node_templates:
       volume:
         size: 10
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
+      resource_id: { get_input: manager_volume_name }
     relationships:
       - type: cloudify.openstack.volume_attached_to_server
         target: manager_server
