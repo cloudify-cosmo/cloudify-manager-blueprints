@@ -20,7 +20,7 @@ import fabric
 import fabric.api
 
 from cloudify import ctx
-from softlayer_plugin import properties_constants
+from softlayer_plugin import constants
 
 PROVIDER_CONTEXT_RUNTIME_PROPERTY = 'provider_context'
 
@@ -44,4 +44,4 @@ def _copy_softlayer_configuration_to_manager(softlayer_api_config):
     tmp = tempfile.mktemp()
     with open(tmp, 'w') as f:
         json.dump(softlayer_api_config, f)
-    fabric.api.put(tmp, properties_constants.DEFAULT_SOFTLAYER_CONFIG_PATH)
+    fabric.api.put(tmp, constants.DEFAULT_SOFTLAYER_CONFIG_PATH)
