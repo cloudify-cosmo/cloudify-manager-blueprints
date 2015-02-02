@@ -13,6 +13,7 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
+import os
 import tempfile
 import json
 
@@ -20,7 +21,10 @@ import fabric
 import fabric.api
 
 from cloudify import ctx
-from softlayer_plugin import constants
+from softlayer_plugin import (
+    constants,
+    add_missing_configuration_from_file
+)
 
 PROVIDER_CONTEXT_RUNTIME_PROPERTY = 'provider_context'
 
@@ -41,7 +45,19 @@ def _set_provider_context(ssh_keys):
 
 
 def _copy_softlayer_configuration_to_manager(softlayer_api_config):
+    merged_config = softlayer_api_config.copy()
+    add_missing_configuration_from_file(merged_config)
+
+    username = merged_config.get(constants.API_CONFIG_USERNAME)
+    api_key = merged_config.get(constants.API_CONFIG_API_KEY)
+    if not username:
+        merged_config[constants.API_CONFIG_USERNAME] = \
+            os.environ[constants.SL_USERNAME]
+    if not api_key:
+        merged_config[constants.API_CONFIG_API_KEY] = \
+            os.environ[constants.SL_API_KEY]
+
     tmp = tempfile.mktemp()
     with open(tmp, 'w') as f:
-        json.dump(softlayer_api_config, f)
+        json.dump(merged_config, f)
     fabric.api.put(tmp, constants.DEFAULT_SOFTLAYER_CONFIG_PATH)

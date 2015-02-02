@@ -19,15 +19,15 @@ import json
 import unittest
 import shutil
 
-from openstack_plugin_common import Config
+from cloudstack_plugin.cloudstack_common import Config
 from test_utils.utils import get_task
 
 
-class TestOpenstackManagerBlueprint(unittest.TestCase):
+class TestCloudstackManagerBlueprint(unittest.TestCase):
 
-    def test_openstack_configuration_copy_to_manager(self):
+    def test_cloudstack_configuration_copy_to_manager(self):
         task = get_task('../scripts/configure.py',
-                        '_copy_openstack_configuration_to_manager')
+                        '_copy_cloudstack_configuration_to_manager')
 
         config_output_file_path = tempfile.mkstemp()[1]
 
@@ -37,30 +37,26 @@ class TestOpenstackManagerBlueprint(unittest.TestCase):
         task.func_globals['fabric'].api.put = mock_put
 
         inputs_config = {
-            'username': 'inputs-username',
-            'region': 'inputs-region'
+            'cs_api_key': 'inputs-api-key'
         }
 
         file_config = {
-            'username': 'file-username',
-            'password': 'file-password',
-            'auth_url': 'file-auth-url'
+            'cs_api_key': 'file-api-key',
+            'cs_api_secret': 'file-api-secret'
         }
         conf_file_path = tempfile.mkstemp()[1]
-        os.environ[Config.OPENSTACK_CONFIG_PATH_ENV_VAR] = conf_file_path
+        os.environ[Config.CLOUDSTACK_CONFIG_PATH_ENV_VAR] = conf_file_path
         with open(conf_file_path, 'w') as f:
             json.dump(file_config, f)
 
-        os.environ['OS_USERNAME'] = 'envar-username'
-        os.environ['OS_PASSWORD'] = 'envar-password'
-        os.environ['OS_TENANT_NAME'] = 'envar-tenant-name'
+        os.environ['CS_API_KEY'] = 'envar-api-key'
+        os.environ['CS_API_SECRET'] = 'envar-api-secret'
+        os.environ['CS_API_URL'] = 'envar-api-url'
 
         task(inputs_config)
 
         with open(config_output_file_path) as f:
             config = json.load(f)
-        self.assertEquals('inputs-username', config.get('username'))
-        self.assertEquals('inputs-region', config.get('region'))
-        self.assertEquals('file-password', config.get('password'))
-        self.assertEquals('file-auth-url', config.get('auth_url'))
-        self.assertEquals('envar-tenant-name', config.get('tenant_name'))
+        self.assertEquals('inputs-api-key', config.get('cs_api_key'))
+        self.assertEquals('file-api-secret', config.get('cs_api_secret'))
+        self.assertEquals('envar-api-url', config.get('cs_api_url'))

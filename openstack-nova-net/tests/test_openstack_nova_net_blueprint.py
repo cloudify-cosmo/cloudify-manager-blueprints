@@ -23,7 +23,7 @@ from openstack_plugin_common import Config
 from test_utils.utils import get_task
 
 
-class TestOpenstackManagerBlueprint(unittest.TestCase):
+class TestOpenstackNovaNetManagerBlueprint(unittest.TestCase):
 
     def test_openstack_configuration_copy_to_manager(self):
         task = get_task('../scripts/configure.py',
