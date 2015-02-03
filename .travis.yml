@@ -20,6 +20,12 @@ env:
         "
         cfy init;
         cfy blueprints validate -p cloudstack/cloudstack.yaml;
+        cfy blueprints validate -p openstack/openstack.yaml;
+        cfy blueprints validate -p openstack-docker/openstack-docker.yaml;
+        cfy blueprints validate -p openstack-nova-net/openstack.yaml;
+        cfy blueprints validate -p simple/simple.yaml;
+        cfy blueprints validate -p simple/simple-docker.yaml;
+        cfy blueprints validate -p softlayer/softlayer.yaml;
         "
     - OP="flake8 ."
     - >
@@ -33,13 +39,5 @@ env:
         "
 
 script:
-#    - cfy init
-#    - cfy blueprints validate -p cloudstack/cloudstack.yaml
-#    - cfy blueprints validate -p openstack/openstack.yaml
-#    - cfy blueprints validate -p openstack-docker/openstack-docker.yaml
-#    - cfy blueprints validate -p openstack-nova-net/openstack.yaml
-#    - cfy blueprints validate -p simple/simple.yaml
-#    - cfy blueprints validate -p simple/simple-docker.yaml
-#    - cfy blueprints validate -p softlayer/softlayer.yaml
-#    - flake8 .
+    - echo "Executing ${OP}"
     - $(echo ${OP})
