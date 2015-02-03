@@ -26,7 +26,11 @@ from test_utils.utils import get_task
 class TestOpenstackNovaNetManagerBlueprint(unittest.TestCase):
 
     def test_openstack_configuration_copy_to_manager(self):
-        task = get_task('../scripts/configure.py',
+        script_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+            'scripts',
+            'configure.py')
+        task = get_task(script_path,
                         '_copy_openstack_configuration_to_manager')
 
         config_output_file_path = tempfile.mkstemp()[1]
