@@ -21,6 +21,7 @@ env:
 
 script:
     - |
+        set -e
         if [ "${OP}" == "validate-blueprints" ]; then
           cfy init
           cfy blueprints validate -p cloudstack/cloudstack.yaml
