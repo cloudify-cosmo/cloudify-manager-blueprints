@@ -15,8 +15,7 @@ install:
     - pip install flake8
 
 env:
-    - >
-        OP=
+    - > OP=
         "
         cfy init;
         cfy blueprints validate -p cloudstack/cloudstack.yaml;
@@ -28,9 +27,7 @@ env:
         cfy blueprints validate -p softlayer/softlayer.yaml;
         "
     - OP="flake8 ."
-    - >
-        OP=
-        "
+    - > OP="
         nose cloudstack/;
         nose openstack/;
         nose openstack-docker/;
@@ -39,5 +36,8 @@ env:
         "
 
 script:
-    - echo "Executing ${OP}"
+    - echo "Executing: ${OP}"
     - $(echo ${OP})
+
+#notifications:
+#    flowdock: 1f4ec6febcf1ac9b35ae6c1f0049471f
