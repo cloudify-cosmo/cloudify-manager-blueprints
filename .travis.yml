@@ -10,6 +10,9 @@ install:
     - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2m4.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.2m4.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/3.2m4.zip
+    - pip install nose
+    - pip install mock
+    - pip install flake8
 
 env:
     - >
