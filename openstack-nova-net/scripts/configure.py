@@ -16,7 +16,6 @@
 import tempfile
 import json
 
-import fabric
 import fabric.api
 
 from cloudify import ctx
@@ -40,9 +39,12 @@ def configure(openstack_config):
 
 
 def _copy_openstack_configuration_to_manager(openstack_config):
+    merged_config = Config().get()
+    Config.update_config(merged_config, openstack_config)
+
     tmp = tempfile.mktemp()
     with open(tmp, 'w') as f:
-        json.dump(openstack_config, f)
+        json.dump(merged_config, f)
     fabric.api.put(tmp, Config.OPENSTACK_CONFIG_PATH_DEFAULT_PATH)
 
 
