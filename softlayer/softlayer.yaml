@@ -75,8 +75,11 @@ inputs:
     type: string
 
 node_templates:
+
   manager_host:
+
     type: cloudify.softlayer.nodes.VirtualServer
+
     properties:
       install_agent: false
 
@@ -97,26 +100,30 @@ node_templates:
       provision_scripts: { get_input: provision_scripts }
       ssh_keys: { get_input: ssh_keys }
 
+
   softlayer_configuration:
+
     type: softlayer_configuration
+
     properties:
       api_config:
         username: { get_input: username }
         api_key: { get_input: api_key }
         endpoint_url: { get_input: endpoint_url }
 
+
   manager:
+
     type: cloudify.nodes.CloudifyManager
+
     properties:
       cloudify_packages:
-        server:
-          components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m4-RELEASE/cloudify-components_3.2.0-m4-b173_amd64.deb
-          core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m4-RELEASE/cloudify-core_3.2.0-m4-b173_amd64.deb
-          ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m4-RELEASE/cloudify-ui_3.2.0-m4-b173_amd64.deb
         agents:
           ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m4-RELEASE/cloudify-ubuntu-agent_3.2.0-m4-b173_amd64.deb
           centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m4-RELEASE/cloudify-centos-final-agent_3.2.0-m4-b173_amd64.deb
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m4-RELEASE/cloudify-windows-agent_3.2.0-m4-b173_amd64.deb
+        docker:
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m4-RELEASE/cloudify-docker_3.2.0-m4-b173.tar
 
       cloudify:
         resources_prefix: { get_input: resources_prefix }
@@ -136,8 +143,8 @@ node_templates:
           start_timeout: 30
 
     relationships:
-      -  type: cloudify.relationships.contained_in
-         target: manager_host
+      - target: manager_host
+        type: cloudify.relationships.contained_in
 
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -156,12 +163,28 @@ node_templates:
         start:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
-            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
             task_properties:
               cloudify_packages: { get_property: [manager, cloudify_packages] }
               agent_local_key_path: { get_input: ssh_key_filename }
               manager_private_ip: { get_attribute: [manager_host, ip]}
               provider_context: { get_attribute: [manager, provider_context] }
+            fabric_env:
+              user: { get_input: agents_user }
+              key_filename: { get_input: ssh_key_filename }
+              host_string: { get_attribute: [manager_host, public_ip] }
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
+            fabric_env:
+              user: { get_input: agents_user }
+              key_filename: { get_input: ssh_key_filename }
+              host_string: { get_attribute: [manager_host, public_ip] }
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
             fabric_env:
               user: { get_input: agents_user }
               key_filename: { get_input: ssh_key_filename }
