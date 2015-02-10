@@ -231,8 +231,8 @@ node_templates:
         type: cloudify.openstack.server_connected_to_floating_ip
       - target: management_keypair
         type: cloudify.openstack.server_connected_to_keypair
-      - type: cloudify.relationships.connected_to
-        target: manager_port
+      - target: manager_port
+        type: cloudify.openstack.server_connected_to_port
 
 
   openstack_configuration:
