@@ -75,8 +75,11 @@ inputs:
     type: string
 
 node_templates:
+
   manager_host:
+
     type: cloudify.softlayer.nodes.VirtualServer
+
     properties:
       install_agent: false
 
@@ -97,66 +100,22 @@ node_templates:
       provision_scripts: { get_input: provision_scripts }
       ssh_keys: { get_input: ssh_keys }
 
+
   softlayer_configuration:
+
     type: softlayer_configuration
+
     properties:
       api_config:
         username: { get_input: username }
         api_key: { get_input: api_key }
         endpoint_url: { get_input: endpoint_url }
 
-  manager_data:
-    type: cloudify.nodes.FileSystem
-    properties:
-      fs_type: ext4
-      fs_mount_path: /var/lib/docker
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        configure:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/resources/rest-service/cloudify/fs/mkfs.sh
-            fabric_env:
-              user: { get_input: manager_server_user }
-              key_filename: { get_property: [management_keypair, private_key_path] }
-              host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
-    relationships:
-      - type: cloudify.relationships.file_system_depends_on_volume
-        target: volume
-        source_interfaces:
-          cloudify.interfaces.relationship_lifecycle:
-            preconfigure:
-              implementation: fabric.fabric_plugin.tasks.run_script
-              inputs:
-                script_path: https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/resources/rest-service/cloudify/fs/fdisk.sh
-                device_name: { get_attribute: [TARGET, device_name] }
-                fabric_env:
-                  user: { get_input: manager_server_user }
-                  key_filename: { get_property: [management_keypair, private_key_path] }
-                  host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
 
-      - type: cloudify.relationships.file_system_contained_in_compute
-        target: manager_server
-        source_interfaces:
-          cloudify.interfaces.relationship_lifecycle:
-            establish:
-              implementation: fabric.fabric_plugin.tasks.run_script
-              inputs:
-                script_path: https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/resources/rest-service/cloudify/fs/mount.sh
-                fabric_env:
-                  user: { get_input: manager_server_user }
-                  key_filename: { get_property: [management_keypair, private_key_path] }
-                  host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
-            unlink:
-              implementation: fabric.fabric_plugin.tasks.run_script
-              inputs:
-                script_path: https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/resources/rest-service/cloudify/fs/unmount.sh
-                fabric_env:
-                  user: { get_input: manager_server_user }
-                  key_filename: { get_property: [management_keypair, private_key_path] }
-                  host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
   manager:
+
     type: cloudify.nodes.CloudifyManager
+
     properties:
       cloudify_packages:
         agents:
@@ -186,8 +145,6 @@ node_templates:
     relationships:
       - target: manager_host
         type: cloudify.relationships.contained_in
-      - target: manager_data
-        type: cloudify.relationships.depends_on
 
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -221,17 +178,17 @@ node_templates:
           inputs:
             task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
             fabric_env:
-              user: { get_input: manager_server_user }
-              key_filename: { get_property: [management_keypair, private_key_path] }
-              host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
+              user: { get_input: agents_user }
+              key_filename: { get_input: ssh_key_filename }
+              host_string: { get_attribute: [manager_host, public_ip] }
         delete:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
             task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
             fabric_env:
-              user: { get_input: manager_server_user }
-              key_filename: { get_property: [management_keypair, private_key_path] }
-              host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
+              user: { get_input: agents_user }
+              key_filename: { get_input: ssh_key_filename }
+              host_string: { get_attribute: [manager_host, public_ip] }
       cloudify.interfaces.validation:
         creation:
           implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
