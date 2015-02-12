@@ -36,6 +36,7 @@ def configure(openstack_config):
     _set_provider_context()
 
     _copy_openstack_configuration_to_manager(openstack_config)
+    _set_recover_script_path()
 
 
 def _copy_openstack_configuration_to_manager(openstack_config):
@@ -46,6 +47,11 @@ def _copy_openstack_configuration_to_manager(openstack_config):
     with open(tmp, 'w') as f:
         json.dump(merged_config, f)
     fabric.api.put(tmp, Config.OPENSTACK_CONFIG_PATH_DEFAULT_PATH)
+
+
+def _set_recover_script_path():
+    ctx.instance.runtime_properties[
+        'recovery_script_relpath'] = 'scripts/recover_deployments.sh'
 
 
 def _set_provider_context():
