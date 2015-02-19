@@ -123,7 +123,7 @@ node_templates:
           centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-centos-final-agent_3.2.0-m5-b175_amd64.deb
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-windows-agent_3.2.0-m5-b175_amd64.deb
         docker:
-           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m4-RELEASE/cloudify-docker_3.2.0-m4-b173.tar
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-docker_3.2.0-m5-b175.tar
 
       cloudify:
         resources_prefix: { get_input: resources_prefix }
