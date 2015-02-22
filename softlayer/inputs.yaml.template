@@ -8,6 +8,7 @@ cpu: ''
 disk: ''
 os: ''
 
+hostname: ''
 image_template_global_id: ''
 image_template_id: ''
 private_network_only: false

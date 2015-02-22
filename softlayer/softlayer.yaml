@@ -34,6 +34,10 @@ inputs:
   os:
     type: integer
 
+  hostname:
+    type: string
+    default: ''
+
   image_template_id:
     type: string
     default: ''
@@ -91,6 +95,7 @@ node_templates:
       cpu: { get_input: cpu }
       disk: { get_input: disk }
       os: { get_input: os }
+      hostname: { get_input: hostname }
       image_template_id: { get_input: image_template_id }
       image_template_global_id: { get_input: image_template_global_id }
       private_network_only: { get_input: private_network_only }
@@ -123,7 +128,7 @@ node_templates:
           centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-centos-final-agent_3.2.0-m5-b175_amd64.deb
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-windows-agent_3.2.0-m5-b175_amd64.deb
         docker:
-           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m4-RELEASE/cloudify-docker_3.2.0-m4-b173.tar
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-docker_3.2.0-m5-b175.tar
 
       cloudify:
         resources_prefix: { get_input: resources_prefix }
