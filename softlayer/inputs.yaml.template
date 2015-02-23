@@ -7,6 +7,8 @@ ram: ''
 cpu: ''
 disk: ''
 os: ''
+ssh_keys: []
+ssh_key_filename: ''
 
 hostname: ''
 image_template_global_id: ''
@@ -16,7 +18,5 @@ port_speed: 187
 private_vlan: ''
 public_vlan: ''
 provision_scripts: []
-ssh_keys: [156067]
-ssh_key_filename: ~/.ssh/shared-systemt-tests-key.pem
 agents_user: root
 resources_prefix: ''
