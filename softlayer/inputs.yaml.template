@@ -7,7 +7,10 @@ ram: ''
 cpu: ''
 disk: ''
 os: ''
+ssh_keys: []
+ssh_key_filename: ''
 
+hostname: ''
 image_template_global_id: ''
 image_template_id: ''
 private_network_only: false
@@ -15,7 +18,5 @@ port_speed: 187
 private_vlan: ''
 public_vlan: ''
 provision_scripts: []
-ssh_keys: []
 agents_user: root
-ssh_key_filename: ~/.ssh/id_rsa
 resources_prefix: ''
