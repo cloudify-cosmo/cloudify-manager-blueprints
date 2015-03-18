@@ -201,6 +201,8 @@ node_templates:
           remote_ip_prefix: 0.0.0.0/0
         - port: 22
           remote_ip_prefix: 0.0.0.0/0
+        - port: 8101
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
         - port: 5555
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
         - port: 5672

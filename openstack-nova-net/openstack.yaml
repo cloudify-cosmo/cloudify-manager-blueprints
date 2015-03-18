@@ -126,6 +126,8 @@ node_templates:
           cidr: 0.0.0.0/0
         - port: 22
           cidr: 0.0.0.0/0
+        - port: 8101
+          cidr: { get_input: internal_cidr }
         - port: 5555
           cidr: { get_input: internal_cidr }
         - port: 5672
