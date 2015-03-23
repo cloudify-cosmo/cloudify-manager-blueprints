@@ -18,5 +18,6 @@ agent_private_key_path: ~/.ssh/cloudify-agent-kp.pem
 agents_user: ubuntu
 manager_security_group_name: cloudify-sg-manager
 agents_security_group_name: cloudify-sg-agents
+manager_volume_name: cloudify-manager-volume
 nova_url: ''
 resources_prefix: ''
