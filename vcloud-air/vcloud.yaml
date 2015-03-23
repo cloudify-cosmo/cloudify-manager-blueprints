@@ -1,0 +1,275 @@
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+    - http://www.getcloudify.org/spec/cloudify/3.2m6/types.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/tosca-vcloud-plugin/1.2-build/plugin.yaml
+    - http://www.getcloudify.org/spec/fabric-plugin/1.2m6/plugin.yaml
+
+inputs:
+    vcloud_username:
+        type: string
+
+    vcloud_password:
+        type: string
+
+    vcloud_token:
+        type: string
+        default: ''
+
+    vcloud_url:
+        type: string
+
+    vcloud_service:
+        type: string
+
+    vcloud_service_type:
+        type: string
+        default: subscription
+
+    vcloud_api_version:
+        type: string
+        default: '5.6'
+
+    vcloud_org_url:
+        type: string
+        default: ''
+        description: >
+            Only required if using token based login on a private vcloud
+            director. This can be obtained by following the vcloud API
+            example docs. If you are unsure of how to obtain this, you will
+            need to use password based login.
+
+    vcloud_vdc:
+        type: string
+
+    manager_server_name:
+        type: string
+
+    manager_server_catalog:
+        type: string
+
+    manager_server_template:
+        type: string
+
+    management_network_use_existing:
+        type: boolean
+        default: false
+
+    management_network_name:
+        type: string
+
+    management_port_ip_allocation_mode:
+        type: string
+        default: dhcp
+
+    management_port_ip_address:
+        type: string
+        default: ''
+
+    edge_gateway:
+        type: string
+        default: gateway
+        description: >
+            For 'ondemand' service type, the value of edge_gateway
+            is always 'gateway'
+
+    floating_ip_public_ip:
+        type: string
+        default: ''
+
+    agents_user:
+        type: string
+        default: ubuntu
+
+    manager_server_user:
+        default: ubuntu
+        type: string
+
+    manager_private_key_path:
+        default: ~/.ssh/cloudify-manager-kp.pem
+        type: string
+
+    agent_private_key_path:
+        default: ~/.ssh/cloudify-agent-kp.pem
+        type: string
+
+    manager_public_key:
+        type: string
+        default: ''
+
+    agent_public_key:
+        type: string
+        default: ''
+
+    resources_prefix:
+        type: string
+        default: ''
+
+
+node_types:
+    vcloud_configuration:
+        derived_from: cloudify.nodes.Root
+        properties:
+            vcloud_config: {}
+
+node_templates:
+    manager_server:
+        type: cloudify.vcloud.nodes.Server
+        properties:
+            install_agent: false
+            server:
+                name: { get_input: manager_server_name }
+                catalog: { get_input: manager_server_catalog }
+                template: { get_input: manager_server_template }
+                guest_customization:
+                    public_keys:
+                        - { get_property: [manager_keypair, public_key] }
+                        - { get_property: [agent_keypair, public_key] }
+                    computer_name: { get_input: manager_server_name }
+            management_network: { get_input: management_network_name }
+            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+        relationships:
+            - target: management_port
+              type: cloudify.vcloud.server_connected_to_port
+            - target: manager_floating_ip
+              type: cloudify.vcloud.server_connected_to_floating_ip
+
+    management_port:
+        type: cloudify.vcloud.nodes.Port
+        properties:
+            port:
+                network: { get_input: management_network_name }
+                ip_allocation_mode: { get_input: management_port_ip_allocation_mode }
+                ip_address: { get_input: management_port_ip_address }
+                primary_interface: true
+            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+        relationships:
+            - target: management_network
+              type: cloudify.vcloud.port_connected_to_network
+
+    management_network:
+        type: cloudify.vcloud.nodes.Network
+        properties:
+            use_external_resource: { get_input: management_network_use_existing }
+            resource_id: { get_input: management_network_name }
+            network:
+                edge_gateway: { get_input: edge_gateway }
+                static_range: 10.67.79.129-10.67.79.254
+                netmask: 255.255.255.0
+                gateway_ip: 10.67.79.1
+                dns: 10.67.79.1
+                dhcp:
+                    dhcp_range: 10.67.79.2-10.67.79.128
+            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+
+    manager_floating_ip:
+        type: cloudify.vcloud.nodes.FloatingIP
+        properties:
+            floatingip:
+                edge_gateway: { get_input: edge_gateway }
+                public_ip: { get_input: floating_ip_public_ip }
+            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+
+    vcloud_configuration:
+        type: vcloud_configuration
+        properties:
+            vcloud_config:
+                username: { get_input: vcloud_username }
+                password: { get_input: vcloud_password }
+                token: { get_input: vcloud_token }
+                url: { get_input: vcloud_url }
+                service: { get_input: vcloud_service }
+                vdc: { get_input: vcloud_vdc }
+                service_type: { get_input: vcloud_service_type }
+                api_version: { get_input: vcloud_api_version }
+                org_url: { get_input: vcloud_org_url }
+
+    manager_keypair:
+        type: cloudify.vcloud.nodes.KeyPair
+        properties:
+            private_key_path: { get_input: manager_private_key_path }
+            public_key:
+                key: { get_input: manager_public_key }
+                user: { get_input: manager_server_user }
+
+    agent_keypair:
+        type: cloudify.vcloud.nodes.KeyPair
+        properties:
+            private_key_path: { get_input: agent_private_key_path }
+            public_key:
+                key: { get_input: agent_public_key }
+                user: { get_input: agents_user }
+
+    manager:
+        type: cloudify.nodes.CloudifyManager
+        properties:
+            cloudify_packages:
+                server:
+                    components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-components_3.2.0-m6-b176_amd64.deb
+                    core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-core_3.2.0-m6-b176_amd64.deb
+                    ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-ui_3.2.0-m6-b176_amd64.deb
+                agents:
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-ubuntu-agent_3.2.0-m6-b176_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-centos-final-agent_3.2.0-m6-b176_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-windows-agent_3.2.0-m6-b176_amd64.deb
+
+            cloudify:
+                resources_prefix: { get_input: resources_prefix }
+
+                cloudify_agent:
+                    min_workers: 0
+                    max_workers: 5
+                    remote_execution_port: 22
+                    user: { get_input: agents_user }
+
+                workflows:
+                    task_retries: -1  # this means forever
+                    task_retry_interval: 30
+
+                policy_engine:
+                    start_timeout: 30
+
+        relationships:
+            - target: manager_server
+              type: cloudify.relationships.contained_in
+
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                configure:
+                    implementation: fabric.fabric_plugin.tasks.run_task
+                    inputs:
+                        tasks_file: scripts/configure.py
+                        task_name: configure
+                        task_properties:
+                            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [manager_floating_ip, public_ip] }
+                start:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+                        task_properties:
+                            cloudify_packages: { get_property: [manager, cloudify_packages] }
+                            agent_local_key_path: { get_input: agent_private_key_path }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [manager_floating_ip, public_ip] }
+            cloudify.interfaces.validation:
+                creation:
+                    implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+                    inputs:
+                        cloudify_packages: { get_property: [manager, cloudify_packages] }
+
+
+plugins:
+    cli:
+        install: false
+        executor: central_deployment_agent
+
+
+outputs:
+    manager_ip:
+        value: { get_attribute: [manager_floating_ip, public_ip] }
