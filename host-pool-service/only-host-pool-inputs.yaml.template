@@ -1,0 +1,4 @@
+host_pool_public_address: !!str
+# host_pool_ssh_user:
+# host_pool_ssh_key_path:
+# host_pool_directory:

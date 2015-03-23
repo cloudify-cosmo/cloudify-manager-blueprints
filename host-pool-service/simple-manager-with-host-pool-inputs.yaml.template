@@ -1,0 +1,11 @@
+manager_public_ip: !!str
+manager_private_ip: !!str
+manager_ssh_user: !!str
+manager_ssh_key_filename: !!str
+manager_agents_user: !!str
+manager_resources_prefix: !!str
+
+host_pool_public_address: !!str
+# host_pool_ssh_user:
+# host_pool_ssh_key_path:
+# host_pool_directory:

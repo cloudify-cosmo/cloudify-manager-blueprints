@@ -1,0 +1,233 @@
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.2m7/types.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.2m7/plugin.yaml
+
+
+inputs:
+
+  manager_public_ip:
+    type: string
+
+  manager_private_ip:
+    type: string
+
+  manager_ssh_user:
+    type: string
+
+  manager_ssh_key_filename:
+    type: string
+
+  manager_agents_user:
+    default: ubuntu
+    type: string
+
+  manager_resources_prefix:
+    default: ''
+    type: string
+
+  host_pool_public_address:
+    type: string
+
+  host_pool_ssh_user:
+    type: string
+    default: ubuntu
+
+  host_pool_ssh_key_path:
+    type: string
+    default: /home/ubuntu/.ssh/id_rsa
+
+  host_pool_directory:
+    type: string
+    default: /home/ubuntu/host_pool
+
+
+node_types:
+  cloudify.nodes.HostPoolService:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      directory:
+        type: string
+        default: /home/ubuntu/host_pool
+      environment:
+        # Accepted environment variables:
+        # * HOST_POOL_CONFIG,
+        # * NUM_WORKERS,
+        # * PID_FILE,
+        # * LOG_LEVEL,
+        # * LOG_FILE,
+        # * BIND_INTERFACE.
+        default: {}
+      ssh_host:
+        type: string
+      ssh_user:
+        type: string
+        default: ubuntu
+      ssh_key_path:
+        type: string
+        default: /home/ubuntu/.ssh/id_rsa
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file:
+              default: scripts/tasks.py
+            task_name:
+              default: create
+            task_properties:
+              default:
+                directory: { get_property: [ SELF, directory ] }
+            fabric_env:
+              default:
+                host_string: { get_property: [ SELF, ssh_host ] }
+                user: { get_property: [ SELF, ssh_user ] }
+                key_filename: { get_property: [ SELF, ssh_key_path ] }
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file:
+              default: scripts/tasks.py
+            task_name:
+              default: configure
+            task_properties:
+              default:
+                directory: { get_property: [ SELF, directory ] }
+                environment: { get_property: [ SELF, environment ] }
+            fabric_env:
+              default:
+                host_string: { get_property: [ SELF, ssh_host ] }
+                user: { get_property: [ SELF, ssh_user ] }
+                key_filename: { get_property: [ SELF, ssh_key_path ] }
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: scripts/start.sh
+            process:
+              default:
+                cwd: { get_property: [ SELF, directory ] }
+                env: { get_property: [ SELF, environment ] }
+            fabric_env:
+              default:
+                host_string: { get_property: [ SELF, ssh_host ] }
+                user: { get_property: [ SELF, ssh_user ] }
+                key_filename: { get_property: [ SELF, ssh_key_path ] }
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default:
+                scripts/stop.sh
+            process:
+              default:
+                cwd: { get_property: [ SELF, directory ] }
+                env: { get_property: [ SELF, environment ] }
+            fabric_env:
+              default:
+                host_string: { get_property: [ SELF, ssh_host ] }
+                user: { get_property: [ SELF, ssh_user ] }
+                key_filename: { get_property: [ SELF, ssh_key_path ] }
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: scripts/delete.sh
+            process:
+              default:
+                env: { get_property: [ SELF, environment ] }
+                args: [ { get_property: [ SELF, directory ] } ]
+            fabric_env:
+              default:
+                host_string: { get_property: [ SELF, ssh_host ] }
+                user: { get_property: [ SELF, ssh_user ] }
+                key_filename: { get_property: [ SELF, ssh_key_path ] }
+
+
+node_templates:
+  manager_host:
+    type: cloudify.nodes.Compute
+    properties:
+      install_agent: false
+      ip: { get_input: manager_public_ip }
+
+  host_pool_host:
+    type: cloudify.nodes.Compute
+    properties:
+      install_agent: false
+      ip: { get_input: host_pool_public_address }
+
+  manager:
+    type: cloudify.nodes.CloudifyManager
+    properties:
+      cloudify_packages:
+        server:
+          components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m7-RELEASE/cloudify-components_3.2.0-m7-b177_amd64.deb
+          core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m7-RELEASE/cloudify-core_3.2.0-m7-b177_amd64.deb
+          ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m7-RELEASE/cloudify-ui_3.2.0-m7-b177_amd64.deb
+        agents:
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m7-RELEASE/cloudify-ubuntu-agent_3.2.0-m7-b177_amd64.deb
+          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m7-RELEASE/cloudify-centos-final-agent_3.2.0-m7-b177_amd64.deb
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m7-RELEASE/cloudify-windows-agent_3.2.0-m7-b177_amd64.deb
+
+      cloudify:
+        resources_prefix: { get_input: manager_resources_prefix }
+
+        cloudify_agent:
+          min_workers: 0
+          max_workers: 5
+          remote_execution_port: 22
+          user: { get_input: manager_agents_user }
+
+        workflows:
+          task_retries: -1  # this means forever
+          task_retry_interval: 30
+
+        policy_engine:
+          start_timeout: 30
+
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+            task_properties:
+              cloudify_packages: { get_property: [manager, cloudify_packages] }
+              agent_local_key_path: { get_input: manager_ssh_key_filename }
+              manager_private_ip: { get_input: manager_private_ip }
+            fabric_env:
+              user: { get_input: manager_ssh_user }
+              key_filename: { get_input: manager_ssh_key_filename }
+      cloudify.interfaces.validation:
+        creation:
+          implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+          inputs:
+            cloudify_packages: { get_property: [manager, cloudify_packages] }
+
+  host_pool_server:
+    type: cloudify.nodes.HostPoolService
+    properties:
+      directory: { get_input: host_pool_directory }
+      ssh_host: { get_input: host_pool_public_address }
+      ssh_user: { get_input: host_pool_ssh_user }
+      ssh_key_path: { get_input: host_pool_ssh_key_path }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: host_pool_host
+
+
+plugins:
+  cli:
+    install: false
+    executor: central_deployment_agent
+
+outputs:
+  manager_ip:
+    value: { get_property: [manager_host, ip] }
+  host_pool_address:
+    value: { get_property: [host_pool_host, ip] }

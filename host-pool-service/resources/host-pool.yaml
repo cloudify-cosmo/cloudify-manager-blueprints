@@ -1,0 +1,30 @@
+########################################################################
+# An **exemplary** Host pool service's configuration file.
+#
+# Rewrite it to suit your needs.
+#
+#
+# Known issues
+# ------------
+#
+# Currently the `auth` section must be a nonempty dictionary.
+#
+# Currently key files are **not** automatically uploaded. Host pool will
+# **not** run if a keyfile is used in the configuration file.
+# To use keyfiles:
+# * first install the service with any valid configuration file,
+# * then stop it,
+# * add keys manually,
+# * alter the configuration to actually use your key files
+# * and start the service.
+########################################################################
+
+
+pool:
+    default:
+        port: 22
+        auth:
+            0: null     # <- dummy
+    hosts:
+        -   host: 127.0.0.1
+        -   host: 127.0.0.1
