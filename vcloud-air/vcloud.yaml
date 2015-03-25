@@ -154,13 +154,26 @@ node_templates:
             resource_id: { get_input: management_network_name }
             network:
                 edge_gateway: { get_input: edge_gateway }
-                static_range: 10.67.79.129-10.67.79.254
+                static_range: 10.67.59.129-10.67.59.254
                 netmask: 255.255.255.0
-                gateway_ip: 10.67.79.1
-                dns: 10.67.79.1
+                gateway_ip: 10.67.59.1
+                dns: 10.67.59.1
+                name: { get_input: management_network_name }
                 dhcp:
-                    dhcp_range: 10.67.79.2-10.67.79.128
+                    dhcp_range: 10.67.59.2-10.67.59.128
             vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+        relationships:
+            - target: managment_network_internet_access
+              type: cloudify.vcloud.net_connected_to_public_nat
+
+    managment_network_internet_access:
+        type: cloudify.vcloud.nodes.PublicNAT
+        properties:
+            nat:
+                edge_gateway: { get_input: edge_gateway }
+            rules:
+                type:
+                    - SNAT
 
     manager_floating_ip:
         type: cloudify.vcloud.nodes.FloatingIP
@@ -204,14 +217,12 @@ node_templates:
         type: cloudify.nodes.CloudifyManager
         properties:
             cloudify_packages:
-                server:
-                    components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-components_3.2.0-m6-b176_amd64.deb
-                    core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-core_3.2.0-m6-b176_amd64.deb
-                    ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-ui_3.2.0-m6-b176_amd64.deb
-                agents:
-                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-ubuntu-agent_3.2.0-m6-b176_amd64.deb
-                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-centos-final-agent_3.2.0-m6-b176_amd64.deb
-                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-windows-agent_3.2.0-m6-b176_amd64.deb
+              agents:
+                ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-ubuntu-agent_3.2.0-m6-b176_amd64.deb
+                centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-centos-final-agent_3.2.0-m6-b176_amd64.deb
+                windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-windows-agent_3.2.0-m6-b176_amd64.deb
+              docker:
+                 docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-docker_3.2.0-m6-b176.tar
 
             cloudify:
                 resources_prefix: { get_input: resources_prefix }
@@ -249,7 +260,7 @@ node_templates:
                 start:
                     implementation: fabric.fabric_plugin.tasks.run_module_task
                     inputs:
-                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
                         task_properties:
                             cloudify_packages: { get_property: [manager, cloudify_packages] }
                             agent_local_key_path: { get_input: agent_private_key_path }
