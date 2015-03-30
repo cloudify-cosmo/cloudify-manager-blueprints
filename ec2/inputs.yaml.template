@@ -1,0 +1,16 @@
+use_existing_manager_keypair: false
+use_existing_agent_keypair: false
+use_existing_manager_group: false
+use_existing_agent_group: false
+manager_keypair_name: ec2-manager-kp
+agent_keypair_name: ec2-agent-kp
+manager_key_pair_file_path: ~/.ssh/ec2-manager-kp.pem
+agent_key_pair_file_path: ~/.ssh/ec2-agent-kp.pem
+mananger_security_group_name: ec2-manager-security-group
+agent_security_group_name: ec2-agent-security-group
+manager_server_name: ec2-manager-server
+image_id: ami-3cf8b154
+instance_type: m3.medium
+resources_prefix: ''
+agents_user: ubuntu
+manager_server_user: ubuntu
