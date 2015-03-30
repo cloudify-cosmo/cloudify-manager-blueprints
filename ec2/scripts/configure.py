@@ -13,20 +13,27 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
-import os
+# Built-in Imports
 import json
 import tempfile
+
+# Third Party Imports
 import fabric.api
+
+# Cloudify Imports
 from ec2 import configure
 from ec2 import constants
+
 
 def configure_manager(config_path, agents_security_group, agents_keypair):
     _upload_credentials(config_path)
     _set_provider_config(agents_security_group, agents_keypair)
 
+
 def _upload_credentials(config_path):
     temp = configure.BotoConfig().get_temp_file()
     fabric.api.put(temp, config_path)
+
 
 def _set_provider_config(agents_security_group, agents_keypair):
 
