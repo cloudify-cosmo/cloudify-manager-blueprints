@@ -213,6 +213,7 @@ node_templates:
                             # Optional Docker related properties
                             # docker_path: docker
                             # use_sudo: true
+                            # privileged: false
                         fabric_env:
                             user: { get_input: manager_server_user }
                             key_filename: { get_property: [management_keypair, private_key_path] }
