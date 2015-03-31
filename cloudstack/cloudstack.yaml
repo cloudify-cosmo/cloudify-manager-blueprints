@@ -156,14 +156,12 @@ node_templates:
         type: cloudify.nodes.CloudifyManager
         properties:
             cloudify_packages:
-                server:
-                    components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-components_3.2.0-m5-b175_amd64.deb
-                    core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-core_3.2.0-m5-b175_amd64.deb
-                    ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-ui_3.2.0-m5-b175_amd64.deb
                 agents:
-                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-ubuntu-agent_3.2.0-m5-b175_amd64.deb
-                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-centos-final-agent_3.2.0-m5-b175_amd64.deb
-                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-windows-agent_3.2.0-m5-b175_amd64.deb
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-ubuntu-agent_3.2.0-m8-b178_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-centos-final-agent_3.2.0-m8-b178_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-windows-agent_3.2.0-m8-b178_amd64.deb
+                docker:
+                docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-docker_3.2.0-m8-b178.tar
             cloudify: 
                 resources_prefix: { get_input: resources_prefix }
 
@@ -191,9 +189,6 @@ node_templates:
                 configure:
                     implementation: fabric.fabric_plugin.tasks.run_task
                     inputs:
-                        # For bootstrapping the manager on a Docker container, comment out the default 'task_mapping' and uncomment the below bootstrap_docker task.
-                        # Also, make sure to uncomment the docker config under 'cloudify_packages'.
-                        # task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
                         tasks_file: scripts/configure.py
                         task_name: configure
                         task_properties:
@@ -205,14 +200,27 @@ node_templates:
                 start:
                     implementation: fabric.fabric_plugin.tasks.run_module_task
                     inputs:
-                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
                         task_properties:
                             cloudify_packages: { get_property: [manager, cloudify_packages] }
-                            agent_local_key_path: { get_property: [agent_keypair, private_key_path]}
+                            agent_local_key_path: { get_property: [agent_keypair, private_key_path] }
                             provider_context: { get_attribute: [manager, provider_context] }
-                            # Optional Docker related properties
-                            # docker_path: docker
-                            # use_sudo: true
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [manager_server, public_ip] }
+                stop:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_property: [management_keypair, private_key_path] }
+                            host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
+                delete:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
                         fabric_env:
                             user: { get_input: manager_server_user }
                             key_filename: { get_property: [management_keypair, private_key_path] }
