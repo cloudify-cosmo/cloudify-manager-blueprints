@@ -75,8 +75,6 @@ node_templates:
               cloudify_packages: { get_property: [manager, cloudify_packages] }
               agent_local_key_path: { get_input: ssh_key_filename }
               manager_private_ip: { get_input: private_ip }
-              # SElinux distrobutions require running in privileged mode.
-              privileged: false
             fabric_env:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }

@@ -174,8 +174,6 @@ node_templates:
               agent_local_key_path: { get_input: ssh_key_filename }
               manager_private_ip: { get_attribute: [manager_host, ip]}
               provider_context: { get_attribute: [manager, provider_context] }
-              # SElinux distrobutions require running in privileged mode.
-              privileged: false
             fabric_env:
               user: { get_input: agents_user }
               key_filename: { get_input: ssh_key_filename }

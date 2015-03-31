@@ -210,11 +210,10 @@ node_templates:
                             cloudify_packages: { get_property: [manager, cloudify_packages] }
                             agent_local_key_path: { get_property: [agent_keypair, private_key_path]}
                             provider_context: { get_attribute: [manager, provider_context] }
-                            # SElinux distrobutions require running in privileged mode.
-                            privileged: false
                             # Optional Docker related properties
                             # docker_path: docker
                             # use_sudo: true
+                            # privileged: false
                         fabric_env:
                             user: { get_input: manager_server_user }
                             key_filename: { get_property: [management_keypair, private_key_path] }
