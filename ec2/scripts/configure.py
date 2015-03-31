@@ -1,5 +1,5 @@
 ########
-# Copyright (c) 2014 GigaSpaces Technologies Ltd. All rights reserved
+# Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import tempfile
 import fabric.api
 
 # Cloudify Imports
+from cloudify import ctx
 from ec2 import configure
 from ec2 import constants
 
@@ -48,3 +49,4 @@ def _set_provider_config(agents_security_group, agents_keypair):
         json.dump(provider_context_json, provider_context_file)
 
     fabric.api.put(temp_config, constants.AWS_DEFAULT_CONFIG_PATH)
+    ctx.instance.runtime_properties['provide_context'] = provider_context_json
