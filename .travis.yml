@@ -30,7 +30,7 @@ script:
           cfy blueprints validate -p cloudstack/cloudstack.yaml
           cfy blueprints validate -p openstack-docker/openstack-docker.yaml
           cfy blueprints validate -p openstack-nova-net/openstack.yaml
-          cfy blueprints validate -p simple/simple-docker.yaml
+          cfy blueprints validate -p simple/simple.yaml
           cfy blueprints validate -p softlayer/softlayer.yaml
         elif [ "${OP}" == "flake8" ]; then
           flake8 .
