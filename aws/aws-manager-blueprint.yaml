@@ -193,8 +193,6 @@ node_templates:
             task_name: configure_manager
             task_properties:
               config_path: { get_input: boto_config }
-              agents_security_group: { get_attribute: [ agents_security_group, aws_resource_id ] }
-              agents_keypair: { get_attribute: [ agent_keypair, aws_resource_id ] }
             fabric_env:
               user: { get_input: manager_server_user }
               key_filename: { get_property: [ management_keypair, private_key_path ] }

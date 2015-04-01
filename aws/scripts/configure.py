@@ -28,7 +28,7 @@ from ec2 import constants
 
 def configure_manager(config_path):
     _upload_credentials(config_path)
-    _set_provider_config(agents_security_group, agents_keypair)
+    _set_provider_config()
 
 
 def _upload_credentials(config_path):
