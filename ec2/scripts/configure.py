@@ -38,15 +38,39 @@ def _upload_credentials(config_path):
 
 def _set_provider_config(agents_security_group, agents_keypair):
 
-    temp_config = tempfile.mktemp()
+    resources = dict()
+    node_instances = ctx._endpoint.storage.get_node_instances()
+    nodes_by_id = \
+        {node.id: node for node in ctx._endpoint.storage.get_nodes()}
 
-    provider_context_json = {
-        "agents_keypair": agents_keypair,
-        "agents_security_group": agents_security_group
+    node_id_to_provider_context_field = {
+        'agents_security_group': 'agents_security_group',
+        'management_security_group': 'management_security_group',
+        'manager_server_ip': 'elastic_ip',
+        'management_keypair': 'management_keypair',
+        'agent_keypair': 'agents_keypair'
     }
 
+    for node_instance in node_instances:
+        if node_instance.node_id in node_id_to_provider_context_field:
+            run_props = node_instance.runtime_properties
+            props = nodes_by_id[node_instance.node_id].properties
+            provider_context_field = \
+                node_id_to_provider_context_field[node_instance.node_id]
+            resources[provider_context_field] = {
+                'external_resource': props['use_external_resource'],
+                'id': run_props[constants.EXTERNAL_RESOURCE_ID],
+            }
+
+    provider = {
+        'resources': resources
+    }
+
+    ctx.instance.runtime_properties['provider_context'] = provider
+
+    temp_config = tempfile.mktemp()
+
     with open(temp_config, 'w') as provider_context_file:
-        json.dump(provider_context_json, provider_context_file)
+        json.dump(provider, provider_context_file)
 
     fabric.api.put(temp_config, constants.AWS_DEFAULT_CONFIG_PATH)
-    ctx.instance.runtime_properties['provide_context'] = provider_context_json
