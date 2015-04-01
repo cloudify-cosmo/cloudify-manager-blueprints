@@ -26,7 +26,7 @@ from ec2 import configure
 from ec2 import constants
 
 
-def configure_manager(config_path, agents_security_group, agents_keypair):
+def configure_manager(config_path):
     _upload_credentials(config_path)
     _set_provider_config(agents_security_group, agents_keypair)
 
@@ -36,7 +36,7 @@ def _upload_credentials(config_path):
     fabric.api.put(temp, config_path)
 
 
-def _set_provider_config(agents_security_group, agents_keypair):
+def _set_provider_config():
 
     resources = dict()
     node_instances = ctx._endpoint.storage.get_node_instances()
