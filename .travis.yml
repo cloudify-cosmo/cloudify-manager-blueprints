@@ -36,7 +36,7 @@ script:
           flake8 .
         elif [ "${OP}" == "unit-tests" ]; then
           nosetests cloudstack/
-          nosetests openstack-docker/
+          nosetests openstack/
           nosetests openstack-nova-net/
           nosetests softlayer/
         else
