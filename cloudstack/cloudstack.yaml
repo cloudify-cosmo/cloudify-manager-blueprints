@@ -1,9 +1,9 @@
 tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
-    - http://www.getcloudify.org/spec/cloudify/3.2m5/types.yaml
-    - http://www.getcloudify.org/spec/cloudstack-plugin/1.2m5/plugin.yaml
-    - http://www.getcloudify.org/spec/fabric-plugin/1.2m5/plugin.yaml
+    - http://www.getcloudify.org/spec/cloudify/3.2m8/types.yaml
+    - http://www.getcloudify.org/spec/cloudstack-plugin/1.2m8/plugin.yaml
+    - http://www.getcloudify.org/spec/fabric-plugin/1.2m8/plugin.yaml
 
 
 inputs:
@@ -156,12 +156,14 @@ node_templates:
         type: cloudify.nodes.CloudifyManager
         properties:
             cloudify_packages:
+                server:
+                    components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-components_3.2.0-m5-b175_amd64.deb
+                    core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-core_3.2.0-m5-b175_amd64.deb
+                    ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-ui_3.2.0-m5-b175_amd64.deb
                 agents:
-                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-ubuntu-agent_3.2.0-m8-b178_amd64.deb
-                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-centos-final-agent_3.2.0-m8-b178_amd64.deb
-                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-windows-agent_3.2.0-m8-b178_amd64.deb
-                docker:
-                docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-docker_3.2.0-m8-b178.tar
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-ubuntu-agent_3.2.0-m5-b175_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-centos-final-agent_3.2.0-m5-b175_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-windows-agent_3.2.0-m5-b175_amd64.deb
             cloudify: 
                 resources_prefix: { get_input: resources_prefix }
 
@@ -189,6 +191,9 @@ node_templates:
                 configure:
                     implementation: fabric.fabric_plugin.tasks.run_task
                     inputs:
+                        # For bootstrapping the manager on a Docker container, comment out the default 'task_mapping' and uncomment the below bootstrap_docker task.
+                        # Also, make sure to uncomment the docker config under 'cloudify_packages'.
+                        # task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
                         tasks_file: scripts/configure.py
                         task_name: configure
                         task_properties:
