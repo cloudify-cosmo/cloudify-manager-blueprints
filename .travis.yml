@@ -29,17 +29,14 @@ script:
           cfy init
           cfy blueprints validate -p cloudstack/cloudstack.yaml
           cfy blueprints validate -p openstack/openstack.yaml
-          cfy blueprints validate -p openstack-docker/openstack-docker.yaml
           cfy blueprints validate -p openstack-nova-net/openstack.yaml
           cfy blueprints validate -p simple/simple.yaml
-          cfy blueprints validate -p simple/simple-docker.yaml
           cfy blueprints validate -p softlayer/softlayer.yaml
         elif [ "${OP}" == "flake8" ]; then
           flake8 .
         elif [ "${OP}" == "unit-tests" ]; then
           nosetests cloudstack/
           nosetests openstack/
-          nosetests openstack-docker/
           nosetests openstack-nova-net/
           nosetests softlayer/
         else

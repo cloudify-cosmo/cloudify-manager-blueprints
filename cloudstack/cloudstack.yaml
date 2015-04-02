@@ -205,15 +205,27 @@ node_templates:
                 start:
                     implementation: fabric.fabric_plugin.tasks.run_module_task
                     inputs:
-                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
                         task_properties:
                             cloudify_packages: { get_property: [manager, cloudify_packages] }
-                            agent_local_key_path: { get_property: [agent_keypair, private_key_path]}
+                            agent_local_key_path: { get_property: [agent_keypair, private_key_path] }
                             provider_context: { get_attribute: [manager, provider_context] }
-                            # Optional Docker related properties
-                            # docker_path: docker
-                            # use_sudo: true
-                            # privileged: false
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [manager_server, public_ip] }
+                stop:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_property: [management_keypair, private_key_path] }
+                            host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
+                delete:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
                         fabric_env:
                             user: { get_input: manager_server_user }
                             key_filename: { get_property: [management_keypair, private_key_path] }
