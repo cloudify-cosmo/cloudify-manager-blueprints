@@ -1,5 +1,3 @@
-# DSL version, should appear in the main blueprint.yaml
-# and may appear in other imports. In such case, the versions must match
 tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
