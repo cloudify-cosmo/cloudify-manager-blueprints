@@ -23,7 +23,7 @@ from openstack_plugin_common import Config
 from test_utils.utils import get_task
 
 
-class TestOpenstackDockerManagerBlueprint(unittest.TestCase):
+class TestOpenstackManagerBlueprint(unittest.TestCase):
 
     def test_openstack_configuration_copy_to_manager(self):
         script_path = os.path.join(
