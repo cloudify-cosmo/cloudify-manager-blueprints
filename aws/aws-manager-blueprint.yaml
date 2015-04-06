@@ -127,11 +127,14 @@ node_templates:
         - ip_protocol: tcp
           from_port: 22
           to_port: 22
-          cidr_ip: 0.0.0.0/0
+          src_group_id: { get_property: [management_security_group, resource_id] }
         - ip_protocol: tcp
           from_port: 5985
           to_port: 5985
-          cidr_ip: 0.0.0.0/0
+          src_group_id: { get_property: [management_security_group, resource_id] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: management_security_group
 
   manager_server_ip:
     type: cloudify.aws.nodes.ElasticIP
