@@ -7,19 +7,19 @@ imports:
 
 inputs:
 
+  aws_access_key_id:
+    type: string
+    default: ''
+
+  aws_secret_access_key:
+    type: string
+    default: ''
+
   use_existing_manager_keypair:
     type: boolean
     default: false
 
   use_existing_agent_keypair:
-    type: boolean
-    default: false
-
-  use_existing_manager_group:
-    type: boolean
-    default: false
-
-  use_existing_agent_group:
     type: boolean
     default: false
 
@@ -31,11 +31,17 @@ inputs:
 
   manager_key_pair_file_path:
     type: string
-    default: ~/.ssh
 
   agent_key_pair_file_path:
     type: string
-    default: ~/.ssh
+
+  use_existing_manager_group:
+    type: boolean
+    default: false
+
+  use_existing_agent_group:
+    type: boolean
+    default: false
 
   mananger_security_group_name:
     type: string
@@ -46,23 +52,19 @@ inputs:
   manager_server_name:
     type: string
 
-  image_id:
+  manager_server_user:
     type: string
-
-  instance_type:
-    type: string
-
-  resources_prefix:
-    type: string
-    default: ''
+    default: ubuntu
 
   agents_user:
     type: string
     default: ubuntu
 
-  manager_server_user:
+  image_id:
     type: string
-    default: ubuntu
+
+  instance_type:
+    type: string
 
   boto_config:
     type: string
@@ -77,6 +79,7 @@ node_templates:
       use_external_resource: { get_input: use_existing_manager_keypair }
       resource_id: { get_input: manager_keypair_name }
       private_key_path: { get_input: manager_key_pair_file_path }
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
 
   agent_keypair:
     type: cloudify.aws.nodes.KeyPair
@@ -84,6 +87,7 @@ node_templates:
       use_external_resource: { get_input: use_existing_agent_keypair }
       resource_id: { get_input: agent_keypair_name }
       private_key_path: { get_input: agent_key_pair_file_path }
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
 
   management_security_group:
     type: cloudify.aws.nodes.SecurityGroup
@@ -116,6 +120,7 @@ node_templates:
           from_port: 53229
           to_port: 53229
           cidr_ip: 0.0.0.0/0
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
 
   agents_security_group:
     type: cloudify.aws.nodes.SecurityGroup
@@ -132,12 +137,15 @@ node_templates:
           from_port: 5985
           to_port: 5985
           src_group_id: { get_property: [management_security_group, resource_id] }
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
     relationships:
       - type: cloudify.relationships.depends_on
         target: management_security_group
 
   manager_server_ip:
     type: cloudify.aws.nodes.ElasticIP
+    properties:
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
 
   manager_server:
     type: cloudify.aws.nodes.Instance
@@ -146,6 +154,7 @@ node_templates:
       image_id: { get_input: image_id }
       instance_type: { get_input: instance_type }
       install_agent: false
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
     relationships:
       - type: cloudify.aws.relationships.instance_connected_to_elastic_ip
         target: manager_server_ip
@@ -166,7 +175,6 @@ node_templates:
            docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-docker_3.2.0-m8-b178.tar
 
       cloudify:
-        resources_prefix: { get_input: resources_prefix }
 
         cloudify_agent:
           min_workers: 0
@@ -232,6 +240,19 @@ node_templates:
           implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
           inputs:
             cloudify_packages: { get_property: [ manager, cloudify_packages ] }
+
+  aws_configuration:
+    type: aws_configuration
+    properties:
+      aws_config:
+        aws_access_key_id: { get_input: aws_access_key_id }
+        aws_secret_access_key: { get_input: aws_secret_access_key }
+
+node_types:
+  aws_configuration:
+    derived_from: cloudify.nodes.Root
+    properties:
+      aws_config: {}
 
 plugins:
   cli:

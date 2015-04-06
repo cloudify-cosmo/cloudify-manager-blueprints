@@ -26,14 +26,32 @@ from ec2 import configure
 from ec2 import constants
 
 
-def configure_manager(config_path):
-    _upload_credentials(config_path)
+def configure_manager(
+        config_path,
+        boto_config_path=None,
+        boto_profile=None):
+
+    _upload_credentials(config_path, boto_config_path, boto_profile)
     _set_provider_config()
 
 
-def _upload_credentials(config_path):
-    temp = configure.BotoConfig().get_temp_file()
-    fabric.api.put(temp, config_path)
+def _upload_credentials(config_path,
+                        boto_config_path=None,
+                        boto_profile=None):
+
+    if boto_config_path and boto_profile:
+        boto_config_string = \
+            configure.BotoConfig().get_config(
+                path=boto_config_path,
+                profile_name=boto_profile
+            )
+        temp_config = tempfile.mktemp()
+        with open(temp_config, 'w') as temp_config_file:
+            temp_config_file.write(boto_config_string)
+    else:
+        temp_config = configure.BotoConfig().get_temp_file()
+
+    fabric.api.put(temp_config, config_path)
 
 
 def _set_provider_config():
