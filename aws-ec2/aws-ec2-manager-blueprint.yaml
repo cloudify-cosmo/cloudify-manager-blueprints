@@ -1,0 +1,261 @@
+tosca_definitions_version: cloudify_dsl_1_1
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.2m8/types.yaml
+  - http://www.getcloudify.org/spec/aws-plugin/1.2m8/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.2m8/plugin.yaml
+
+inputs:
+
+  aws_access_key_id:
+    type: string
+    default: ''
+
+  aws_secret_access_key:
+    type: string
+    default: ''
+
+  use_existing_manager_keypair:
+    type: boolean
+    default: false
+
+  use_existing_agent_keypair:
+    type: boolean
+    default: false
+
+  manager_keypair_name:
+    type: string
+
+  agent_keypair_name:
+    type: string
+
+  manager_key_pair_file_path:
+    type: string
+
+  agent_key_pair_file_path:
+    type: string
+
+  use_existing_manager_group:
+    type: boolean
+    default: false
+
+  use_existing_agent_group:
+    type: boolean
+    default: false
+
+  mananger_security_group_name:
+    type: string
+
+  agent_security_group_name:
+    type: string
+
+  manager_server_name:
+    type: string
+
+  manager_server_user:
+    type: string
+    default: ubuntu
+
+  agents_user:
+    type: string
+    default: ubuntu
+
+  image_id:
+    type: string
+
+  instance_type:
+    type: string
+
+
+node_templates:
+
+  management_keypair:
+    type: cloudify.aws.nodes.KeyPair
+    properties:
+      use_external_resource: { get_input: use_existing_manager_keypair }
+      resource_id: { get_input: manager_keypair_name }
+      private_key_path: { get_input: manager_key_pair_file_path }
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
+
+  agent_keypair:
+    type: cloudify.aws.nodes.KeyPair
+    properties:
+      use_external_resource: { get_input: use_existing_agent_keypair }
+      resource_id: { get_input: agent_keypair_name }
+      private_key_path: { get_input: agent_key_pair_file_path }
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
+
+  management_security_group:
+    type: cloudify.aws.nodes.SecurityGroup
+    properties:
+      resource_id: { get_input: mananger_security_group_name }
+      use_external_resource: { get_input: use_existing_manager_group }
+      description: Security group for Cloudify Manager VM
+      rules:
+        - ip_protocol: tcp
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+        - ip_protocol: tcp
+          from_port: 80
+          to_port: 80
+          cidr_ip: 0.0.0.0/0
+        - ip_protocol: tcp
+          from_port: 5555
+          to_port: 5555
+          src_group_id: { get_property: [agents_security_group, resource_id] }
+        - ip_protocol: tcp
+          from_port: 8101
+          to_port: 8101
+          src_group_id: { get_property: [agents_security_group, resource_id] }
+        - ip_protocol: tcp
+          from_port: 5672
+          to_port: 5672
+          src_group_id: { get_property: [agents_security_group, resource_id] }
+        - ip_protocol: tcp
+          from_port: 53229
+          to_port: 53229
+          src_group_id: { get_property: [agents_security_group, resource_id] }
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: agents_security_group
+
+  agents_security_group:
+    type: cloudify.aws.nodes.SecurityGroup
+    properties:
+      resource_id: { get_input: agent_security_group_name }
+      use_external_resource: { get_input: use_existing_agent_group }
+      description: Security group for Cloudify agent VMs
+      rules:
+        - ip_protocol: tcp
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+        - ip_protocol: tcp
+          from_port: 5985
+          to_port: 5985
+          cidr_ip: 0.0.0.0/0
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
+
+  manager_server_ip:
+    type: cloudify.aws.nodes.ElasticIP
+    properties:
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
+
+  manager_server:
+    type: cloudify.aws.nodes.Instance
+    properties:
+      resource_id: { get_input: manager_server_name }
+      image_id: { get_input: image_id }
+      instance_type: { get_input: instance_type }
+      install_agent: false
+      aws_config: { get_property: [ aws_configuration, aws_config ] }
+    relationships:
+      - type: cloudify.aws.relationships.instance_connected_to_elastic_ip
+        target: manager_server_ip
+      - type: cloudify.aws.relationships.instance_connected_to_keypair
+        target: management_keypair
+      - type: cloudify.aws.relationships.instance_connected_to_security_group
+        target: management_security_group
+
+  manager:
+    type: cloudify.nodes.CloudifyManager
+    properties:
+      cloudify_packages:
+        agents:
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-ubuntu-agent_3.2.0-m8-b178_amd64.deb
+          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-centos-final-agent_3.2.0-m8-b178_amd64.deb
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-windows-agent_3.2.0-m8-b178_amd64.deb
+        docker:
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-docker_3.2.0-m8-b178.tar
+
+      cloudify:
+
+        cloudify_agent:
+          min_workers: 0
+          max_workers: 5
+          remote_execution_port: 22
+          user: { get_input: agents_user }
+
+        workflows:
+          task_retries: -1  # this means forever
+          task_retry_interval: 30
+
+        policy_engine:
+          start_timeout: 30
+
+    relationships:
+      - target: manager_server
+        type: cloudify.relationships.contained_in
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file: scripts/configure.py
+            task_name: configure_manager
+            task_properties:
+              aws_config: { get_property: [ aws_configuration, aws_config ] }
+            fabric_env:
+              user: { get_input: manager_server_user }
+              key_filename: { get_property: [ management_keypair, private_key_path ] }
+              host_string: { get_attribute: [ manager_server_ip, aws_resource_id ] }
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
+            task_properties:
+              cloudify_packages: { get_property: [manager, cloudify_packages] }
+              agent_local_key_path: { get_property: [agent_keypair, private_key_path] }
+              provider_context: { get_attribute: [manager, provider_context] }
+            fabric_env:
+              user: { get_input: manager_server_user }
+              key_filename: { get_property: [ management_keypair, private_key_path ] }
+              host_string: { get_attribute: [ manager_server_ip, aws_resource_id ] }
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
+            fabric_env:
+              user: { get_input: manager_server_user }
+              key_filename: { get_property: [ management_keypair, private_key_path ] }
+              host_string: { get_attribute: [ manager_server_ip, aws_resource_id ] }
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
+            fabric_env:
+              user: { get_input: manager_server_user }
+              key_filename: { get_property: [ management_keypair, private_key_path ] }
+              host_string: { get_attribute: [ manager_server_ip, aws_resource_id ] }
+
+      cloudify.interfaces.validation:
+        creation:
+          implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+          inputs:
+            cloudify_packages: { get_property: [ manager, cloudify_packages ] }
+
+  aws_configuration:
+    type: aws_configuration
+    properties:
+      aws_config:
+        aws_access_key_id: { get_input: aws_access_key_id }
+        aws_secret_access_key: { get_input: aws_secret_access_key }
+
+node_types:
+  aws_configuration:
+    derived_from: cloudify.nodes.Root
+    properties:
+      aws_config: {}
+
+plugins:
+  cli:
+    install: false
+    executor: central_deployment_agent
+
+outputs:
+  manager_ip:
+    value: { get_attribute: [ manager_server_ip, aws_resource_id ] }
+

@@ -1,0 +1,18 @@
+aws_access_key_id: ''
+aws_secret_access_key: ''
+image_id: ''
+instance_type: ''
+manager_keypair_name: ''
+agent_keypair_name: ''
+
+use_existing_manager_group: false
+use_existing_agent_group: false
+use_existing_manager_keypair: false
+use_existing_agent_keypair: false
+manager_key_pair_file_path: ~/.ssh/cloudify-manager-kp.pem
+agent_key_pair_file_path: ~/.ssh/cloudify-agent-kp.pem
+mananger_security_group_name: cloudify-manager-security-group
+agent_security_group_name: cloudify-agent-security-group
+manager_server_name: cloudify-manager-server
+manager_server_user: ubuntu
+agents_user: ubuntu
