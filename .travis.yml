@@ -27,20 +27,12 @@ script:
         set -e
         if [ "${OP}" == "validate-blueprints" ]; then
           cfy init
-          cfy blueprints validate -p aws-ec2/aws-ec2-manager-blueprint.yaml
-          cfy blueprints validate -p cloudstack/cloudstack.yaml
-          cfy blueprints validate -p openstack/openstack.yaml
-          cfy blueprints validate -p openstack-docker/openstack-docker.yaml
-          cfy blueprints validate -p openstack-nova-net/openstack.yaml
-          cfy blueprints validate -p simple/simple.yaml
-          cfy blueprints validate -p simple/simple-docker.yaml
-          cfy blueprints validate -p softlayer/softlayer.yaml
+          find -name "*manager-blueprint.yaml" -exec cfy blueprints validate -p {} \;
         elif [ "${OP}" == "flake8" ]; then
           flake8 .
         elif [ "${OP}" == "unit-tests" ]; then
           nosetests cloudstack/
           nosetests openstack/
-          nosetests openstack-docker/
           nosetests openstack-nova-net/
           nosetests softlayer/
         else
