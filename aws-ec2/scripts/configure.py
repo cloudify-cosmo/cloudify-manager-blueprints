@@ -28,7 +28,9 @@ from ec2 import constants
 
 def configure_manager(
         manager_config_path=constants.AWS_DEFAULT_CONFIG_PATH,
-        aws_config={}):
+        aws_config=None):
+
+    aws_config = aws_config or {}
 
     _upload_credentials(aws_config, manager_config_path)
     _set_provider_config()
