@@ -27,11 +27,7 @@ script:
         set -e
         if [ "${OP}" == "validate-blueprints" ]; then
           cfy init
-          cfy blueprints validate -p cloudstack/cloudstack.yaml
-          cfy blueprints validate -p openstack/openstack.yaml
-          cfy blueprints validate -p openstack-nova-net/openstack.yaml
-          cfy blueprints validate -p simple/simple.yaml
-          cfy blueprints validate -p softlayer/softlayer.yaml
+          find -name "*manager-blueprint.yaml" -exec cfy blueprints validate -p {} \;
         elif [ "${OP}" == "flake8" ]; then
           flake8 .
         elif [ "${OP}" == "unit-tests" ]; then
