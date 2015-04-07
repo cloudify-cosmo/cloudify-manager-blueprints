@@ -66,10 +66,6 @@ inputs:
   instance_type:
     type: string
 
-  boto_config:
-    type: string
-    default: /home/ubuntu/.boto
-
 
 node_templates:
 
@@ -107,20 +103,23 @@ node_templates:
         - ip_protocol: tcp
           from_port: 5555
           to_port: 5555
-          cidr_ip: 0.0.0.0/0
+          src_group_id: { get_property: [agents_security_group, resource_id] }
         - ip_protocol: tcp
           from_port: 8101
           to_port: 8101
-          cidr_ip: 0.0.0.0/0
+          src_group_id: { get_property: [agents_security_group, resource_id] }
         - ip_protocol: tcp
           from_port: 5672
           to_port: 5672
-          cidr_ip: 0.0.0.0/0
+          src_group_id: { get_property: [agents_security_group, resource_id] }
         - ip_protocol: tcp
           from_port: 53229
           to_port: 53229
-          cidr_ip: 0.0.0.0/0
+          src_group_id: { get_property: [agents_security_group, resource_id] }
       aws_config: { get_property: [ aws_configuration, aws_config ] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: agents_security_group
 
   agents_security_group:
     type: cloudify.aws.nodes.SecurityGroup
@@ -132,15 +131,12 @@ node_templates:
         - ip_protocol: tcp
           from_port: 22
           to_port: 22
-          src_group_id: { get_property: [management_security_group, resource_id] }
+          cidr_ip: 0.0.0.0/0
         - ip_protocol: tcp
           from_port: 5985
           to_port: 5985
-          src_group_id: { get_property: [management_security_group, resource_id] }
+          cidr_ip: 0.0.0.0/0
       aws_config: { get_property: [ aws_configuration, aws_config ] }
-    relationships:
-      - type: cloudify.relationships.depends_on
-        target: management_security_group
 
   manager_server_ip:
     type: cloudify.aws.nodes.ElasticIP
@@ -200,8 +196,7 @@ node_templates:
           inputs:
             tasks_file: scripts/configure.py
             task_name: configure_manager
-            task_properties:
-              config_path: { get_input: boto_config }
+            task_properties: {}
             fabric_env:
               user: { get_input: manager_server_user }
               key_filename: { get_property: [ management_keypair, private_key_path ] }

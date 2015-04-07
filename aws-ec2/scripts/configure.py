@@ -14,6 +14,7 @@
 #    * limitations under the License.
 
 # Built-in Imports
+import os
 import json
 import tempfile
 
@@ -27,17 +28,19 @@ from ec2 import constants
 
 
 def configure_manager(
-        config_path,
+        config_path=constants.AWS_DEFAULT_CONFIG_PATH,
         boto_config_path=None,
         boto_profile=None):
 
-    _upload_credentials(config_path, boto_config_path, boto_profile)
+    _upload_credentials(
+        os.path.expanduser(config_path),
+        boto_config_path, boto_profile)
     _set_provider_config()
 
 
 def _upload_credentials(config_path,
-                        boto_config_path=None,
-                        boto_profile=None):
+                        boto_config_path,
+                        boto_profile):
 
     if boto_config_path and boto_profile:
         boto_config_string = \
@@ -85,10 +88,3 @@ def _set_provider_config():
     }
 
     ctx.instance.runtime_properties['provider_context'] = provider
-
-    temp_config = tempfile.mktemp()
-
-    with open(temp_config, 'w') as provider_context_file:
-        json.dump(provider, provider_context_file)
-
-    fabric.api.put(temp_config, constants.AWS_DEFAULT_CONFIG_PATH)
