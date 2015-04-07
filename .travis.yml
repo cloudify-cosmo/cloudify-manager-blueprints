@@ -27,7 +27,7 @@ script:
         set -e
         if [ "${OP}" == "validate-blueprints" ]; then
           cfy init
-          cfy blueprints validate -p aws/aws-manager-blueprint.yaml
+          cfy blueprints validate -p aws-ec2/aws-ec2-manager-blueprint.yaml
           cfy blueprints validate -p cloudstack/cloudstack.yaml
           cfy blueprints validate -p openstack/openstack.yaml
           cfy blueprints validate -p openstack-docker/openstack-docker.yaml
