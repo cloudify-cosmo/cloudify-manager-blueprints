@@ -15,7 +15,6 @@
 
 # Built-in Imports
 import os
-import json
 import tempfile
 
 # Third Party Imports
@@ -33,8 +32,7 @@ def configure_manager(
         boto_profile=None):
 
     _upload_credentials(
-        os.path.expanduser(config_path),
-        boto_config_path, boto_profile)
+        config_path, boto_config_path, boto_profile)
     _set_provider_config()
 
 
@@ -54,6 +52,11 @@ def _upload_credentials(config_path,
     else:
         temp_config = configure.BotoConfig().get_temp_file()
 
+    prepare_dir = \
+        'if [ ! -d {0} ]; then mkdir -p {0}; fi'.format(
+            os.path.split(config_path)[0])
+
+    fabric.api.run(prepare_dir)
     fabric.api.put(temp_config, config_path)
 
 

@@ -196,7 +196,8 @@ node_templates:
           inputs:
             tasks_file: scripts/configure.py
             task_name: configure_manager
-            task_properties: {}
+            task_properties:
+              config_path: ~/.aws/credentials
             fabric_env:
               user: { get_input: manager_server_user }
               key_filename: { get_property: [ management_keypair, private_key_path ] }
