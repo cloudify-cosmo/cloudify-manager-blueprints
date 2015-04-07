@@ -198,7 +198,6 @@ node_templates:
             task_name: configure_manager
             task_properties:
               aws_config: { get_property: [ aws_configuration, aws_config ] }
-              manager_config_path: ~/.aws/credentials
             fabric_env:
               user: { get_input: manager_server_user }
               key_filename: { get_property: [ management_keypair, private_key_path ] }
