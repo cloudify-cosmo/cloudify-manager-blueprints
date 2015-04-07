@@ -27,37 +27,34 @@ from ec2 import constants
 
 
 def configure_manager(
-        config_path=constants.AWS_DEFAULT_CONFIG_PATH,
-        boto_config_path=None,
-        boto_profile=None):
+        manager_config_path=constants.AWS_DEFAULT_CONFIG_PATH,
+        aws_config={}):
 
-    _upload_credentials(
-        config_path, boto_config_path, boto_profile)
+    _upload_credentials(aws_config, manager_config_path)
     _set_provider_config()
 
 
-def _upload_credentials(config_path,
-                        boto_config_path,
-                        boto_profile):
+def _upload_credentials(aws_config, manager_config_path):
 
-    if boto_config_path and boto_profile:
-        boto_config_string = \
-            configure.BotoConfig().get_config(
-                path=boto_config_path,
-                profile_name=boto_profile
-            )
+    if aws_config.get('aws_access_key_id') and \
+            aws_config.get('aws_secret_access_key'):
         temp_config = tempfile.mktemp()
+        config = '[Credentials]\n' \
+                 'aws_access_key_id = {0}\n' \
+                 'aws_secret_access_key = {1}'.format(
+                     aws_config['aws_access_key_id'],
+                     aws_config['aws_secret_access_key'])
         with open(temp_config, 'w') as temp_config_file:
-            temp_config_file.write(boto_config_string)
+            temp_config_file.write(config)
     else:
         temp_config = configure.BotoConfig().get_temp_file()
 
     prepare_dir = \
         'if [ ! -d {0} ]; then mkdir -p {0}; fi'.format(
-            os.path.split(config_path)[0])
+            os.path.split(manager_config_path)[0])
 
     fabric.api.run(prepare_dir)
-    fabric.api.put(temp_config, config_path)
+    fabric.api.put(temp_config, manager_config_path)
 
 
 def _set_provider_config():
@@ -69,9 +66,6 @@ def _set_provider_config():
 
     node_id_to_provider_context_field = {
         'agents_security_group': 'agents_security_group',
-        'management_security_group': 'management_security_group',
-        'manager_server_ip': 'elastic_ip',
-        'management_keypair': 'management_keypair',
         'agent_keypair': 'agents_keypair'
     }
 
