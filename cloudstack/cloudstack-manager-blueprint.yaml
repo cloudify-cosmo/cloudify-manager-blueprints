@@ -99,7 +99,7 @@ node_templates:
                 - type: ingress
                   protocol: TCP
                   cidr: { get_input: management_network_fw_cidr }
-                  ports: [5555, 5672, 53229, 8101, 22, 8100, 80]
+                  ports: [5555, 5672, 53229, 8101, 22, 8100, 80, 443]
                 - type: egress
                   protocol: TCP
                   cidr: 0.0.0.0/0
@@ -123,6 +123,9 @@ node_templates:
                 - protocol: TCP
                   private_port: 80
                   public_port: 80
+                - protocol: TCP
+                  private_port: 443
+                  public_port: 443                  
                 - protocol: TCP
                   private_port: 22
                   public_port: 22
