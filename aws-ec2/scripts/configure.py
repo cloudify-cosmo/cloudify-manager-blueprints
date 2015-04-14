@@ -67,6 +67,7 @@ def _upload_credentials(aws_config, manager_config_path):
     fabric.api.put(temp_config, manager_config_path)
     fabric.api.run(make_default_lower)
 
+
 def _set_provider_config():
 
     resources = dict()
