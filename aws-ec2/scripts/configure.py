@@ -41,13 +41,21 @@ def _upload_credentials(aws_config, manager_config_path):
     if aws_config.get('aws_access_key_id') and \
             aws_config.get('aws_secret_access_key'):
         temp_config = tempfile.mktemp()
-        config = '[Credentials]\n' \
-                 'aws_access_key_id = {0}\n' \
-                 'aws_secret_access_key = {1}'.format(
-                     aws_config['aws_access_key_id'],
-                     aws_config['aws_secret_access_key'])
+        credentials = \
+            configure.BotoConfig().create_creds_config(
+                'Credentials',
+                aws_config.get('aws_access_key_id'),
+                aws_config.get('aws_secret_access_key')
+            )
+        # This is here because the manager can only use "default".
+        # Unless you use a specific region or profile,
+        # in which case you need to modify this script.
+        credentials = credentials.replace('Credentials', 'default')
+        config_string = \
+            configure.BotoConfig.create_creds_string(
+                credentials).getvalue()
         with open(temp_config, 'w') as temp_config_file:
-            temp_config_file.write(config)
+            temp_config_file.write(config_string)
     else:
         temp_config = configure.BotoConfig().get_temp_file()
 
