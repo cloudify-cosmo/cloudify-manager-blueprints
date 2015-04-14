@@ -49,7 +49,6 @@ def _upload_credentials(aws_config, manager_config_path):
         # This is here because the manager can only use "default".
         # Unless you use a specific region or profile,
         # in which case you need to modify this script.
-        credentials = credentials.replace('Credentials', 'default')
         config_string = \
             configure.BotoConfig.create_creds_string(
                 credentials).getvalue()
