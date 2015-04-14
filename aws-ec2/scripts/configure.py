@@ -48,7 +48,7 @@ def _upload_credentials(aws_config, manager_config_path):
                 aws_config.get('aws_secret_access_key')
             )
         # This is here because the manager can only use "default".
-        # Unless you use a specific region or profile, 
+        # Unless you use a specific region or profile,
         # in which case you need to modify this script.
         credentials = credentials.replace('Credentials', 'default')
         config_string = \
