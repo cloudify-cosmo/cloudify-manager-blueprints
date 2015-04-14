@@ -41,26 +41,31 @@ def _upload_credentials(aws_config, manager_config_path):
     if aws_config.get('aws_access_key_id') and \
             aws_config.get('aws_secret_access_key'):
         temp_config = tempfile.mktemp()
-        credentials = \
-            configure.BotoConfig().create_creds_config(
-                aws_config.get('aws_access_key_id'),
-                aws_config.get('aws_secret_access_key')
+        config = configure.BotoConfig()
+        credentials = config.create_creds_config(
+            aws_config.get('aws_access_key_id'),
+            aws_config.get('aws_secret_access_key')
             )
+        # This is here because the manager can only use "default".
+        # Unless you use a specific region or profile,
+        # in which case you need to modify this script.
         config_string = \
-            configure.BotoConfig.create_creds_string(
-                credentials).getvalue()
+            config.create_creds_string(credentials)
         with open(temp_config, 'w') as temp_config_file:
-            temp_config_file.write(config_string)
+            temp_config_file.write(config_string.getvalue())
     else:
         temp_config = configure.BotoConfig().get_temp_file()
 
     prepare_dir = \
         'if [ ! -d {0} ]; then mkdir -p {0}; fi'.format(
             os.path.split(manager_config_path)[0])
+    make_default_lower = \
+        'sed -i "s/\[DEFAULT\]/\[default\]/g" {0}'.format(
+            constants.AWS_DEFAULT_CONFIG_PATH)
 
     fabric.api.run(prepare_dir)
     fabric.api.put(temp_config, manager_config_path)
-
+    fabric.api.run(make_default_lower)
 
 def _set_provider_config():
 
