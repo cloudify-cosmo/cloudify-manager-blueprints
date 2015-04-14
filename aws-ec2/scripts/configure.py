@@ -43,7 +43,6 @@ def _upload_credentials(aws_config, manager_config_path):
         temp_config = tempfile.mktemp()
         credentials = \
             configure.BotoConfig().create_creds_config(
-                'Credentials',
                 aws_config.get('aws_access_key_id'),
                 aws_config.get('aws_secret_access_key')
             )
