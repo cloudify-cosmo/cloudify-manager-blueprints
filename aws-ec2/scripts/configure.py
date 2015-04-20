@@ -37,33 +37,35 @@ def configure_manager(
 
 
 def _upload_credentials(aws_config, manager_config_path):
+    temp_config = tempfile.mktemp()
+    config = configure.BotoConfig()
 
-    if aws_config.get('aws_access_key_id') and \
-            aws_config.get('aws_secret_access_key'):
-        temp_config = tempfile.mktemp()
-        config = configure.BotoConfig()
+    if aws_config.get('ec2_region_name') and \
+            aws_config.get('ec2_region_endpoint'):
+        credentials = config.create_creds_config(
+            aws_config.get('aws_access_key_id'),
+            aws_config.get('aws_secret_access_key'),
+            profile_name='Credentials',
+            ec2_region_name=aws_config.get('ec2_region_name'),
+            ec2_region_endpoint=aws_config.get('ec2_region_endpoint')
+            )
+        config_string = \
+            config.create_creds_string(credentials)
+    else:
         credentials = config.create_creds_config(
             aws_config.get('aws_access_key_id'),
             aws_config.get('aws_secret_access_key')
             )
-        # This is here because the manager can only use "default".
-        # Unless you use a specific region or profile,
-        # in which case you need to modify this script.
         config_string = \
             config.create_creds_string(credentials)
-        with open(temp_config, 'w') as temp_config_file:
-            temp_config_file.write(config_string.getvalue())
-    else:
-        temp_config = configure.BotoConfig().get_temp_file()
 
-    prepare_dir = \
-        'if [ ! -d {0} ]; then mkdir -p {0}; fi'.format(
-            os.path.split(manager_config_path)[0])
+    with open(temp_config, 'w') as temp_config_file:
+        temp_config_file.write(config_string.getvalue())
+
     make_default_lower = \
         'sed -i "s/\[DEFAULT\]/\[default\]/g" {0}'.format(
             constants.AWS_DEFAULT_CONFIG_PATH)
 
-    fabric.api.run(prepare_dir)
     fabric.api.put(temp_config, manager_config_path)
     fabric.api.run(make_default_lower)
 
