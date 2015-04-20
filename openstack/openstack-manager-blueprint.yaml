@@ -199,6 +199,8 @@ node_templates:
       rules:
         - port: 80
           remote_ip_prefix: 0.0.0.0/0
+        - port: 443
+          remote_ip_prefix: 0.0.0.0/0    
         - port: 22
           remote_ip_prefix: 0.0.0.0/0
         - port: 8101

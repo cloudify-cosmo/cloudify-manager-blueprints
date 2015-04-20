@@ -99,7 +99,7 @@ node_templates:
                 - type: ingress
                   protocol: TCP
                   cidr: { get_input: management_network_fw_cidr }
-                  ports: [5555, 5672, 53229, 8101, 22, 8100, 80]
+                  ports: [5555, 5672, 53229, 8101, 22, 8100, 80, 443]
                 - type: egress
                   protocol: TCP
                   cidr: 0.0.0.0/0
@@ -123,6 +123,9 @@ node_templates:
                 - protocol: TCP
                   private_port: 80
                   public_port: 80
+                - protocol: TCP
+                  private_port: 443
+                  public_port: 443                  
                 - protocol: TCP
                   private_port: 22
                   public_port: 22
@@ -164,7 +167,7 @@ node_templates:
                     ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-agent_3.2.0-rc1-b179_amd64.deb
                     centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-centos-final-agent_3.2.0-rc1-b179_amd64.deb
                     windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-windows-agent_3.2.0-rc1-b179_amd64.deb
-            cloudify: 
+            cloudify:
                 resources_prefix: { get_input: resources_prefix }
 
                 cloudify_agent:
