@@ -19,10 +19,6 @@ inputs:
     type: string
     default: ''
 
-  ec2_region_endpoint:
-    type: string
-    default: ''
-
   use_existing_manager_keypair:
     type: boolean
     default: false
@@ -256,7 +252,6 @@ node_templates:
         aws_access_key_id: { get_input: aws_access_key_id }
         aws_secret_access_key: { get_input: aws_secret_access_key }
         ec2_region_name: { get_input: ec2_region_name }
-        ec2_region_endpoint: { get_input: ec2_region_endpoint }
 
 node_types:
   aws_configuration:

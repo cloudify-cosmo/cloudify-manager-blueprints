@@ -20,6 +20,7 @@ from ConfigParser import ConfigParser
 
 # Third Party Imports
 import fabric.api
+from boto.ec2 import get_region
 
 # Cloudify Imports
 from cloudify import ctx
@@ -47,14 +48,13 @@ def _upload_credentials(aws_config, manager_config_path):
     credentials.set('Credentials', 'aws_secret_access_key',
                     aws_config['aws_secret_access_key'])
 
-    if aws_config.get('ec2_region_name') and \
-            aws_config.get('ec2_region_endpoint'):
-
+    if aws_config.get('ec2_region_name'):
+        region = get_region(aws_config['ec2_region_name'])
         credentials.add_section('Boto')
         credentials.set('Boto', 'ec2_region_name',
                         aws_config['ec2_region_name'])
         credentials.set('Boto', 'ec2_region_endpoint',
-                        aws_config['ec2_region_endpoint'])
+                        region.endpoint)
 
     credentials_string = StringIO()
     credentials.write(credentials_string)
