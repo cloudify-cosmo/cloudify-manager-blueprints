@@ -15,13 +15,14 @@
 
 # Built-in Imports
 import tempfile
+from StringIO import StringIO
+from ConfigParser import ConfigParser
 
 # Third Party Imports
 import fabric.api
 
 # Cloudify Imports
 from cloudify import ctx
-from ec2 import configure
 from ec2 import constants
 
 
@@ -36,30 +37,30 @@ def configure_manager(
 
 
 def _upload_credentials(aws_config, manager_config_path):
+
     temp_config = tempfile.mktemp()
-    config = configure.BotoConfig()
+    credentials = ConfigParser()
+
+    credentials.add_section('Credentials')
+    credentials.set('Credentials', 'aws_access_key_id',
+                    aws_config['aws_access_key_id'])
+    credentials.set('Credentials', 'aws_secret_access_key',
+                    aws_config['aws_secret_access_key'])
 
     if aws_config.get('ec2_region_name') and \
             aws_config.get('ec2_region_endpoint'):
-        credentials = config.create_creds_config(
-            aws_config.get('aws_access_key_id'),
-            aws_config.get('aws_secret_access_key'),
-            profile_name='Credentials',
-            ec2_region_name=aws_config.get('ec2_region_name'),
-            ec2_region_endpoint=aws_config.get('ec2_region_endpoint')
-            )
-        config_string = \
-            config.create_creds_string(credentials)
-    else:
-        credentials = config.create_creds_config(
-            aws_config.get('aws_access_key_id'),
-            aws_config.get('aws_secret_access_key')
-            )
-        config_string = \
-            config.create_creds_string(credentials)
+
+        credentials.add_section('Boto')
+        credentials.set('Boto', 'ec2_region_name',
+                        aws_config['ec2_region_name'])
+        credentials.set('Boto', 'ec2_region_endpoint',
+                        aws_config['ec2_region_endpoint'])
+
+    credentials_string = StringIO()
+    credentials.write(credentials_string)
 
     with open(temp_config, 'w') as temp_config_file:
-        temp_config_file.write(config_string.getvalue())
+        temp_config_file.write(credentials_string.getvalue())
 
     make_default_lower = \
         'sed -i "s/\[DEFAULT\]/\[default\]/g" {0}'.format(
