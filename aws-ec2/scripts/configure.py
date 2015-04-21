@@ -14,15 +14,16 @@
 #    * limitations under the License.
 
 # Built-in Imports
-import os
 import tempfile
+from StringIO import StringIO
+from ConfigParser import ConfigParser
 
 # Third Party Imports
 import fabric.api
+from boto.ec2 import get_region
 
 # Cloudify Imports
 from cloudify import ctx
-from ec2 import configure
 from ec2 import constants
 
 
@@ -38,32 +39,33 @@ def configure_manager(
 
 def _upload_credentials(aws_config, manager_config_path):
 
-    if aws_config.get('aws_access_key_id') and \
-            aws_config.get('aws_secret_access_key'):
-        temp_config = tempfile.mktemp()
-        config = configure.BotoConfig()
-        credentials = config.create_creds_config(
-            aws_config.get('aws_access_key_id'),
-            aws_config.get('aws_secret_access_key')
-            )
-        # This is here because the manager can only use "default".
-        # Unless you use a specific region or profile,
-        # in which case you need to modify this script.
-        config_string = \
-            config.create_creds_string(credentials)
-        with open(temp_config, 'w') as temp_config_file:
-            temp_config_file.write(config_string.getvalue())
-    else:
-        temp_config = configure.BotoConfig().get_temp_file()
+    temp_config = tempfile.mktemp()
+    credentials = ConfigParser()
 
-    prepare_dir = \
-        'if [ ! -d {0} ]; then mkdir -p {0}; fi'.format(
-            os.path.split(manager_config_path)[0])
+    credentials.add_section('Credentials')
+    credentials.set('Credentials', 'aws_access_key_id',
+                    aws_config['aws_access_key_id'])
+    credentials.set('Credentials', 'aws_secret_access_key',
+                    aws_config['aws_secret_access_key'])
+
+    if aws_config.get('ec2_region_name'):
+        region = get_region(aws_config['ec2_region_name'])
+        credentials.add_section('Boto')
+        credentials.set('Boto', 'ec2_region_name',
+                        aws_config['ec2_region_name'])
+        credentials.set('Boto', 'ec2_region_endpoint',
+                        region.endpoint)
+
+    credentials_string = StringIO()
+    credentials.write(credentials_string)
+
+    with open(temp_config, 'w') as temp_config_file:
+        temp_config_file.write(credentials_string.getvalue())
+
     make_default_lower = \
         'sed -i "s/\[DEFAULT\]/\[default\]/g" {0}'.format(
             constants.AWS_DEFAULT_CONFIG_PATH)
 
-    fabric.api.run(prepare_dir)
     fabric.api.put(temp_config, manager_config_path)
     fabric.api.run(make_default_lower)
 

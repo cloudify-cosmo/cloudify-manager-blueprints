@@ -16,3 +16,5 @@ agent_security_group_name: cloudify-agent-security-group
 manager_server_name: cloudify-manager-server
 manager_server_user: ubuntu
 agents_user: ubuntu
+# If no region is provided, the plugin will fallback to the default region for your user.
+ec2_region_name: ''
