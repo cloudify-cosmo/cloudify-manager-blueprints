@@ -319,11 +319,11 @@ node_templates:
     properties:
       cloudify_packages:
         agents:
-          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-agent_3.2.0-rc1-b179_amd64.deb
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-commercial-agent_3.2.0-rc1-b179_amd64.deb
           centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-centos-final-agent_3.2.0-rc1-b179_amd64.deb
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-windows-agent_3.2.0-rc1-b179_amd64.deb
         docker:
-           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-docker_3.2.0-rc1-b179.tar
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-docker-commercial_3.2.0-rc1-b179.tar
 
       cloudify:
         resources_prefix: { get_input: resources_prefix }

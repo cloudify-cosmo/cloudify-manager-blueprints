@@ -164,7 +164,7 @@ node_templates:
                     core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-core_3.2.0-m5-b175_amd64.deb
                     ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-ui_3.2.0-m5-b175_amd64.deb
                 agents:
-                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-agent_3.2.0-rc1-b179_amd64.deb
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-commercial-agent_3.2.0-rc1-b179_amd64.deb
                     centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-centos-final-agent_3.2.0-rc1-b179_amd64.deb
                     windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-windows-agent_3.2.0-rc1-b179_amd64.deb
             cloudify:
