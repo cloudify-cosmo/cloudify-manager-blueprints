@@ -343,70 +343,72 @@ node_templates:
 
         security:
           #########################################################################
-          # Setting 'enabled' to true will activate security on the REST server,
+          # Setting 'enabled' to true will activate security on the REST service,
           # according to the below configuration. Each request received by the
-          # REST server will be authenticated and communication can be limited to SSL.
+          # REST service will be authenticated, and communication can be limited
+          # to SSL.
           enabled: false
 
           #########################################################################
-          # An ordered (!) list of the authentication providers.
-          # The list below will use Flask-secuREST's password-based
-          # and token-based authentication implementations, in that order.
+          # An ordered (!) list of the authentication providers (Mandatory).
+          # The list below sets Flask-secuREST's password-based and token-based
+          # authentication providers as the authenticators that will be used on
+          # each request, in that order.
           # ** Note: Preferably, password_hash should NOT remain plaintext.
           #          Possible values are: 'bcrypt', 'des_crypt', 'pbkdf2_sha256',
           #          pbkdf2_sha512', 'sha256_crypt' and 'sha512_crypt'.
-          #
-          # authentication_providers:
-          #   - name: password
-          #     implementation: flask_securest.authentication_providers.password:PasswordAuthenticator
-          #     properties:
-          #       password_hash: plaintext
-          #   - name: token
-          #     implementation: flask_securest.authentication_providers.token:TokenAuthenticator
-          #     properties:
-          #       secret_key: my_secret
+          authentication_providers:
+            - name: password
+              implementation: flask_securest.authentication_providers.password:PasswordAuthenticator
+              properties:
+                password_hash: plaintext
+            - name: token
+              implementation: flask_securest.authentication_providers.token:TokenAuthenticator
+              properties:
+                secret_key: my_secret
 
           #########################################################################
           # A user-store implementation is used to find a matching user
-          # and load its details.
+          # and load its details (Mandatory unless you specified a custom
+          # authentication provider that does not require it).
           # The configuration below will use Flask-secuREST's "simple userstore"
           # implementation, with the users listed inline.
-          #
-          # userstore_driver:
-          #   implementation: flask_securest.userstores.simple:SimpleUserstore
-          #   properties:
-          #     userstore:
-          #       user1:
-          #         username: example_user
-          #         password: example_password
-          #         email: example_user@your_domain.dom
-          #     identifying_attribute: username
+          userstore_driver:
+            implementation: flask_securest.userstores.simple:SimpleUserstore
+            properties:
+              userstore:
+                user1:
+                  username: example_user
+                  password: example_password
+                  email: example_user@your_domain.dom
+              identifying_attribute: username
 
           #########################################################################
-          # REST calls to "rest_service_ip/tokens" will generate and return
-          # authentication tokens if an auth_token_generator implementation is set.
-          # The below configuration sets Flask_secuREST's token generator.
+          # REST calls to "MANAGER_IP/tokens" will generate and return
+          # authentication tokens if an auth_token_generator is set (Optional).
+          # The below configuration sets Flask_secuREST's token module as the
+          # token generator.
           # ** Note: Set the same secret key as in your token authenticator
-          #
-          # auth_token_generator:
-          #   implementation: flask_securest.authentication_providers.token:TokenAuthenticator
-          #   properties:
-          #     secret_key: my_secret
-          #     expires_in_seconds: 600
+          auth_token_generator:
+            implementation: flask_securest.authentication_providers.token:TokenAuthenticator
+            properties:
+              secret_key: my_secret
+              expires_in_seconds: 600
 
           #########################################################################
-          # Enabling SSL will load limit communication with the server to SSL only
-          #
-          # ssl:
-          #   enabled: false
-          #   certificate_path: ""
-          #   private_key_path: ""
+          # Enabling SSL limits communication with the server to SSL only (Optional).
+          # If enabled, both certificate and private key are mandatory.
+          ssl:
+            enabled: false
+            certificate_path: ""
+            private_key_path: ""
 
           #########################################################################
-          # Security log file properties
-          #
-          # log_file: /var/log/cloudify/rest-security-audit.log
-          # log_level: INFO # possible values: OFF, CRITICAL, ERROR, WARNING, INFO, DEBUG
+          # Security log file properties (Optional, the default values are as
+          # shown below).
+          # ** Note: The log file is located on the rest-service container
+          log_file: /var/log/cloudify/rest-security-audit.log
+          log_level: INFO # possible values: OFF, CRITICAL, ERROR, WARNING, INFO, DEBUG
 
     relationships:
       - target: manager_server
