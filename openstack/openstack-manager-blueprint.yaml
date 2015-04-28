@@ -395,6 +395,7 @@ node_templates:
           #     expires_in_seconds: 600
 
           #########################################################################
+          # Enabling SSL will load limit communication with the server to SSL only
           #
           # ssl:
           #   enabled: false
@@ -412,7 +413,7 @@ node_templates:
         type: cloudify.relationships.contained_in
       - target: manager_data
         type: cloudify.relationships.depends_on
-        
+
     interfaces:
       cloudify.interfaces.lifecycle:
         configure:
