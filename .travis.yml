@@ -12,7 +12,7 @@ install:
     - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/3.2rc1.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-openstack-plugin/archive/1.2rc1.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-cloudstack-plugin/archive/1.2rc1.zip
-    - pip install https://github.com/cloudify-cosmo/cloudify-softlayer-plugin/archive/1.2rc1.zip
+    # - pip install https://github.com/cloudify-cosmo/cloudify-softlayer-plugin/archive/1.2rc1.zip
     - pip install nose
     - pip install mock
     - pip install flake8
@@ -34,7 +34,7 @@ script:
           nosetests cloudstack/
           nosetests openstack/
           nosetests openstack-nova-net/
-          nosetests softlayer/
+          # nosetests softlayer/
         else
           exit 1
         fi;
