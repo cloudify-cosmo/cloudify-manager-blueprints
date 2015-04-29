@@ -354,8 +354,8 @@ node_templates:
           # these providers in the order specified in the list (Mandatory).
           # The list below sets Flask-secuREST's password-based and token-based
           # authentication providers.
-          # ** Note: The password_hash should match the hashing of password found in
-          #          the userstore, which is not likely to be plaintext.
+          # ** Note: Passwords are usually not store as plaintext. Set passowrd_hash
+          #          to match the hash scheme used in the selected datastore.
           #          Acceptable values: 'bcrypt', 'des_crypt', 'pbkdf2_sha256',
           #          pbkdf2_sha512', 'sha256_crypt' and 'sha512_crypt'.
           authentication_providers:
