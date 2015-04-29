@@ -417,7 +417,7 @@ node_templates:
           # shown below).
           # ** Note: The log file is located on the rest-service container
           log_file: /var/log/cloudify/rest-security-audit.log
-          log_level: INFO # possible values: OFF, CRITICAL, ERROR, WARNING, INFO, DEBUG
+          log_level: INFO # values: CRITICAL, ERROR, WARNING, INFO, DEBUG
 
     relationships:
       - target: manager_server
