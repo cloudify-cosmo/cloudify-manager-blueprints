@@ -416,8 +416,11 @@ node_templates:
           # Security log file properties (Optional, the default values are as
           # shown below).
           # ** Note: The log file is located on the rest-service container
-          log_file: /var/log/cloudify/rest-security-audit.log
-          log_level: INFO # values: CRITICAL, ERROR, WARNING, INFO, DEBUG
+          #
+          audit_log_file: /var/log/cloudify/rest-security-audit.log
+          audit_log_level: INFO # values: CRITICAL, ERROR, WARNING, INFO, DEBUG
+          audit_log_file_size_MB: 100
+          audit_log_files_backup_count: 20
 
     relationships:
       - target: manager_server
