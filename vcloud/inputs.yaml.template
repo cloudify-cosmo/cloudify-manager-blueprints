@@ -1,0 +1,17 @@
+vsphere_username: ''
+vsphere_password: ''
+vsphere_host: ''
+vsphere_datacenter_name: ''
+manager_server_template: ''
+manager_server_cpus: ''
+manager_server_memory: ''
+manager_server_user: ''
+manager_server_user_home: ''
+management_network_name: ''
+management_network_switch_distributed: true
+external_network_name: ''
+external_network_switch_distributed: true
+manager_private_key_path: ''
+agent_private_key_path: ''
+agents_user: ''
+resources_prefix: ''

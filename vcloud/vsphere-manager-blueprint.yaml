@@ -1,0 +1,332 @@
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+    - http://www.getcloudify.org/spec/cloudify/3.2rc1/types.yaml
+    - http://www.getcloudify.org/spec/vsphere-plugin/1.2rc1/plugin.yaml
+    - http://www.getcloudify.org/spec/fabric-plugin/1.2rc1/plugin.yaml
+
+
+inputs:
+    vsphere_username:
+        description: >
+            vSphere username
+        type: string
+
+    vsphere_password:
+        description: >
+            vSphere user password
+        type: string
+
+    vsphere_host:
+        description: >
+            vSphere host
+        type: string
+
+    vsphere_port:
+        description: >
+            port which vCenter Server system uses to monitor data transfer
+            from SDK clients
+        default: 443
+        type: string
+
+    vsphere_datacenter_name:
+        description: >
+            datacenter name
+        default: Datacenter
+        type: string
+
+    vsphere_resource_pool_name:
+        description: >
+            resource pool name. Represents a set of physical resources:
+            a single host, a subset of a host's resources, or resources
+            spanning multiple hosts
+        default: Resources
+        type: string
+
+    vsphere_auto_placement:
+        description: >
+            signifies if server is to be automatically placed on a host
+        default: false
+        type: boolean
+
+    manager_server_name:
+        description: >
+            name of the management server
+        default: cloudify-management-server
+        type: string
+
+    manager_server_template:
+        description: >
+            virtual machine template from which server will be spawned
+        type: string
+
+    manager_server_cpus:
+        description: >
+            number of cpus
+        default: 2
+        type: string
+
+    manager_server_memory:
+        description: >
+            amount of RAM, in MB
+        default: 4096
+        type: string
+
+    manager_server_domain:
+        description: >
+            the fully qualified domain name
+        default: ''
+        type: string
+
+    external_network_name:
+        description: >
+            network name
+        default: DMZ
+        type: string
+
+    external_network_use_dhcp:
+        description: >
+            use DHCP to obtain an ip address
+        default: true
+        type: boolean
+
+    external_network_cidr:
+        description: >
+            network cidr (for example, 10.0.0.0/24).
+            It will be used by the plugin only when `use_dhcp` is false
+        default: ''
+        type: string
+
+    external_network_gateway:
+        description: >
+            network gateway ip. It will be used by the plugin only when
+            `use_dhcp` is false
+        default: ''
+        type: string
+
+    external_network_ip:
+        description: >
+            server ip address. It will be used by the plugin only when
+            `use_dhcp` is false
+        default: ''
+        type: string
+
+    external_network_switch_distributed:
+        description: >
+            signifies if network is connected to a distributed switch
+        default: false
+        type: boolean
+
+    management_network_name:
+        description: >
+            network name
+        default: Management
+        type: string
+
+    management_network_use_dhcp:
+        description: >
+            use DHCP to obtain an ip address
+        default: true
+        type: boolean
+
+    management_network_cidr:
+        description: >
+            network cidr (for example, 10.0.0.0/24). It will be used by the
+            plugin only when `use_dhcp` is false
+        default: ''
+        type: string
+
+    management_network_gateway:
+        description: >
+            network gateway ip. It will be used by the plugin only
+            when `use_dhcp` is false
+        default: ''
+        type: string
+
+    management_network_ip:
+        description: >
+            server ip address. It will be used by the plugin only
+            when `use_dhcp` is false
+        default: ''
+        type: string
+
+    management_network_switch_distributed:
+        description: >
+            signifies if network is connected to a distributed switch
+        default: false
+        type: boolean
+
+    manager_server_user:
+        description: >
+            user account on manager server
+        default: ubuntu
+        type: string
+
+    manager_server_user_home:
+        description: >
+            path to the user home directory
+        default: /home/ubuntu
+        type: string
+
+    manager_private_key_path:
+        description: >
+            path to RSA key which will be used for ssh connection to manager
+            server
+        default: ~/.ssh/cloudify-manager-kp.pem
+        type: string
+
+    agent_private_key_path:
+        description: >
+            path to RSA key which will be used for ssh connection to cloudify
+            agent
+        default: ~/.ssh/cloudify-agent-kp.pem
+        type: string
+
+    agents_user:
+        default: ubuntu
+        type: string
+
+    resources_prefix:
+        default: ''
+        type: string
+
+node_templates:
+
+    manager_server:
+        type: cloudify.vsphere.nodes.Server
+        properties:
+            install_agent: false
+            networking:
+                domain: { get_input: manager_server_domain }
+                dns_servers: ['8.8.8.8']
+                connect_networks:
+                    -
+                        management: true
+                        switch_distributed: { get_input: management_network_switch_distributed }
+                        use_dhcp: { get_input: management_network_use_dhcp }
+                        network: { get_input: management_network_cidr }
+                        gateway: { get_input: management_network_gateway }
+                        ip: { get_input: management_network_ip}
+                        name: { get_input: management_network_name }
+                    -
+                        external: true
+                        switch_distributed: { get_input: external_network_switch_distributed }
+                        use_dhcp: { get_input: external_network_use_dhcp }
+                        network: { get_input: external_network_cidr }
+                        gateway: { get_input: external_network_gateway }
+                        ip: { get_input: external_network_ip}
+                        name: { get_input: external_network_name }
+            server:
+                name: { get_input: manager_server_name }
+                template: { get_input: manager_server_template }
+                cpus: { get_input: manager_server_cpus }
+                memory: { get_input: manager_server_memory }
+            connection_config: { get_property: [connection_configuration, connection_config] }
+
+    connection_configuration:
+        type: connection_configuration
+        properties:
+            connection_config:
+                username: { get_input: vsphere_username }
+                password: { get_input: vsphere_password }
+                host: { get_input: vsphere_host }
+                port: { get_input: vsphere_port }
+                datacenter_name: { get_input: vsphere_datacenter_name }
+                resource_pool_name: { get_input: vsphere_resource_pool_name }
+                auto_placement: { get_input: vsphere_auto_placement }
+
+    manager:
+        type: cloudify.nodes.CloudifyManager
+        properties:
+            cloudify_packages:
+                agents:
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-commercial-agent_3.2.0-rc1-b179_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-centos-final-agent_3.2.0-rc1-b179_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-windows-agent_3.2.0-rc1-b179_amd64.deb
+                docker:
+                    docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-docker-commercial_3.2.0-rc1-b179.tar
+
+            cloudify:
+                resources_prefix: { get_input: resources_prefix }
+
+                cloudify_agent:
+                    min_workers: 2
+                    max_workers: 5
+                    remote_execution_port: 22
+                    user: { get_input: agents_user }
+
+                workflows:
+                    task_retries: -1  # this means forever
+                    task_retry_interval: 30
+
+                policy_engine:
+                    start_timeout: 30
+
+        relationships:
+            - target: manager_server
+              type: cloudify.relationships.contained_in
+
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                configure:
+                    implementation: fabric.fabric_plugin.tasks.run_task
+                    inputs:
+                        tasks_file: scripts/configure.py
+                        task_name: configure
+                        task_properties:
+                            vsphere_config: { get_property: [connection_configuration, connection_config] }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [manager_server, public_ip] }
+                start:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
+                        task_properties:
+                            cloudify_packages: { get_property: [manager, cloudify_packages] }
+                            agent_local_key_path: { get_input: agent_private_key_path }
+                            provider_context: { get_attribute: [manager, provider_context] }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [manager_server, public_ip] }
+                stop:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [manager_server, public_ip] }
+                delete:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [manager_server, public_ip] }
+            cloudify.interfaces.validation:
+                creation:
+                    implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+                    inputs:
+                        cloudify_packages: { get_property: [manager, cloudify_packages] }
+
+
+node_types:
+    connection_configuration:
+        derived_from: cloudify.nodes.Root
+        properties:
+            connection_config: {}
+
+
+plugins:
+    cli:
+        install: false
+        executor: central_deployment_agent
+
+
+outputs:
+    manager_ip:
+        value: { get_attribute: [manager_server, public_ip] }
