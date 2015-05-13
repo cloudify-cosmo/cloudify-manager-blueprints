@@ -5,7 +5,6 @@ imports:
     - http://www.getcloudify.org/spec/cloudstack-plugin/1.2/plugin.yaml
     - http://www.getcloudify.org/spec/fabric-plugin/1.2/plugin.yaml
 
-
 inputs:
     cloudstack_api_url:
         default: ''
@@ -99,7 +98,7 @@ node_templates:
                 - type: ingress
                   protocol: TCP
                   cidr: { get_input: management_network_fw_cidr }
-                  ports: [5672, 53229, 8101, 22, 8100, 80, 443]
+                  ports: [5555, 5672, 53229, 8101, 22, 8100, 80, 443]
                 - type: egress
                   protocol: TCP
                   cidr: 0.0.0.0/0
@@ -141,8 +140,8 @@ node_templates:
         relationships:
             - target: manager_server_ip
               type: cloudify.cloudstack.virtual_machine_connected_to_floating_ip
-            - target: management_network
-              type: cloudify.relationships.connected_to
+            # - target: management_network
+            #   type: cloudify.relationships.connected_to
             - target: management_keypair
               type: cloudify.cloudstack.virtual_machine_connected_to_keypair
 
@@ -159,14 +158,12 @@ node_templates:
         type: cloudify.nodes.CloudifyManager
         properties:
             cloudify_packages:
-                server:
-                    components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-components_3.2.0-m5-b175_amd64.deb
-                    core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-core_3.2.0-m5-b175_amd64.deb
-                    ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-ui_3.2.0-m5-b175_amd64.deb
+                docker:
+                   docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-docker_3.2.0-rc1-b179.tar
                 agents:
-                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-ubuntu-agent_3.2.0-ga-b200_amd64.deb
-                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-centos-final-agent_3.2.0-ga-b200_amd64.deb
-                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-windows-agent_3.2.0-ga-b200_amd64.deb
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-agent_3.2.0-rc1-b179_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-centos-final-agent_3.2.0-rc1-b179_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-windows-agent_3.2.0-rc1-b179_amd64.deb
             cloudify:
                 resources_prefix: { get_input: resources_prefix }
 
@@ -216,7 +213,7 @@ node_templates:
                         fabric_env:
                             user: { get_input: manager_server_user }
                             key_filename: { get_input: manager_private_key_path }
-                            host_string: { get_attribute: [manager_server, public_ip] }
+                            host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
                 stop:
                     implementation: fabric.fabric_plugin.tasks.run_module_task
                     inputs:
