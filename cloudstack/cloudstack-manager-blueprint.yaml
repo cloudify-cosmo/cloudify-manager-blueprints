@@ -157,7 +157,7 @@ node_templates:
         properties:
             cloudify_packages:
                 docker:
-                   docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-docker_3.2.0-rc1-b179.tar
+                   docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-docker_3.2.0-ga-b200.tar
                 agents:
                   ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-ubuntu-agent_3.2.0-ga-b200_amd64.deb
                   centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-centos-final-agent_3.2.0-ga-b200_amd64.deb
