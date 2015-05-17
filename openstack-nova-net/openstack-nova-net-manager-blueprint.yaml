@@ -220,7 +220,7 @@ node_templates:
             establish:
               implementation: fabric.fabric_plugin.tasks.run_script
               inputs:
-                script_path: https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/resources/rest-service/cloudify/fs/mount.sh
+                script_path: https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/resources/rest-service/cloudify/fs/mount-docker.sh
                 fabric_env:
                   user: { get_input: manager_server_user }
                   key_filename: { get_property: [management_keypair, private_key_path] }
