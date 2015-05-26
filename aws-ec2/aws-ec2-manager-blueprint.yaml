@@ -1,9 +1,9 @@
 tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.2rc1/types.yaml
-  - http://www.getcloudify.org/spec/aws-plugin/1.2rc1/plugin.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.2rc1/plugin.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
+  - http://www.getcloudify.org/spec/aws-plugin/1.2/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.2/plugin.yaml
 
 inputs:
 
@@ -109,10 +109,6 @@ node_templates:
           to_port: 443
           cidr_ip: 0.0.0.0/0          
         - ip_protocol: tcp
-          from_port: 5555
-          to_port: 5555
-          src_group_id: { get_property: [agents_security_group, resource_id] }
-        - ip_protocol: tcp
           from_port: 8101
           to_port: 8101
           src_group_id: { get_property: [agents_security_group, resource_id] }
@@ -172,11 +168,11 @@ node_templates:
     properties:
       cloudify_packages:
         agents:
-          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-agent_3.2.0-rc1-b179_amd64.deb
-          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-centos-final-agent_3.2.0-rc1-b179_amd64.deb
-          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-windows-agent_3.2.0-rc1-b179_amd64.deb
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-ubuntu-agent_3.2.0-ga-b200_amd64.deb
+          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-centos-final-agent_3.2.0-ga-b200_amd64.deb
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-windows-agent_3.2.0-ga-b200_amd64.deb
         docker:
-           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-docker_3.2.0-rc1-b179.tar
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-docker_3.2.0-ga-b200.tar
 
       cloudify:
 
