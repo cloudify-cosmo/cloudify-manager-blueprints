@@ -1,9 +1,9 @@
 tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
-    - http://www.getcloudify.org/spec/cloudify/3.2rc1/types.yaml
-    - https://raw.githubusercontent.com/cloudify-cosmo/tosca-vcloud-plugin/master/plugin.yaml
-    - http://www.getcloudify.org/spec/fabric-plugin/1.2rc1/plugin.yaml
+    - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/tosca-vcloud-plugin/1.2/plugin.yaml
+    - http://www.getcloudify.org/spec/fabric-plugin/1.2/plugin.yaml
 
 inputs:
     vcloud_username:
@@ -198,7 +198,7 @@ node_templates:
         relationships:
             - target: management_port
               type: cloudify.vcloud.server_connected_to_port
-            - target: management_server_internet_access
+            - target: management_server_nat
               type: cloudify.vcloud.server_connected_to_public_nat
             - target: node_security_group
               type: cloudify.vcloud.server_connected_to_security_group
@@ -234,10 +234,10 @@ node_templates:
                     dhcp_range: 10.67.79.2-10.67.79.128
             vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
         relationships:
-            - target: management_network_internet_access
+            - target: management_network_nat
               type: cloudify.vcloud.net_connected_to_public_nat
 
-    management_network_internet_access:
+    management_network_nat:
         type: cloudify.vcloud.nodes.PublicNAT
         properties:
             use_external_resource: { get_input: management_network_public_nat_use_existing }
@@ -248,7 +248,7 @@ node_templates:
                 - type: SNAT
             vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
 
-    management_server_internet_access:
+    management_server_nat:
         type: cloudify.vcloud.nodes.PublicNAT
         properties:
             nat:
@@ -311,11 +311,11 @@ node_templates:
         properties:
             cloudify_packages:
                 agents:
-                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-agent_3.2.0-rc1-b179_amd64.deb
-                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-centos-final-agent_3.2.0-rc1-b179_amd64.deb
-                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-windows-agent_3.2.0-rc1-b179_amd64.deb
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-ubuntu-agent_3.2.0-ga-b200_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-centos-final-agent_3.2.0-ga-b200_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-windows-agent_3.2.0-ga-b200_amd64.deb
                 docker:
-                    docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-docker_3.2.0-rc1-b179.tar
+                    docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-docker_3.2.0-ga-b200.tar
 
             cloudify:
                 resources_prefix: { get_input: resources_prefix }
@@ -349,7 +349,7 @@ node_templates:
                         fabric_env:
                             user: { get_input: manager_server_user }
                             key_filename: { get_input: manager_private_key_path }
-                            host_string: { get_attribute: [management_server_internet_access, public_ip] }
+                            host_string: { get_attribute: [management_server_nat, public_ip] }
                 configure:
                     implementation: fabric.fabric_plugin.tasks.run_module_task
                     inputs:
@@ -361,7 +361,7 @@ node_templates:
                         fabric_env:
                             user: { get_input: manager_server_user }
                             key_filename: { get_input: manager_private_key_path }
-                            host_string: { get_attribute: [management_server_internet_access, public_ip] }
+                            host_string: { get_attribute: [management_server_nat, public_ip] }
                 start:
                     implementation: fabric.fabric_plugin.tasks.run_task
                     inputs:
@@ -372,7 +372,7 @@ node_templates:
                         fabric_env:
                             user: { get_input: manager_server_user }
                             key_filename: { get_input: manager_private_key_path }
-                            host_string: { get_attribute: [management_server_internet_access, public_ip] }
+                            host_string: { get_attribute: [management_server_nat, public_ip] }
                 stop:
                     implementation: fabric.fabric_plugin.tasks.run_module_task
                     inputs:
@@ -380,7 +380,7 @@ node_templates:
                         fabric_env:
                             user: { get_input: manager_server_user }
                             key_filename: { get_property: [manager_keypair, private_key_path] }
-                            host_string: { get_attribute: [management_server_internet_access, public_ip] }
+                            host_string: { get_attribute: [management_server_nat, public_ip] }
                 delete:
                     implementation: fabric.fabric_plugin.tasks.run_module_task
                     inputs:
@@ -388,7 +388,7 @@ node_templates:
                         fabric_env:
                             user: { get_input: manager_server_user }
                             key_filename: { get_property: [manager_keypair, private_key_path] }
-                            host_string: { get_attribute: [management_server_internet_access, public_ip] }
+                            host_string: { get_attribute: [management_server_nat, public_ip] }
             cloudify.interfaces.validation:
                 creation:
                     implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
@@ -404,4 +404,4 @@ plugins:
 
 outputs:
     manager_ip:
-        value: { get_attribute: [management_server_internet_access, public_ip] }
+        value: { get_attribute: [management_server_nat, public_ip] }
