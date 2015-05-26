@@ -1,0 +1,237 @@
+tosca_definitions_version: cloudify_dsl_1_1
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.2m7/types.yaml
+  - https://raw.githubusercontent.com/szpotona/cloudify-gcp-plugin/add_keypair/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.2m7/plugin.yaml
+
+
+inputs:
+  use_existing_manager_keypair:
+    type: boolean
+    default: false
+
+  use_existing_agent_keypair:
+    type: boolean
+    default: false
+
+  use_existing_manager_group:
+    type: boolean
+    default: false
+
+  use_existing_agent_group:
+    type: boolean
+    default: false
+
+  manager_key_pair_file_path:
+    type: string
+
+  agent_key_pair_file_path:
+    type: string
+
+  manager_server_name:
+    type: string
+
+  manager_server_user:
+    type: string
+    default: ubuntu
+
+  agents_user:
+    type: string
+    default: ubuntu
+
+  image_id:
+    type: string
+
+  instance_type:
+    type: string
+
+  config:
+    default: {}
+
+  instance_properties:
+    default: {}
+
+  resources_prefix:
+    default: ''
+
+  network:
+    default: {}
+
+node_templates:
+  management_keypair:
+    type: cloudify.gcp.nodes.KeyPair
+    properties:
+      use_external_resource: { get_input: use_existing_manager_keypair }
+      private_key_path: { get_input: manager_key_pair_file_path }
+      gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
+      user: { get_input: manager_server_user }
+
+  agent_keypair:
+    type: cloudify.gcp.nodes.KeyPair
+    properties:
+      use_external_resource: { get_input: use_existing_agent_keypair }
+      private_key_path: { get_input: agent_key_pair_file_path }
+      gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
+      user: { get_input: agents_user }
+
+  cloudify_network:
+    type: cloudify.gcp.nodes.Network
+    properties:
+      gcp_config: { get_property: [gcp_configuration, gcp_config] }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            network: { get_input: network }
+
+  management_security_group:
+    type: cloudify.gcp.nodes.SecurityGroup
+    properties:
+      use_external_resource: { get_input: use_existing_manager_group }
+      rules:
+        - ip_protocol: tcp
+          port: 22
+          cidr_ip: 0.0.0.0/0
+        - ip_protocol: tcp
+          port: 80
+          cidr_ip: 0.0.0.0/0
+        - ip_protocol: tcp
+          port: 443
+          cidr_ip: 0.0.0.0/0          
+        - ip_protocol: tcp
+          port: 8101
+          source_tags: 
+            - agent
+        - ip_protocol: tcp
+          port: 5672
+          source_tags: 
+            - agent
+        - ip_protocol: tcp
+          port: 53229
+          source_tags: 
+            - agent
+      gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
+    relationships:
+      - type: cloudify.gcp.relationships.contained_in
+        target: cloudify_network
+
+  agents_security_group:
+    type: cloudify.gcp.nodes.SecurityGroup
+    properties:
+      use_external_resource: { get_input: use_existing_agent_group }
+      rules:
+        - ip_protocol: tcp
+          port: 22
+          cidr_ip: 0.0.0.0/0
+        - ip_protocol: tcp
+          port: 5985
+          cidr_ip: 0.0.0.0/0
+      gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
+    relationships:
+      - type: cloudify.gcp.relationships.contained_in
+        target: cloudify_network
+
+  manager_server_ip:
+    type: cloudify.gcp.nodes.ExternalIP
+    properties:
+      gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
+
+  manager_server:
+    type: cloudify.gcp.nodes.Instance
+    properties:
+      image_id: { get_input: image_id }
+      instance_type: { get_input: instance_type }
+      install_agent: false
+      gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
+      properties: { get_input: instance_properties }
+    relationships:
+      - type: cloudify.gcp.relationships.instance_connected_to_ip
+        target: manager_server_ip
+      - type: cloudify.gcp.relationships.instance_connected_to_keypair
+        target: management_keypair
+      - type: cloudify.gcp.relationships.manager_connected_to_security_group
+        target: management_security_group
+
+  manager:
+    type: cloudify.nodes.CloudifyManager
+    properties:
+      cloudify_packages:
+        server:
+          components_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-components_3.2.0-m6-b176_amd64.deb
+          core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-core_3.2.0-m6-b176_amd64.deb
+          ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-ui_3.2.0-m6-b176_amd64.deb
+        agents:
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-ubuntu-agent_3.2.0-m6-b176_amd64.deb
+          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-centos-final-agent_3.2.0-m6-b176_amd64.deb
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m6-RELEASE/cloudify-windows-agent_3.2.0-m6-b176_amd64.deb
+      cloudify:
+        resources_prefix: { get_input: resources_prefix }
+
+        cloudify_agent:
+          min_workers: 0
+          max_workers: 5
+          remote_execution_port: 22
+          user: { get_input: agents_user }
+
+        workflows:
+          task_retries: -1  # this means forever
+          task_retry_interval: 30
+
+        policy_engine:
+          start_timeout: 30
+
+    relationships:
+      - target: manager_server
+        type: cloudify.relationships.contained_in
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file: scripts/configure.py
+            task_name: configure_manager  
+            task_properties:
+              gcp_config: { get_property: [gcp_configuration, gcp_config] }
+            fabric_env:
+              user: { get_input: manager_server_user }
+              key_filename: { get_property: [management_keypair, private_key_path] }
+              host_string: { get_attribute: [manager_server_ip, gcp_resource_id] }
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_module_task
+          inputs:
+            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap
+            task_properties:
+              cloudify_packages: { get_property: [manager, cloudify_packages] }
+              agent_local_key_path: { get_property: [agent_keypair, private_key_path] }
+              provider_context: { get_attribute: [manager, provider_context] }
+            fabric_env:
+              user: { get_input: manager_server_user }
+              key_filename: { get_property: [management_keypair, private_key_path] }
+              host_string: { get_attribute: [manager_server_ip, gcp_resource_id] }
+      cloudify.interfaces.validation:
+        creation:
+          implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+          inputs:
+            cloudify_packages: { get_property: [manager, cloudify_packages] }
+
+  gcp_configuration:
+    type: gcp_configuration
+    properties:
+      gcp_config: { get_input: config }
+
+node_types:
+  gcp_configuration:
+    derived_from: cloudify.nodes.Root
+    properties:
+      gcp_config: {}
+
+plugins:
+  cli:
+    install: false
+    executor: central_deployment_agent
+
+outputs:
+  manager_ip:
+    value: { get_attribute: [manager_server_ip, gcp_resource_id] }
