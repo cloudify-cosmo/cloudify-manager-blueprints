@@ -88,7 +88,7 @@ node_templates:
           source_tags: 
             - agent
         - ip_protocol: tcp
-          from_port: 5672
+          port: 5672
           source_tags: 
             - agent
         - ip_protocol: tcp
@@ -136,11 +136,11 @@ node_templates:
     properties:
       cloudify_packages:
         agents:
-          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-ubuntu-agent_3.2.0-ga-b200_amd64.deb
-          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-centos-final-agent_3.2.0-ga-b200_amd64.deb
-          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-windows-agent_3.2.0-ga-b200_amd64.deb
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m7-RELEASE/cloudify-ubuntu-agent_3.2.0-m7-b177_amd64.deb
+          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-centos-final-agent_3.2.0-m8-b178_amd64.deb
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-windows-agent_3.2.0-m8-b178_amd64.deb
         docker:
-           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-docker_3.2.0-ga-b200.tar
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m7-RELEASE/cloudify-docker_3.2.0-m7-b177.tar
 
       cloudify:
 
