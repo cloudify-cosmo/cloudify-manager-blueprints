@@ -19,6 +19,10 @@ inputs:
     type: boolean
     default: false
 
+  use_existing_manager_agent_group:
+    type: boolean
+    default: false
+
   use_existing_agent_group:
     type: boolean
     default: false
@@ -99,18 +103,34 @@ node_templates:
         - ip_protocol: tcp
           port: 443
           cidr_ip: 0.0.0.0/0          
+      gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
+    relationships:
+      - type: cloudify.gcp.relationships.contained_in
+        target: cloudify_network
+
+  manager_agent_security_group:
+    type: cloudify.gcp.nodes.SecurityGroup
+    properties:
+      use_external_resource: { get_input: use_existing_manager_agent_group }
+      rules:
         - ip_protocol: tcp
           port: 8101
           source_tags: 
             - agent
+          target_tags:
+            - manager
         - ip_protocol: tcp
           port: 5672
           source_tags: 
             - agent
+          target_tags:
+            - manager
         - ip_protocol: tcp
           port: 53229
           source_tags: 
             - agent
+          target_tags:
+            - manager
       gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
     relationships:
       - type: cloudify.gcp.relationships.contained_in
@@ -124,9 +144,13 @@ node_templates:
         - ip_protocol: tcp
           port: 22
           cidr_ip: 0.0.0.0/0
+          target_tags:
+            - agent
         - ip_protocol: tcp
           port: 5985
           cidr_ip: 0.0.0.0/0
+          target_tags:
+            - agent
       gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
     relationships:
       - type: cloudify.gcp.relationships.contained_in
@@ -150,7 +174,7 @@ node_templates:
         target: manager_server_ip
       - type: cloudify.gcp.relationships.instance_connected_to_keypair
         target: management_keypair
-      - type: cloudify.gcp.relationships.manager_connected_to_security_group
+      - type: cloudify.gcp.relationships.instance_connected_to_security_group
         target: management_security_group
 
   manager:
