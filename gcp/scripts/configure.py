@@ -17,7 +17,6 @@ import os
 
 from cloudify import ctx
 from plugin import utils
-from plugin import gcp.utils
 
 
 GCP_DEFAULT_CONFIG_PATH = '/home/ubuntu/gcp_config.json'
@@ -35,8 +34,8 @@ def configure_manager(manager_config_path=GCP_DEFAULT_CONFIG_PATH,
             run_props = node_instance.runtime_properties
             resources[node_instance.node_id] = {
                 'id': run_props[utils.NAME],
-                gcp.utils.TARGET_TAGS: run_props[gcp.utils.TARGET_TAGS],
-                gcp.utils.SOURCE_TAGS: run_props[gcp.utils.SOURCE_TAGS]}
+                utils.TARGET_TAGS: run_props[utils.TARGET_TAGS],
+                utils.SOURCE_TAGS: run_props[utils.SOURCE_TAGS]}
     resources[utils.GCP_CONFIG] = manager_config_path
     provider = {'resources': resources}
     ctx.instance.runtime_properties['provider_context'] = provider

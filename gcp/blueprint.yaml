@@ -27,6 +27,18 @@ inputs:
     type: boolean
     default: false
 
+  manager_public_existing_key_path:
+    type: string
+
+  agent_public_existing_key_path:
+    type: string
+
+  manager_private_existing_key_path:
+    type: string
+
+  agent_private_existing_key_path:
+    type: string
+
   manager_key_pair_file_path:
     type: string
 
@@ -53,7 +65,7 @@ inputs:
   config:
     default: {}
 
-  instance_properties:
+  instance_additional_settings:
     default: {}
 
   resources_prefix:
@@ -67,6 +79,8 @@ node_templates:
     type: cloudify.gcp.nodes.KeyPair
     properties:
       use_external_resource: { get_input: use_existing_manager_keypair }
+      private_existing_key_path: { get_input: manager_private_existing_key_path }
+      public_existing_key_path: { get_input: manager_public_existing_key_path }
       private_key_path: { get_input: manager_key_pair_file_path }
       gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
       user: { get_input: manager_server_user }
@@ -75,6 +89,8 @@ node_templates:
     type: cloudify.gcp.nodes.KeyPair
     properties:
       use_external_resource: { get_input: use_existing_agent_keypair }
+      private_existing_key_path: { get_input: agent_private_existing_key_path }
+      public_existing_key_path: { get_input: agent_public_existing_key_path }
       private_key_path: { get_input: agent_key_pair_file_path }
       gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
       user: { get_input: agents_user }
@@ -105,7 +121,7 @@ node_templates:
           cidr_ip: 0.0.0.0/0          
       gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
     relationships:
-      - type: cloudify.gcp.relationships.contained_in
+      - type: cloudify.relationships.contained_in
         target: cloudify_network
 
   manager_agent_security_group:
@@ -133,7 +149,7 @@ node_templates:
             - manager
       gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
     relationships:
-      - type: cloudify.gcp.relationships.contained_in
+      - type: cloudify.relationships.contained_in
         target: cloudify_network
 
   agents_security_group:
@@ -153,7 +169,7 @@ node_templates:
             - agent
       gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
     relationships:
-      - type: cloudify.gcp.relationships.contained_in
+      - type: cloudify.relationships.contained_in
         target: cloudify_network
 
   manager_server_ip:
@@ -168,7 +184,7 @@ node_templates:
       instance_type: { get_input: instance_type }
       install_agent: false
       gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
-      properties: { get_input: instance_properties }
+      instance_additional_settings: { get_input: instance_additional_settings }
     relationships:
       - type: cloudify.gcp.relationships.instance_connected_to_ip
         target: manager_server_ip
