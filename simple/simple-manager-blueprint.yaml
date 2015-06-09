@@ -30,6 +30,29 @@ inputs:
 
   # Manager Components Inputs
 
+  # Cloudify Modules Inputs
+  rest_service_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz
+
+  # Python Related Inputs
+  pip_version:
+    type: string
+    default: ''
+
+  virtualenv_version:
+    type: string
+    default: ''
+
+  # RabbitMQ Related Inputs
+  erlang_source_url:
+    type: string
+    default: http://www.rabbitmq.com/releases/erlang/erlang-17.4-1.el6.x86_64.rpm
+
+  rabbitmq_source_url:
+    type: string
+    default: http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm
+
   # Elasticsearch Related Inputs
   elasticsearch_source_url:
     type: string
@@ -52,6 +75,14 @@ inputs:
     type: string
     default: https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz
 
+  # InfluxDB Related Inputs
+  influxdb_source_url:
+    type: string
+    default: http://get.influxdb.org/influxdb-0.8.8-1.x86_64.rpm
+
+  influxdb_port:
+    type: integer
+    default: 8086
 
 node_templates:
   manager_host:
@@ -123,14 +154,14 @@ node_templates:
           inputs:
             cloudify_packages: { get_property: [manager, cloudify_packages] }
 
-  java_host:
-    type: manager.nodes.JavaHost
+  python_host:
+    type: manager.nodes.PythonHost
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
 
-  python_host:
-    type: manager.nodes.PythonHost
+  java_host:
+    type: manager.nodes.JavaHost
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host

@@ -1,19 +1,33 @@
 node_types:
 
+  manager.nodes.PythonHost:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      pip_version:
+        type: string
+        default: { get_input: pip_version }
+      virtualenv_version:
+        type: string
+        default: { get_input: virtualenv_version }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/python/scripts/create.sh
+
   manager.nodes.JavaHost:
     derived_from: cloudify.nodes.SoftwareComponent
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/java/scripts/create.sh
 
-  manager.nodes.PythonHost:
-    derived_from: cloudify.nodes.SoftwareComponent
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create: components/python/scripts/create.sh
-
   manager.nodes.RabbitMQ:
     derived_from: cloudify.nodes.MessageBusServer
+    properties:
+      erlang_rpm_source_url:
+        type: string
+        default: { get_input: erlang_source_url }
+      rabbitmq_rpm_source_url:
+        type: string
+        default: { get_input: rabbitmq_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/rabbitmq/scripts/create.sh
@@ -24,6 +38,10 @@ node_types:
   manager.nodes.Elasticsearch:
     derived_from: cloudify.nodes.DBMS
     properties:
+      elasticsearch_tar_source_url:
+        description: Elasticsearch Source URL
+        type: string
+        default: { get_input: elasticsearch_source_url }
       port:
         description: Elasticsearch API Port
         type: integer
@@ -32,6 +50,10 @@ node_types:
         description: Elasticsearch Zen Discovery Port
         type: integer
         default: { get_input: elasticsearch_discovery_port }
+      es_java_opts:
+        description: ES_JAVA_OPTS Env Var
+        type: string
+        default: { get_input: elasticsearch_java_opts }
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/elasticsearch/scripts/create.sh
@@ -42,7 +64,7 @@ node_types:
   manager.nodes.Logstash:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      logstash_source_url:
+      logstash_tar_source_url:
         description: >
           You can provide a url to a different Logstash tar.
           This will allow you to switch versions.
@@ -58,9 +80,14 @@ node_types:
   manager.nodes.InfluxDB:
     derived_from: cloudify.nodes.DBMS
     properties:
+      influxdb_rpm_source_url:
+        description: InfluxDB Source URL
+        type: string
+        default: { get_input: influxdb_source_url }
       port:
         description: InfluxDB API Port
         type: integer
+        default: { get_input: influxdb_port }
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/influxdb/scripts/create.sh
@@ -70,6 +97,14 @@ node_types:
 
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
+    properties:
+      rest_service_url:
+        description: REST Service repo tar URL for resources
+        type: string
+        default: { get_input: rest_service_url }
+      # should also have a source_url for nginx.
+      # currently it seems that they don't directly provide
+      # an rpm for us to download, we'll have to fix that :)
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/frontend/scripts/create.sh
