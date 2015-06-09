@@ -1,0 +1,155 @@
+node_types:
+
+  manager.nodes.JavaHost:
+    derived_from: cloudify.nodes.SoftwareComponent
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/java/scripts/create.sh
+
+  manager.nodes.PythonHost:
+    derived_from: cloudify.nodes.SoftwareComponent
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/python/scripts/create.sh
+
+  manager.nodes.RabbitMQ:
+    derived_from: cloudify.nodes.MessageBusServer
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/rabbitmq/scripts/create.sh
+        configure: components/rabbitmq/scripts/configure.sh
+        start: components/rabbitmq/scripts/start.sh
+        stop: components/rabbitmq/scripts/stop.sh
+
+  manager.nodes.Elasticsearch:
+    derived_from: cloudify.nodes.DBMS
+    properties:
+      port:
+        description: Elasticsearch API Port
+        type: integer
+        default: { get_input: elasticsearch_port }
+      discovery_port:
+        description: Elasticsearch Zen Discovery Port
+        type: integer
+        default: { get_input: elasticsearch_discovery_port }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/elasticsearch/scripts/create.sh
+        configure: components/elasticsearch/scripts/configure.sh
+        start: components/elasticsearch/scripts/start.sh
+        stop: components/elasticsearch/scripts/stop.sh
+
+  manager.nodes.Logstash:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      logstash_source_url:
+        description: >
+          You can provide a url to a different Logstash tar.
+          This will allow you to switch versions.
+        type: string
+        default: { get_input: logstash_source_url }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/logstash/scripts/create.sh
+        configure: components/logstash/scripts/configure.sh
+        start: components/logstash/scripts/start.sh
+        stop: components/logstash/scripts/stop.sh
+
+  manager.nodes.InfluxDB:
+    derived_from: cloudify.nodes.DBMS
+    properties:
+      port:
+        description: InfluxDB API Port
+        type: integer
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/influxdb/scripts/create.sh
+        configure: components/influxdb/scripts/configure.sh
+        start: components/influxdb/scripts/start.sh
+        stop: components/influxdb/scripts/stop.sh
+
+  manager.nodes.Nginx:
+    derived_from: cloudify.nodes.WebServer
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/frontend/scripts/create.sh
+        configure: components/frontend/scripts/configure.sh
+        start: components/frontend/scripts/start.sh
+        stop: components/frontend/scripts/stop.sh
+
+  manager.nodes.Riemann:
+    derived_from: cloudify.nodes.SoftwareComponent
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/riemann/scripts/create.sh
+        configure: components/riemann/scripts/configure.sh
+        start: components/riemann/scripts/start.sh
+        stop: components/riemann/scripts/stop.sh
+
+  manager.nodes.RestService:
+    derived_from: cloudify.nodes.ApplicationModule
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/restservice/scripts/create.sh
+        configure: components/restservice/scripts/configure.sh
+        start: components/restservice/scripts/start.sh
+        stop: components/restservice/scripts/stop.sh
+
+  manager.nodes.ManagementWorker:
+    derived_from: cloudify.nodes.ApplicationModule
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/mgmtworker/scripts/create.sh
+        start: components/mgmtworker/scripts/start.sh
+        stop: components/mgmtworker/scripts/stop.sh
+
+  manager.nodes.AmqpInfluxBroker:
+    derived_from: cloudify.nodes.ApplicationModule
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/amqpinflux/scripts/create.sh
+        start: components/amqpinflux/scripts/start.sh
+        stop: components/amqpinflux/scripts/stop.sh
+
+  manager.nodes.FileServer:
+    derived_from: cloudify.nodes.ApplicationServer
+
+relationships:
+
+  # logstash is installed
+  # logstash config file is deployed
+  # elasticsearch host and port are retrieved
+  # elasticsearch host and port are inserted to logstash config
+  # logstash is started
+  logstash_connected_to_elasticsearch:
+    derived_from: cloudify.relationships.connected_to
+    target_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        postconfigure: components/logstash/scripts/set-ls-es-host-and-port.sh
+
+  logstash_connected_to_rabbitmq:
+    derived_from: cloudify.relationships.connected_to
+    target_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        postconfigure: components/logstash
+
+  contained_in_java_host:
+    derived_from: cloudify.relationships.contained_in
+    target_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+
+  restservice_connected_to_elasticsearch:
+
+  nginx_connected_to_restservice:
+
+  nginx_connected_to_ui:
+
+  riemann_connected_to_rabbbitmq:
+
+  amqpinflux_connected_to_rabbitmq:
+
+  amqpinflux_connected_to_influxdb:
+
+  restservice_connected_to_rabbitmq:
+
