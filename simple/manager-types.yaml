@@ -98,10 +98,10 @@ node_types:
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
     properties:
-      rest_service_url:
+      rest_service_module_source_url:
         description: REST Service repo tar URL for resources
         type: string
-        default: { get_input: rest_service_url }
+        default: { get_input: rest_service_source_url }
       # should also have a source_url for nginx.
       # currently it seems that they don't directly provide
       # an rpm for us to download, we'll have to fix that :)
@@ -114,6 +114,19 @@ node_types:
 
   manager.nodes.Riemann:
     derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      langohr_jar_source_url:
+        description: Langohr JAR Source URL
+        type: string
+        default: { get_input: langohr_source_url }
+      daemonize_rpm_source_url:
+        description: Daemonize RPM Source URL
+        type: string
+        default: { get_input: daemonize_source_url }
+      riemann_rpm_source_url:
+        description: Riemann RPM Source URL
+        type: string
+        default: { get_input: riemann_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/riemann/scripts/create.sh
@@ -123,6 +136,27 @@ node_types:
 
   manager.nodes.RestService:
     derived_from: cloudify.nodes.ApplicationModule
+    properties:
+      dsl_parser_module_source_url:
+        description: DSL Parser module Source URL
+        type: string
+        default: { get_input: dsl_parser_source_url }
+      rest_client_module_source_url:
+        description: REST Client module Source URL
+        type: string
+        default: { get_input: rest_client_source_url }
+      plugins_common_module_source_url:
+        description: Plugins Common module Source URL
+        type: string
+        default: { get_input: plugins_common_source_url }
+      securest_module_source_url:
+        description: Flask SecuREST module Source URL
+        type: string
+        default: { get_input: securest_source_url }
+      rest_service_module_source_url:
+        description: REST Service module Source URL
+        type: string
+        default: { get_input: rest_service_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/restservice/scripts/create.sh

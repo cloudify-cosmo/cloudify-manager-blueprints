@@ -31,7 +31,27 @@ inputs:
   # Manager Components Inputs
 
   # Cloudify Modules Inputs
-  rest_service_url:
+  rest_service_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz
+
+  dsl_parser_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.2.tar.gz
+
+  rest_client_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.tar.gz
+
+  plugins_common_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2.tar.gz
+
+  script_plugin_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/flask-securest/archive/3.2.tar.gz
+
+  securest_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz
 
@@ -83,6 +103,20 @@ inputs:
   influxdb_port:
     type: integer
     default: 8086
+
+  # Riemann Related Inputs
+  langohr_source_url:
+    type: string
+    default: https://s3-eu-west-1.amazonaws.com/gigaspaces-repository-eu/langohr/2.11.0/langohr.jar
+
+  daemonize_source_url:
+    type: string
+    default: https://forensics.cert.org/centos/cert/7/x86_64/daemonize-1.7.3-7.el7.x86_64.rpm
+
+  riemann_source_url:
+    type: string
+    default: https://aphyr.com/riemann/riemann-0.2.6-1.noarch.rpm
+
 
 node_templates:
   manager_host:
