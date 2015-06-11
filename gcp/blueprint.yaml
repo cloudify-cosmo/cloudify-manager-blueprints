@@ -113,12 +113,18 @@ node_templates:
         - ip_protocol: tcp
           port: 22
           cidr_ip: 0.0.0.0/0
+          target_tags:
+            - manager
         - ip_protocol: tcp
           port: 80
           cidr_ip: 0.0.0.0/0
+          target_tags:
+            - manager
         - ip_protocol: tcp
           port: 443
           cidr_ip: 0.0.0.0/0          
+          target_tags:
+            - manager
       gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
     relationships:
       - type: cloudify.relationships.contained_in
@@ -188,8 +194,6 @@ node_templates:
     relationships:
       - type: cloudify.gcp.relationships.instance_connected_to_ip
         target: manager_server_ip
-      - type: cloudify.gcp.relationships.instance_connected_to_keypair
-        target: management_keypair
       - type: cloudify.gcp.relationships.instance_connected_to_security_group
         target: management_security_group
 

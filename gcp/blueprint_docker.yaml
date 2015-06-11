@@ -112,12 +112,18 @@ node_templates:
         - ip_protocol: tcp
           port: 22
           cidr_ip: 0.0.0.0/0
+          target_tags:
+            - manager
         - ip_protocol: tcp
           port: 80
           cidr_ip: 0.0.0.0/0
+          target_tags:
+            - manager
         - ip_protocol: tcp
           port: 443
           cidr_ip: 0.0.0.0/0          
+          target_tags:
+            - manager
       gcp_config: { get_property: [ gcp_configuration, gcp_config ] }
     relationships:
       - type: cloudify.relationships.contained_in
@@ -187,8 +193,6 @@ node_templates:
     relationships:
       - type: cloudify.gcp.relationships.instance_connected_to_ip
         target: manager_server_ip
-      - type: cloudify.gcp.relationships.instance_connected_to_keypair
-        target: management_keypair
       - type: cloudify.gcp.relationships.instance_connected_to_security_group
         target: management_security_group
 
@@ -197,11 +201,11 @@ node_templates:
     properties:
       cloudify_packages:
         agents:
-          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m7-RELEASE/cloudify-ubuntu-agent_3.2.0-m7-b177_amd64.deb
-          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-centos-final-agent_3.2.0-m8-b178_amd64.deb
-          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m8-RELEASE/cloudify-windows-agent_3.2.0-m8-b178_amd64.deb
+          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-agent_3.2.0-rc1-b179_amd64.deb
+          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-centos-final-agent_3.2.0-rc1-b179_amd64.deb
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-windows-agent_3.2.0-rc1-b179_amd64.deb
         docker:
-           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m7-RELEASE/cloudify-docker_3.2.0-m7-b177.tar
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-docker_3.2.0-rc1-b179.tar
 
       cloudify:
 
