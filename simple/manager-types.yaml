@@ -31,7 +31,6 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/rabbitmq/scripts/create.sh
-        configure: components/rabbitmq/scripts/configure.sh
         start: components/rabbitmq/scripts/start.sh
         stop: components/rabbitmq/scripts/stop.sh
 
@@ -57,7 +56,6 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/elasticsearch/scripts/create.sh
-        configure: components/elasticsearch/scripts/configure.sh
         start: components/elasticsearch/scripts/start.sh
         stop: components/elasticsearch/scripts/stop.sh
 
@@ -73,7 +71,6 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/logstash/scripts/create.sh
-        configure: components/logstash/scripts/configure.sh
         start: components/logstash/scripts/start.sh
         stop: components/logstash/scripts/stop.sh
 
@@ -91,7 +88,6 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/influxdb/scripts/create.sh
-        configure: components/influxdb/scripts/configure.sh
         start: components/influxdb/scripts/start.sh
         stop: components/influxdb/scripts/stop.sh
 
@@ -108,7 +104,6 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/frontend/scripts/create.sh
-        configure: components/frontend/scripts/configure.sh
         start: components/frontend/scripts/start.sh
         stop: components/frontend/scripts/stop.sh
 
@@ -130,7 +125,6 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/riemann/scripts/create.sh
-        configure: components/riemann/scripts/configure.sh
         start: components/riemann/scripts/start.sh
         stop: components/riemann/scripts/stop.sh
 
@@ -160,7 +154,6 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/restservice/scripts/create.sh
-        configure: components/restservice/scripts/configure.sh
         start: components/restservice/scripts/start.sh
         stop: components/restservice/scripts/stop.sh
 
