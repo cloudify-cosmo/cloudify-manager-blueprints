@@ -32,7 +32,6 @@ node_types:
       cloudify.interfaces.lifecycle:
         create: components/rabbitmq/scripts/create.sh
         start: components/rabbitmq/scripts/start.sh
-        # stop: components/rabbitmq/scripts/stop.sh
 
   manager.nodes.Elasticsearch:
     derived_from: cloudify.nodes.DBMS
@@ -57,7 +56,6 @@ node_types:
       cloudify.interfaces.lifecycle:
         create: components/elasticsearch/scripts/create.sh
         start: components/elasticsearch/scripts/start.sh
-        # stop: components/elasticsearch/scripts/stop.sh
 
   manager.nodes.Logstash:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -72,7 +70,6 @@ node_types:
       cloudify.interfaces.lifecycle:
         create: components/logstash/scripts/create.sh
         start: components/logstash/scripts/start.sh
-        # stop: components/logstash/scripts/stop.sh
 
   manager.nodes.InfluxDB:
     derived_from: cloudify.nodes.DBMS
@@ -89,7 +86,6 @@ node_types:
       cloudify.interfaces.lifecycle:
         create: components/influxdb/scripts/create.sh
         start: components/influxdb/scripts/start.sh
-        # stop: components/influxdb/scripts/stop.sh
 
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
@@ -105,7 +101,6 @@ node_types:
       cloudify.interfaces.lifecycle:
         create: components/frontend/scripts/create.sh
         start: components/frontend/scripts/start.sh
-        # stop: components/frontend/scripts/stop.sh
 
   manager.nodes.Riemann:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -126,7 +121,6 @@ node_types:
       cloudify.interfaces.lifecycle:
         create: components/riemann/scripts/create.sh
         start: components/riemann/scripts/start.sh
-        # stop: components/riemann/scripts/stop.sh
 
   manager.nodes.RestService:
     derived_from: cloudify.nodes.ApplicationModule
@@ -155,7 +149,6 @@ node_types:
       cloudify.interfaces.lifecycle:
         create: components/restservice/scripts/create.sh
         start: components/restservice/scripts/start.sh
-        # stop: components/restservice/scripts/stop.sh
 
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -163,7 +156,6 @@ node_types:
       cloudify.interfaces.lifecycle:
         create: components/mgmtworker/scripts/create.sh
         start: components/mgmtworker/scripts/start.sh
-        # stop: components/mgmtworker/scripts/stop.sh
 
   manager.nodes.AmqpInfluxBroker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -171,29 +163,17 @@ node_types:
       cloudify.interfaces.lifecycle:
         create: components/amqpinflux/scripts/create.sh
         start: components/amqpinflux/scripts/start.sh
-        # stop: components/amqpinflux/scripts/stop.sh
 
   # manager.nodes.FileServer:
   #   derived_from: cloudify.nodes.ApplicationServer
 
-# relationships:
+relationships:
 
-  # logstash is installed
-  # logstash config file is deployed
-  # elasticsearch host and port are retrieved
-  # elasticsearch host and port are inserted to logstash config
-  # logstash is started
   logstash_to_elasticsearch:
     derived_from: cloudify.relationships.connected_to
 
   logstash_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to
-
-  # contained_in_java_host:
-  #   derived_from: cloudify.relationships.contained_in
-  #   target_interfaces:
-  #     cloudify.interfaces.relationship_lifecycle:
-  #       preconfigure:
 
   restservice_to_elasticsearch:
     derived_from: cloudify.relationships.connected_to
@@ -204,7 +184,16 @@ node_types:
   nginx_to_webui:
     derived_from: cloudify.relationships.connected_to
 
-  riemann_to_rabbbitmq:
+  riemann_to_rabbitmq:
+    derived_from: cloudify.relationships.connected_to
+
+  riemann_to_nginx:
+    derived_from: cloudify.relationships.connected_to
+
+  mgmtworker_to_rabbitmq:
+    derived_from: cloudify.relationships.connected_to
+
+  mgmtworker_to_nginx:
     derived_from: cloudify.relationships.connected_to
 
   amqpinflux_to_rabbitmq:

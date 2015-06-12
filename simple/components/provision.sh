@@ -14,22 +14,16 @@ sudo pip install virtualenv
 virtualenv cfy
 source cfy/bin/activate
 pip install cloudify==3.2
-wget https://github.com/cloudify-cosmo/cloudify-manager-blueprints/archive/componentized-simple-manager-blueprint.tar.gz
-tar -xzvf componentized-simple-manager-blueprint.tar.gz
-cd cloudify-manager-blueprints-componentized-simple-manager-blueprint/
-cd simple/
+cd /vagrant
 # cfy local init --blueprint-path simple-manager-blueprint.yaml --inputs inputs.yaml.template
 # cfy local execute -w install
 
 
 
-cd /vagrant
 
 
 
-
-
-
+# cd /vagrant
 # components/install_manager_components.sh
 # components/start_manager_components.sh
 
@@ -46,13 +40,18 @@ cd /vagrant
 
 # mkdir -p ~/cloudify/blueprints/inputs/
 
-# cd /vagrant/components
+# wget https://github.com/cloudify-cosmo/cloudify-nodecellar-example/archive/3.2.tar.gz
+# tar -xzvf 3.2.tar.gz
+# cd cloudify-nodecellar-example-3.2/
+
 # echo '
 # host_ip: 10.10.1.10
 # agent_user: vagrant
 # agent_private_key_path: /root/.ssh/id_rsa
-# ' >> ~/cloudify/blueprints/inputs/nodecellar-singlehost.yaml
+# ' >> inputs/nodecellar-singlehost.yaml
 
+# cfy init
+# cfy use -t localhost
 # cfy blueprints upload -b nodecellar -p singlehost-blueprint.yaml
-# cfy deployments create -b nodecellar -d nodecellar --inputs ~/cloudify/blueprints/inputs/nodecellar-singlehost.yaml
+# cfy deployments create -b nodecellar -d nodecellar --inputs inputs/nodecellar-singlehost.yaml
 # cfy executions start -w install -d nodecellar

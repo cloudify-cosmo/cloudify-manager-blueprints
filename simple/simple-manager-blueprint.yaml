@@ -231,7 +231,8 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
-      - type: nginx_to_webui
+      # - type: nginx_to_webui
+      #   target: webui
       # - type: nginx_proxy_to_restservice
       #   target: restservice
 
@@ -290,6 +291,6 @@ plugins:
     install: false
     executor: central_deployment_agent
 
-outputs:
-  manager_ip:
-    value: { get_property: [manager_host, ip] }
+# outputs:
+#   manager_ip:
+#     value: { get_property: [manager_host, ip] }

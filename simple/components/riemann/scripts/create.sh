@@ -43,7 +43,7 @@ function main
 
     copy_notice "riemann"
     create_dir ${RIEMANN_LOG_PATH} && \
-    create_dir ${EXTRA_CLASSPATH} && \
+    create_dir ${LANGOHR_HOME} && \
     create_dir ${RIEMANN_CONFIG_PATH} && \
     create_dir ${RIEMANN_CONFIG_PATH}/conf.d && \
 

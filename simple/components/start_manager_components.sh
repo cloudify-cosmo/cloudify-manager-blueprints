@@ -20,14 +20,15 @@ function upload_provider_context
 
 cd /vagrant
 
-start_rabbitmq
-start_elasticsearch
-start_logstash
-start_influxdb
-start_nginx
-start_riemann
-start_restservice
-start_mgmtworker
-start_amqpinflux
-start_webui
+components/rabbitmq/scripts/start.sh
+components/elasticsearch/scripts/start.sh
+components/logstash/scripts/start.sh
+components/influxdb/scripts/start.sh
+components/frontend/scripts/start.sh
+components/riemann/scripts/start.sh
+components/restservice/scripts/start.sh
+components/mgmtworker/scripts/start.sh
+components/amqpinflux/scripts/start.sh
+sleep 5
+components/webui/scripts/start.sh
 upload_provider_context
