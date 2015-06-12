@@ -209,14 +209,16 @@ node_templates:
   elasticsearch:
     type: manager.nodes.Elasticsearch
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.contained_in
         target: java_host
 
   logstash:
     type: manager.nodes.Logstash
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.contained_in
         target: java_host
+      - type: logstash_to_elasticsearch
+        target: elasticsearch
 
   influxdb:
     type: manager.nodes.InfluxDB
@@ -229,28 +231,29 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: nginx_to_webui
       # - type: nginx_proxy_to_restservice
       #   target: restservice
 
   riemann:
     type: manager.nodes.Riemann
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.contained_in
         target: java_host
-      # - type: riemann_connected_to_rabbitmq
-      #   target: rabbitmq
-      # - type: riemann_connected_to_nginx
-      #   target: nginx
+      - type: riemann_to_rabbitmq
+        target: rabbitmq
+      - type: riemann_to_nginx
+        target: nginx
 
   restservice:
     type: manager.nodes.RestService
     relationships:
       - type: cloudify.relationships.contained_in
         target: python_host
-      # - type: restservice_connected_to_elasticsearch
-      #   target: elasticsearch
-      # - type: restservice_connected_to_rabbitmq
-      #   target: rabbitmq
+      - type: restservice_to_elasticsearch
+        target: elasticsearch
+      - type: restservice_to_rabbitmq
+        target: rabbitmq
       # - type: restservice_connected_to_fileserver
       #   target: fileserver
 
@@ -259,10 +262,10 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: python_host
-      # - type: mgmtworker_connected_to_rabbitmq
-      #   target: rabbitmq
-      # - type: mgmtworker_connected_to_nginx
-      #   target: nginx
+      - type: mgmtworker_to_rabbitmq
+        target: rabbitmq
+      - type: mgmtworker_to_nginx
+        target: nginx
       # - type: mgmtworker_connected_to_fileserver
       #   target: fileserver
 
@@ -271,10 +274,10 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: python_host
-      # - type: amqpinflux_connected_to_rabbitmq
-      #   target: rabbitmq
-      # - type: amqpinflux_connected_to_influxdb
-      #   target: influxdb
+      - type: amqpinflux_to_rabbitmq
+        target: rabbitmq
+      - type: amqpinflux_to_influxdb
+        target: influxdb
 
   # fileserver:
   #   type: manager.nodes.FileServer
