@@ -1,0 +1,140 @@
+#!/bin/sh
+
+function sys_error
+{
+    log ERROR "${1:-UNKNOWN} (status $?)"
+    # ctx logger error "${1:-UNKNOWN} (status $?)"
+    exit 1
+}
+
+function log_section
+{
+    message=$1
+
+    echo "####################################################################################"
+    echo "######################## ${message} ##########################"
+    echo "####################################################################################"
+}
+
+function log
+{
+    level=$1
+    message=$2
+    timestamp=$(date +"%Y-%m-%dT%T%z")
+
+    echo "### ${timestamp}, ${level}: ${message}"
+}
+
+function create_virtualenv
+{
+    virtualenv_path=$1
+
+    log DEBUG "Creating virtualenv ${virtualenv_path}..."
+    # ctx logger debug "Creating virtualenv ${virtualenv_path}..."
+    sudo virtualenv ${virtualenv_path}
+}
+
+function create_dir
+{
+    dir=$1
+
+    log DEBUG "Creating directory ${dir}..."
+    # ctx logger debug "Creating directory ${dir}..."
+    sudo mkdir -p ${dir}
+}
+
+function install_module
+{
+    module=$1
+    venv=${2:-""}
+
+    if [[ ! -z "${venv}" ]]; then
+        log DEBUG "Installing ${module} in virtualenv ${venv}..."
+        # ctx logger debug "Installing ${module} in virtualenv ${venv}..."
+        sudo ${venv}/bin/pip install ${module}
+    else
+        log DEBUG "Installing ${module}..."
+        # ctx logger debug "Installing ${module}..."
+        sudo pip install ${module}
+    fi
+}
+
+
+function install_rpm
+{
+    source=$1
+    if [[ -z "${source}" ]]; then
+        sys_error "Must supply url as param (install_rpm #URL#)."
+    fi
+
+    tmp_file_path="/tmp/${RANDOM}.rpm"
+    download_file ${source} ${tmp_file_path}
+    log DEBUG "Installing RPM ${tmp_file_path}..."
+    # ctx logger debug "Installing RPM ${tmp_file_path}..."
+    sudo rpm --nodeps -ivh ${tmp_file_path}
+    clean_tmp
+}
+
+function clean_tmp
+{
+    log DEBUG "Cleaning up /tmp..."
+    # ctx logger debug "Cleaning up /tmp..."
+    sudo rm -rf /tmp/*
+}
+
+function download_file
+{
+    url=$1
+    destination_path=$2
+
+    log DEBUG "Downloading ${url} to ${destination_path}..."
+    # ctx logger debug "Downloading ${url} to ${destination_path}..."
+
+    set +e
+    curl_cmd=$(which curl)
+    wget_cmd=$(which wget)
+    set -e
+
+    if [[ ! -z ${curl_cmd} ]]; then
+        curl --fail -L --location ${url} --create-dirs -o ${destination_path}
+    elif [[ ! -z ${wget_cmd} ]]; then
+        wget -O ${destination_path} ${url}
+    else
+        # ctx logger error "Failed to download ${url}: Neither 'cURL' nor 'wget' were found on the system"
+        sys_error "Failed to download ${url}: Neither 'cURL' nor 'wget' were found on the system"
+    fi
+}
+
+function check_empty_var
+{
+    var=$1
+    message=$2
+
+    if [[ -z "${var}" ]]; then
+        sys_error "${message}"
+    fi
+}
+
+function copy_notice
+{
+    service=$1
+
+    log INFO "Copying ${service} NOTICE file..."
+    # ctx logger info "Copying Elasticsearch NOTICE file..."
+    sudo cp components/${service}/NOTICE.txt /opt/${service}_NOTICE.txt
+    # ctx download-resource elasticsearch/ELASTICSEARCH_NOTICE.txt '@{"target_path": "/opt/ELASTICSEARCH_NOTICE.txt"}'
+}
+
+function wait_for_port
+{
+    c=0
+    while ! echo exit | curl http://localhost:$1;
+    do
+            if [[ $c -gt 24 ]]; then
+                sys_error "Failed to connect to service... (status $?)"
+            fi
+            echo "host not up yet... retrying... ($c/24)"
+            sleep 5;
+            c=$((c+1))
+    done
+}

@@ -125,68 +125,68 @@ node_templates:
       install_agent: false
       ip: { get_input: public_ip }
 
-  manager:
-    type: cloudify.nodes.CloudifyManager
-    properties:
-      cloudify_packages:
-        agents:
-          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-ubuntu-agent_3.3.0-m1-b270_amd64.deb
-          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-centos-final-agent_3.3.0-m1-b270_amd64.deb
-          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-windows-agent_3.3.0-m1-b270_amd64.deb
-        docker:
-           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-docker_3.3.0-m1-b270.tar
+  # manager:
+  #   type: cloudify.nodes.CloudifyManager
+  #   properties:
+  #     cloudify_packages:
+  #       agents:
+  #         ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-ubuntu-agent_3.3.0-m1-b270_amd64.deb
+  #         centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-centos-final-agent_3.3.0-m1-b270_amd64.deb
+  #         windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-windows-agent_3.3.0-m1-b270_amd64.deb
+  #       docker:
+  #          docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-docker_3.3.0-m1-b270.tar
 
-      cloudify:
-        resources_prefix: { get_input: resources_prefix }
+  #     cloudify:
+  #       resources_prefix: { get_input: resources_prefix }
 
-        cloudify_agent:
-          min_workers: 0
-          max_workers: 5
-          remote_execution_port: 22
-          user: { get_input: agents_user }
+  #       cloudify_agent:
+  #         min_workers: 0
+  #         max_workers: 5
+  #         remote_execution_port: 22
+  #         user: { get_input: agents_user }
 
-        workflows:
-          task_retries: -1  # this means forever
-          task_retry_interval: 30
+  #       workflows:
+  #         task_retries: -1  # this means forever
+  #         task_retry_interval: 30
 
-        policy_engine:
-          start_timeout: 30
+  #       policy_engine:
+  #         start_timeout: 30
 
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        start:
-          implementation: fabric.fabric_plugin.tasks.run_module_task
-          inputs:
-            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
-            task_properties:
-              cloudify_packages: { get_property: [manager, cloudify_packages] }
-              agent_local_key_path: { get_input: ssh_key_filename }
-              manager_private_ip: { get_input: private_ip }
-            fabric_env:
-              user: { get_input: ssh_user }
-              key_filename: { get_input: ssh_key_filename }
-        stop:
-          implementation: fabric.fabric_plugin.tasks.run_module_task
-          inputs:
-            task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
-            fabric_env:
-              user: { get_input: ssh_user }
-              key_filename: { get_input: ssh_key_filename }
-        delete:
-          implementation: fabric.fabric_plugin.tasks.run_module_task
-          inputs:
-            task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
-            fabric_env:
-              user: { get_input: ssh_user }
-              key_filename: { get_input: ssh_key_filename }
-      cloudify.interfaces.validation:
-        creation:
-          implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
-          inputs:
-            cloudify_packages: { get_property: [manager, cloudify_packages] }
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: manager_host
+  #   interfaces:
+  #     cloudify.interfaces.lifecycle:
+  #       start:
+  #         implementation: fabric.fabric_plugin.tasks.run_module_task
+  #         inputs:
+  #           task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
+  #           task_properties:
+  #             cloudify_packages: { get_property: [manager, cloudify_packages] }
+  #             agent_local_key_path: { get_input: ssh_key_filename }
+  #             manager_private_ip: { get_input: private_ip }
+  #           fabric_env:
+  #             user: { get_input: ssh_user }
+  #             key_filename: { get_input: ssh_key_filename }
+  #       stop:
+  #         implementation: fabric.fabric_plugin.tasks.run_module_task
+  #         inputs:
+  #           task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
+  #           fabric_env:
+  #             user: { get_input: ssh_user }
+  #             key_filename: { get_input: ssh_key_filename }
+  #       delete:
+  #         implementation: fabric.fabric_plugin.tasks.run_module_task
+  #         inputs:
+  #           task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
+  #           fabric_env:
+  #             user: { get_input: ssh_user }
+  #             key_filename: { get_input: ssh_key_filename }
+  #     cloudify.interfaces.validation:
+  #       creation:
+  #         implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+  #         inputs:
+  #           cloudify_packages: { get_property: [manager, cloudify_packages] }
 
   python_host:
     type: manager.nodes.PythonHost
@@ -229,58 +229,58 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
-      - type: nginx_proxy_to_restservice
-        target: restservice
+      # - type: nginx_proxy_to_restservice
+      #   target: restservice
 
   riemann:
     type: manager.nodes.Riemann
     relationships:
       - type: cloudify.relationships.depends_on
         target: java_host
-      - type: riemann_connected_to_rabbitmq
-        target: rabbitmq
-      - type: riemann_connected_to_nginx
-        target: nginx
+      # - type: riemann_connected_to_rabbitmq
+      #   target: rabbitmq
+      # - type: riemann_connected_to_nginx
+      #   target: nginx
 
   restservice:
     type: manager.nodes.RestService
     relationships:
       - type: cloudify.relationships.contained_in
         target: python_host
-      - type: restservice_connected_to_elasticsearch
-        target: elasticsearch
-      - type: restservice_connected_to_rabbitmq
-        target: rabbitmq
-      - type: restservice_connected_to_fileserver
-        target: fileserver
+      # - type: restservice_connected_to_elasticsearch
+      #   target: elasticsearch
+      # - type: restservice_connected_to_rabbitmq
+      #   target: rabbitmq
+      # - type: restservice_connected_to_fileserver
+      #   target: fileserver
 
   mgmtworker:
     type: manager.nodes.ManagementWorker
     relationships:
       - type: cloudify.relationships.contained_in
         target: python_host
-      - type: mgmtworker_connected_to_rabbitmq
-        target: rabbitmq
-      - type: mgmtworker_connected_to_nginx
-        target: nginx
-      - type: mgmtworker_connected_to_fileserver
-        target: fileserver
+      # - type: mgmtworker_connected_to_rabbitmq
+      #   target: rabbitmq
+      # - type: mgmtworker_connected_to_nginx
+      #   target: nginx
+      # - type: mgmtworker_connected_to_fileserver
+      #   target: fileserver
 
   amqpinflux:
     type: manager.nodes.AmqpInfluxBroker
     relationships:
       - type: cloudify.relationships.contained_in
         target: python_host
-      - type: amqpinflux_connected_to_rabbitmq
-        target: rabbitmq
-      - type: amqpinflux_connected_to_influxdb
-        target: influxdb
+      # - type: amqpinflux_connected_to_rabbitmq
+      #   target: rabbitmq
+      # - type: amqpinflux_connected_to_influxdb
+      #   target: influxdb
 
-  fileserver:
-    type: manager.nodes.FileServer
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: nginx
+  # fileserver:
+  #   type: manager.nodes.FileServer
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: nginx
 
 plugins:
   cli:

@@ -1,0 +1,227 @@
+#!/bin/bash
+
+if [[ "$(uname)" == 'Darwin' ]]; then
+    DOCKER_HOST_IP=$(boot2docker ssh ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
+    DOCKER_EXT_IP=$(boot2docker ip)
+  else
+    DOCKER_HOST_IP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
+    DOCKER_EXT_IP="127.0.0.1"
+fi
+
+printf "docker bridge ip: $DOCKER_HOST_IP\n"
+printf "docker external ip: $DOCKER_EXT_IP\n"
+
+function run_elasticsearch
+{
+  # elasticsearchdata
+  docker run --name="cloudify_elasticsearchdata" \
+             docker_elasticsearch \
+             echo ELASTICSEARCHDATA
+  # elasticsearch
+  docker run -d --hostname="elasticsearch" \
+                --name="cloudify_elasticsearch" \
+                --publish=9200:9200 \
+                --restart="always" \
+                --volumes-from cloudify_elasticsearchdata \
+                docker_elasticsearch
+}
+
+function run_rabbitmq
+{
+  docker run -d --hostname="rabbitmq" \
+                --name="cloudify_rabbitmq" \
+                --publish=5672:5672 \
+                --restart="always" \
+                docker_rabbitmq
+}
+
+function run_influxdb
+{
+  # influxdbdata
+  docker run --name="cloudify_influxdbdata" \
+             docker_influxdb \
+             echo INFLUXDBDATA
+  # influxdb
+  docker run -d --hostname="influxdb" \
+                --name="cloudify_influxdb" \
+                --publish=8083:8083 \
+                --publish=8086:8086 \
+                --restart="always" \
+                --volumes-from cloudify_influxdbdata \
+                docker_influxdb
+}
+
+function run_logstash
+{
+  docker run -d --add-host=elasticsearch:${DOCKER_HOST_IP} \
+                --add-host=rabbitmq:${DOCKER_HOST_IP} \
+                --hostname="logstash" \
+                --name="cloudify_logstash" \
+                --publish=9999:9999 \
+                --restart="always" \
+                docker_logstash
+}
+
+function run_kibana
+{
+  docker run -d --add-host=elasticsearch:${DOCKER_HOST_IP} \
+                --hostname="kibana" \
+                --name="cloudify_kibana" \
+                --publish=5601:5601 \
+                --restart="always" \
+                docker_kibana
+}
+
+function run_metrics_broker
+{
+  docker run -d --add-host=influxdb:${DOCKER_HOST_IP} \
+                --add-host=rabbitmq:${DOCKER_HOST_IP} \
+                --hostname="amqpinflux" \
+                --name="cloudify_amqpinflux" \
+                --restart="always" \
+                docker_amqpinflux
+}
+
+function run_frontend
+{
+  # frontend
+  docker run -d --add-host=fileserver:${DOCKER_HOST_IP} \
+                --add-host=restservice:${DOCKER_HOST_IP} \
+                --add-host=webui:${DOCKER_HOST_IP} \
+                --hostname="frontend" \
+                --name="cloudify_frontend" \
+                --publish=80:80 \
+                --publish=53229:53229 \
+                --restart="always" \
+                --volumes-from cloudify_fileserver \
+                --volumes-from cloudify_webui \
+                docker_frontend
+}
+
+function run_webui
+{
+  # webui
+  docker run -d --name="cloudify_webui" \
+                --hostname="webui" \
+                --publish=9001:9001 \
+                --add-host=frontend:${DOCKER_HOST_IP} \
+                --add-host=influxdb:${DOCKER_HOST_IP} \
+                --restart="always" \
+                --volume=/opt/cloudify-ui \
+                docker_webui
+}
+
+function run_restservice
+{
+  # restservice
+  docker run -d --name="cloudify_restservice" \
+                --hostname="restservice" \
+                --add-host=rabbitmq:${DOCKER_HOST_IP} \
+                --add-host=elasticsearch:${DOCKER_HOST_IP} \
+                --add-host=fileserver:${DOCKER_HOST_IP} \
+                --publish=8100:8100 \
+                --restart="always" \
+                --volumes-from cloudify_fileserver \
+                docker_restservice
+}
+
+function run_fileserver
+{
+  # fileserver
+  docker run -d --name="cloudify_fileserver" \
+                --volume=/opt/manager/resources \
+                docker_fileserver
+}
+
+function run_riemann
+{
+  # riemanndata
+  docker run --name="cloudify_riemanndata" \
+             docker_riemann \
+             echo RIEMANNDATA
+  # riemann
+  docker run -d --add-host=rabbitmq:${DOCKER_HOST_IP} \
+                --add-host=frontend:${DOCKER_HOST_IP} \
+                --hostname="riemann" \
+                --name="cloudify_riemann" \
+                --restart="always" \
+                --volumes-from cloudify_riemanndata \
+                --volumes-from cloudify_mgmtdata \
+                docker_riemann
+}
+
+function run_mgmtworker
+{
+  # mgmtworkerdata
+  docker run --name="cloudify_mgmtdata" \
+             --volume /root \
+             --volume /opt/riemann \
+             docker_mgmtworker \
+             echo mgmt data container
+
+  # mgmtworker
+  docker run -d --add-host=rabbitmq:${DOCKER_HOST_IP} \
+                --add-host=frontend:${DOCKER_HOST_IP} \
+                --add-host=fileserver:${DOCKER_HOST_IP} \
+                --env="MANAGEMENT_IP=${DOCKER_HOST_IP}" \
+                --hostname="mgmtworker" \
+                --name="cloudify_mgmtworker" \
+                --restart="always" \
+                --volumes-from cloudify_mgmtdata \
+                docker_mgmtworker
+}
+
+function run_logio
+{
+  docker run -d --name="cloudify_logio" \
+             --publish=28778:28778 \
+             docker_logio
+}
+
+function run_targethost
+{
+  docker run -d --name="cloudify_targethost" \
+            docker_targethost
+}
+
+function upload_context
+{
+  sleep 5 &&
+  type curl >/dev/null 2>&1 || { echo >&2 "Curl not installed.  Aborting."; exit 1; }
+  if [[ -a "provider_context" ]] ; then
+    curl --fail --request POST --data @provider_context http://${DOCKER_EXT_IP}/provider/context --header "Content-Type:application/json"
+  else
+    printf "provider_context not found, Aborting.\n"; exit 1;
+  fi
+}
+
+if [ "$1" == "elk" ]; then
+  run_rabbitmq
+  run_elasticsearch
+  run_logstash
+  run_kibana
+elif [ "$1" == "mon" ]; then
+  run_rabbitmq
+  run_metrics_broker
+  run_influxdb
+elif [ "$1" == "frontend" ]; then
+  run_rabbitmq
+  run_elasticsearch
+  run_fileserver
+  run_webui
+  run_frontend
+  run_mgmtworker
+else
+  run_elasticsearch
+  run_rabbitmq
+  run_influxdb
+  run_logstash
+  run_metrics_broker
+  run_webui
+  run_fileserver
+  run_restservice
+  run_frontend
+  run_mgmtworker
+  run_riemann
+  upload_context
+fi
