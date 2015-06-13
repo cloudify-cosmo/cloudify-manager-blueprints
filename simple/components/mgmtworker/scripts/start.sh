@@ -17,23 +17,18 @@ export CELERY_RESULT_BACKEND="amqp"
 export C_FORCE_ROOT=true
 
 
-function main
-{
-    sudo -E ${VIRTUALENV_DIR}/bin/celery worker \
-    -Ofair \
-    --include=cloudify_system_workflows.deployment_environment,plugin_installer.tasks,worker_installer.tasks,riemann_controller.tasks,cloudify.plugins.workflows \
-    --broker=${BROKER_URL} \
-    --hostname celery.cloudify.management \
-    --events \
-    --app=cloudify \
-    --loglevel=debug \
-    --queues=cloudify.management \
-    --logfile=${CELERY_LOG_DIR}/cloudify.management_worker.log \
-    --pidfile=${CELERY_LOG_DIR}/cloudify.management_worker.pid \
-    --autoscale=5,2 \
-    --without-gossip \
-    --without-mingle &
-    # sudo ${MGMTWORKER_HOME}/startup.sh
-}
-
-main
+sudo -E ${VIRTUALENV_DIR}/bin/celery worker \
+-Ofair \
+--include=cloudify_system_workflows.deployment_environment,plugin_installer.tasks,worker_installer.tasks,riemann_controller.tasks,cloudify.plugins.workflows \
+--broker=${BROKER_URL} \
+--hostname celery.cloudify.management \
+--events \
+--app=cloudify \
+--loglevel=debug \
+--queues=cloudify.management \
+--logfile=${CELERY_LOG_DIR}/cloudify.management_worker.log \
+--pidfile=${CELERY_LOG_DIR}/cloudify.management_worker.pid \
+--autoscale=5,2 \
+--without-gossip \
+--without-mingle &
+# sudo ${MGMTWORKER_HOME}/startup.sh

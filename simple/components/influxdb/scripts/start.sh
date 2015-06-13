@@ -2,9 +2,4 @@
 
 INFLUXDB_HOME="/opt/influxdb"
 
-function main
-{
-    sudo /usr/bin/influxdb-daemon -config=${INFLUXDB_HOME}/shared/config.toml
-}
-
-main
+sudo /usr/bin/influxdb -config=${INFLUXDB_HOME}/shared/config.toml &

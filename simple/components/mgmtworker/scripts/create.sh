@@ -1,18 +1,18 @@
 #!/bin/bash
 
+# CELERY_VERSION=$(ctx node properties celery_version)
 CELERY_VERSION="3.1.17"
-REST_CLIENT_VERSION="3.2"
-PLUGINS_COMMON_VERSION="3.2"
-SCRIPT_PLUGIN_VERSION="1.2"
-REST_SERVICE_VERSION="3.2"
-
 # REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_source_url)
+REST_CLIENT_VERSION="3.2"
 REST_CLIENT_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-rest-client/archive/${REST_CLIENT_VERSION}.zip"
 # PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_source_url)
+PLUGINS_COMMON_VERSION="3.2"
 PLUGINS_COMMON_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/${PLUGINS_COMMON_VERSION}.zip"
 # SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_source_url)
+SCRIPT_PLUGIN_VERSION="1.2"
 SCRIPT_PLUGIN_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/${SCRIPT_PLUGIN_VERSION}.zip"
 # REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_source_url)
+REST_SERVICE_VERSION="3.2"
 REST_SERVICE_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-manager/archive/${REST_SERVICE_VERSION}.tar.gz"
 
 

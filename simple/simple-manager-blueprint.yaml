@@ -5,6 +5,9 @@ imports:
   - http://www.getcloudify.org/spec/fabric-plugin/1.3m1/plugin.yaml
   - manager-types.yaml
 
+
+
+
 inputs:
 
   public_ip:
@@ -54,6 +57,10 @@ inputs:
   securest_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz
+
+  amqpinflux_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.2.tar.gz
 
   # Python Related Inputs
   pip_version:
@@ -117,6 +124,22 @@ inputs:
     type: string
     default: https://aphyr.com/riemann/riemann-0.2.6-1.noarch.rpm
 
+  # Rest Service Related Inputs
+  rest_service_port:
+    type: integer
+    default: 8100
+
+  gunicorn_workers:
+    type: integer
+    default: ''
+
+  # Management Worker Related Inputs
+  celery_version:
+    type: string
+    default: 3.1.17
+
+
+
 
 node_templates:
   manager_host:
@@ -124,6 +147,104 @@ node_templates:
     properties:
       install_agent: false
       ip: { get_input: public_ip }
+
+  python_host:
+    type: manager.nodes.PythonHost
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+
+  java_host:
+    type: manager.nodes.JavaHost
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+
+  rabbitmq:
+    type: manager.nodes.RabbitMQ
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+
+  elasticsearch:
+    type: manager.nodes.Elasticsearch
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: java_host
+
+  logstash:
+    type: manager.nodes.Logstash
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: java_host
+      - type: logstash_to_elasticsearch
+        target: elasticsearch
+
+  # influxdb:
+  #   type: manager.nodes.InfluxDB
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: manager_host
+
+  nginx:
+    type: manager.nodes.Nginx
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      # - type: nginx_to_webui
+      #   target: webui
+      # - type: nginx_proxy_to_restservice
+      #   target: restservice
+
+  riemann:
+    type: manager.nodes.Riemann
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: java_host
+      - type: riemann_to_rabbitmq
+        target: rabbitmq
+      - type: riemann_to_nginx
+        target: nginx
+
+  restservice:
+    type: manager.nodes.RestService
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: python_host
+      - type: restservice_to_elasticsearch
+        target: elasticsearch
+      - type: restservice_to_rabbitmq
+        target: rabbitmq
+      # - type: restservice_connected_to_fileserver
+      #   target: fileserver
+
+  mgmtworker:
+    type: manager.nodes.ManagementWorker
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: python_host
+      - type: mgmtworker_to_rabbitmq
+        target: rabbitmq
+      - type: mgmtworker_to_nginx
+        target: nginx
+      # - type: mgmtworker_connected_to_fileserver
+      #   target: fileserver
+
+  # amqpinflux:
+  #   type: manager.nodes.AmqpInfluxBroker
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: python_host
+  #     - type: amqpinflux_to_rabbitmq
+  #       target: rabbitmq
+  #     - type: amqpinflux_to_influxdb
+  #       target: influxdb
+
+  # fileserver:
+  #   type: manager.nodes.FileServer
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: nginx
 
   # manager:
   #   type: cloudify.nodes.CloudifyManager
@@ -188,109 +309,11 @@ node_templates:
   #         inputs:
   #           cloudify_packages: { get_property: [manager, cloudify_packages] }
 
-  python_host:
-    type: manager.nodes.PythonHost
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-
-  java_host:
-    type: manager.nodes.JavaHost
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-
-  rabbitmq:
-    type: manager.nodes.RabbitMQ
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-
-  elasticsearch:
-    type: manager.nodes.Elasticsearch
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: java_host
-
-  logstash:
-    type: manager.nodes.Logstash
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: java_host
-      - type: logstash_to_elasticsearch
-        target: elasticsearch
-
-  influxdb:
-    type: manager.nodes.InfluxDB
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-
-  nginx:
-    type: manager.nodes.Nginx
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      # - type: nginx_to_webui
-      #   target: webui
-      # - type: nginx_proxy_to_restservice
-      #   target: restservice
-
-  riemann:
-    type: manager.nodes.Riemann
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: java_host
-      - type: riemann_to_rabbitmq
-        target: rabbitmq
-      - type: riemann_to_nginx
-        target: nginx
-
-  restservice:
-    type: manager.nodes.RestService
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: python_host
-      - type: restservice_to_elasticsearch
-        target: elasticsearch
-      - type: restservice_to_rabbitmq
-        target: rabbitmq
-      # - type: restservice_connected_to_fileserver
-      #   target: fileserver
-
-  mgmtworker:
-    type: manager.nodes.ManagementWorker
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: python_host
-      - type: mgmtworker_to_rabbitmq
-        target: rabbitmq
-      - type: mgmtworker_to_nginx
-        target: nginx
-      # - type: mgmtworker_connected_to_fileserver
-      #   target: fileserver
-
-  amqpinflux:
-    type: manager.nodes.AmqpInfluxBroker
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: python_host
-      - type: amqpinflux_to_rabbitmq
-        target: rabbitmq
-      - type: amqpinflux_to_influxdb
-        target: influxdb
-
-  # fileserver:
-  #   type: manager.nodes.FileServer
-  #   relationships:
-  #     - type: cloudify.relationships.contained_in
-  #       target: nginx
-
 plugins:
   cli:
     install: false
     executor: central_deployment_agent
 
-# outputs:
-#   manager_ip:
-#     value: { get_property: [manager_host, ip] }
+outputs:
+  manager_ip:
+    value: { get_property: [manager_host, ip] }

@@ -1,11 +1,10 @@
 #!/bin/bash
 
-AMQPINFLUX_VERSION="3.2"
-AMQP_HOST="localhost"
-INFLUXDB_HOST="localhost"
 AMQPINFLUX_HOME="/opt/amqpinflux"
 AMQPINFLUX_VIRTUALENV_DIR="${AMQPINFLUX_HOME}/env"
+
 # AMQPINFLUX_SOURCE_URL=$(ctx node properties amqpinflux_source_url)
+AMQPINFLUX_VERSION="3.2"
 AMQPINFLUX_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/${AMQPINFLUX_VERSION}.zip"
 
 

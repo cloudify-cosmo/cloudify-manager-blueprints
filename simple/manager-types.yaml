@@ -145,6 +145,10 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: rest_service_source_url }
+      gunicorn_workers:
+        description: Number of workers Gunicorn loads up with
+        type: integer
+        default: { get_input: gunicorn_workers }
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/restservice/scripts/create.sh
@@ -152,6 +156,27 @@ node_types:
 
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
+    properties:
+      celery_version:
+        description: Celery version to use
+        type: string
+        default: { get_input: celery_version }
+      rest_client_module_source_url:
+        description: REST Client module Source URL
+        type: string
+        default: { get_input: rest_client_source_url }
+      plugins_common_module_source_url:
+        description: Plugins Common module Source URL
+        type: string
+        default: { get_input: plugins_common_source_url }
+      script_plugin_source_url:
+        description: Script Plugin module Source URL
+        type: string
+        default: { get_input: securest_source_url }
+      rest_service_module_source_url:
+        description: REST Service module Source URL
+        type: string
+        default: { get_input: rest_service_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/mgmtworker/scripts/create.sh
@@ -159,6 +184,11 @@ node_types:
 
   manager.nodes.AmqpInfluxBroker:
     derived_from: cloudify.nodes.ApplicationModule
+    properties:
+      amqpinflux_module_source_url:
+        description: AMQP to InfluxDB Broker Source URL
+        type: string
+        default: { get_input: amqpinflux_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/amqpinflux/scripts/create.sh

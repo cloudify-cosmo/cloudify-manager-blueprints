@@ -3,9 +3,4 @@
 LOGSTASH_HOME="/opt/logstash"
 LOGSTASH_LOG_PATH="/var/log/cloudify/logstash"
 
-function main
-{
-    sudo ${LOGSTASH_HOME}/bin/logstash -f ${LOGSTASH_HOME}/logstash.conf -l ${LOGSTASH_LOG}/logstash.log --verbose &
-}
-
-main
+sudo ${LOGSTASH_HOME}/bin/logstash -f ${LOGSTASH_HOME}/logstash.conf -l ${LOGSTASH_LOG}/logstash.log --verbose &
