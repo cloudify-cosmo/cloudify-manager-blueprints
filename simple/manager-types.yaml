@@ -160,7 +160,7 @@ node_types:
       celery_version:
         description: Celery version to use
         type: string
-        default: { get_input: celery_version }
+        default: 3.1.17
       rest_client_module_source_url:
         description: REST Client module Source URL
         type: string
@@ -194,9 +194,37 @@ node_types:
         create: components/amqpinflux/scripts/create.sh
         start: components/amqpinflux/scripts/start.sh
 
-  # manager.nodes.FileServer:
-  #   derived_from: cloudify.nodes.ApplicationServer
+  manager.nodes.WebUI:
+    derived_from: cloudify.nodes.ApplicationModule
+    properties:
+      webui_tar_source_url:
+        description: Cloudify's WebUI Source URL
+        type: string
+        default: { get_input: webui_source_url }
+      grafana_tar_source_url:
+        description: Cloudify's Grafana Source URL
+        type: string
+        default: { get_input: grafana_source_url }
+      nodejs_tar_source_url:
+        description: NodeJS tgz Source URL
+        type: string
+        default: { get_input: nodejs_source_url }
+      webui_backend_port:
+        description: Port to the WebUI's backend
+        type: integer
+        default: { get_input: webui_backend_port }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/webui/scripts/create.sh
+        start: components/webui/scripts/start.sh
 
+
+
+######################################################################
+# The relationships don't provide any configuration related
+# functionality but are rather here just to provide the dependency
+# graph. Host configuration for all components assumes "localhost"
+######################################################################
 relationships:
 
   logstash_to_elasticsearch:
@@ -235,3 +263,5 @@ relationships:
   restservice_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to
 
+  webui_to_influxdb:
+    derived_from: cloudify.relationships.connected_to

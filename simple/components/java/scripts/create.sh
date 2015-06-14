@@ -1,5 +1,6 @@
 #!/bin/bash
 
+JAVA_DOWNLOAD_URL="http://javadl.sun.com/webapps/download/AutoDL?BundleId=106239"
 
 function import_helpers
 {
@@ -14,7 +15,7 @@ function import_helpers
 
 function main
 {
-    log_section "Installing Java..."
+    ctx logger info "Installing Java..."
 
     copy_notice "java" &&
 
@@ -23,7 +24,8 @@ function main
     # export JAVA_HOME=/opt/java
     # sudo curl --fail --location --header "Cookie: oraclelicense=accept-securebackup-cookie" --create-dirs -o /tmp/java.tar.gz http://download.oracle.com/otn-pub/java/jdk/${JAVABASE_VERSION}-b13/jre-${JAVABASE_VERSION}-linux-x64.tar.gz &&
     # sudo mkdir ${JAVA_HOME} && sudo tar -xzvf /tmp/java.tar.gz -C ${JAVA_HOME} --strip=1 &&
-    sudo curl --fail --location --header "Cookie: oraclelicense=accept-securebackup-cookie" http://javadl.sun.com/webapps/download/AutoDL?BundleId=106239 --create-dirs -o /tmp/java.rpm && \
+    ctx logger info "Downloading java from: ${JAVA_DOWNLOAD_URL}..."
+    sudo curl --fail --location --header "Cookie: oraclelicense=accept-securebackup-cookie" ${JAVA_DOWNLOAD_URL} --create-dirs -o /tmp/java.rpm && \
     sudo rpm -ivh /tmp/java.rpm && \
     clean_tmp
 }

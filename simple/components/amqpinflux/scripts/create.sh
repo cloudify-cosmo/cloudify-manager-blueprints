@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/bash -e
 
-AMQPINFLUX_HOME="/opt/amqpinflux"
-AMQPINFLUX_VIRTUALENV_DIR="${AMQPINFLUX_HOME}/env"
+export AMQPINFLUX_HOME="/opt/amqpinflux"
+export AMQPINFLUX_VIRTUALENV_DIR="${AMQPINFLUX_HOME}/env"
 
 # AMQPINFLUX_SOURCE_URL=$(ctx node properties amqpinflux_source_url)
-AMQPINFLUX_VERSION="3.2"
-AMQPINFLUX_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/${AMQPINFLUX_VERSION}.zip"
+export AMQPINFLUX_VERSION="3.2"
+export AMQPINFLUX_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/${AMQPINFLUX_VERSION}.zip"
 
 
 function import_helpers
@@ -21,7 +21,7 @@ function import_helpers
 
 function main
 {
-    log_section "Installing AQMPInflux..."
+    ctx logger info "Installing AQMPInflux..."
 
     copy_notice "amqpinflux" && \
     create_dir "${AMQPINFLUX_HOME}" && \

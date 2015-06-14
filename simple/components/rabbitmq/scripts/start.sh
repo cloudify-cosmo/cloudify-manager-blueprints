@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/bin/bash -e
 
 sudo rabbitmq-server -detached

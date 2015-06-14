@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/bin/bash -e
 
-RABBITMQ_VERSION="3.5.3"
-ERLANG_VERSION="17.4"
-RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
-# ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)
-ERLANG_SOURCE_URL="http://www.rabbitmq.com/releases/erlang/erlang-${ERLANG_VERSION}-1.el6.x86_64.rpm"
-# RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)
-RABBITMQ_SOURCE_URL="http://www.rabbitmq.com/releases/rabbitmq-server/v${RABBITMQ_VERSION}/rabbitmq-server-${RABBITMQ_VERSION}-1.noarch.rpm"
+export RABBITMQ_VERSION="3.5.3"
+export ERLANG_VERSION="17.4"
+export RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
+export ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)
+# export ERLANG_SOURCE_URL="http://www.rabbitmq.com/releases/erlang/erlang-${ERLANG_VERSION}-1.el6.x86_64.rpm"
+export RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)
+# export RABBITMQ_SOURCE_URL="http://www.rabbitmq.com/releases/rabbitmq-server/v${RABBITMQ_VERSION}/rabbitmq-server-${RABBITMQ_VERSION}-1.noarch.rpm"
 
 
 function import_helpers
@@ -22,12 +22,12 @@ function import_helpers
 
 function main
 {
-    log_section "Installing RabbitMQ..."
+    ctx logger info "Installing RabbitMQ..."
 
     copy_notice "rabbitmq" && \
     create_dir "${RABBITMQ_LOG_BASE}" && \
 
-    log DEBUG "Installing logrotate"
+    ctx logger info "Installing logrotate"
     sudo yum install logrotate -y && \
     install_rpm ${ERLANG_SOURCE_URL} && \
     install_rpm ${RABBITMQ_SOURCE_URL} && \
@@ -37,21 +37,21 @@ function main
     # sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
     # sudo yum install /tmp/rabbitmq.rpm -y
 
-    log DEBUG "Starting RabbitMQ Server in Daemonized mode..."
+    ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
     sudo rabbitmq-server -detached && \
 
-    log DEBUG "Enabling RabbitMQ Plugins..."
+    ctx logger info "Enabling RabbitMQ Plugins..."
     sudo rabbitmq-plugins enable rabbitmq_management && \
     sudo rabbitmq-plugins enable rabbitmq_tracing && \
 
     # enable guest user access where cluster not on localhost
-    log DEBUG "Enabling RabbitMQ user access..."
+    ctx logger info "Enabling RabbitMQ user access..."
     echo "[{rabbit, [{loopback_users, []}]}]." | sudo tee --append /etc/rabbitmq/rabbitmq.config && \
 
-    log DEBUG "Chowning RabbitMQ Log Path..."
+    ctx logger info "Chowning RabbitMQ Log Path..."
     sudo chown rabbitmq:rabbitmq ${RABBITMQ_LOG_BASE} && \
 
-    log DEBUG "Killing RabbitMQ..."
+    ctx logger info "Killing RabbitMQ..."
     sudo pkill -f rabbitmq
 }
 

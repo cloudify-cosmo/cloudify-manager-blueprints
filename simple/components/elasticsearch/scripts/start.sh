@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/bin/bash -e
 
-ELASTICSEARCH_HOME="/opt/elasticsearch"
+export ELASTICSEARCH_HOME="/opt/elasticsearch"
 
-sudo ${ELASTICSEARCH_HOME}/bin/elasticsearch -d
+sudo -E ${ELASTICSEARCH_HOME}/bin/elasticsearch -d

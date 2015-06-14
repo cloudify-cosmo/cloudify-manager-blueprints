@@ -14,9 +14,11 @@ sudo pip install virtualenv
 virtualenv cfy
 source cfy/bin/activate
 pip install cloudify==3.2
-cd /vagrant
-cfy local init --blueprint-path simple-manager-blueprint.yaml --inputs inputs.yaml.template
-cfy local execute -w install
+
+# cd /vagrant
+# source ~/cfy/bin/activate
+# cfy local init --blueprint-path simple-manager-blueprint.yaml --inputs inputs.yaml.template
+# cfy local execute -w install -v
 
 
 

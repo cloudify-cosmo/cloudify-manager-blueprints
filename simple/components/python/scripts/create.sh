@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/bash -e
 
-# PIP_VERSION=$(ctx node properties pip_version)
-PIP_VERSION=${PIP_VERSION}
-# VIRTUALENV_VERSION=$(ctx node properties virtualenv_version)
-VIRTUALENV_VERSION=${VIRTUALENV_VERSION}
+export PIP_VERSION=$(ctx node properties pip_version)
+# export PIP_VERSION=${PIP_VERSION}
+export VIRTUALENV_VERSION=$(ctx node properties virtualenv_version)
+# export VIRTUALENV_VERSION=${VIRTUALENV_VERSION}
 
 
 function import_helpers
@@ -39,7 +39,7 @@ function install_python
 
 function install_virtualenv
 {
-    log_section "Installing Python Requirements..."
+    ctx logger info "Installing Python Requirements..."
 
     version=${1:-""}
 
@@ -57,7 +57,6 @@ function install_pip
     curl --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python
     if [[ ! -z "${version}" ]]; then
         install_module "pip==${version} --upgrade"
-        # sudo pip install pip==${version}
     fi
 }
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 export MGMTWORKER_HOME="/opt/mgmtworker"
 export VIRTUALENV_DIR="${MGMTWORKER_HOME}/env"
@@ -17,6 +17,7 @@ export CELERY_RESULT_BACKEND="amqp"
 export C_FORCE_ROOT=true
 
 
+ctx logger info "Starting Management Worker..."
 sudo -E ${VIRTUALENV_DIR}/bin/celery worker \
 -Ofair \
 --include=cloudify_system_workflows.deployment_environment,plugin_installer.tasks,worker_installer.tasks,riemann_controller.tasks,cloudify.plugins.workflows \
@@ -30,5 +31,5 @@ sudo -E ${VIRTUALENV_DIR}/bin/celery worker \
 --pidfile=${CELERY_LOG_DIR}/cloudify.management_worker.pid \
 --autoscale=5,2 \
 --without-gossip \
---without-mingle &
+--without-mingle > /dev/null 2>&1 &
 # sudo ${MGMTWORKER_HOME}/startup.sh

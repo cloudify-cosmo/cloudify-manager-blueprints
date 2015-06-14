@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/bin/bash -e
 
-LOGSTASH_VERSION="1.4.2"
-LOGSTASH_HOME="/opt/logstash"
-LOGSTASH_LOG_PATH="/var/log/cloudify/logstash"
-# LOGSTASH_SOURCE_URL=$(ctx node properties logstash_tar_source_url)
-LOGSTASH_SOURCE_URL="https://download.elasticsearch.org/logstash/logstash/logstash-${LOGSTASH_VERSION}.tar.gz"
+export LOGSTASH_VERSION="1.4.2"
+export LOGSTASH_HOME="/opt/logstash"
+export LOGSTASH_LOG_PATH="/var/log/cloudify/logstash"
+# export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_tar_source_url)
+export LOGSTASH_SOURCE_URL="https://download.elasticsearch.org/logstash/logstash/logstash-${LOGSTASH_VERSION}.tar.gz"
 
 
 function import_helpers
@@ -20,14 +20,14 @@ function import_helpers
 
 function main
 {
-    log_section "Installing Logstash..."
+    ctx logger info "Installing Logstash..."
 
     copy_notice "logstash" && \
     create_dir ${LOGSTASH_HOME} && \
     create_dir ${LOGSTASH_LOG_PATH} && \
 
     download_file ${LOGSTASH_SOURCE_URL} "/tmp/logstash.tar.gz" && \
-    log DEBUG "Extracting Logstash..."
+    ctx logger info "Extracting Logstash..."
     sudo tar -C ${LOGSTASH_HOME} -xzvf "/tmp/logstash.tar.gz" --strip-components=1 && \
     clean_tmp
 

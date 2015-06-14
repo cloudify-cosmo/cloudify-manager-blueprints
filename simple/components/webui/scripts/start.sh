@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/bin/bash -e
 
-NODEJS_HOME=/opt/nodejs
-WEBUI_HOME=/opt/cloudify-ui
+export NODEJS_HOME=/opt/nodejs
+export WEBUI_HOME=/opt/cloudify-ui
 
-sudo ${NODEJS_HOME}/bin/node ${WEBUI_HOME}/cosmoui.js localhost &
+ctx logger info "Starting WebUI Backend..."
+sudo ${NODEJS_HOME}/bin/node ${WEBUI_HOME}/cosmoui.js localhost > /dev/null 2>&1 &

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 ELASTICSEARCH_VERSION="1.4.3"
 ELASTICSEARCH_HOME="/opt/elasticsearch"
@@ -32,7 +32,7 @@ function import_helpers
 function main
 {
 
-    log_section "Installing Elasticsearch..."
+    ctx logger info "Installing Elasticsearch..."
 
     copy_notice "elasticsearch"
     create_dir ${ELASTICSEARCH_HOME} && \
@@ -41,23 +41,23 @@ function main
 
     # elasticsearch_installer_source=$(ctx node properties elasticsearch_source_url)
     download_file ${ELASTICHSEARCH_SOURCE_URL} "/tmp/elasticsearch.tar.gz" && \
-    log DEBUG "Extracting Elasticsearch..."
+    ctx logger info "Extracting Elasticsearch..."
     sudo tar -C ${ELASTICSEARCH_HOME}/ -xvf /tmp/elasticsearch.tar.gz --strip-components=1 && \
     clean_tmp
 
-    log DEBUG "Deploying Elasticsearch Config file..."
+    ctx logger info "Deploying Elasticsearch Config file..."
     # ctx download-resource components/elasticsearch/config/elasticsearch.yml '@{"target_path": "/tmp/elasticsearch.yml"}'
     cp "components/elasticsearch/config/elasticsearch.yml" "/tmp/elasticsearch.yml" && \
     sudo mv "/tmp/elasticsearch.yml" "${ELASTICSEARCH_HOME}/config/elasticsearch.yml" && \
     # sudo sed -i 's|54329|${es_discovery_port}|g' "${ELASTICSEARCH_HOME}/config/elasticsearch.yml"
-    log DEBUG "Starting Elasticsearch for configuration purposes..."
+    ctx logger info "Starting Elasticsearch for configuration purposes..."
     sudo ${ELASTICSEARCH_HOME}/bin/elasticsearch -d && \
-    log DEBUG "Waiting for Elasticsearch to become available..."
+    ctx logger info "Waiting for Elasticsearch to become available..."
     wait_for_port "${ELASTICSEARCH_PORT}"
-    log DEBUG "Configuring Elasticsearch Indices, Mappings, etc..."
+    ctx logger info "Configuring Elasticsearch Indices, Mappings, etc..."
     configure_elasticsearch && \
 
-    log DEBUG "Killing Elasticsearch..."
+    ctx logger info "Killing Elasticsearch..."
     sudo pkill -f elasticsearch
 }
 

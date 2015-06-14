@@ -1,17 +1,17 @@
-#!/bin/bash
+#!/bin/bash -e
 
-RIEMANN_VERSION="0.2.6"
-LANGOHR_VERSION="2.11.0"
-RIEMANN_CONFIG_PATH="/etc/riemann"
-RIEMANN_LOG_PATH="/var/log/cloudify/riemann"
-LANGOHR_HOME="/opt/lib"
-EXTRA_CLASSPATH="${LANGOHR_HOME}/langohr.jar"
-# LANGOHR_SOURCE_URL=$(ctx node properties langohr_jar_source_url)
-LANGOHR_SOURCE_URL="https://s3-eu-west-1.amazonaws.com/gigaspaces-repository-eu/langohr/${LANGOHR_VERSION}/langohr.jar"
-# DAEMONIZE_SOURCE_URL=$(ctx node properties daemonize_rpm_source_url)
-DAEMONIZE_SOURCE_URL="https://forensics.cert.org/centos/cert/7/x86_64/daemonize-1.7.3-7.el7.x86_64.rpm"
-# RIEMANN_SOURCE_URL=$(ctx node properties riemann_rpm_source_url)
-RIEMANN_SOURCE_URL="https://aphyr.com/riemann/riemann-${RIEMANN_VERSION}-1.noarch.rpm"
+export RIEMANN_VERSION="0.2.6"
+export LANGOHR_VERSION="2.11.0"
+export RIEMANN_CONFIG_PATH="/etc/riemann"
+export RIEMANN_LOG_PATH="/var/log/cloudify/riemann"
+export LANGOHR_HOME="/opt/lib"
+export EXTRA_CLASSPATH="${LANGOHR_HOME}/langohr.jar"
+# export LANGOHR_SOURCE_URL=$(ctx node properties langohr_jar_source_url)
+export LANGOHR_SOURCE_URL="https://s3-eu-west-1.amazonaws.com/gigaspaces-repository-eu/langohr/${LANGOHR_VERSION}/langohr.jar"
+# export DAEMONIZE_SOURCE_URL=$(ctx node properties daemonize_rpm_source_url)
+export DAEMONIZE_SOURCE_URL="https://forensics.cert.org/centos/cert/7/x86_64/daemonize-1.7.3-7.el7.x86_64.rpm"
+# export RIEMANN_SOURCE_URL=$(ctx node properties riemann_rpm_source_url)
+export RIEMANN_SOURCE_URL="https://aphyr.com/riemann/riemann-${RIEMANN_VERSION}-1.noarch.rpm"
 
 # if java isn't installed via an rpm, the path should be set so that Riemann can use it
 # export PATH="$PATH:/opt/java/bin"
@@ -23,7 +23,7 @@ RIEMANN_SOURCE_URL="https://aphyr.com/riemann/riemann-${RIEMANN_VERSION}-1.noarc
 # export RABBITMQ_HOST=""
 
 # we should definitely make out another way of retrieving this. maybe by downloading the same version of the rest service's repo tar
-RIEMANN_MASTER_CONFIG_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/plugins/riemann-controller/riemann_controller/resources/manager.config"
+export RIEMANN_MASTER_CONFIG_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/plugins/riemann-controller/riemann_controller/resources/manager.config"
 
 
 function import_helpers
@@ -39,7 +39,7 @@ function import_helpers
 
 function main
 {
-    log_section "Installing Riemann..."
+    ctx logger info "Installing Riemann..."
 
     copy_notice "riemann"
     create_dir ${RIEMANN_LOG_PATH} && \
@@ -49,8 +49,10 @@ function main
 
     download_file ${LANGOHR_SOURCE_URL} "/tmp/langohr.jar" && \
     sudo mv "/tmp/langohr.jar" ${LANGOHR_HOME} && \
+    ctx logger info "Applying Langohr permissions..."
     sudo chmod 644 ${EXTRA_CLASSPATH} && \
-    sudo yum install -y ${DAEMONIZE_SOURCE_URL}
+    ctx logger info "Installing Daemonize..."
+    sudo yum install -y ${DAEMONIZE_SOURCE_URL} && \
     install_rpm ${RIEMANN_SOURCE_URL} && \
 
     download_file ${RIEMANN_MASTER_CONFIG_URL} "/tmp/manager.config" && \

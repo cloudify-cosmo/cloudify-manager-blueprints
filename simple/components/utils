@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash -e
 
 function sys_error
 {
-    log ERROR "${1:-UNKNOWN} (status $?)"
+    ctx logger error "${1:-UNKNOWN} (status $?)"
     # ctx logger error "${1:-UNKNOWN} (status $?)"
     exit 1
 }
@@ -29,7 +29,7 @@ function create_virtualenv
 {
     virtualenv_path=$1
 
-    log DEBUG "Creating virtualenv ${virtualenv_path}..."
+    ctx logger info "Creating virtualenv ${virtualenv_path}..."
     # ctx logger debug "Creating virtualenv ${virtualenv_path}..."
     sudo virtualenv ${virtualenv_path}
 }
@@ -38,7 +38,7 @@ function create_dir
 {
     dir=$1
 
-    log DEBUG "Creating directory ${dir}..."
+    ctx logger info "Creating directory ${dir}..."
     # ctx logger debug "Creating directory ${dir}..."
     sudo mkdir -p ${dir}
 }
@@ -49,11 +49,11 @@ function install_module
     venv=${2:-""}
 
     if [[ ! -z "${venv}" ]]; then
-        log DEBUG "Installing ${module} in virtualenv ${venv}..."
+        ctx logger info "Installing ${module} in virtualenv ${venv}..."
         # ctx logger debug "Installing ${module} in virtualenv ${venv}..."
         sudo ${venv}/bin/pip install ${module}
     else
-        log DEBUG "Installing ${module}..."
+        ctx logger info "Installing ${module}..."
         # ctx logger debug "Installing ${module}..."
         sudo pip install ${module}
     fi
@@ -69,7 +69,7 @@ function install_rpm
 
     tmp_file_path="/tmp/${RANDOM}.rpm"
     download_file ${source} ${tmp_file_path}
-    log DEBUG "Installing RPM ${tmp_file_path}..."
+    ctx logger info "Installing RPM ${tmp_file_path}..."
     # ctx logger debug "Installing RPM ${tmp_file_path}..."
     sudo rpm --nodeps -ivh ${tmp_file_path}
     clean_tmp
@@ -77,7 +77,7 @@ function install_rpm
 
 function clean_tmp
 {
-    log DEBUG "Cleaning up /tmp..."
+    ctx logger info "Cleaning up /tmp..."
     # ctx logger debug "Cleaning up /tmp..."
     sudo rm -rf /tmp/*
 }
@@ -87,7 +87,7 @@ function download_file
     url=$1
     destination_path=$2
 
-    log DEBUG "Downloading ${url} to ${destination_path}..."
+    ctx logger info "Downloading ${url} to ${destination_path}..."
     # ctx logger debug "Downloading ${url} to ${destination_path}..."
 
     set +e

@@ -1,8 +1,8 @@
-tosca_definitions_version: cloudify_dsl_1_0
+tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.3m1/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.3m1/plugin.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.2/plugin.yaml
   - manager-types.yaml
 
 
@@ -30,10 +30,9 @@ inputs:
     default: ''
     type: string
 
-
-  # Manager Components Inputs
-
-  # Cloudify Modules Inputs
+  #############################
+  # Cloudify Modules
+  #############################
   rest_service_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz
@@ -62,7 +61,9 @@ inputs:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.2.tar.gz
 
-  # Python Related Inputs
+  #############################
+  # Python Inputs
+  #############################
   pip_version:
     type: string
     default: ''
@@ -71,7 +72,9 @@ inputs:
     type: string
     default: ''
 
-  # RabbitMQ Related Inputs
+  #############################
+  # RabbitMQ Inputs
+  #############################
   erlang_source_url:
     type: string
     default: http://www.rabbitmq.com/releases/erlang/erlang-17.4-1.el6.x86_64.rpm
@@ -80,7 +83,9 @@ inputs:
     type: string
     default: http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm
 
-  # Elasticsearch Related Inputs
+  #############################
+  # Elasticsearch Inputs
+  #############################
   elasticsearch_source_url:
     type: string
     default: https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz
@@ -97,12 +102,16 @@ inputs:
     type: string
     default: "-Xmx1024m -Xms1024m"
 
-  # Logstash Related Inputs
+  #############################
+  # Logstash Inputs
+  #############################
   logstash_source_url:
     type: string
     default: https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz
 
-  # InfluxDB Related Inputs
+  #############################
+  # InfluxDB Inputs
+  #############################
   influxdb_source_url:
     type: string
     default: http://get.influxdb.org/influxdb-0.8.8-1.x86_64.rpm
@@ -111,7 +120,9 @@ inputs:
     type: integer
     default: 8086
 
-  # Riemann Related Inputs
+  #############################
+  # Riemann Inputs
+  #############################
   langohr_source_url:
     type: string
     default: https://s3-eu-west-1.amazonaws.com/gigaspaces-repository-eu/langohr/2.11.0/langohr.jar
@@ -124,7 +135,9 @@ inputs:
     type: string
     default: https://aphyr.com/riemann/riemann-0.2.6-1.noarch.rpm
 
-  # Rest Service Related Inputs
+  #############################
+  # Rest Service Inputs
+  #############################
   rest_service_port:
     type: integer
     default: 8100
@@ -133,13 +146,24 @@ inputs:
     type: integer
     default: ''
 
-  # Management Worker Related Inputs
-  celery_version:
+  #############################
+  # WebUI Inputs
+  #############################
+  webui_source_url:
     type: string
-    default: 3.1.17
+    default: https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0-m4.tgz
 
+  grafana_source_url:
+    type: string
+    default: https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz
 
+  nodejs_source_url:
+    type: string
+    default: http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz
 
+  webui_backend_port:
+    type: integer
+    default: 9001
 
 node_templates:
   manager_host:
@@ -148,6 +172,11 @@ node_templates:
       install_agent: false
       ip: { get_input: public_ip }
 
+  ######################################################################
+  # The Python and Java hosts are used to provide runtime environments
+  # on specific hosts. It allows us to define the runtime environment
+  # and install it only once per host and then have a node depend on it.
+  ######################################################################
   python_host:
     type: manager.nodes.PythonHost
     relationships:
@@ -160,6 +189,9 @@ node_templates:
       - type: cloudify.relationships.contained_in
         target: manager_host
 
+  ######################################################################
+  # These are the nodes comprising the Cloudify Manager's components
+  ######################################################################
   rabbitmq:
     type: manager.nodes.RabbitMQ
     relationships:
@@ -172,13 +204,13 @@ node_templates:
       - type: cloudify.relationships.contained_in
         target: java_host
 
-  logstash:
-    type: manager.nodes.Logstash
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: java_host
-      - type: logstash_to_elasticsearch
-        target: elasticsearch
+  # logstash:
+  #   type: manager.nodes.Logstash
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: java_host
+  #     - type: logstash_to_elasticsearch
+  #       target: elasticsearch
 
   # influxdb:
   #   type: manager.nodes.InfluxDB
@@ -193,18 +225,18 @@ node_templates:
         target: manager_host
       # - type: nginx_to_webui
       #   target: webui
-      # - type: nginx_proxy_to_restservice
-      #   target: restservice
+      - type: nginx_to_restservice
+        target: restservice
 
-  riemann:
-    type: manager.nodes.Riemann
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: java_host
-      - type: riemann_to_rabbitmq
-        target: rabbitmq
-      - type: riemann_to_nginx
-        target: nginx
+  # riemann:
+  #   type: manager.nodes.Riemann
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: java_host
+  #     - type: riemann_to_rabbitmq
+  #       target: rabbitmq
+  #     - type: riemann_to_nginx
+  #       target: nginx
 
   restservice:
     type: manager.nodes.RestService
@@ -215,20 +247,16 @@ node_templates:
         target: elasticsearch
       - type: restservice_to_rabbitmq
         target: rabbitmq
-      # - type: restservice_connected_to_fileserver
-      #   target: fileserver
 
-  mgmtworker:
-    type: manager.nodes.ManagementWorker
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: python_host
-      - type: mgmtworker_to_rabbitmq
-        target: rabbitmq
-      - type: mgmtworker_to_nginx
-        target: nginx
-      # - type: mgmtworker_connected_to_fileserver
-      #   target: fileserver
+  # mgmtworker:
+  #   type: manager.nodes.ManagementWorker
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: python_host
+  #     - type: mgmtworker_to_rabbitmq
+  #       target: rabbitmq
+  #     - type: mgmtworker_to_nginx
+  #       target: nginx
 
   # amqpinflux:
   #   type: manager.nodes.AmqpInfluxBroker
@@ -240,11 +268,24 @@ node_templates:
   #     - type: amqpinflux_to_influxdb
   #       target: influxdb
 
-  # fileserver:
-  #   type: manager.nodes.FileServer
+  # webui:
+  #   type: manager.nodes.WebUI
   #   relationships:
   #     - type: cloudify.relationships.contained_in
-  #       target: nginx
+  #       target: manager_host
+  #     - type: webui_to_influxdb
+  #       target: influxdb
+
+  provider_context:
+    type: cloudify.nodes.Root
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: restservice
+      - type: cloudify.relationships.depends_on
+        target: nginx
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create: components/upload_provider_context.sh
 
   # manager:
   #   type: cloudify.nodes.CloudifyManager

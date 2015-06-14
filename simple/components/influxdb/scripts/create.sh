@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/bin/bash -e
 
-INFLUXDB_VERSION="0.8.8"
-INFLUXDB_HOME="/opt/influxdb"
-INFLUXDB_LOG_PATH="/var/log/cloudify/influxdb"
-# INFLUXDB_PORT=$(ctx node properties influxdb_port)
-INFLUXDB_PORT="8086"
-# INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)
-INFLUXDB_SOURCE_URL="http://get.influxdb.org/influxdb-${INFLUXDB_VERSION}-1.x86_64.rpm"
+export INFLUXDB_VERSION="0.8.8"
+export INFLUXDB_HOME="/opt/influxdb"
+export INFLUXDB_LOG_PATH="/var/log/cloudify/influxdb"
+# export INFLUXDB_PORT=$(ctx node properties influxdb_port)
+export INFLUXDB_PORT="8086"
+# export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)
+export INFLUXDB_SOURCE_URL="http://get.influxdb.org/influxdb-${INFLUXDB_VERSION}-1.x86_64.rpm"
 
 
 function import_helpers
@@ -23,7 +23,7 @@ function import_helpers
 function main
 {
 
-    log_section "Installing InfluxDB..."
+    ctx logger info "Installing InfluxDB..."
 
     copy_notice "influxdb" && \
     create_dir ${INFLUXDB_HOME} && \
@@ -32,19 +32,20 @@ function main
 
     install_rpm ${INFLUXDB_SOURCE_URL} && \
 
-    log DEBUT "Deploying InfluxDB Config file..."
+    ctx logger info "Deploying InfluxDB Config file..."
     # ctx download-resource components/influxdb/config/config.toml '@{"target_path": "/tmp/config.toml"}'
     sudo cp "components/influxdb/config/config.toml" "/tmp/config.toml" && \
     sudo mv "/tmp/config.toml" "${INFLUXDB_HOME}/shared/config.toml" && \
 
-    log DEBUG "Starting InfluxDB for configuration purposes..."
-    sudo /usr/bin/influxdb-daemon -config=${INFLUXDB_HOME}/shared/config.toml && \
-    log DEBUG "Waiting for InfluxDB to become available..."
+    ctx logger info "Starting InfluxDB for configuration purposes..."
+    sudo -E /usr/bin/influxdb-daemon -config=${INFLUXDB_HOME}/shared/config.toml && \
+    ctx logger info "Waiting for InfluxDB to become available..."
     wait_for_port "${INFLUXDB_PORT}"
-    log DEBUG "Creating InfluxDB Database..."
+    ctx logger info "Creating InfluxDB Database..."
     sudo curl "http://localhost:8086/db?u=root&p=root" -d "{\"name\": \"cloudify\"}" && \
-    curl 'http://localhost:8086/cluster_admins?u=root&p=root'
-    log DEBUG "Killing InfluxDB..."
+    test_db_creation=$(curl 'http://localhost:8086/cluster_admins?u=root&p=root') && \
+    ctx logger info "InfluxDB Database Creation test: ${test_db_creation}"
+    ctx logger info "Killing InfluxDB..."
     sudo pkill -f influxdb
 }
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 NGINX_LOG_PATH="/var/log/cloudify/nginx"
 NGINX_REPO="http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm"
@@ -26,7 +26,7 @@ function import_helpers
 
 function main
 {
-    log_section "Installing Nginx..."
+    ctx logger info "Installing Nginx..."
 
     copy_notice "frontend" && \
     create_dir ${NGINX_LOG_PATH} && \
@@ -40,26 +40,26 @@ function main
     install_rpm ${NGINX_REPO} && \
     sudo yum install nginx -y && \
 
-    log DEBUG "Copying default.conf file to /etc/nginx/conf.d/default.conf..."
+    ctx logger info "Copying default.conf file to /etc/nginx/conf.d/default.conf..."
     sudo cp "components/frontend/config/default.conf" "/tmp/default.conf" && \
     sudo mv "/tmp/default.conf" "/etc/nginx/conf.d/default.conf" && \
 
-    log DEBUG "Copying rest-location.cloudify file to /etc/nginx/conf.d/rest-location.cloudify..."
+    ctx logger info "Copying rest-location.cloudify file to /etc/nginx/conf.d/rest-location.cloudify..."
     sudo cp "components/frontend/config/rest-location.cloudify" "/tmp/rest-location.cloudify" && \
     sudo mv "/tmp/rest-location.cloudify" "/etc/nginx/conf.d/rest-location.cloudify" && \
 
-    log DEBUG "Copying SSL Certs..."
+    ctx logger info "Copying SSL Certs..."
     sudo cp components/frontend/config/ssl/* "/tmp/" && \
     sudo mv /tmp/server.* "/root/cloudify/" && \
 
-    log DEBUG "Deploying Required Manager Resources..."
+    ctx logger info "Deploying Required Manager Resources..."
     curl --fail -L ${REST_SERVICE_SOURCE_URL} --create-dirs -o "/tmp/cloudify-manager/manager.tar.gz" && \
-    log DEBUG "Extracting Manager Resources to ${MANAGER_RESOURCES_HOME}..."
+    ctx logger info "Extracting Manager Resources to ${MANAGER_RESOURCES_HOME}..."
     tar -xzf "/tmp/cloudify-manager/manager.tar.gz" --strip-components=1 -C "/tmp/cloudify-manager/" && \
     sudo cp -R "/tmp/cloudify-manager/resources/rest-service/cloudify/" "${MANAGER_RESOURCES_HOME}" && \
     clean_tmp
 
-    log DEBUG "Downloading Centos Agent resources..."
+    ctx logger info "Downloading Centos Agent resources..."
     download_file ${CENTOS7_AGENT_SOURCE_URL} "/tmp/centos-Core-agent.tar.gz"
     sudo mv "/tmp/centos-Core-agent.tar.gz" "/opt/manager/resources/packages/agents/"
     download_file ${REQUIRE_TTY_SOURCE_URL} "/tmp/centos-agent-disable-requiretty.sh"
