@@ -1,19 +1,10 @@
 #!/bin/bash -e
 
-# CELERY_VERSION=$(ctx node properties celery_version)
-export CELERY_VERSION="3.1.17"
-# export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_source_url)
-export REST_CLIENT_VERSION="3.2"
-export REST_CLIENT_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-rest-client/archive/${REST_CLIENT_VERSION}.zip"
-# export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_source_url)
-export PLUGINS_COMMON_VERSION="3.2"
-export PLUGINS_COMMON_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/${PLUGINS_COMMON_VERSION}.zip"
-# export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_source_url)
-export SCRIPT_PLUGIN_VERSION="1.2"
-export SCRIPT_PLUGIN_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/${SCRIPT_PLUGIN_VERSION}.zip"
-# export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_source_url)
-export REST_SERVICE_VERSION="3.2"
-export REST_SERVICE_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-manager/archive/${REST_SERVICE_VERSION}.tar.gz"
+export CELERY_VERSION=$(ctx node properties celery_version)  # (e.g. 3.1.17)
+export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.zip")
+export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2.zip")
+export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.2.zip")
+export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
 
 
 # these must all be exported as part of the start operation. they will not persist, so we should use the new agent
@@ -31,8 +22,6 @@ function import_helpers
         # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
     fi
     . /tmp/utils
-    # required only in current vagrant environment otherwise passed to the vm via the script plugin
-    . components/env_vars
 }
 
 function main

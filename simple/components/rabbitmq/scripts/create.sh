@@ -1,12 +1,8 @@
 #!/bin/bash -e
 
-export RABBITMQ_VERSION="3.5.3"
-export ERLANG_VERSION="17.4"
 export RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
-export ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)
-# export ERLANG_SOURCE_URL="http://www.rabbitmq.com/releases/erlang/erlang-${ERLANG_VERSION}-1.el6.x86_64.rpm"
-export RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)
-# export RABBITMQ_SOURCE_URL="http://www.rabbitmq.com/releases/rabbitmq-server/v${RABBITMQ_VERSION}/rabbitmq-server-${RABBITMQ_VERSION}-1.noarch.rpm"
+export ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/erlang/erlang-17.4-1.el6.x86_64.rpm")
+export RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm")
 
 
 function import_helpers
@@ -16,8 +12,6 @@ function import_helpers
         # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
     fi
     . /tmp/utils
-    # required only in current vagrant environment otherwise passed to the vm via the script plugin
-    . components/env_vars
 }
 
 function main
@@ -32,7 +26,7 @@ function main
     install_rpm ${ERLANG_SOURCE_URL} && \
     install_rpm ${RABBITMQ_SOURCE_URL} && \
 
-    # Dunno if required.. the key thing, that is...
+    # Dunno if required.. the key thing, that is... check please.
     # curl --fail --location http://www.rabbitmq.com/releases/rabbitmq-server/v${RABBITMQ_VERSION}/rabbitmq-server-${RABBITMQ_VERSION}-1.noarch.rpm -o /tmp/rabbitmq.rpm
     # sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
     # sudo yum install /tmp/rabbitmq.rpm -y

@@ -1,28 +1,19 @@
 #!/bin/bash -e
 
-export DSL_PARSER_VERSION=3.2
-export REST_CLIENT_VERSION=3.2
-export PLUGINS_COMMON_VERSION=3.2
-export REST_SERVICE_VERSION=3.2
-export SECUREST_VERSION=0.6
+export DSL_PARSER_SOURCE_URL=$(ctx node properties dsl_parser_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.2.tar.gz")
+export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.tar.gz")
+export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2.tar.gz")
+export SECUREST_SOURCE_URL=$(ctx node properties securest_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/flask-securest/archive/0.6.tar.gz")
+export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
+
 # TODO: change to /opt/cloudify-rest-service
 export REST_SERVICE_HOME=/opt/manager
 export REST_SERVICE_VIRTUALENV=${REST_SERVICE_HOME}/env
 # guni.conf currently contains localhost for all endpoints. We need to change that.
-# this is mandatory since the manager's code reads this env var. it should be named as below.
+# Also, MANAGER_REST_CONFIG_PATH is mandatory since the manager's code reads this env var. it should be renamed to REST_SERVICE_CONFIG_PATH.
 export MANAGER_REST_CONFIG_PATH=${REST_SERVICE_HOME}/guni.conf
 export REST_SERVICE_CONFIG_PATH=${REST_SERVICE_HOME}/guni.conf
 export REST_SERVICE_LOG_PATH=/var/log/cloudify/rest
-# export DSL_PARSER_SOURCE_URL=$(ctx node properties dsl_parser_module_source_url)
-export DSL_PARSER_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/${DSL_PARSER_VERSION}.tar.gz"
-# export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)
-export REST_CLIENT_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-rest-client/archive/${REST_CLIENT_VERSION}.tar.gz"
-# export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_source_url)
-export PLUGINS_COMMON_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/${PLUGINS_COMMON_VERSION}.tar.gz"
-# export SECUREST_SOURCE_URL=$(ctx node properties securest_module_source_url)
-export SECUREST_SOURCE_URL="https://github.com/cloudify-cosmo/flask-securest/archive/${SECUREST_VERSION}.tar.gz"
-# export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)
-export REST_SERVICE_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-manager/archive/${REST_SERVICE_VERSION}.tar.gz"
 
 
 function import_helpers
@@ -32,8 +23,6 @@ function import_helpers
         # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
     fi
     . /tmp/utils
-    # required only in current vagrant environment otherwise passed to the vm via the script plugin
-    . components/env_vars
 }
 
 function main

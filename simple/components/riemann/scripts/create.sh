@@ -1,17 +1,13 @@
 #!/bin/bash -e
 
-export RIEMANN_VERSION="0.2.6"
-export LANGOHR_VERSION="2.11.0"
+export LANGOHR_SOURCE_URL=$(ctx node properties langohr_jar_source_url)  # (e.g. "https://s3-eu-west-1.amazonaws.com/gigaspaces-repository-eu/langohr/2.11.0/langohr.jar")
+export DAEMONIZE_SOURCE_URL=$(ctx node properties daemonize_rpm_source_url)  # (e.g. "https://forensics.cert.org/centos/cert/7/x86_64/daemonize-1.7.3-7.el7.x86_64.rpm")
+export RIEMANN_SOURCE_URL=$(ctx node properties riemann_rpm_source_url)  # (e.g. "https://aphyr.com/riemann/riemann-0.2.6-1.noarch.rpm")
+
 export RIEMANN_CONFIG_PATH="/etc/riemann"
 export RIEMANN_LOG_PATH="/var/log/cloudify/riemann"
 export LANGOHR_HOME="/opt/lib"
 export EXTRA_CLASSPATH="${LANGOHR_HOME}/langohr.jar"
-# export LANGOHR_SOURCE_URL=$(ctx node properties langohr_jar_source_url)
-export LANGOHR_SOURCE_URL="https://s3-eu-west-1.amazonaws.com/gigaspaces-repository-eu/langohr/${LANGOHR_VERSION}/langohr.jar"
-# export DAEMONIZE_SOURCE_URL=$(ctx node properties daemonize_rpm_source_url)
-export DAEMONIZE_SOURCE_URL="https://forensics.cert.org/centos/cert/7/x86_64/daemonize-1.7.3-7.el7.x86_64.rpm"
-# export RIEMANN_SOURCE_URL=$(ctx node properties riemann_rpm_source_url)
-export RIEMANN_SOURCE_URL="https://aphyr.com/riemann/riemann-${RIEMANN_VERSION}-1.noarch.rpm"
 
 # if java isn't installed via an rpm, the path should be set so that Riemann can use it
 # export PATH="$PATH:/opt/java/bin"
@@ -33,8 +29,6 @@ function import_helpers
         # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
     fi
     . /tmp/utils
-    # required only in current vagrant environment otherwise passed to the vm via the script plugin
-    . components/env_vars
 }
 
 function main

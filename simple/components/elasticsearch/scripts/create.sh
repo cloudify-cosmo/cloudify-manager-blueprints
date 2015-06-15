@@ -1,16 +1,11 @@
 #!/bin/bash -e
 
-ELASTICSEARCH_VERSION="1.4.3"
-ELASTICSEARCH_HOME="/opt/elasticsearch"
-ELASTICSEARCH_LOG_PATH="/var/log/cloudify/elasticsearch"
-# ES_JAVA_OPRT=$(ctx node properties es_java_opts)
-ES_JAVA_OPTS="-Xmx1024m -Xms1024m"
-# ELASTICSEARCH_PORT=$(ctx node properties port)
-ELASTICSEARCH_PORT="9200"
-# ELASTICSEARCH_DISCOVERY_PORT=$(ctx node properties discovery_port)
-ELASTICSEARCH_DISCOVERY_PORT="54329"
-# ELASTICHSEARCH_SOURCE_URL=$(ctx node properties elasticsearch_tar_source_url)
-ELASTICHSEARCH_SOURCE_URL="https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-${ELASTICSEARCH_VERSION}.tar.gz"
+export ELASTICSEARCH_HOME="/opt/elasticsearch"
+export ELASTICSEARCH_LOG_PATH="/var/log/cloudify/elasticsearch"
+export ES_JAVA_OPRT=$(ctx node properties es_java_opts)  # (e.g. "-Xmx1024m -Xms1024m")
+export ELASTICSEARCH_PORT=$(ctx node properties port)  # (e.g. "9200")
+export ELASTICSEARCH_DISCOVERY_PORT=$(ctx node properties discovery_port)  # (e.g. "54329")
+export ELASTICHSEARCH_SOURCE_URL=$(ctx node properties elasticsearch_tar_source_url)  # (e.g. "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz")
 
 
 function import_helpers
@@ -24,9 +19,6 @@ function import_helpers
     # ctx download-resource components/elasticsearch/scripts/configure_es '@{"target_path": "/tmp/configure_es"}'
     cp components/elasticsearch/scripts/configure_es /tmp/configure_es
     . /tmp/configure_es
-
-    # required only in current vagrant environment otherwise passed to the vm via the script plugin
-    . components/env_vars
 }
 
 function main
@@ -39,7 +31,6 @@ function main
     create_dir ${ELASTICSEARCH_HOME}/scripts && \
     create_dir ${ELASTICSEARCH_LOG_PATH} && \
 
-    # elasticsearch_installer_source=$(ctx node properties elasticsearch_source_url)
     download_file ${ELASTICHSEARCH_SOURCE_URL} "/tmp/elasticsearch.tar.gz" && \
     ctx logger info "Extracting Elasticsearch..."
     sudo tar -C ${ELASTICSEARCH_HOME}/ -xvf /tmp/elasticsearch.tar.gz --strip-components=1 && \

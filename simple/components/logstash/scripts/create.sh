@@ -1,10 +1,8 @@
 #!/bin/bash -e
 
-export LOGSTASH_VERSION="1.4.2"
 export LOGSTASH_HOME="/opt/logstash"
 export LOGSTASH_LOG_PATH="/var/log/cloudify/logstash"
-# export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_tar_source_url)
-export LOGSTASH_SOURCE_URL="https://download.elasticsearch.org/logstash/logstash/logstash-${LOGSTASH_VERSION}.tar.gz"
+export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_tar_source_url)  # (e.g. "https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz")
 
 
 function import_helpers
@@ -14,8 +12,6 @@ function import_helpers
         # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
     fi
     . /tmp/utils
-    # required only in current vagrant environment otherwise passed to the vm via the script plugin
-    . components/env_vars
 }
 
 function main

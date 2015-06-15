@@ -2,10 +2,7 @@
 
 export AMQPINFLUX_HOME="/opt/amqpinflux"
 export AMQPINFLUX_VIRTUALENV_DIR="${AMQPINFLUX_HOME}/env"
-
-# AMQPINFLUX_SOURCE_URL=$(ctx node properties amqpinflux_source_url)
-export AMQPINFLUX_VERSION="3.2"
-export AMQPINFLUX_SOURCE_URL="https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/${AMQPINFLUX_VERSION}.zip"
+export AMQPINFLUX_SOURCE_URL=$(ctx node properties amqpinflux_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.2.zip")
 
 
 function import_helpers
@@ -15,8 +12,6 @@ function import_helpers
         # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
     fi
     . /tmp/utils
-    # required only in current vagrant environment otherwise passed to the vm via the script plugin
-    . components/env_vars
 }
 
 function main

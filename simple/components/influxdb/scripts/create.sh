@@ -1,12 +1,9 @@
 #!/bin/bash -e
 
-export INFLUXDB_VERSION="0.8.8"
 export INFLUXDB_HOME="/opt/influxdb"
 export INFLUXDB_LOG_PATH="/var/log/cloudify/influxdb"
-# export INFLUXDB_PORT=$(ctx node properties influxdb_port)
-export INFLUXDB_PORT="8086"
-# export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)
-export INFLUXDB_SOURCE_URL="http://get.influxdb.org/influxdb-${INFLUXDB_VERSION}-1.x86_64.rpm"
+export INFLUXDB_PORT=$(ctx node properties influxdb_port)  # (e.g. "8086")
+export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)  # (e.g. "http://get.influxdb.org/influxdb-0.8.8-1.x86_64.rpm")
 
 
 function import_helpers
@@ -16,8 +13,6 @@ function import_helpers
         # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
     fi
     . /tmp/utils
-    # required only in current vagrant environment otherwise passed to the vm via the script plugin
-    . components/env_vars
 }
 
 function main

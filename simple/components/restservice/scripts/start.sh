@@ -5,8 +5,7 @@ export REST_SERVICE_VIRTUALENV=${REST_SERVICE_HOME}/env
 export MANAGER_VIRTUALENV=${REST_SERVICE_HOME}/env
 export REST_SERVICE_LOG_PATH=/var/log/cloudify/rest
 export MANAGER_REST_CONFIG_PATH=${REST_SERVICE_HOME}/guni.conf
-# export REST_SERVICE_PORT=$(ctx node properties rest_service_port)
-export REST_SERVICE_PORT="8100"
+export REST_SERVICE_PORT=$(ctx node properties rest_service_port)  # (e.g. "8100")
 
 WORKERS=$(($(nproc)*2+1))
 

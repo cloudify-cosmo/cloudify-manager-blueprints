@@ -1,17 +1,14 @@
 #!/bin/bash -e
 
 
-export NODEJS_VERSION="0.10.35"
+export NODEJS_SOURCE_URL=$(ctx node properties nodejs_tar_source_url)  # (e.g. "http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz")
+export WEBUI_SOURCE_URL=$(ctx node properties webui_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0-m4.tgz")
+export GRAFANA_SOURCE_URL=$(ctx node properties grafana_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz")
+
 export NODEJS_HOME="/opt/nodejs"
 export WEBUI_HOME="/opt/cloudify-ui"
 export WEBUI_LOG_PATH="/var/log/cloudify/webui"
 export GRAFANA_HOME="${WEBUI_HOME}/grafana"
-export NODEJS_SOURCE_URL="http://nodejs.org/dist/v${NODEJS_VERSION}/node-v${NODEJS_VERSION}-linux-x64.tar.gz"
-# export NODEJS_SOURCE_URL=$(ctx node properties nodejs_tar_source_url)
-export WEBUI_SOURCE_URL="https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0-m4.tgz"
-# export WEBUI_SOURCE_URL=$(ctx node properties webui_source_url)
-export GRAFANA_SOURCE_URL="https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz"
-# export GRAFANA_SOURCE_URL=$(ctx node properties grafana_source_url)
 
 
 function import_helpers
@@ -21,8 +18,6 @@ function import_helpers
         # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
     fi
     . /tmp/utils
-    # required only in current vagrant environment otherwise passed to the vm via the script plugin
-    . components/env_vars
 }
 
 function main

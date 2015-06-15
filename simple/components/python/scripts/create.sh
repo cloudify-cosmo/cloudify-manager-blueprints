@@ -1,9 +1,7 @@
 #!/bin/bash -e
 
 export PIP_VERSION=$(ctx node properties pip_version)
-# export PIP_VERSION=${PIP_VERSION}
 export VIRTUALENV_VERSION=$(ctx node properties virtualenv_version)
-# export VIRTUALENV_VERSION=${VIRTUALENV_VERSION}
 
 
 function import_helpers
@@ -13,8 +11,6 @@ function import_helpers
         # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
     fi
     . /tmp/utils
-    # required only in current vagrant environment otherwise passed to the vm via the script plugin
-    . components/env_vars
 }
 
 function install_python

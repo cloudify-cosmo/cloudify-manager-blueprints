@@ -30,17 +30,11 @@ pip install cloudify==3.2
 # components/start_manager_components.sh
 
 # sudo yum install python-devel gcc g++ -y
-# cd ~
-# virtualenv cfy
-# source cfy/bin/activate
-# pip install cloudify==3.2
 
 # sudo mkdir /root/.ssh
 # ssh-keygen -t rsa -f ~/.ssh/id_rsa -q -N ''
 # cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-# sudo cp ~/.ssh/id_rsa /root/.ssh
-
-# mkdir -p ~/cloudify/blueprints/inputs/
+# sudo cp ~/.ssh/id_rsa /root/.ssh/id_rsa
 
 # wget https://github.com/cloudify-cosmo/cloudify-nodecellar-example/archive/3.2.tar.gz
 # tar -xzvf 3.2.tar.gz
