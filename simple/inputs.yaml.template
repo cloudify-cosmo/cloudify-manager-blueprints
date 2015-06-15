@@ -32,10 +32,5 @@ resources_prefix: ''
 # langohr_source_url: ''
 # daemonize_source_url: ''
 
-# virtualenv_version: ''
-# pip_version: ''
-
 # rest_service_port: ''
 # gunicorn_workers: ''
-
-# celery_version: ''

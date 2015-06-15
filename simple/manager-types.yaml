@@ -4,11 +4,19 @@ node_types:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
       pip_version:
+        description: >
+          The pip version to use on the host.
+          Note that defaulting to an empty string means
+          installing the latest version available.
         type: string
-        default: { get_input: pip_version }
+        default: ''
       virtualenv_version:
+        description: >
+          The virtualenv version to use on the host.
+          Note that defaulting to an empty string means
+          installing the latest version available.
         type: string
-        default: { get_input: virtualenv_version }
+        default: ''
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/python/scripts/create.sh
@@ -23,9 +31,11 @@ node_types:
     derived_from: cloudify.nodes.MessageBusServer
     properties:
       erlang_rpm_source_url:
+        description: Erlang RPM to install.
         type: string
         default: { get_input: erlang_source_url }
       rabbitmq_rpm_source_url:
+        description: RabbitMQ RPM Source URL
         type: string
         default: { get_input: rabbitmq_source_url }
     interfaces:
@@ -37,7 +47,7 @@ node_types:
     derived_from: cloudify.nodes.DBMS
     properties:
       elasticsearch_tar_source_url:
-        description: Elasticsearch Source URL
+        description: Elasticsearch tar.gz Source URL
         type: string
         default: { get_input: elasticsearch_source_url }
       port:
@@ -49,7 +59,13 @@ node_types:
         type: integer
         default: { get_input: elasticsearch_discovery_port }
       es_java_opts:
-        description: ES_JAVA_OPTS Env Var
+        description: >
+          ES_JAVA_OPTS Env Var. Allows to provide arguments
+          to Elasticsearch. This is crucial when scaling up as it
+          allows to set the amount of memory allocated and affects
+          indexing and searching performance. See
+          https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
+          for more info.
         type: string
         default: { get_input: elasticsearch_java_opts }
     interfaces:
@@ -61,9 +77,7 @@ node_types:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
       logstash_tar_source_url:
-        description: >
-          You can provide a url to a different Logstash tar.
-          This will allow you to switch versions.
+        description: Logstash tar.gz Source URL
         type: string
         default: { get_input: logstash_source_url }
     interfaces:
@@ -75,7 +89,7 @@ node_types:
     derived_from: cloudify.nodes.DBMS
     properties:
       influxdb_rpm_source_url:
-        description: InfluxDB Source URL
+        description: InfluxDB RPM Source URL
         type: string
         default: { get_input: influxdb_source_url }
       port:

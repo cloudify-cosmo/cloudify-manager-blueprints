@@ -10,6 +10,9 @@ imports:
 
 inputs:
 
+  #############################
+  # Provider specific Inputs
+  #############################
   public_ip:
     type: string
 
@@ -62,17 +65,6 @@ inputs:
     default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.2.tar.gz
 
   #############################
-  # Python Inputs
-  #############################
-  pip_version:
-    type: string
-    default: ''
-
-  virtualenv_version:
-    type: string
-    default: ''
-
-  #############################
   # RabbitMQ Inputs
   #############################
   erlang_source_url:
@@ -88,6 +80,8 @@ inputs:
   #############################
   elasticsearch_source_url:
     type: string
+    # default: https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.4.3.noarch.rpm
+    # default: https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.6.0.noarch.rpm
     default: https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz
 
   elasticsearch_port:
@@ -107,6 +101,9 @@ inputs:
   #############################
   logstash_source_url:
     type: string
+    # default: https://download.elastic.co/logstash/logstash/packages/centos/logstash-1.4.2-1_2c0f5a1.noarch.rpm
+    # default: http://download.elastic.co/logstash/logstash/packages/centos/logstash-1.5.0-1.noarch.rpm
+    # default: http://download.elastic.co/logstash/logstash/packages/centos/logstash-1.4.3-1_7e387fb.noarch.rpm
     default: https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz
 
   #############################
@@ -165,6 +162,10 @@ inputs:
     type: integer
     default: 9001
 
+
+######################################################################
+# These nodes comprise the manager's infrastructure and components
+######################################################################
 node_templates:
   manager_host:
     type: cloudify.nodes.Compute
@@ -276,6 +277,9 @@ node_templates:
       - type: webui_to_influxdb
         target: influxdb
 
+  ######################################################################
+  # The provider context node is temporary
+  ######################################################################
   provider_context:
     type: cloudify.nodes.Root
     relationships:
@@ -288,69 +292,6 @@ node_templates:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/upload_provider_context.sh
-
-  # manager:
-  #   type: cloudify.nodes.CloudifyManager
-  #   properties:
-  #     cloudify_packages:
-  #       agents:
-  #         ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-ubuntu-agent_3.3.0-m1-b270_amd64.deb
-  #         centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-centos-final-agent_3.3.0-m1-b270_amd64.deb
-  #         windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-windows-agent_3.3.0-m1-b270_amd64.deb
-  #       docker:
-  #          docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m1-RELEASE/cloudify-docker_3.3.0-m1-b270.tar
-
-  #     cloudify:
-  #       resources_prefix: { get_input: resources_prefix }
-
-  #       cloudify_agent:
-  #         min_workers: 0
-  #         max_workers: 5
-  #         remote_execution_port: 22
-  #         user: { get_input: agents_user }
-
-  #       workflows:
-  #         task_retries: -1  # this means forever
-  #         task_retry_interval: 30
-
-  #       policy_engine:
-  #         start_timeout: 30
-
-  #   relationships:
-  #     - type: cloudify.relationships.contained_in
-  #       target: manager_host
-  #   interfaces:
-  #     cloudify.interfaces.lifecycle:
-  #       start:
-  #         implementation: fabric.fabric_plugin.tasks.run_module_task
-  #         inputs:
-  #           task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
-  #           task_properties:
-  #             cloudify_packages: { get_property: [manager, cloudify_packages] }
-  #             agent_local_key_path: { get_input: ssh_key_filename }
-  #             manager_private_ip: { get_input: private_ip }
-  #           fabric_env:
-  #             user: { get_input: ssh_user }
-  #             key_filename: { get_input: ssh_key_filename }
-  #       stop:
-  #         implementation: fabric.fabric_plugin.tasks.run_module_task
-  #         inputs:
-  #           task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
-  #           fabric_env:
-  #             user: { get_input: ssh_user }
-  #             key_filename: { get_input: ssh_key_filename }
-  #       delete:
-  #         implementation: fabric.fabric_plugin.tasks.run_module_task
-  #         inputs:
-  #           task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
-  #           fabric_env:
-  #             user: { get_input: ssh_user }
-  #             key_filename: { get_input: ssh_key_filename }
-  #     cloudify.interfaces.validation:
-  #       creation:
-  #         implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
-  #         inputs:
-  #           cloudify_packages: { get_property: [manager, cloudify_packages] }
 
 plugins:
   cli:
