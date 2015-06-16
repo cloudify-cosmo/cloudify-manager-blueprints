@@ -4,11 +4,10 @@
 
 
 export CELERY_VERSION=$(ctx node properties celery_version)  # (e.g. 3.1.17)
-export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.zip")
-export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2.zip")
-export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.2.zip")
-export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
-
+export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.zip")
+export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2.zip")
+export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.2.zip")
+export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
 
 # these must all be exported as part of the start operation. they will not persist, so we should use the new agent
 # don't forget to change all localhosts to the relevant ips

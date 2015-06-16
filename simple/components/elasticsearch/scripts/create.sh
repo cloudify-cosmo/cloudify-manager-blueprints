@@ -7,9 +7,9 @@
 export ELASTICSEARCH_HOME="/opt/elasticsearch"
 export ELASTICSEARCH_LOG_PATH="/var/log/cloudify/elasticsearch"
 export ES_JAVA_OPRT=$(ctx node properties es_java_opts)  # (e.g. "-Xmx1024m -Xms1024m")
-export ELASTICSEARCH_PORT=$(ctx node properties port)  # (e.g. "9200")
-export ELASTICSEARCH_DISCOVERY_PORT=$(ctx node properties discovery_port)  # (e.g. "54329")
-export ELASTICHSEARCH_SOURCE_URL=$(ctx node properties elasticsearch_tar_source_url)  # (e.g. "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz")
+export ELASTICSEARCH_PORT=$(ctx node properties es_api_port)  # (e.g. "9200")
+export ELASTICSEARCH_DISCOVERY_PORT=$(ctx node properties es_discovery_port)  # (e.g. "54329")
+export ELASTICHSEARCH_SOURCE_URL=$(ctx node properties es_tar_source_url)  # (e.g. "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz")
 
 
 ctx logger info "Installing Elasticsearch..."
@@ -23,6 +23,8 @@ es_tar=$(download_file ${ELASTICHSEARCH_SOURCE_URL})
 ctx logger info "Extracting Elasticsearch from ${es_tar}..."
 sudo tar -xzvf ${es_tar} --strip-components=1 -C ${ELASTICSEARCH_HOME}/
 clean_tmp
+
+# yum_install ${ELASTICHSEARCH_SOURCE_URL}
 
 blueprint_es_conf_path="components/elasticsearch/config/elasticsearch.yml"
 destination_es_conf_path="${ELASTICSEARCH_HOME}/config/elasticsearch.yml"

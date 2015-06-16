@@ -107,6 +107,12 @@ inputs:
     default: https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz
 
   #############################
+  # Nginx Inputs
+  #############################
+  centos7_agent_source_url:
+    type: string
+    default: "https://dl.dropboxusercontent.com/u/407576/centos-Core-agent.tar.gz"
+  #############################
   # InfluxDB Inputs
   #############################
   influxdb_source_url:
@@ -138,10 +144,6 @@ inputs:
   rest_service_port:
     type: integer
     default: 8100
-
-  gunicorn_workers:
-    type: integer
-    default: ''
 
   #############################
   # WebUI Inputs
@@ -177,6 +179,9 @@ node_templates:
   # The Python and Java hosts are used to provide runtime environments
   # on specific hosts. It allows us to define the runtime environment
   # and install it only once per host and then have a node depend on it.
+  # Note that Erlang and NodeJS are also installed as runtime envs as
+  # part of the RabbitMQ and WebUI nodes but as they're not used by
+  # multiple nodes, we're not specifying them as independent entities.
   # #####################################################################
   python_host:
     type: manager.nodes.PythonHost
@@ -209,9 +214,9 @@ node_templates:
     type: manager.nodes.Logstash
     relationships:
       - type: cloudify.relationships.contained_in
-        target: java_host
-      - type: logstash_to_elasticsearch
-        target: elasticsearch
+        target: manager_host
+      # - type: logstash_to_elasticsearch
+      #   target: elasticsearch
 
   influxdb:
     type: manager.nodes.InfluxDB

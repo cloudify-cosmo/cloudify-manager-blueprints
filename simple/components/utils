@@ -68,7 +68,7 @@ function install_rpm
 function clean_tmp
 {
     ctx logger info "Cleaning up /tmp..."
-    rm -rf /tmp/*
+    sudo rm -rf /tmp/*
 }
 
 function download_file

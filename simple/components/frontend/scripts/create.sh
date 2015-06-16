@@ -3,14 +3,19 @@
 . $(ctx download-resource "components/utils")
 
 
-export NGINX_LOG_PATH="/var/log/cloudify/nginx"
-export NGINX_REPO="http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm"
-export MANAGER_RESOURCES_HOME="/opt/manager/resources"
-export REST_SERVICE_URL=$(ctx node properties rest_service_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
+export REST_SERVICE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
 export CENTOS7_AGENT_SOURCE_URL=$(ctx node properties centos7_agent_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/centos-Core-agent.tar.gz")
 export REQUIRE_TTY_SOURCE_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/CFY-2596-centos7-agent/package-configuration/centos-agent/centos-agent-disable-requiretty.sh"
 export CELERY_CONF_SOURCE_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/CFY-2596-centos7-agent/package-configuration/centos-agent/centos-celeryd-cloudify.conf.template"
 export CELERY_INIT_SOURCE_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/CFY-2596-centos7-agent/package-configuration/centos-agent/centos-celeryd-cloudify.init.template"
+
+export NGINX_LOG_PATH="/var/log/cloudify/nginx"
+export NGINX_REPO="http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm"
+export MANAGER_RESOURCES_HOME="/opt/manager/resources"
+export MANAGER_AGENTS_PATH="${MANAGER_RESOURCES_HOME}/packages/agents"
+export MANAGER_SCRIPTS_PATH="${MANAGER_RESOURCES_HOME}/packages/scripts"
+export MANAGER_TEMPLATES_PATH="${MANAGER_RESOURCES_HOME}/packages/templates"
+export SSL_CERTS_ROOT="/root/cloudify"
 
 
 ctx logger info "Installing Nginx..."
@@ -18,11 +23,11 @@ ctx logger info "Installing Nginx..."
 copy_notice "frontend"
 create_dir ${NGINX_LOG_PATH}
 create_dir ${MANAGER_RESOURCES_HOME}
-create_dir "/root/cloudify"
+create_dir "${SSL_CERTS_ROOT}"
 
-create_dir "/opt/manager/resources/packages/agents"
-create_dir "/opt/manager/resources/packages/templates"
-create_dir "/opt/manager/resources/packages/scripts"
+create_dir ${MANAGER_AGENTS_PATH}
+create_dir ${MANAGER_SCRIPTS_PATH}
+create_dir ${MANAGER_TEMPLATES_PATH}
 
 yum_install ${NGINX_REPO}
 yum_install nginx
@@ -37,9 +42,9 @@ sudo mv ${cloudify_conf} "/etc/nginx/conf.d/rest-location.cloudify"
 
 ctx logger info "Copying SSL Certs..."
 crt=$(ctx download-resource "components/frontend/config/ssl/server.crt")
-sudo mv ${crt} "/root/cloudify/"
+sudo mv ${crt} "${SSL_CERTS_ROOT}/"
 key=$(ctx download-resource "components/frontend/config/ssl/server.key")
-sudo mv ${key} "/root/cloudify/"
+sudo mv ${key} "${SSL_CERTS_ROOT}/"
 
 ctx logger info "Deploying Required Manager Resources..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
@@ -50,10 +55,10 @@ clean_tmp
 
 ctx logger info "Downloading Centos Agent resources..."
 centos_agent=$(download_file ${CENTOS7_AGENT_SOURCE_URL})
-sudo mv ${centos_agent} "/opt/manager/resources/packages/agents/centos-Core-agent.tar.gz"
+sudo mv ${centos_agent} "${MANAGER_AGENTS_PATH}/centos-Core-agent.tar.gz"
 require_tty_script=$(download_file ${REQUIRE_TTY_SOURCE_URL})
-sudo mv ${require_tty_script} "/opt/manager/resources/packages/scripts/centos-agent-disable-requiretty.sh"
+sudo mv ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/centos-agent-disable-requiretty.sh"
 celery_conf=$(download_file ${CELERY_CONF_SOURCE_URL})
-sudo mv ${celery_conf} "/opt/manager/resources/packages/templates/centos-celeryd-cloudify.conf.template"
+sudo mv ${celery_conf} "${MANAGER_TEMPLATES_PATH}/centos-celeryd-cloudify.conf.template"
 celery_init=$(download_file ${CELERY_INIT_SOURCE_URL})
-sudo mv ${celery_init} "/opt/manager/resources/packages/templates/centos-celeryd-cloudify.init.template"
+sudo mv ${celery_init} "${MANAGER_TEMPLATES_PATH}/centos-celeryd-cloudify.init.template"

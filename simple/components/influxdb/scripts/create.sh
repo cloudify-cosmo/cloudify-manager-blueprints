@@ -3,10 +3,12 @@
 . $(ctx download-resource "components/utils")
 
 
+export INFLUXDB_PORT=$(ctx node properties influxdb_api_port)  # (e.g. "8086")
+export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)  # (e.g. "http://get.influxdb.org/influxdb-0.8.8-1.x86_64.rpm")
+
 export INFLUXDB_HOME="/opt/influxdb"
 export INFLUXDB_LOG_PATH="/var/log/cloudify/influxdb"
-export INFLUXDB_PORT=$(ctx node properties influxdb_port)  # (e.g. "8086")
-export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)  # (e.g. "http://get.influxdb.org/influxdb-0.8.8-1.x86_64.rpm")
+
 
 
 ctx logger info "Installing InfluxDB..."

@@ -4,8 +4,8 @@
 
 
 export NODEJS_SOURCE_URL=$(ctx node properties nodejs_tar_source_url)  # (e.g. "http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz")
-export WEBUI_SOURCE_URL=$(ctx node properties webui_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0-m4.tgz")
-export GRAFANA_SOURCE_URL=$(ctx node properties grafana_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz")
+export WEBUI_SOURCE_URL=$(ctx node properties webui_tar_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0-m4.tgz")
+export GRAFANA_SOURCE_URL=$(ctx node properties grafana_tar_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz")
 
 export NODEJS_HOME="/opt/nodejs"
 export WEBUI_HOME="/opt/cloudify-ui"
@@ -34,14 +34,14 @@ webui=$(download_file ${WEBUI_SOURCE_URL})
 sudo tar -xzvf ${webui} -C ${WEBUI_HOME} --strip-components=1
 ctx logger info "Applying Workaround for missing dependencies..."
 sudo ${NODEJS_HOME}/bin/npm install --prefix ${WEBUI_HOME} request tar
-clean_tmp
+# clean_tmp
 
 ctx logger info "Installing Grafana..."
 grafana=$(download_file ${GRAFANA_SOURCE_URL})
 sudo tar -xzvf ${grafana} -C ${GRAFANA_HOME} --strip-components=1
 
 ctx logger info "Deploying WebUI Configuration..."
-webui_conf=$(ctx download-resource "components/webui/config/gsPresets.js")
+webui_conf=$(ctx download-resource "components/webui/config/gsPresets.json")
 sudo mv ${webui_conf} "${WEBUI_HOME}/backend/gsPresets.json"
 ctx logger info "Deploying Grafana Configuration..."
 grafana_conf=$(ctx download-resource "components/webui/config/config.js")

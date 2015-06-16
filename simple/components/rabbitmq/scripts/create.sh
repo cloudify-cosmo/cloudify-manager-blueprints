@@ -3,9 +3,10 @@
 . $(ctx download-resource "components/utils")
 
 
-export RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
 export ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/erlang/erlang-17.4-1.el6.x86_64.rpm")
 export RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm")
+
+export RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
 
 
 ctx logger info "Installing RabbitMQ..."

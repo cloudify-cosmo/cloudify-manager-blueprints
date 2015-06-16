@@ -46,15 +46,15 @@ node_types:
   manager.nodes.Elasticsearch:
     derived_from: cloudify.nodes.DBMS
     properties:
-      elasticsearch_tar_source_url:
+      es_tar_source_url:
         description: Elasticsearch tar.gz Source URL
         type: string
         default: { get_input: elasticsearch_source_url }
-      port:
+      es_api_port:
         description: Elasticsearch API Port
         type: integer
         default: { get_input: elasticsearch_port }
-      discovery_port:
+      es_discovery_port:
         description: Elasticsearch Zen Discovery Port
         type: integer
         default: { get_input: elasticsearch_discovery_port }
@@ -92,7 +92,7 @@ node_types:
         description: InfluxDB RPM Source URL
         type: string
         default: { get_input: influxdb_source_url }
-      port:
+      influxdb_api_port:
         description: InfluxDB API Port
         type: integer
         default: { get_input: influxdb_port }
@@ -108,6 +108,10 @@ node_types:
         description: REST Service repo tar URL for resources
         type: string
         default: { get_input: rest_service_source_url }
+      centos7_agent_source_url:
+        description: Centos 7 Agent required for the manager
+        type: string
+        default: { get_input: centos7_agent_source_url }
       # should also have a source_url for nginx.
       # currently it seems that they don't directly provide
       # an rpm for us to download, we'll have to fix that :)
@@ -159,10 +163,6 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: rest_service_source_url }
-      gunicorn_workers:
-        description: Number of workers Gunicorn loads up with
-        type: integer
-        default: { get_input: gunicorn_workers }
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/restservice/scripts/create.sh
@@ -183,7 +183,7 @@ node_types:
         description: Plugins Common module Source URL
         type: string
         default: { get_input: plugins_common_source_url }
-      script_plugin_source_url:
+      script_plugin_module_source_url:
         description: Script Plugin module Source URL
         type: string
         default: { get_input: securest_source_url }
