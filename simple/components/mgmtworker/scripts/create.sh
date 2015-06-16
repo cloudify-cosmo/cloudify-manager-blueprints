@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+. $(ctx download-resource "components/utils")
+
+
 export CELERY_VERSION=$(ctx node properties celery_version)  # (e.g. 3.1.17)
 export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.zip")
 export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2.zip")
@@ -15,58 +18,44 @@ export CELERY_WORK_DIR="${MGMTWORKER_HOME}/work"
 export CELERY_LOG_DIR="/var/log/cloudify/mgmtworker"
 
 
-function import_helpers
-{
-    if [ ! -e "/tmp/utils" ]; then
-        cp components/utils /tmp/utils
-        # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
-    fi
-    . /tmp/utils
-}
+ctx logger info "Installing Management Worker..."
 
-function main
-{
-    ctx logger info "Installing Management Worker..."
+copy_notice "mgmtworker"
+create_dir ${MGMTWORKER_HOME}
+create_dir ${MGMTWORKER_HOME}/config
+create_dir ${CELERY_LOG_DIR}
+create_dir ${CELERY_WORK_DIR}
 
-    copy_notice "mgmtworker" && \
-    create_dir ${MGMTWORKER_HOME} && \
-    create_dir ${MGMTWORKER_HOME}/config && \
-    create_dir ${CELERY_LOG_DIR} && \
-    create_dir ${CELERY_WORK_DIR} && \
+ctx logger info "Creating virtualenv ${VIRTUALENV_DIR}..."
+create_virtualenv "${VIRTUALENV_DIR}"
 
-    ctx logger info "Creating virtualenv ${VIRTUALENV_DIR}..."
-    create_virtualenv "${VIRTUALENV_DIR}" && \
+# NOT SURE WE NEED THIS ANYMORE...
+# ctx logger info "Deploying mgmtworker startup script..."
+# sudo cp "components/mgmtworker/config/startup.sh" "${MGMTWORKER_HOME}/startup.sh"
+# sudo chmod +x ${MGMTWORKER_HOME}/startup.sh
 
-    ctx logger info "Deploying mgmtworker startup script..."
-    sudo cp "components/mgmtworker/config/startup.sh" "${MGMTWORKER_HOME}/startup.sh" && \
-    sudo chmod +x ${MGMTWORKER_HOME}/startup.sh && \
+ctx logger info "Installing Prerequisites..."
+# instead of installing these, our build process should create wheels of the required dependencies which could be later installed directory
+# sudo yum install -y python-devel g++ gcc # libxslt-dev libxml2-dev
+yum_install "python-devel g++ gcc"
 
-    ctx logger info "Installing Prerequisites..."
-    # instead of installing these, our build process should create wheels of the required dependencies which could be later installed directory
-    sudo yum install -y python-devel g++ gcc # libxslt-dev libxml2-dev
+ctx logger info "Installing Management Worker Modules..."
+install_module "celery==${CELERY_VERSION}" ${VIRTUALENV_DIR}
+install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR}
+install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR}
+install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR}
 
-    ctx logger info "Installing Management Worker Modules..."
-    install_module "celery==${CELERY_VERSION}" ${VIRTUALENV_DIR} && \
-    install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR} && \
-    install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR} && \
-    install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR} && \
+ctx logger info "Downloading Manager Repository..."
+manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
+ctx logger info "Extracting Manager Repository..."
+tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp/cloudify-manager"
 
-    ctx logger info "Downloading Manager Repository..."
-    curl -L ${REST_SERVICE_SOURCE_URL} -o /tmp/cloudify-manager.tar.gz && \
-    ctx logger info "Extracting Manager Repository..."
-    tar -xzf /tmp/cloudify-manager.tar.gz -C /tmp --strip-components=1 && \
+ctx logger info "Installing Management Worker Plugins..."
+install_module "/tmp/cloudify-manager/plugins/plugin-installer" ${VIRTUALENV_DIR}
+install_module "/tmp/cloudify-manager/plugins/agent-installer" ${VIRTUALENV_DIR}
+install_module "/tmp/cloudify-manager/plugins/riemann-controller" ${VIRTUALENV_DIR}
+install_module "/tmp/cloudify-manager/workflows" ${VIRTUALENV_DIR}
 
-    ctx logger info "Installing Management Worker Plugins..."
-    install_module "/tmp/plugins/plugin-installer" ${VIRTUALENV_DIR} && \
-    install_module "/tmp/plugins/agent-installer" ${VIRTUALENV_DIR} && \
-    install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR} && \
-    install_module "/tmp/workflows" ${VIRTUALENV_DIR} && \
-
-    ctx logger info "Cleaning up unneeded packages..."
-    sudo yum remove -y python-devel g++ gcc
-    clean_tmp
-}
-
-cd /vagrant
-import_helpers
-main
+ctx logger info "Cleaning up unneeded packages..."
+sudo yum remove -y python-devel g++ gcc
+clean_tmp

@@ -7,15 +7,7 @@ function sys_error
     exit 1
 }
 
-function log_section
-{
-    message=$1
-
-    echo "####################################################################################"
-    echo "######################## ${message} ##########################"
-    echo "####################################################################################"
-}
-
+# DEPRECATED
 function log
 {
     level=$1
@@ -30,7 +22,6 @@ function create_virtualenv
     virtualenv_path=$1
 
     ctx logger info "Creating virtualenv ${virtualenv_path}..."
-    # ctx logger debug "Creating virtualenv ${virtualenv_path}..."
     sudo virtualenv ${virtualenv_path}
 }
 
@@ -39,7 +30,6 @@ function create_dir
     dir=$1
 
     ctx logger info "Creating directory ${dir}..."
-    # ctx logger debug "Creating directory ${dir}..."
     sudo mkdir -p ${dir}
 }
 
@@ -50,11 +40,9 @@ function install_module
 
     if [[ ! -z "${venv}" ]]; then
         ctx logger info "Installing ${module} in virtualenv ${venv}..."
-        # ctx logger debug "Installing ${module} in virtualenv ${venv}..."
         sudo ${venv}/bin/pip install ${module}
     else
         ctx logger info "Installing ${module}..."
-        # ctx logger debug "Installing ${module}..."
         sudo pip install ${module}
     fi
 }
@@ -67,10 +55,12 @@ function install_rpm
         sys_error "Must supply url as param (install_rpm #URL#)."
     fi
 
+    # ctx logger info "Installing RPM ${tmp_file_path}..."
+    # sudo yum install -y ${source}
+
     tmp_file_path="/tmp/${RANDOM}.rpm"
     download_file ${source} ${tmp_file_path}
     ctx logger info "Installing RPM ${tmp_file_path}..."
-    # ctx logger debug "Installing RPM ${tmp_file_path}..."
     sudo rpm --nodeps -ivh ${tmp_file_path}
     clean_tmp
 }
@@ -78,8 +68,7 @@ function install_rpm
 function clean_tmp
 {
     ctx logger info "Cleaning up /tmp..."
-    # ctx logger debug "Cleaning up /tmp..."
-    sudo rm -rf /tmp/*
+    rm -rf /tmp/*
 }
 
 function download_file
@@ -87,22 +76,25 @@ function download_file
     url=$1
     destination_path=$2
 
-    ctx logger info "Downloading ${url} to ${destination_path}..."
-    # ctx logger debug "Downloading ${url} to ${destination_path}..."
-
     set +e
     curl_cmd=$(which curl)
     wget_cmd=$(which wget)
     set -e
 
+    if [[ -z ${destination_path} ]]; then
+        ctx logger info "Downloading ${url}..."
+        destination_path="/tmp/${RANDOM}.file"
+    else
+        ctx logger info "Downloading ${url} to ${destination_path}..."
+    fi
     if [[ ! -z ${curl_cmd} ]]; then
-        curl --fail -L --location ${url} --create-dirs -o ${destination_path}
+        curl --fail -L ${url} --create-dirs -o ${destination_path}
     elif [[ ! -z ${wget_cmd} ]]; then
         wget -O ${destination_path} ${url}
     else
-        # ctx logger error "Failed to download ${url}: Neither 'cURL' nor 'wget' were found on the system"
         sys_error "Failed to download ${url}: Neither 'cURL' nor 'wget' were found on the system"
     fi
+    echo ${destination_path}
 }
 
 function check_empty_var
@@ -119,10 +111,10 @@ function copy_notice
 {
     service=$1
 
-    log INFO "Copying ${service} NOTICE file..."
-    # ctx logger info "Copying Elasticsearch NOTICE file..."
-    sudo cp components/${service}/NOTICE.txt /opt/${service}_NOTICE.txt
-    # ctx download-resource elasticsearch/ELASTICSEARCH_NOTICE.txt '@{"target_path": "/opt/ELASTICSEARCH_NOTICE.txt"}'
+    destination_notice="/opt/${service}_NOTICE.txt"
+    ctx logger info "Copying ${service} NOTICE file to ${destination_notice}..."
+    notice_file=$(ctx download-resource "components/${service}/NOTICE.txt")
+    sudo mv ${notice_file} ${destination_notice}
 }
 
 function wait_for_port
@@ -137,4 +129,12 @@ function wait_for_port
             sleep 5;
             c=$((c+1))
     done
+}
+
+function yum_install
+{
+    source=$1
+
+    ctx logger info "yum Installing ${source}..."
+    sudo yum install -y ${source}
 }

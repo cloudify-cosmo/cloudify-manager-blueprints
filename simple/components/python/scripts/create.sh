@@ -1,17 +1,11 @@
 #!/bin/bash -e
 
+. $(ctx download-resource "components/utils")
+
+
 export PIP_VERSION=$(ctx node properties pip_version)
 export VIRTUALENV_VERSION=$(ctx node properties virtualenv_version)
 
-
-function import_helpers
-{
-    if [ ! -e "/tmp/utils" ]; then
-        cp components/utils /tmp/utils
-        # ctx download-resource "components/utils" '@{"target_path": "/tmp/utils"}'
-    fi
-    . /tmp/utils
-}
 
 function install_python
 {
@@ -57,24 +51,17 @@ function install_pip
 }
 
 
-function main
-{
-    copy_notice "python" && \
+ctx logger info "Installing Python requirements..."
+copy_notice "python"
 
-    if [[ ! -z "${PIP_VERSION}" ]]; then
-        install_pip ${PIP_VERSION}
-    else
-        install_pip
-    fi
+if [[ ! -z "${PIP_VERSION}" ]]; then
+    install_pip ${PIP_VERSION}
+else
+    install_pip
+fi
 
-    if [[ ! -z "${VIRTUALENV_VERSION}" ]]; then
-        install_virtualenv ${VIRTUALENV_VERSION}
-    else
-        install_virtualenv
-    fi
-}
-
-
-cd /vagrant
-import_helpers
-main
+if [[ ! -z "${VIRTUALENV_VERSION}" ]]; then
+    install_virtualenv ${VIRTUALENV_VERSION}
+else
+    install_virtualenv
+fi

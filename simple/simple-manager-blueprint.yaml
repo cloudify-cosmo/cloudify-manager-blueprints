@@ -148,7 +148,7 @@ inputs:
   #############################
   webui_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0-m4.tgz
+    default: https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0.tgz
 
   grafana_source_url:
     type: string
@@ -173,11 +173,11 @@ node_templates:
       install_agent: false
       ip: { get_input: public_ip }
 
-  ######################################################################
+  # #####################################################################
   # The Python and Java hosts are used to provide runtime environments
   # on specific hosts. It allows us to define the runtime environment
   # and install it only once per host and then have a node depend on it.
-  ######################################################################
+  # #####################################################################
   python_host:
     type: manager.nodes.PythonHost
     relationships:
