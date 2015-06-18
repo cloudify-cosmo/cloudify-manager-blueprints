@@ -34,14 +34,16 @@ create_dir ${RIEMANN_CONFIG_PATH}
 create_dir ${RIEMANN_CONFIG_PATH}/conf.d
 
 langohr=$(download_file ${LANGOHR_SOURCE_URL})
-sudo mv ${langohr} ${LANGOHR_HOME}
+sudo mv ${langohr} ${EXTRA_CLASSPATH}
 ctx logger info "Applying Langohr permissions..."
 sudo chmod 644 ${EXTRA_CLASSPATH}
 ctx logger info "Installing Daemonize..."
 yum_install ${DAEMONIZE_SOURCE_URL}
 yum_install ${RIEMANN_SOURCE_URL}
 
+ctx logger info "Deploying Riemann manager.config..."
 manager_config=$(download_file ${RIEMANN_MASTER_CONFIG_URL})
 sudo mv ${manager_config} ${RIEMANN_CONFIG_PATH}/conf.d/manager.config
+ctx logger info "Deploying Riemann main.clj..."
 riemann_main_config=$(ctx download-resource "components/riemann/config/main.clj")
-sudo mv ${riemann_main_config} "${RIEMANN_CONFIG_PATH}/"
+sudo mv ${riemann_main_config} "${RIEMANN_CONFIG_PATH}/main.clj"

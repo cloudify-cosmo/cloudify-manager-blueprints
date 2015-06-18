@@ -38,8 +38,8 @@ ctx logger info "Downloading Manager Repository..."
 # curl --fail --insecure -L ${REST_SERVICE_SOURCE_URL} --create-dirs -o /tmp/cloudify-manager/manager.tar.gz
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager..."
-tar -xzf ${manager_repo} --strip-components=1 -C "/tmp/cloudify-manager/"
-install_module "/tmp/cloudify-manager/rest-service" ${REST_SERVICE_VIRTUALENV}
+tar -xzf ${manager_repo} --strip-components=1 -C "/tmp"
+install_module "/tmp/rest-service" ${REST_SERVICE_VIRTUALENV}
 clean_tmp
 
 ctx logger info "Deploying Gunicorn and REST Service Configuration file..."

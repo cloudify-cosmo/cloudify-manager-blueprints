@@ -7,29 +7,35 @@ agents_user: vagrant
 resources_prefix: ''
 
 
-# rest_client_source_url: ''
-# dsl_parser_source_url: ''
-# plugins_common_source_url: ''
-# rest_service_source_url: ''
-# script_plugin_source_url: ''
-# securest_source_url: ''
-# amqpinflux_source_url: ''
+# rest_client_source_url: http://localhost:1337/cloudify-rest-client-3.2.tar.gz
+# dsl_parser_source_url: http://localhost:1337/cloudify-dsl-parser-3.2.tar.gz
+# plugins_common_source_url: http://localhost:1337/cloudify-plugins-common-3.2.tar.gz
+# rest_service_source_url: http://localhost:1337/cloudify-managfer-3.2.tar.gz
+# script_plugin_source_url: http://localhost:1337/cloudify-script-plugin-3.2.tar.gz
+# securest_source_url: http://localhost:1337/flask-securest-0.6.tar.gz
+# amqpinflux_source_url: http://localhost:1337/cloudify-amqp-influxdb-3.2.tar.gz
 
-# erlang_source_url: ''
-# rabbitmq_source_url: ''
+# centos7_agent_source_url: http://localhost:1337/centos-Core-agent.tar.gz
 
-# elasticsearch_source_url: ''
+# erlang_source_url: http://localhost:1337/erlang-17.4-1.el6.x86_64.rpm
+# rabbitmq_source_url: http://localhost:1337/rabbitmq-server-3.5.3-1.noarch.rpm
+
+# elasticsearch_source_url: http://localhost:1337/elasticsearch-1.4.3.tar.gz
 # elasticsearch_port: ''
-# elasticsearch_discovery_port: ''
+# elasticsearch_discovery_port:''
 # elasticsearch_java_opts: ''
 
-# logstash_source_url: ''
+# logstash_source_url: http://localhost:1337/logstash-1.4.2.tar.gz
 
-# influxdb_source_url: ''
+# influxdb_source_url: http://localhost:1337/influxdb-0.8.8-1.x86_64.rpm
 # influxdb_port: ''
 
-# riemann_source_url: ''
-# langohr_source_url: ''
-# daemonize_source_url: ''
+# riemann_source_url: http://localhost:1337/riemann-0.2.6-1.noarch.rpm
+# langohr_source_url: http://localhost:1337/langohr.jar
+# daemonize_source_url: http://localhost:1337/daemonize-1.7.3-7.el7.x86_64.rpm
 
 # rest_service_port: ''
+
+# nodejs_source_url: http://localhost:1337/node-v0.10.35-linux-x64.tar.gz
+# webui_source_url: http://localhost:1337/cosmo-ui-3.2.0.tgzS
+# grafana_source_url: http://localhost:1337/grafana-1.9.0.tgz

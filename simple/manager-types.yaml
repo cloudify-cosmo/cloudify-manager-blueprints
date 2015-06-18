@@ -20,12 +20,25 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/python/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #     inputs:
+        #       script_path: components/python/scripts/create.sh
+        #       fabric_env: &simple_fabric_env
+        #         user: { get_input: ssh_user }
+        #         key_filename: { get_input: ssh_key_filename }
+        #         host_string: { get_input: public_ip }
 
   manager.nodes.JavaHost:
     derived_from: cloudify.nodes.SoftwareComponent
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/java/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #     inputs:
+        #       script_path: components/python/scripts/create.sh
+        #       fabric_env: *simple_fabric_env
 
   manager.nodes.RabbitMQ:
     derived_from: cloudify.nodes.MessageBusServer
@@ -163,6 +176,10 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: rest_service_source_url }
+      rest_service_port:
+        description: Port to expose the REST Service on
+        type: integer
+        default: 8100
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/restservice/scripts/create.sh

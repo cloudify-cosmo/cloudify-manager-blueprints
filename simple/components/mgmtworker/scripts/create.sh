@@ -47,13 +47,13 @@ install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR}
 ctx logger info "Downloading Manager Repository..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager Repository..."
-tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp/cloudify-manager"
+tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp"
 
 ctx logger info "Installing Management Worker Plugins..."
-install_module "/tmp/cloudify-manager/plugins/plugin-installer" ${VIRTUALENV_DIR}
-install_module "/tmp/cloudify-manager/plugins/agent-installer" ${VIRTUALENV_DIR}
-install_module "/tmp/cloudify-manager/plugins/riemann-controller" ${VIRTUALENV_DIR}
-install_module "/tmp/cloudify-manager/workflows" ${VIRTUALENV_DIR}
+install_module "/tmp/plugins/plugin-installer" ${VIRTUALENV_DIR}
+install_module "/tmp/plugins/agent-installer" ${VIRTUALENV_DIR}
+install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}
+install_module "/tmp/workflows" ${VIRTUALENV_DIR}
 
 ctx logger info "Cleaning up unneeded packages..."
 sudo yum remove -y python-devel g++ gcc

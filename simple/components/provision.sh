@@ -15,10 +15,13 @@ virtualenv cfy
 source cfy/bin/activate
 pip install cloudify==3.2
 
-# cd /vagrant
-# source ~/cfy/bin/activate
-# cfy local init --blueprint-path simple-manager-blueprint.yaml --inputs inputs.yaml.template
-# cfy local execute -w install -v
+wget http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/get-cloudify.py
+python get-cloudify.py -v -f
+
+cd /vagrant
+source ~/cfy/bin/activate
+cfy local init --blueprint-path simple-manager-blueprint.yaml --inputs inputs.yaml.template
+cfy local execute -w install -v
 
 
 

@@ -54,11 +54,11 @@ inputs:
 
   script_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/flask-securest/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.2.tar.gz
 
   securest_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/flask-securest/archive/0.6.tar.gz
 
   amqpinflux_source_url:
     type: string
@@ -214,9 +214,9 @@ node_templates:
     type: manager.nodes.Logstash
     relationships:
       - type: cloudify.relationships.contained_in
-        target: manager_host
-      # - type: logstash_to_elasticsearch
-      #   target: elasticsearch
+        target: java_host
+      - type: logstash_to_elasticsearch
+        target: elasticsearch
 
   influxdb:
     type: manager.nodes.InfluxDB
