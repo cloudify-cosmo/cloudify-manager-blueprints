@@ -13,7 +13,7 @@ export LOGSTASH_CONF_PATH="/etc/logstash/"
 ctx logger info "Installing Logstash..."
 
 copy_notice "logstash"
-create_dir ${LOGSTASH_HOME}
+# create_dir ${LOGSTASH_HOME}
 create_dir ${LOGSTASH_LOG_PATH}
 create_dir ${LOGSTASH_CONF_PATH}
 

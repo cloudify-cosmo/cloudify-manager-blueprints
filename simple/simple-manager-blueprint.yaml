@@ -126,7 +126,7 @@ inputs:
   #############################
   influxdb_source_url:
     type: string
-    default: http://get.influxdb.org/influxdb-0.8.8-1.x86_64.rpm
+    default: https://s3.amazonaws.com/influxdb/influxdb-0.8.8-1.x86_64.rpm
 
   influxdb_port:
     type: integer

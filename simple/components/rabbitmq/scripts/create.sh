@@ -37,7 +37,7 @@ sudo rabbitmq-plugins enable rabbitmq_tracing
 ctx logger info "Enabling RabbitMQ user access..."
 echo "[{rabbit, [{loopback_users, []}]}]." | sudo tee --append /etc/rabbitmq/rabbitmq.config
 
-ctx logger info "Chowning RabbitMQ Log Path..."
+ctx logger info "Chowning RabbitMQ logs path..."
 sudo chown rabbitmq:rabbitmq ${RABBITMQ_LOG_BASE}
 
 ctx logger info "Killing RabbitMQ..."

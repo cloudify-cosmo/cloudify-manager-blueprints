@@ -125,7 +125,7 @@ function wait_for_port
             if [[ $c -gt 24 ]]; then
                 sys_error "Failed to connect to service... (status $?)"
             fi
-            echo "host not up yet... retrying... ($c/24)"
+            ctx logger info "Port $1 not available yet, retrying... ($c/24)"
             sleep 5;
             c=$((c+1))
     done

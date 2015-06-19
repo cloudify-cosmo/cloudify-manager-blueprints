@@ -4,7 +4,7 @@
 
 
 export INFLUXDB_PORT=$(ctx node properties influxdb_api_port)  # (e.g. "8086")
-export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)  # (e.g. "http://get.influxdb.org/influxdb-0.8.8-1.x86_64.rpm")
+export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)  # (e.g. "https://s3.amazonaws.com/influxdb/influxdb-0.8.8-1.x86_64.rpm")
 
 export INFLUXDB_HOME="/opt/influxdb"
 export INFLUXDB_LOG_PATH="/var/log/cloudify/influxdb"
@@ -23,6 +23,9 @@ yum_install ${INFLUXDB_SOURCE_URL}
 ctx logger info "Deploying InfluxDB Config file..."
 influx_config=$(ctx download-resource "components/influxdb/config/config.toml")
 sudo mv ${influx_config} "${INFLUXDB_HOME}/shared/config.toml"
+
+ctx logger info "Chowning InfluxDB logs path..."
+sudo chown -R influxdb:influxdb ${INFLUXDB_LOG_PATH}
 
 ctx logger info "Starting InfluxDB for configuration purposes..."
 # sudo -E /usr/bin/influxdb-daemon -config=${INFLUXDB_HOME}/shared/config.toml
