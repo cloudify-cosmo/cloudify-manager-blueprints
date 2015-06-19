@@ -5,4 +5,4 @@ export LANGOHR_HOME="/opt/lib"
 export EXTRA_CLASSPATH="${LANGOHR_HOME}/langohr.jar"
 
 ctx logger info "Starting Riemann..."
-sudo -E /usr/bin/riemann -a ${RIEMANN_CONFIG_PATH}/main.clj > /dev/null 2>&1 &
+nohup sudo -E /usr/bin/riemann -a ${RIEMANN_CONFIG_PATH}/main.clj >& /dev/null < /dev/null &

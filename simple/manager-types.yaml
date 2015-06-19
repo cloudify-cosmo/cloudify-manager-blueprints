@@ -22,9 +22,11 @@ node_types:
         create: components/python/scripts/create.sh
         # create:
         #   implementation: fabric.fabric_plugin.tasks.run_script
-        #     inputs:
-        #       script_path: components/python/scripts/create.sh
-        #       fabric_env: &simple_fabric_env
+        #   inputs:
+        #     script_path:
+        #       default: components/python/scripts/create.sh
+        #     fabric_env: &simple_fabric_env
+        #       default:
         #         user: { get_input: ssh_user }
         #         key_filename: { get_input: ssh_key_filename }
         #         host_string: { get_input: public_ip }
@@ -36,9 +38,10 @@ node_types:
         create: components/java/scripts/create.sh
         # create:
         #   implementation: fabric.fabric_plugin.tasks.run_script
-        #     inputs:
-        #       script_path: components/python/scripts/create.sh
-        #       fabric_env: *simple_fabric_env
+        #   inputs:
+        #     script_path:
+        #       default: components/java/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
 
   manager.nodes.RabbitMQ:
     derived_from: cloudify.nodes.MessageBusServer
@@ -46,6 +49,7 @@ node_types:
       erlang_rpm_source_url:
         description: Erlang RPM to install.
         type: string
+        # default: default: { concat: [ "https://dl.dropboxusercontent.com/u/407576/" , { get_input: cloudify_version} , "/erlang-17.4-1.el6.x86_64.rpm"]}
         default: { get_input: erlang_source_url }
       rabbitmq_rpm_source_url:
         description: RabbitMQ RPM Source URL
@@ -54,7 +58,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/rabbitmq/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/rabbitmq/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
         start: components/rabbitmq/scripts/start.sh
+        # start:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/rabbitmq/scripts/start.sh
+        #     fabric_env: *simple_fabric_env
 
   manager.nodes.Elasticsearch:
     derived_from: cloudify.nodes.DBMS
@@ -84,7 +100,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/elasticsearch/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/elasticsearch/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
         start: components/elasticsearch/scripts/start.sh
+        # start:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/elasticsearch/scripts/start.sh
+        #     fabric_env: *simple_fabric_env
 
   manager.nodes.Logstash:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -96,7 +124,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/logstash/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/logstash/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
         start: components/logstash/scripts/start.sh
+        # start:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/logstash/scripts/start.sh
+        #     fabric_env: *simple_fabric_env
 
   manager.nodes.InfluxDB:
     derived_from: cloudify.nodes.DBMS
@@ -112,11 +152,27 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/influxdb/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/influxdb/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
         start: components/influxdb/scripts/start.sh
+        # start:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/influxdb/scripts/start.sh
+        #     fabric_env: *simple_fabric_env
 
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
     properties:
+      nginx_rpm_source_url:
+        description: Nginx RPM Source URL
+        type: string
+        default: { get_input: nginx_source_url }
       rest_service_module_source_url:
         description: REST Service repo tar URL for resources
         type: string
@@ -131,7 +187,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/frontend/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/frontend/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
         start: components/frontend/scripts/start.sh
+        # start:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/frontend/scripts/start.sh
+        #     fabric_env: *simple_fabric_env
 
   manager.nodes.Riemann:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -151,7 +219,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/riemann/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/riemann/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
         start: components/riemann/scripts/start.sh
+        # start:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/riemann/scripts/start.sh
+        #     fabric_env: *simple_fabric_env
 
   manager.nodes.RestService:
     derived_from: cloudify.nodes.ApplicationModule
@@ -183,7 +263,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/restservice/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/restservice/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
         start: components/restservice/scripts/start.sh
+        # start:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/restservice/scripts/start.sh
+        #     fabric_env: *simple_fabric_env
 
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -211,7 +303,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/mgmtworker/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/mgmtworker/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
         start: components/mgmtworker/scripts/start.sh
+        # start:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/mgmtworker/scripts/start.sh
+        #     fabric_env: *simple_fabric_env
 
   manager.nodes.AmqpInfluxBroker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -223,7 +327,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/amqpinflux/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/amqpinflux/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
         start: components/amqpinflux/scripts/start.sh
+        # start:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/amqpinflux/scripts/start.sh
+        #     fabric_env: *simple_fabric_env
 
   manager.nodes.WebUI:
     derived_from: cloudify.nodes.ApplicationModule
@@ -247,7 +363,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create: components/webui/scripts/create.sh
+        # create:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/webui/scripts/create.sh
+        #     fabric_env: *simple_fabric_env
         start: components/webui/scripts/start.sh
+        # start:
+        #   implementation: fabric.fabric_plugin.tasks.run_script
+        #   inputs:
+        #     script_path:
+        #       default: components/webui/scripts/start.sh
+        #     fabric_env: *simple_fabric_env
 
 
 

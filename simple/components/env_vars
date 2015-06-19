@@ -1,5 +1,0 @@
-#!/bin/sh
-
-# GENERAL
-export DOCKER_ENV=False
-export RESOURCES="/vagrant"

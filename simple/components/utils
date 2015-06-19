@@ -40,10 +40,10 @@ function install_module
 
     if [[ ! -z "${venv}" ]]; then
         ctx logger info "Installing ${module} in virtualenv ${venv}..."
-        sudo ${venv}/bin/pip install ${module}
+        sudo ${venv}/bin/pip install ${module} >/dev/null
     else
         ctx logger info "Installing ${module}..."
-        sudo pip install ${module}
+        sudo pip install ${module} >/dev/null
     fi
 }
 
@@ -88,9 +88,9 @@ function download_file
         ctx logger info "Downloading ${url} to ${destination_path}..."
     fi
     if [[ ! -z ${curl_cmd} ]]; then
-        curl --fail -L ${url} --create-dirs -o ${destination_path}
+        curl --fail --silent --location ${url} --create-dirs -o ${destination_path} >/dev/null
     elif [[ ! -z ${wget_cmd} ]]; then
-        wget -O ${destination_path} ${url}
+        wget -O ${destination_path} ${url} >/dev/null
     else
         sys_error "Failed to download ${url}: Neither 'cURL' nor 'wget' were found on the system"
     fi
@@ -136,5 +136,5 @@ function yum_install
     source=$1
 
     ctx logger info "yum Installing ${source}..."
-    sudo yum install -y ${source}
+    sudo yum install -y ${source} >/dev/null
 }

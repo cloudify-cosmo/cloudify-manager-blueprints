@@ -25,7 +25,8 @@ influx_config=$(ctx download-resource "components/influxdb/config/config.toml")
 sudo mv ${influx_config} "${INFLUXDB_HOME}/shared/config.toml"
 
 ctx logger info "Starting InfluxDB for configuration purposes..."
-sudo -E /usr/bin/influxdb-daemon -config=${INFLUXDB_HOME}/shared/config.toml
+# sudo -E /usr/bin/influxdb-daemon -config=${INFLUXDB_HOME}/shared/config.toml
+sudo /etc/init.d/influxdb start
 ctx logger info "Waiting for InfluxDB to become available..."
 wait_for_port "${INFLUXDB_PORT}"
 ctx logger info "Creating InfluxDB Database..."
@@ -33,4 +34,5 @@ sudo curl "http://localhost:8086/db?u=root&p=root" -d "{\"name\": \"cloudify\"}"
 test_db_creation=$(curl 'http://localhost:8086/cluster_admins?u=root&p=root')
 ctx logger info "InfluxDB Database Creation test: ${test_db_creation}"
 ctx logger info "Killing InfluxDB..."
-sudo pkill -f influxdb
+# sudo pkill -f influxdb
+sudo /etc/init.d/influxdb stop

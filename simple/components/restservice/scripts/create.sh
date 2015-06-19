@@ -40,7 +40,6 @@ manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager..."
 tar -xzf ${manager_repo} --strip-components=1 -C "/tmp"
 install_module "/tmp/rest-service" ${REST_SERVICE_VIRTUALENV}
-clean_tmp
 
 ctx logger info "Deploying Gunicorn and REST Service Configuration file..."
 guni_conf=$(ctx download-resource "components/restservice/config/guni.conf")

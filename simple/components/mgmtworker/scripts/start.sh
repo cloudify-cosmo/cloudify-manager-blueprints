@@ -18,7 +18,7 @@ export C_FORCE_ROOT=true
 
 
 ctx logger info "Starting Management Worker..."
-sudo -E ${VIRTUALENV_DIR}/bin/celery worker \
+nohup sudo -E ${VIRTUALENV_DIR}/bin/celery worker \
 -Ofair \
 --include=cloudify_system_workflows.deployment_environment,plugin_installer.tasks,worker_installer.tasks,riemann_controller.tasks,cloudify.plugins.workflows \
 --broker=${BROKER_URL} \
@@ -31,5 +31,5 @@ sudo -E ${VIRTUALENV_DIR}/bin/celery worker \
 --pidfile=${CELERY_LOG_DIR}/cloudify.management_worker.pid \
 --autoscale=5,2 \
 --without-gossip \
---without-mingle > /dev/null 2>&1 &
+--without-mingle >& /dev/null < /dev/null &
 # sudo ${MGMTWORKER_HOME}/startup.sh

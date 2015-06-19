@@ -36,6 +36,7 @@ resources_prefix: ''
 
 # rest_service_port: ''
 
+# nginx_source_url: https://dl.dropboxusercontent.com/u/407576/3.2/nginx-1.8.0-1.el7.ngx.x86_64.rpm
 # nodejs_source_url: http://localhost:1337/node-v0.10.35-linux-x64.tar.gz
 # webui_source_url: http://localhost:1337/cosmo-ui-3.2.0.tgzS
 # grafana_source_url: http://localhost:1337/grafana-1.9.0.tgz

@@ -6,9 +6,9 @@ export AMQPINFLUX_HOME="/opt/amqpinflux"
 export AMQPINFLUX_VIRTUALENV_DIR="${AMQPINFLUX_HOME}/env"
 
 ctx logger info "AMQP InfluxDB Broker..."
-sudo -E ${AMQPINFLUX_VIRTUALENV_DIR}/bin/python ${AMQPINFLUX_VIRTUALENV_DIR}/bin/cloudify-amqp-influxdb \
+nohup sudo -E ${AMQPINFLUX_VIRTUALENV_DIR}/bin/python ${AMQPINFLUX_VIRTUALENV_DIR}/bin/cloudify-amqp-influxdb \
 --amqp-exchange cloudify-monitoring \
 --amqp-routing-key '*' \
 --amqp-hostname ${AMQP_HOST} \
 --influx-database cloudify \
---influx-hostname ${INFLUXDB_HOST} > /dev/null 2>&1 &
+--influx-hostname ${INFLUXDB_HOST} >& /dev/null < /dev/null &

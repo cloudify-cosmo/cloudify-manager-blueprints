@@ -36,6 +36,10 @@ inputs:
   #############################
   # Cloudify Modules
   #############################
+  # cloudify_version:
+  #   type: string
+  #   default: 3.2
+
   rest_service_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz
@@ -80,9 +84,9 @@ inputs:
   #############################
   elasticsearch_source_url:
     type: string
-    # default: https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.4.3.noarch.rpm
+    default: https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.4.3.noarch.rpm
     # default: https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.6.0.noarch.rpm
-    default: https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz
+    # default: https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz
 
   elasticsearch_port:
     type: integer
@@ -101,17 +105,22 @@ inputs:
   #############################
   logstash_source_url:
     type: string
-    # default: https://download.elastic.co/logstash/logstash/packages/centos/logstash-1.4.2-1_2c0f5a1.noarch.rpm
+    default: https://download.elastic.co/logstash/logstash/packages/centos/logstash-1.4.2-1_2c0f5a1.noarch.rpm
     # default: http://download.elastic.co/logstash/logstash/packages/centos/logstash-1.5.0-1.noarch.rpm
     # default: http://download.elastic.co/logstash/logstash/packages/centos/logstash-1.4.3-1_7e387fb.noarch.rpm
-    default: https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz
+    # default: https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz
 
   #############################
   # Nginx Inputs
   #############################
+  nginx_source_url:
+    type: string
+    default: https://dl.dropboxusercontent.com/u/407576/3.2/nginx-1.8.0-1.el7.ngx.x86_64.rpm
+
   centos7_agent_source_url:
     type: string
     default: "https://dl.dropboxusercontent.com/u/407576/centos-Core-agent.tar.gz"
+
   #############################
   # InfluxDB Inputs
   #############################
@@ -183,13 +192,13 @@ node_templates:
   # part of the RabbitMQ and WebUI nodes but as they're not used by
   # multiple nodes, we're not specifying them as independent entities.
   # #####################################################################
-  python_host:
+  python_runtime:
     type: manager.nodes.PythonHost
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
 
-  java_host:
+  java_runtime:
     type: manager.nodes.JavaHost
     relationships:
       - type: cloudify.relationships.contained_in
@@ -208,13 +217,17 @@ node_templates:
     type: manager.nodes.Elasticsearch
     relationships:
       - type: cloudify.relationships.contained_in
-        target: java_host
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: java_runtime
 
   logstash:
     type: manager.nodes.Logstash
     relationships:
       - type: cloudify.relationships.contained_in
-        target: java_host
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: java_runtime
       - type: logstash_to_elasticsearch
         target: elasticsearch
 
@@ -238,7 +251,9 @@ node_templates:
     type: manager.nodes.Riemann
     relationships:
       - type: cloudify.relationships.contained_in
-        target: java_host
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: java_runtime
       - type: riemann_to_rabbitmq
         target: rabbitmq
       - type: riemann_to_nginx
@@ -248,7 +263,9 @@ node_templates:
     type: manager.nodes.RestService
     relationships:
       - type: cloudify.relationships.contained_in
-        target: python_host
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
       - type: restservice_to_elasticsearch
         target: elasticsearch
       - type: restservice_to_rabbitmq
@@ -258,7 +275,9 @@ node_templates:
     type: manager.nodes.ManagementWorker
     relationships:
       - type: cloudify.relationships.contained_in
-        target: python_host
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
       - type: mgmtworker_to_rabbitmq
         target: rabbitmq
       - type: mgmtworker_to_nginx
@@ -268,7 +287,9 @@ node_templates:
     type: manager.nodes.AmqpInfluxBroker
     relationships:
       - type: cloudify.relationships.contained_in
-        target: python_host
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
       - type: amqpinflux_to_rabbitmq
         target: rabbitmq
       - type: amqpinflux_to_influxdb

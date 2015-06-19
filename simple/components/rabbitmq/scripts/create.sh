@@ -25,7 +25,9 @@ yum_install ${RABBITMQ_SOURCE_URL}
 # sudo yum install /tmp/rabbitmq.rpm -y
 
 ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
-sudo rabbitmq-server -detached
+# sudo rabbitmq-server -detached
+sudo chkconfig rabbitmq-server on
+sudo /sbin/service rabbitmq-server start
 
 ctx logger info "Enabling RabbitMQ Plugins..."
 sudo rabbitmq-plugins enable rabbitmq_management
@@ -39,4 +41,4 @@ ctx logger info "Chowning RabbitMQ Log Path..."
 sudo chown rabbitmq:rabbitmq ${RABBITMQ_LOG_BASE}
 
 ctx logger info "Killing RabbitMQ..."
-sudo pkill -f rabbitmq
+sudo /sbin/service rabbitmq-server stop
