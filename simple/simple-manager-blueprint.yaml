@@ -180,12 +180,13 @@ node_templates:
       ip: { get_input: public_ip }
 
   # #####################################################################
-  # The Python and Java hosts are used to provide runtime environments
+  # The Python and Java nodes are used to provide runtime environments
   # on specific hosts. It allows us to define the runtime environment
   # and install it only once per host and then have a node depend on it.
   # Note that Erlang and NodeJS are also installed as runtime envs as
-  # part of the RabbitMQ and WebUI nodes but as they're not used by
-  # multiple nodes, we're not specifying them as independent entities.
+  # part of the RabbitMQ and WebUI nodes respectively but as they're not
+  # used by multiple nodes, we're not specifying them as independent
+  # entities.
   # #####################################################################
   python_runtime:
     type: manager.nodes.PythonRuntime
@@ -237,6 +238,7 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      # awaiting solution for circular relationship
       # - type: nginx_to_webui
       #   target: webui
       - type: nginx_to_restservice
@@ -295,11 +297,18 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      # awaiting solution for circular relationship
+      # - type: webui_to_nginx
+      #   target: nginx
       - type: webui_to_influxdb
         target: influxdb
 
   ######################################################################
-  # The provider context node is temporary
+  # The provider context node does not represent a service or any other
+  # entity for that matter. It is here to all us to update the provider
+  # context as a part of the deployment process and is not represented
+  # within another node as it doesn't directly relate to a specific
+  # service or entity.
   ######################################################################
   provider_context:
     type: cloudify.nodes.Root

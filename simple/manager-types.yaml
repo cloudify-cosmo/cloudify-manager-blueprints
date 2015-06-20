@@ -1,3 +1,12 @@
+######################################################################
+# By default, the types are using the Fabric plugin to create
+# and start the nodes so that you can choose a machine and run this
+# blueprint on it. You can replace the create and start lifecycle
+# operations with the ones commented below to use the Script plugin
+# instead which will allow you to bootstrap without using SSH on the
+# local machine.
+######################################################################
+
 node_types:
 
   manager.nodes.PythonRuntime:
