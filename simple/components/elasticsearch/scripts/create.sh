@@ -20,14 +20,9 @@ copy_notice "elasticsearch"
 create_dir ${ELASTICSEARCH_HOME}
 create_dir ${ELASTICSEARCH_LOG_PATH}
 
-# es_tar=$(download_file ${ELASTICHSEARCH_SOURCE_URL})
-# ctx logger info "Extracting Elasticsearch from ${es_tar}..."
-# sudo tar -xzvf ${es_tar} --strip-components=1 -C ${ELASTICSEARCH_HOME}/ >/dev/null
-
 yum_install ${ELASTICHSEARCH_SOURCE_URL}
 
 blueprint_es_conf_path="components/elasticsearch/config/elasticsearch.yml"
-# destination_es_conf_path="${ELASTICSEARCH_HOME}/config/elasticsearch.yml"
 destination_es_conf_path="${ELASTICSEARCH_CONF_PATH}/elasticsearch.yml"
 ctx logger info "Deploying Elasticsearch Config file ${blueprint_es_conf_path} to ${destination_es_conf_path}..."
 tmp_es_conf_path=$(ctx download-resource ${blueprint_es_conf_path})

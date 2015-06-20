@@ -13,13 +13,7 @@ export LOGSTASH_CONF_PATH="/etc/logstash/conf.d"
 ctx logger info "Installing Logstash..."
 
 copy_notice "logstash"
-# create_dir ${LOGSTASH_HOME}
 create_dir ${LOGSTASH_LOG_PATH}
-# create_dir ${LOGSTASH_CONF_PATH}
-
-# logstash_source=$(download_file ${LOGSTASH_SOURCE_URL})
-# ctx logger info "Extracting Logstash..."
-# sudo tar -xzvf ${logstash_source} --strip-components=1 -C ${LOGSTASH_HOME} >/dev/null
 
 yum_install ${LOGSTASH_SOURCE_URL}
 

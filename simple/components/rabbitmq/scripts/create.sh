@@ -25,7 +25,6 @@ yum_install ${RABBITMQ_SOURCE_URL}
 # sudo yum install /tmp/rabbitmq.rpm -y
 
 ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
-# sudo rabbitmq-server -detached
 sudo chkconfig rabbitmq-server on
 sudo /sbin/service rabbitmq-server start
 
