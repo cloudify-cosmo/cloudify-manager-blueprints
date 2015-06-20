@@ -193,13 +193,13 @@ node_templates:
   # multiple nodes, we're not specifying them as independent entities.
   # #####################################################################
   python_runtime:
-    type: manager.nodes.PythonHost
+    type: manager.nodes.PythonRuntime
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
 
   java_runtime:
-    type: manager.nodes.JavaHost
+    type: manager.nodes.JavaRuntime
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host

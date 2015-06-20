@@ -20,4 +20,5 @@ yum_install ${LOGSTASH_SOURCE_URL}
 logstash_conf=$(ctx download-resource "components/logstash/config/logstash.conf")
 sudo mv ${logstash_conf} "${LOGSTASH_CONF_PATH}/logstash.conf"
 
-sudo systemctl enable logstash.service
+# sudo systemctl enable logstash.service
+sudo /sbin/chkconfig logstash on
