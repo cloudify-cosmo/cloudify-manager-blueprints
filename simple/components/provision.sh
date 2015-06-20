@@ -23,16 +23,10 @@ ssh-keygen -t rsa -f ~/.ssh/id_rsa -q -N ''
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 sudo cp ~/.ssh/id_rsa /root/.ssh/id_rsa
 
-cd /vagrant
-source ~/cfy/bin/activate
-cfy local init --blueprint-path simple-manager-blueprint.yaml --inputs inputs.yaml.template --install-plugins
-cfy local execute -w install -v
-
-
-sudo mkdir /root/.ssh
-ssh-keygen -t rsa -f ~/.ssh/id_rsa -q -N ''
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-sudo cp ~/.ssh/id_rsa /root/.ssh/id_rsa
+# cd /vagrant
+# source ~/cfy/bin/activate
+# cfy local init --blueprint-path simple-manager-blueprint.yaml --inputs inputs.yaml.template --install-plugins
+# cfy local execute -w install -v
 
 # cd /tmp
 # wget https://github.com/cloudify-cosmo/cloudify-nodecellar-example/archive/3.2.tar.gz -O /tmp/nc.tar.gz

@@ -7,7 +7,7 @@ export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_tar_source_url)  # (e.
 
 # export LOGSTASH_HOME="/opt/logstash"
 export LOGSTASH_LOG_PATH="/var/log/cloudify/logstash"
-export LOGSTASH_CONF_PATH="/etc/logstash/"
+export LOGSTASH_CONF_PATH="/etc/logstash/conf.d"
 
 
 ctx logger info "Installing Logstash..."
@@ -15,7 +15,7 @@ ctx logger info "Installing Logstash..."
 copy_notice "logstash"
 # create_dir ${LOGSTASH_HOME}
 create_dir ${LOGSTASH_LOG_PATH}
-create_dir ${LOGSTASH_CONF_PATH}
+# create_dir ${LOGSTASH_CONF_PATH}
 
 # logstash_source=$(download_file ${LOGSTASH_SOURCE_URL})
 # ctx logger info "Extracting Logstash..."

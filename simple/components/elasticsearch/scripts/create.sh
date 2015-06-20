@@ -18,7 +18,6 @@ ctx logger info "Installing Elasticsearch..."
 
 copy_notice "elasticsearch"
 create_dir ${ELASTICSEARCH_HOME}
-create_dir ${ELASTICSEARCH_HOME}/scripts
 create_dir ${ELASTICSEARCH_LOG_PATH}
 
 # es_tar=$(download_file ${ELASTICHSEARCH_SOURCE_URL})

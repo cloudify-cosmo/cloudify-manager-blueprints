@@ -16,7 +16,7 @@
             ]
         },
         "influx": {
-            "host": "influxdb",
+            "host": "localhost",
             "user": "root",
             "pass": "root",
             "dbname": "cloudify"
