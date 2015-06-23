@@ -41,8 +41,9 @@ yum_install "python-devel g++ gcc" >/dev/null
 ctx logger info "Installing Management Worker Modules..."
 install_module "celery==${CELERY_VERSION}" ${VIRTUALENV_DIR}
 install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR}
-install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR}
-install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR}
+# do we need these two?
+install_module ${PLUGINS_COMMON_SOURCE_URL} ${VIRTUALENV_DIR}
+install_module ${SCRIPT_PLUGIN_SOURCE_URL} ${VIRTUALENV_DIR}
 
 ctx logger info "Downloading Manager Repository..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})

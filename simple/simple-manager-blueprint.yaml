@@ -40,6 +40,14 @@ inputs:
   #   type: string
   #   default: 3.2
 
+  # cloudify_source_rpm:
+  #   type: string
+  #   default: https://dl.dropboxusercontent.com/u/407576/3.2/cloudify-3.2.0-1.x86_64.rpm
+
+  cli_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-cli/archive/3.2.tar.gz
+
   rest_service_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz
@@ -303,6 +311,16 @@ node_templates:
       - type: webui_to_influxdb
         target: influxdb
 
+  cli:
+    type: manager.nodes.CLI
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: nginx
+      - type: cloudify.relationships.depends_on
+        target: restservice
+
   ######################################################################
   # The provider context node does not represent a service or any other
   # entity for that matter. It is here to all us to update the provider
@@ -321,7 +339,14 @@ node_templates:
         target: nginx
     interfaces:
       cloudify.interfaces.lifecycle:
-        create: components/upload_provider_context.sh
+        # create: components/upload_provider_context.sh
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/upload_provider_context.sh
+            # declared in the manager-types.yaml file
+            fabric_env: *simple_fabric_env
 
 plugins:
   cli:
