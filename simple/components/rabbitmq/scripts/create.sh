@@ -24,6 +24,24 @@ yum_install ${RABBITMQ_SOURCE_URL}
 # sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 # sudo yum install /tmp/rabbitmq.rpm -y
 
+lconf="/etc/logrotate.d/rabbitmq-server"
+config="$RABBITMQ_LOG_BASE/*.log {
+        daily
+        missingok
+        rotate 7
+        compress
+        delaycompress
+        notifempty
+        sharedscripts
+        postrotate
+            /sbin/service rabbitmq-server rotate-logs > /dev/null
+        endscript
+}"
+
+ctx logger info "Configuring logrotate..."
+echo "$config" | sudo tee $lconf
+sudo chmod 644 $lconf
+
 ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
 sudo chkconfig rabbitmq-server on
 sudo /sbin/service rabbitmq-server start
