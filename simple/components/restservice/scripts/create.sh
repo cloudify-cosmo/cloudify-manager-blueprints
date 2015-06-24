@@ -5,7 +5,6 @@
 
 export DSL_PARSER_SOURCE_URL=$(ctx node properties dsl_parser_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.2.tar.gz")
 export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.tar.gz")
-export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2.tar.gz")
 export SECUREST_SOURCE_URL=$(ctx node properties securest_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/flask-securest/archive/0.6.tar.gz")
 export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
 
@@ -31,7 +30,6 @@ create_virtualenv ${REST_SERVICE_VIRTUALENV}
 ctx logger info "Installing Required REST Service Modules..."
 install_module ${DSL_PARSER_SOURCE_URL} ${REST_SERVICE_VIRTUALENV}
 install_module ${REST_CLIENT_SOURCE_URL} ${REST_SERVICE_VIRTUALENV}
-install_module ${PLUGINS_COMMON_SOURCE_URL} ${REST_SERVICE_VIRTUALENV}
 install_module ${SECUREST_SOURCE_URL} ${REST_SERVICE_VIRTUALENV}
 ctx logger info "Downloading Manager Repository..."
 # insecure matters here?

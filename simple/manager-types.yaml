@@ -254,14 +254,11 @@ node_types:
         description: DSL Parser module Source URL
         type: string
         default: { get_input: dsl_parser_source_url }
+      # DO WE NEED THE REST CLIENT HERE? ITS NOT IN THE setup.py REQUIREMENTS
       rest_client_module_source_url:
         description: REST Client module Source URL
         type: string
         default: { get_input: rest_client_source_url }
-      plugins_common_module_source_url:
-        description: Plugins Common module Source URL
-        type: string
-        default: { get_input: plugins_common_source_url }
       securest_module_source_url:
         description: Flask SecuREST module Source URL
         type: string
