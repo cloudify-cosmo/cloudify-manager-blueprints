@@ -112,7 +112,7 @@ function download_file
         destination_file="/tmp/${RANDOM}.file"
     fi
 
-    if [[ ! -e ${destination_file } ]]; then
+    if [[ ! -e ${destination_file} ]]; then
         if [[ ! -z ${curl_cmd} ]]; then
             ctx logger info "Downloading ${url} to ${destination_file}..."
             curl_download_with_retries ${url} ${destination_file}
@@ -127,6 +127,7 @@ function download_file
     else
         ctx logger info "File ${destination_file} already exists..."
         echo ${destination_file}
+    fi
 }
 
 function copy_notice

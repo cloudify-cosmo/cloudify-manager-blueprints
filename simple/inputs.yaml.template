@@ -1,7 +1,7 @@
-public_ip: '127.0.0.1'
-private_ip: '127.0.0.1'
+public_ip: '10.10.1.10'
+private_ip: '10.10.1.10'
 ssh_user: 'vagrant'
-ssh_key_filename: '~/.ssh/id_rsa'
+ssh_key_filename: '~/repos/cloudify-manager-blueprints/simple/.vagrant/machines/centos7/virtualbox/private_key'
 
 agents_user: vagrant
 resources_prefix: ''

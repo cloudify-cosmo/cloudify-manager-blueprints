@@ -343,10 +343,12 @@ node_templates:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path:
-              default: components/upload_provider_context.sh
-            # declared in the manager-types.yaml file
-            fabric_env: *simple_fabric_env
+            script_path: components/upload_provider_context.sh
+            fabric_env:
+              user: { get_input: ssh_user }
+              key_filename: { get_input: ssh_key_filename }
+              host_string: { get_input: public_ip }
+              always_use_pty: false
 
 plugins:
   cli:
