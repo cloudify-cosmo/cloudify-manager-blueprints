@@ -130,10 +130,6 @@ inputs:
     default: cloudify-sg-agents
     type: string
 
-  use_existing_manager_port:
-    type: boolean
-    default: false
-
   manager_port_name:
     default: cloudify-manager-port
     type: string
@@ -199,7 +195,6 @@ node_templates:
     properties:
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
       resource_id: { get_input: manager_port_name }
-      use_external_resource: { get_input: use_existing_manager_port }
     relationships:
       - type: cloudify.relationships.contained_in
         target: management_network

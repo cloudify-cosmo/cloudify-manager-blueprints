@@ -28,7 +28,6 @@ use_existing_manager_security_group: false
 manager_security_group_name: cloudify-sg-manager
 use_existing_agents_security_group: false
 agents_security_group_name: cloudify-sg-agents
-use_existing_manager_port: false
 manager_port_name: cloudify-manager-port
 manager_volume_name: cloudify-manager-volume
 security_audit_log_file: /var/log/cloudify/rest-security-audit.log
