@@ -18,7 +18,23 @@ create_dir ${INFLUXDB_HOME}
 create_dir ${INFLUXDB_HOME}/scripts
 create_dir ${INFLUXDB_LOG_PATH}
 
-yum_install ${INFLUXDB_SOURCE_URL}
+yum_install ${INFLUXDB_LOG_PATH}
+
+# influxdb 0.8 rotates its log files every midnight
+# so that's the files we going to logrotate here (*.txt.*)
+lconf="/etc/logrotate.d/influxdb"
+config="$LOGSTASH_LOG_PATH/*.txt.* {
+        daily
+        rotate 7
+        compress
+        delaycompress
+        missingok
+        notifempty
+}"
+
+ctx logger info "Configuring logrotate..."
+echo "$config" | sudo tee $lconf
+sudo chmod 644 $lconf
 
 ctx logger info "Deploying InfluxDB Config file..."
 influx_config=$(ctx download-resource "components/influxdb/config/config.toml")
