@@ -1,0 +1,17 @@
+[Unit]
+Description=Cloudify REST Service
+; After=elasticsearch.service
+
+[Service]
+TimeoutStartSec=0
+EnvironmentFile=-/etc/sysconfig/cloudifyrest
+ExecStart=/bin/sh -c 'export MANAGER_REST_CONFIG_PATH="${MANAGER_REST_CONFIG_PATH}" && \
+    /opt/manager/env/bin/gunicorn \
+    -w ${WORKERS} \
+    -b 0.0.0.0:${REST_SERVICE_PORT} \
+    --timeout 300 manager_rest.server:app \
+    --log-file /var/log/cloudify/rest/gunicorn.log \
+    --access-logfile /var/log/cloudify/rest/gunicorn-access.log'
+
+[Install]
+WantedBy=multi-user.target
