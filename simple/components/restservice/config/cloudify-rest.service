@@ -4,7 +4,7 @@ Description=Cloudify REST Service
 
 [Service]
 TimeoutStartSec=0
-EnvironmentFile=-/etc/sysconfig/cloudifyrest
+EnvironmentFile=-/etc/sysconfig/cloudify-rest
 ExecStart=/bin/sh -c 'export MANAGER_REST_CONFIG_PATH="${MANAGER_REST_CONFIG_PATH}" && \
     /opt/manager/env/bin/gunicorn \
     -w ${WORKERS} \
