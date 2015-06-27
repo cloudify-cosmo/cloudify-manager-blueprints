@@ -58,3 +58,15 @@ install_module "/tmp/workflows" ${VIRTUALENV_DIR} >/dev/null
 
 ctx logger info "Cleaning up unneeded packages..."
 sudo yum remove -y python-devel g++ gcc >/dev/null
+
+ctx logger info "Deploying Service systemd EnvironmentFile..."
+envfile=$(ctx download-resource "components/mgmtworker/config/cloudify-mgmtworker")
+sudo mv ${envfile} "/etc/sysconfig/cloudify-mgmtworker"
+
+ctx logger info "Deploying Service systemd .service file..."
+servicefile=$(ctx download-resource "components/mgmtworker/config/cloudify-mgmtworker.service")
+sudo mv ${servicefile} "/usr/lib/systemd/system/cloudify-mgmtworker.service"
+
+ctx logger info "Enabling .service..."
+sudo systemctl enable cloudify-mgmtworker.service
+sudo systemctl daemon-reload
