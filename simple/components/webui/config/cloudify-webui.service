@@ -1,0 +1,10 @@
+[Unit]
+Description=Cloudify WebUI Service
+
+[Service]
+TimeoutStartSec=0
+EnvironmentFile=-/etc/sysconfig/cloudify-webui
+ExecStart=/opt/nodejs/bin/node /opt/cloudify-ui/cosmoui.js localhost
+
+[Install]
+WantedBy=multi-user.target
