@@ -3,6 +3,7 @@ Description=Cloudify AMQP InfluxDB Broker Service
 
 [Service]
 TimeoutStartSec=0
+Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-amqpinflux
 ExecStart=/opt/amqpinflux/env/bin/python /opt/amqpinflux/env/bin/cloudify-amqp-influxdb \
     --amqp-exchange cloudify-monitoring \
