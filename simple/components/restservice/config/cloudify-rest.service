@@ -1,9 +1,9 @@
 [Unit]
 Description=Cloudify REST Service
-; After=elasticsearch.service
 
 [Service]
 TimeoutStartSec=0
+Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-rest
 ExecStart=/bin/sh -c 'export MANAGER_REST_CONFIG_PATH="${MANAGER_REST_CONFIG_PATH}" && \
     /opt/manager/env/bin/gunicorn \
