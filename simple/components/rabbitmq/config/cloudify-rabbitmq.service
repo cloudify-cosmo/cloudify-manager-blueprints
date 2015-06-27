@@ -3,6 +3,7 @@ Description=RabbitMQ Service
 
 [Service]
 TimeoutStartSec=0
+Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-rabbitmq
 ExecStart=rabbitmq-server
 
