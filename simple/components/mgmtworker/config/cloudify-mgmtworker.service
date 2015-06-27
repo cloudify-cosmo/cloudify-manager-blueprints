@@ -3,6 +3,7 @@ Description=Cloudify Management Worker Service
 
 [Service]
 TimeoutStartSec=0
+Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-mgmtworker
 ExecStart=/opt/mgmtworker/env/bin/celery worker \
     -Ofair \
