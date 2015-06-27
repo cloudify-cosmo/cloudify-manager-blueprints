@@ -1,0 +1,10 @@
+[Unit]
+Description=InfluxDB Service
+
+[Service]
+TimeoutStartSec=0
+EnvironmentFile=-/etc/sysconfig/cloudify-influxdb
+ExecStart=/usr/bin/influxdb -config=${INFLUXDB_CONFIG_PATH}
+
+[Install]
+WantedBy=multi-user.target

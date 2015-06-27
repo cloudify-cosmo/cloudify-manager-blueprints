@@ -1,0 +1,2 @@
+INFLUXDB_HOME="/opt/influxdb"
+INFLUXDB_CONFIG_PATH="${INFLUXDB_HOME}/shared/config.toml"
