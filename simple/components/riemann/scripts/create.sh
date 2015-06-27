@@ -41,3 +41,5 @@ sudo mv ${manager_config} ${RIEMANN_CONFIG_PATH}/conf.d/manager.config
 ctx logger info "Deploying Riemann main.clj..."
 riemann_main_config=$(ctx download-resource "components/riemann/config/main.clj")
 sudo mv ${riemann_main_config} "${RIEMANN_CONFIG_PATH}/main.clj"
+
+configure_systemd_service "riemann"
