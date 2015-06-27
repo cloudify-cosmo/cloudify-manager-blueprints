@@ -1,0 +1,4 @@
+AMQP_HOST="localhost"
+INFLUXDB_HOST="localhost"
+AMQPINFLUX_HOME="/opt/amqpinflux"
+AMQPINFLUX_VIRTUALENV_DIR="${AMQPINFLUX_HOME}/env"
