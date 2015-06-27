@@ -23,9 +23,10 @@ yum_install ${RABBITMQ_SOURCE_URL}
 # sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 # sudo yum install /tmp/rabbitmq.rpm -y
 
+configure_systemd_service "rabbitmq"
+
 ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
-sudo chkconfig rabbitmq-server on
-sudo /sbin/service rabbitmq-server start
+sudo systemctl start cloudify-rabbitmq.service
 
 ctx logger info "Enabling RabbitMQ Plugins..."
 sudo rabbitmq-plugins enable rabbitmq_management
@@ -38,5 +39,5 @@ echo "[{rabbit, [{loopback_users, []}]}]." | sudo tee --append /etc/rabbitmq/rab
 ctx logger info "Chowning RabbitMQ logs path..."
 sudo chown rabbitmq:rabbitmq ${RABBITMQ_LOG_BASE}
 
-ctx logger info "Killing RabbitMQ..."
-sudo /sbin/service rabbitmq-server stop
+ctx logger info "Stopping RabbitMQ Service..."
+sudo systemctl stop cloudify-rabbitmq.service

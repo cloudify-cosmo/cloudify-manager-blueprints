@@ -1,0 +1,10 @@
+[Unit]
+Description=RabbitMQ Service
+
+[Service]
+TimeoutStartSec=0
+EnvironmentFile=-/etc/sysconfig/cloudify-rabbitmq
+ExecStart=rabbitmq-server
+
+[Install]
+WantedBy=multi-user.target
