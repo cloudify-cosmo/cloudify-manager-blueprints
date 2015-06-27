@@ -22,25 +22,3 @@ sudo mkdir /root/.ssh
 ssh-keygen -t rsa -f ~/.ssh/id_rsa -q -N ''
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 sudo cp ~/.ssh/id_rsa /root/.ssh/id_rsa
-
-# cd /vagrant
-# source ~/cfy/bin/activate
-# cfy local init --blueprint-path simple-manager-blueprint.yaml --inputs inputs.yaml.template --install-plugins
-# cfy local execute -w install -v
-
-# cd /tmp
-# wget https://github.com/cloudify-cosmo/cloudify-nodecellar-example/archive/3.2.tar.gz -O /tmp/nc.tar.gz
-# tar -xzvf /tmp/nc.tar.gz
-# cd cloudify-nodecellar-example-3.2/
-
-# echo '
-# host_ip: 10.10.1.10
-# agent_user: vagrant
-# agent_private_key_path: /root/.ssh/id_rsa
-# ' >> inputs/nodecellar-singlehost.yaml
-
-# cfy init
-# cfy use -t localhost
-# cfy blueprints upload -b nodecellar -p singlehost-blueprint.yaml
-# cfy deployments create -b nodecellar -d nodecellar --inputs inputs/nodecellar-singlehost.yaml
-# cfy executions start -w install -d nodecellar
