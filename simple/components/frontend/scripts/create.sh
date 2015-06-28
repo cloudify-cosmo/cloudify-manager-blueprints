@@ -40,6 +40,26 @@ ctx logger info "Copying rest-location.cloudify file to /etc/nginx/conf.d/rest-l
 cloudify_conf=$(ctx download-resource "components/frontend/config/rest-location.cloudify")
 sudo mv ${cloudify_conf} "/etc/nginx/conf.d/rest-location.cloudify"
 
+lconf="/etc/logrotate.d/nginx"
+config="$NGINX_LOG_PATH/*.log {
+        daily
+        missingok
+        rotate 7
+        compress
+        delaycompress
+        notifempty
+        create 640 nginx adm
+        sharedscripts
+        postrotate
+                [ -f /var/run/nginx.pid ] && kill -USR1 `cat /var/run/nginx.pid`
+        endscript
+}"
+
+ctx logger info "Configuring logrotate..."
+echo "$config" | sudo tee $lconf
+sudo chmod 644 $lconf
+
+
 ctx logger info "Copying SSL Certs..."
 crt=$(ctx download-resource "components/frontend/config/ssl/server.crt")
 sudo mv ${crt} "${SSL_CERTS_ROOT}/server.crt"
