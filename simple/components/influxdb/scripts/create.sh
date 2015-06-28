@@ -18,12 +18,12 @@ create_dir ${INFLUXDB_HOME}
 create_dir ${INFLUXDB_HOME}/scripts
 create_dir ${INFLUXDB_LOG_PATH}
 
-yum_install ${INFLUXDB_LOG_PATH}
+yum_install ${INFLUXDB_SOURCE_URL}
 
 # influxdb 0.8 rotates its log files every midnight
 # so that's the files we going to logrotate here (*.txt.*)
 lconf="/etc/logrotate.d/influxdb"
-config="$LOGSTASH_LOG_PATH/*.txt.* {
+config="$INFLUXDB_LOG_PATH/*.txt.* {
         daily
         rotate 7
         compress
