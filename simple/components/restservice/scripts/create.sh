@@ -42,3 +42,15 @@ install_module "/tmp/rest-service" ${REST_SERVICE_VIRTUALENV}
 ctx logger info "Deploying Gunicorn and REST Service Configuration file..."
 guni_conf=$(ctx download-resource "components/restservice/config/guni.conf")
 sudo mv ${guni_conf} "${REST_SERVICE_HOME}/guni.conf"
+
+ctx logger info "Deploying Service systemd EnvironmentFile..."
+envfile=$(ctx download-resource "components/restservice/config/cloudify-rest")
+sudo mv ${envfile} "/etc/sysconfig/cloudify-rest"
+
+ctx logger info "Deploying Service systemd .service file..."
+servicefile=$(ctx download-resource "components/restservice/config/cloudify-rest.service")
+sudo mv ${servicefile} "/usr/lib/systemd/system/cloudify-rest.service"
+
+ctx logger info "Enabling .service..."
+sudo systemctl enable cloudify-rest.service
+sudo systemctl daemon-reload
