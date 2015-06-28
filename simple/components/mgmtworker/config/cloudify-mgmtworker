@@ -1,6 +1,6 @@
 MGMTWORKER_HOME="/opt/mgmtworker"
-VIRTUALENV_DIR="${MGMTWORKER_HOME}/env"
-CELERY_WORK_DIR="${MGMTWORKER_HOME}/work"
+VIRTUALENV_DIR="/opt/mgmtworker/env"
+CELERY_WORK_DIR="/opt/mgmtworker/work"
 CELERY_LOG_DIR="/var/log/cloudify/mgmtworker"
 RIEMANN_CONFIGS_DIR="/opt/riemann"
 MANAGEMENT_IP="localhost"
