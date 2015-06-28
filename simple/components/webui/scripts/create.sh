@@ -45,3 +45,5 @@ sudo mv ${webui_conf} "${WEBUI_HOME}/backend/gsPresets.json"
 ctx logger info "Deploying Grafana Configuration..."
 grafana_conf=$(ctx download-resource "components/webui/config/config.js")
 sudo mv ${grafana_conf} "${GRAFANA_HOME}/config.js"
+
+configure_systemd_service "webui"
