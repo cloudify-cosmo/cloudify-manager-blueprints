@@ -1,3 +1,4 @@
 #!/bin/bash -e
 
-sudo /sbin/service rabbitmq-server start
+ctx logger info "Starting RabbitMQ Service..."
+sudo systemctl start cloudify-rabbitmq.service
