@@ -1,1 +1,0 @@
-RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
