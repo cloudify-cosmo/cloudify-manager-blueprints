@@ -1,0 +1,60 @@
+########
+# Copyright (c) 2014 GigaSpaces Technologies Ltd. All rights reserved
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+#    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    * See the License for the specific language governing permissions and
+#    * limitations under the License.
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+AWS_ACCESS_KEY_ID = ENV['AWS_ACCESS_KEY_ID']
+AWS_ACCESS_KEY = ENV['AWS_ACCESS_KEY']
+
+CENTOS7_BOX_NAME = 'chef/centos-7.0'
+CENTOS7_PREMADE = 'centos7manager'
+# BASE_BOX_URI = 'https://github.com/2creatives/vagrant-centos/releases/download/v0.1.0/centos64-x86_64-20131030.box'
+CENTOS65_BOX_NAME = 'chef/centos-6.5'
+
+Vagrant.configure('2') do |config|
+  config.vm.define :centos7 do |centos7|
+    centos7.vm.provider :virtualbox do |vb|
+      vb.customize ['modifyvm', :id, '--memory', '3072']
+    end
+    centos7.vm.box = CENTOS7_BOX_NAME
+    centos7.vm.network :private_network, ip: "10.10.1.10"
+    centos7.vm.hostname = 'centos7'
+    # centos7.vm.synced_folder "../", "/vagrant", create: true
+    centos7.vm.provision "shell", path: "components/provision.sh", privileged: false
+  end
+
+  config.vm.define :centos7_premade do |centos7|
+    centos7.vm.provider :virtualbox do |vb|
+      vb.customize ['modifyvm', :id, '--memory', '3072']
+    end
+    centos7.vm.box = CENTOS7_PREMADE
+    centos7.vm.network :private_network, ip: "10.10.1.10"
+    centos7.vm.hostname = 'centos7-premade'
+    # centos7.vm.synced_folder "../", "/vagrant", create: true
+    centos7.vm.provision "shell", path: "components/provision.sh", privileged: false
+  end
+
+  config.vm.define :centos65 do |centos65|
+    centos65.vm.provider :virtualbox do |vb|
+      vb.customize ['modifyvm', :id, '--memory', '3072']
+    end
+    centos65.vm.box = CENTOS65_BOX_NAME
+    centos65.vm.network :private_network, ip: "10.10.1.11"
+    centos65.vm.hostname = 'centos65'
+    # centos65.vm.synced_folder "../", "/vagrant", create: true
+    centos65.vm.provision "shell", path: "components/provision.sh", privileged: false
+  end
+end

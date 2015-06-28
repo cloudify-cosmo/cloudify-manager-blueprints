@@ -1,0 +1,1 @@
+{"relationships": [{"target_name": "manager_host", "type": "cloudify.relationships.contained_in", "target_id": "manager_host_373eb"}, {"target_name": "influxdb", "type": "webui_to_influxdb", "target_id": "influxdb_7397e"}], "state": "initializing", "node_id": "webui", "name": "webui", "version": 1, "host_id": "manager_host_373eb", "runtime_properties": {}, "id": "webui_95e87"}

@@ -1,0 +1,199 @@
+#!/bin/bash -e
+
+function sys_error
+{
+    ctx logger error "${1:-UNKNOWN} (status $?)"
+    exit 1
+}
+
+# DEPRECATED
+function log
+{
+    level=$1
+    message=$2
+    timestamp=$(date +"%Y-%m-%dT%T%z")
+
+    echo "### ${timestamp}, ${level}: ${message}"
+}
+
+function create_virtualenv
+{
+    virtualenv_path=$1
+
+    ctx logger info "Creating virtualenv ${virtualenv_path}..."
+    sudo virtualenv ${virtualenv_path}
+}
+
+function create_dir
+{
+    dir=$1
+
+    ctx logger info "Creating directory ${dir}..."
+    sudo mkdir -p ${dir}
+}
+
+function install_module
+{
+    module=$1
+    venv=${2:-""}
+
+    if [[ ! -z "${venv}" ]]; then
+        ctx logger info "Installing ${module} in virtualenv ${venv}..."
+        sudo ${venv}/bin/pip install ${module} >/dev/null
+    else
+        ctx logger info "Installing ${module}..."
+        sudo pip install ${module} >/dev/null
+    fi
+}
+
+
+# DEPRECATED
+function install_rpm
+{
+    source=$1
+    if [[ -z "${source}" ]]; then
+        sys_error "Must supply url as param (install_rpm #URL#)."
+    fi
+
+    tmp_file_path="/tmp/${RANDOM}.rpm"
+    download_file ${source} ${tmp_file_path}
+    ctx logger info "Installing RPM ${tmp_file_path}..."
+    sudo rpm --nodeps -ivh ${tmp_file_path}
+    clean_tmp
+}
+
+function clean_tmp
+{
+    ctx logger info "Cleaning up /tmp..."
+    sudo rm -rf /tmp/*
+}
+
+function curl_download_with_retries
+{
+    ###
+    # This will download a file.
+    # It will retry 10 times; provide an error if failure occurs rather than an html page;
+    # no output will be shows other than errors, and any directory structure required
+    # for the download will be created automatically.
+    ###
+    source=$1
+    destination=$2
+
+    # this will use an exponential backoff algorithm 10 times before it fails.
+    curl --retry 10 --fail --silent --show-error --location ${source} --create-dirs --output ${destination}
+}
+
+function wget_download_with_retries
+{
+    source=$1
+    destination=$2
+
+    wget --tries=10 --quiet --output-document=${destination_file} ${url}
+}
+
+function download_file
+{
+    ###
+    # This will download a file whether by using cURL (first) or wget (second)
+    # if a destination file path is provided, it will be downloaded to that path.
+    # if not, the file will be downloaded to a tmp path and the path will be
+    # echoed so that it can be used as a return value.
+    # If the destination file already exists, it will be echoed back without being downloaded.
+    ###
+    url=$1
+    destination_file=$2
+
+    set +e
+    curl_cmd=$(which curl)
+    wget_cmd=$(which wget)
+    set -e
+
+    if [[ -z ${destination_file} ]]; then
+        destination_file="/tmp/${RANDOM}.file"
+    fi
+
+    if [[ ! -e ${destination_file} ]]; then
+        if [[ ! -z ${curl_cmd} ]]; then
+            ctx logger info "Downloading ${url} to ${destination_file}..."
+            curl_download_with_retries ${url} ${destination_file}
+        elif [[ ! -z ${wget_cmd} ]]; then
+            ctx logger info "Downloading ${url} to ${destination_file}..."
+            # should create dir struct here as wget doesn't do it for us
+            wget_download_with_retries ${url} ${destination_file}
+        else
+            sys_error "Cannot download ${url}. Neither 'cURL' nor 'wget' were found on the system"
+        fi
+        echo ${destination_file}
+    else
+        ctx logger info "File ${destination_file} already exists..."
+        echo ${destination_file}
+    fi
+}
+
+function copy_notice
+{
+    ###
+    # This is a generic implementation for copying NOTICE files for different
+    # services to /opt.
+    ###
+    service=$1
+
+    destination_notice="/opt/${service}_NOTICE.txt"
+    ctx logger info "Copying ${service} NOTICE file to ${destination_notice}..."
+    notice_file=$(ctx download-resource "components/${service}/NOTICE.txt")
+    sudo mv ${notice_file} ${destination_notice}
+}
+
+function wait_for_port
+{
+    ###
+    # services sometime take time to load. This allows us to wait for their
+    # port to open before we continue with other operations.
+    # for instance, before we create Elasticsearch mapping, we run Elasticsearch
+    # and wait for its port to be opened.
+    ###
+    port=$1
+
+    counter=0
+    while ! echo exit | curl http://localhost:$1;
+    do
+            if [[ $c -gt 24 ]]; then
+                sys_error "Failed to connect to port ${port}... (status $?)"
+            fi
+            ctx logger info "Port ${port} not available yet, retrying... ($counter/24)"
+            sleep 5;
+            c=$((c+1))
+    done
+}
+
+function yum_install
+{
+    ###
+    # yum supports installing from URL, path and the default yum repo
+    # configured within your image
+    # you can specify one of the following:
+    # [yum install -y] http://www.myrpmrepo.com/file.rpm
+    # [yum install -y] mylocalfile.rpm
+    # [yum install -y] mypackagename
+    ###
+    source=$1
+
+    ctx logger info "yum Installing ${source}..."
+    sudo yum install -y ${source} >/dev/null
+}
+
+function configure_systemd_service() {
+    service_name=$1
+
+    ctx logger info "Deploying Service systemd EnvironmentFile..."
+    envfile=$(ctx download-resource "components/${service_name}/config/cloudify-${service_name}")
+    sudo mv ${envfile} "/etc/sysconfig/cloudify-${service_name}"
+
+    ctx logger info "Deploying Service systemd .service file..."
+    servicefile=$(ctx download-resource "components/${service_name}/config/cloudify-${service_name}.service")
+    sudo mv ${servicefile} "/usr/lib/systemd/system/cloudify-${service_name}.service"
+
+    ctx logger info "Enabling .service..."
+    sudo systemctl enable cloudify-${service_name}.service
+    sudo systemctl daemon-reload
+}

@@ -1,0 +1,3 @@
+RIEMANN_CONFIG_PATH="/etc/riemann"
+LANGOHR_HOME="/opt/lib"
+EXTRA_CLASSPATH="/opt/lib/langohr.jar"

@@ -1,0 +1,1 @@
+{"relationships": [{"target_name": "manager_host", "target_id": "manager_host_373eb", "type": "cloudify.relationships.contained_in"}], "name": "python_runtime", "runtime_properties": {}, "state": "creating", "node_id": "python_runtime", "version": 2, "host_id": "manager_host_373eb", "id": "python_runtime_96095"}
