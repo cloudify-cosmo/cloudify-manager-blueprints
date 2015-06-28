@@ -2,18 +2,15 @@
 REST_SERVICE_HOME="/opt/manager"
 
 # REST Service's config file. This is currently misnamed.. should probably renamed to cloudify-rest.config or something.
-MANAGER_REST_CONFIG_PATH="${REST_SERVICE_HOME}/guni.conf"
+MANAGER_REST_CONFIG_PATH="/opt/manager/guni.conf"
 
 # REST Service's virtualenv
-REST_SERVICE_VIRTUALENV="${REST_SERVICE_HOME}/env"
+REST_SERVICE_VIRTUALENV="/opt/manager/env"
 # Duplicate of the above. Need to check if unneeded.
-MANAGER_VIRTUALENV="${REST_SERVICE_HOME}/env"
+MANAGER_VIRTUALENV="/opt/manager/env"
 
 # REST Service (and Gunicorn) Log Path
 REST_SERVICE_LOG_PATH="/var/log/cloudify/rest"
 
 # REST Service port
 REST_SERVICE_PORT=8100
-
-# Number of Gunicorn Workers to run.
-WORKERS=$(($(nproc)*2+1))
