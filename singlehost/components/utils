@@ -185,11 +185,11 @@ function yum_install
 function configure_systemd_service() {
     service_name=$1
 
-    ctx logger info "Deploying Service systemd EnvironmentFile..."
+    ctx logger info "Deploying systemd EnvironmentFile..."
     envfile=$(ctx download-resource "components/${service_name}/config/cloudify-${service_name}")
     sudo mv ${envfile} "/etc/sysconfig/cloudify-${service_name}"
 
-    ctx logger info "Deploying Service systemd .service file..."
+    ctx logger info "Deploying systemd .service file..."
     servicefile=$(ctx download-resource "components/${service_name}/config/cloudify-${service_name}.service")
     sudo mv ${servicefile} "/usr/lib/systemd/system/cloudify-${service_name}.service"
 

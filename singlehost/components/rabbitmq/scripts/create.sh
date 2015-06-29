@@ -14,7 +14,6 @@ ctx logger info "Installing RabbitMQ..."
 copy_notice "rabbitmq"
 create_dir "${RABBITMQ_LOG_BASE}"
 
-ctx logger info "Installing logrotate"
 yum_install ${ERLANG_SOURCE_URL}
 yum_install ${RABBITMQ_SOURCE_URL}
 
