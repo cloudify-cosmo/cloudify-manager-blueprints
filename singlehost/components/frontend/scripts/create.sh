@@ -41,7 +41,7 @@ cloudify_conf=$(ctx download-resource "components/frontend/config/rest-location.
 sudo mv ${cloudify_conf} "/etc/nginx/conf.d/rest-location.cloudify"
 
 lconf="/etc/logrotate.d/nginx"
-config="$NGINX_LOG_PATH/*.log {
+config="$NGINX_LOG_PATH/*.log"' {
         daily
         missingok
         rotate 7
@@ -53,7 +53,7 @@ config="$NGINX_LOG_PATH/*.log {
         postrotate
                 [ -f /var/run/nginx.pid ] && kill -USR1 `cat /var/run/nginx.pid`
         endscript
-}"
+}'
 
 ctx logger info "Configuring logrotate..."
 echo "$config" | sudo tee $lconf

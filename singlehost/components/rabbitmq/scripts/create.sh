@@ -23,7 +23,7 @@ yum_install ${RABBITMQ_SOURCE_URL}
 # sudo yum install /tmp/rabbitmq.rpm -y
 
 lconf="/etc/logrotate.d/rabbitmq-server"
-config="$RABBITMQ_LOG_BASE/*.log {
+config="$RABBITMQ_LOG_BASE/*.log"' {
         daily
         missingok
         rotate 7
@@ -34,7 +34,7 @@ config="$RABBITMQ_LOG_BASE/*.log {
         postrotate
             /sbin/service rabbitmq-server rotate-logs > /dev/null
         endscript
-}"
+}'
 
 ctx logger info "Configuring logrotate..."
 echo "$config" | sudo tee $lconf
