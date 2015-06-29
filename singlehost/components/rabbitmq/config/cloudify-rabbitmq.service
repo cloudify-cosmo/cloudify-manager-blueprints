@@ -5,7 +5,7 @@ Description=RabbitMQ Service
 TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-rabbitmq
-ExecStart=rabbitmq-server
+ExecStart=/usr/sbin/rabbitmq-server
 
 [Install]
 WantedBy=multi-user.target

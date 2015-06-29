@@ -157,12 +157,12 @@ function wait_for_port
     counter=0
     while ! echo exit | curl http://localhost:$1;
     do
-            if [[ $c -gt 24 ]]; then
+            if [[ $counter -gt 24 ]]; then
                 sys_error "Failed to connect to port ${port}... (status $?)"
             fi
             ctx logger info "Port ${port} not available yet, retrying... ($counter/24)"
             sleep 5;
-            c=$((c+1))
+            counter=$((counter+1))
     done
 }
 
