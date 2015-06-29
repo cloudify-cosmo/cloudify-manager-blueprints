@@ -51,7 +51,7 @@ config="$NGINX_LOG_PATH/*.log {
         create 640 nginx adm
         sharedscripts
         postrotate
-                [ -f /var/run/nginx.pid ] && kill -USR1 `cat /var/run/nginx.pid`
+                [ -f /var/run/nginx.pid ] && kill -USR1 \`cat /var/run/nginx.pid\`
         endscript
 }"
 
