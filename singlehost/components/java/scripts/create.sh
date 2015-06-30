@@ -8,8 +8,7 @@ JAVA_SOURCE_URL=$(ctx node properties java_rpm_source_url)
 ctx logger info "Installing Java..."
 copy_notice "java"
 
-if [[ "$JAVA_SOURCE_URL" == *rpm ]]
-then
+if [[ "$JAVA_SOURCE_URL" == *rpm ]]; then
     yum_install ${JAVA_SOURCE_URL}
 else
     # alternative tar based oracle jre installation. deprecated.
