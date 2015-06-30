@@ -1,14 +1,12 @@
 #!/bin/bash -e
 
-function sys_error
-{
+function sys_error() {
     ctx logger error "${1:-UNKNOWN} (status $?)"
     exit 1
 }
 
 # DEPRECATED
-function log
-{
+function log() {
     level=$1
     message=$2
     timestamp=$(date +"%Y-%m-%dT%T%z")
@@ -16,24 +14,28 @@ function log
     echo "### ${timestamp}, ${level}: ${message}"
 }
 
-function create_virtualenv
-{
+function create_virtualenv() {
     virtualenv_path=$1
 
     ctx logger info "Creating virtualenv ${virtualenv_path}..."
     sudo virtualenv ${virtualenv_path}
 }
 
-function create_dir
-{
+function create_dir() {
     dir=$1
 
     ctx logger info "Creating directory ${dir}..."
     sudo mkdir -p ${dir}
 }
 
-function install_module
-{
+function remove_dir() {
+    dir=$1
+
+    ctx logger info "Revmoing directory ${dir}..."
+    sudo rm -rf ${dir}
+}
+
+function install_module() {
     module=$1
     venv=${2:-""}
 
@@ -48,8 +50,7 @@ function install_module
 
 
 # DEPRECATED
-function install_rpm
-{
+function install_rpm() {
     source=$1
     if [[ -z "${source}" ]]; then
         sys_error "Must supply url as param (install_rpm #URL#)."
@@ -62,14 +63,12 @@ function install_rpm
     clean_tmp
 }
 
-function clean_tmp
-{
+function clean_tmp() {
     ctx logger info "Cleaning up /tmp..."
     sudo rm -rf /tmp/*
 }
 
-function curl_download_with_retries
-{
+function curl_download_with_retries() {
     ###
     # This will download a file.
     # It will retry 10 times; provide an error if failure occurs rather than an html page;
@@ -83,16 +82,14 @@ function curl_download_with_retries
     curl --retry 10 --fail --silent --show-error --location ${source} --create-dirs --output ${destination}
 }
 
-function wget_download_with_retries
-{
+function wget_download_with_retries() {
     source=$1
     destination=$2
 
     wget --tries=10 --quiet --output-document=${destination_file} ${url}
 }
 
-function download_file
-{
+function download_file() {
     ###
     # This will download a file whether by using cURL (first) or wget (second)
     # if a destination file path is provided, it will be downloaded to that path.
@@ -130,8 +127,7 @@ function download_file
     fi
 }
 
-function copy_notice
-{
+function copy_notice() {
     ###
     # This is a generic implementation for copying NOTICE files for different
     # services to /opt.
@@ -144,8 +140,7 @@ function copy_notice
     sudo mv ${notice_file} ${destination_notice}
 }
 
-function wait_for_port
-{
+function wait_for_port() {
     ###
     # services sometime take time to load. This allows us to wait for their
     # port to open before we continue with other operations.
@@ -166,8 +161,7 @@ function wait_for_port
     done
 }
 
-function yum_install
-{
+function yum_install() {
     ###
     # yum supports installing from URL, path and the default yum repo
     # configured within your image
@@ -180,6 +174,13 @@ function yum_install
 
     ctx logger info "yum Installing ${source}..."
     sudo yum install -y ${source} >/dev/null
+}
+
+function yum_uninstall() {
+    package=$1
+
+    ctx logger info "yum Removing ${package}..."
+    sudo yum remove -y ${package} >/dev/null
 }
 
 function configure_systemd_service() {
@@ -196,4 +197,18 @@ function configure_systemd_service() {
     ctx logger info "Enabling .service..."
     sudo systemctl enable cloudify-${service_name}.service
     sudo systemctl daemon-reload
+}
+
+function remove_systemd_service() {
+    service_name=$1
+
+    ctx logger info "Disabling .service..."
+    sudo systemctl disable cloudify-${service_name}.service
+    sudo systemctl daemon-reload
+
+    ctx logger info "Removing systemd EnvironmentFile..."
+    sudo rm "/etc/sysconfig/cloudify-${service_name}"
+
+    ctx logger info "Removing systemd .service file..."
+    sudo rm "/usr/lib/systemd/system/cloudify-${service_name}.service"
 }
