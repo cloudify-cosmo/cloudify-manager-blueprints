@@ -81,7 +81,8 @@ inputs:
   #############################
   java_source_url:
     type: string
-    default: http://javadl.sun.com/webapps/download/AutoDL?BundleId=106239
+    # default: http://javadl.sun.com/webapps/download/AutoDL?BundleId=106239
+    default: https://dl.dropboxusercontent.com/u/407576/3.2/java.rpm
 
   #############################
   # RabbitMQ Inputs
