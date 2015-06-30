@@ -318,15 +318,20 @@ node_templates:
       - type: webui_to_influxdb
         target: influxdb
 
-  cli:
-    type: manager.nodes.CLI
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: nginx
-      - type: cloudify.relationships.depends_on
-        target: restservice
+  ######################################################################
+  # Enable this node if you want to have the CLI installed within
+  # the manager. This might aid in debugging problems or just
+  # controlling the manager from within itself.
+  ######################################################################
+  # cli:
+  #   type: manager.nodes.CLI
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: manager_host
+  #     - type: cloudify.relationships.depends_on
+  #       target: nginx
+  #     - type: cloudify.relationships.depends_on
+  #       target: restservice
 
   ######################################################################
   # The provider context node does not represent a service or any other
