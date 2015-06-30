@@ -272,7 +272,7 @@ node_templates:
       - type: riemann_to_nginx
         target: nginx
 
-  restservice:
+  rest_service:
     type: manager.nodes.RestService
     relationships:
       - type: cloudify.relationships.contained_in
@@ -284,7 +284,7 @@ node_templates:
       - type: restservice_to_rabbitmq
         target: rabbitmq
 
-  mgmtworker:
+  mgmt_worker:
     type: manager.nodes.ManagementWorker
     relationships:
       - type: cloudify.relationships.contained_in
@@ -296,7 +296,7 @@ node_templates:
       - type: mgmtworker_to_nginx
         target: nginx
 
-  amqpinflux:
+  amqp_influx:
     type: manager.nodes.AmqpInfluxBroker
     relationships:
       - type: cloudify.relationships.contained_in
