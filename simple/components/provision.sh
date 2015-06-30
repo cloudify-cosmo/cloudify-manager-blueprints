@@ -7,13 +7,13 @@ function update_local_cache
 
 
 update_local_cache
-sudo yum install python-devel g++ gcc -y
+# sudo yum install python-devel g++ gcc -y
 
-curl --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python
-sudo pip install virtualenv
-virtualenv cfy
-source cfy/bin/activate
-pip install cloudify==3.2
+# curl --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python
+# sudo pip install virtualenv
+# virtualenv cfy
+# source cfy/bin/activate
+# pip install cloudify==3.2
 
 # wget http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/get-cloudify.py
 # python get-cloudify.py -v -f
