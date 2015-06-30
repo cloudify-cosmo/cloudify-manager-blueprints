@@ -140,6 +140,15 @@ function copy_notice() {
     sudo mv ${notice_file} ${destination_notice}
 }
 
+function remove_notice() {
+    # See copy_notice()
+    service=$1
+
+    destination_notice="/opt/${service}_NOTICE.txt"
+    ctx logger info "Deleting ${service} NOTICE file..."
+    sudo rm ${destination_notice}
+}
+
 function wait_for_port() {
     ###
     # services sometime take time to load. This allows us to wait for their
