@@ -77,6 +77,13 @@ inputs:
     default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.2.tar.gz
 
   #############################
+  # Java Inputs
+  #############################
+  java_source_url:
+    type: string
+    default: http://javadl.sun.com/webapps/download/AutoDL?BundleId=106239
+
+  #############################
   # RabbitMQ Inputs
   #############################
   erlang_source_url:

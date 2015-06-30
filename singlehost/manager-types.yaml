@@ -43,6 +43,10 @@ node_types:
 
   manager.nodes.JavaRuntime:
     derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      java_rpm_source_url:
+        description: Java RPM Source URL
+        default: { get_input: java_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         # create: components/java/scripts/create.sh
