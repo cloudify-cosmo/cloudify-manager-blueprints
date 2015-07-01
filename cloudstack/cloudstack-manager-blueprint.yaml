@@ -1,9 +1,9 @@
 tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
-    - http://www.getcloudify.org/spec/cloudify/3.3m2/types.yaml
-    - http://www.getcloudify.org/spec/cloudstack-plugin/1.3m2/plugin.yaml
-    - http://www.getcloudify.org/spec/fabric-plugin/1.3m2/plugin.yaml
+    - http://www.getcloudify.org/spec/cloudify/3.3m3/types.yaml
+    - http://www.getcloudify.org/spec/cloudstack-plugin/1.3m3/plugin.yaml
+    - http://www.getcloudify.org/spec/fabric-plugin/1.3m3/plugin.yaml
 
 
 inputs:
@@ -164,9 +164,9 @@ node_templates:
                     core_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-core_3.2.0-m5-b175_amd64.deb
                     ui_package_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/m5-RELEASE/cloudify-ui_3.2.0-m5-b175_amd64.deb
                 agents:
-                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m2-RELEASE/cloudify-ubuntu-agent_3.3.0-m2-b272_amd64.deb
-                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m2-RELEASE/cloudify-centos-final-agent_3.3.0-m2-b272_amd64.deb
-                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m2-RELEASE/cloudify-windows-agent_3.3.0-m2-b272_amd64.deb
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-agent_3.3.0-m3-b273_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-final-agent_3.3.0-m3-b273_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-windows-agent_3.3.0-m3-b273_amd64.deb
             cloudify:
                 resources_prefix: { get_input: resources_prefix }
 
