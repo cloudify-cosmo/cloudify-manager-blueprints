@@ -46,4 +46,22 @@ ctx logger info "Deploying Grafana Configuration..."
 grafana_conf=$(ctx download-resource "components/webui/config/config.js")
 sudo mv ${grafana_conf} "${GRAFANA_HOME}/config.js"
 
+ctx logger info "Configuring logrotate..."
+lconf="/etc/logrotate.d/nodejs"
+
+cat << EOF | sudo tee $lconf > /dev/null
+$WEBUI_LOG_PATH/*.log {
+        daily
+        rotate 7
+        copytruncate
+        compress
+        delaycompress
+        missingok
+        notifempty
+}
+EOF
+
+sudo chmod 644 $lconf
+
+
 configure_systemd_service "webui"
