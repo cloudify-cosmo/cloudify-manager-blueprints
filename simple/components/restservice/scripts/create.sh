@@ -39,6 +39,26 @@ ctx logger info "Extracting Manager..."
 tar -xzf ${manager_repo} --strip-components=1 -C "/tmp"
 install_module "/tmp/rest-service" ${REST_SERVICE_VIRTUALENV}
 
+ctx logger info "Configuring logrotate..."
+lconf="/etc/logrotate.d/gunicorn"
+
+cat << EOF | sudo tee $lconf > /dev/null
+$REST_SERVICE_LOG_PATH/*.log {
+        daily
+        missingok
+        rotate 7
+        compress
+        delaycompress
+        notifempty
+        sharedscripts
+        postrotate
+                [ -f /var/run/gunicorn.pid ] && kill -USR1 \$(cat /var/run/gunicorn.pid)
+        endscript
+}
+EOF
+
+sudo chmod 644 $lconf
+
 ctx logger info "Deploying Gunicorn and REST Service Configuration file..."
 guni_conf=$(ctx download-resource "components/restservice/config/guni.conf")
 sudo mv ${guni_conf} "${REST_SERVICE_HOME}/guni.conf"
