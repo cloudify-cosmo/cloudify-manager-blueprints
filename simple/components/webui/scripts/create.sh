@@ -47,7 +47,7 @@ grafana_conf=$(ctx download-resource "components/webui/config/config.js")
 sudo mv ${grafana_conf} "${GRAFANA_HOME}/config.js"
 
 ctx logger info "Configuring logrotate..."
-lconf="/etc/logrotate.d/nodejs"
+lconf="/etc/logrotate.d/cloudify-webui"
 
 cat << EOF | sudo tee $lconf > /dev/null
 $WEBUI_LOG_PATH/*.log {
