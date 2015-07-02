@@ -20,8 +20,11 @@ yum_install ${LOGSTASH_SOURCE_URL}
 logstash_conf=$(ctx download-resource "components/logstash/config/logstash.conf")
 sudo mv ${logstash_conf} "${LOGSTASH_CONF_PATH}/logstash.conf"
 
+ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/logstash"
-config="$LOGSTASH_LOG_PATH/*.log {
+
+cat << EOF | sudo tee $lconf > /dev/null
+$LOGSTASH_LOG_PATH/*.log {
         daily
         rotate 7
         copytruncate
@@ -29,10 +32,9 @@ config="$LOGSTASH_LOG_PATH/*.log {
         delaycompress
         missingok
         notifempty
-}"
+}
+EOF
 
-ctx logger info "Configuring logrotate..."
-echo "$config" | sudo tee $lconf
 sudo chmod 644 $lconf
 
 # sudo systemctl enable logstash.service

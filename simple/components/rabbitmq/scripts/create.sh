@@ -22,8 +22,11 @@ yum_install ${RABBITMQ_SOURCE_URL}
 # sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 # sudo yum install /tmp/rabbitmq.rpm -y
 
+ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/rabbitmq-server"
-config="$RABBITMQ_LOG_BASE/*.log"' {
+
+cat << EOF | sudo tee $lconf > /dev/null
+$RABBITMQ_LOG_BASE/*.log {
         daily
         missingok
         rotate 7
@@ -34,10 +37,9 @@ config="$RABBITMQ_LOG_BASE/*.log"' {
         postrotate
             /sbin/service rabbitmq-server rotate-logs > /dev/null
         endscript
-}'
+}
+EOF
 
-ctx logger info "Configuring logrotate..."
-echo "$config" | sudo tee $lconf
 sudo chmod 644 $lconf
 
 configure_systemd_service "rabbitmq"
