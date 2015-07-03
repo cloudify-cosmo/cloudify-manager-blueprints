@@ -1,7 +1,8 @@
 tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
+  # - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/CFY-3065-refactor-manager-node-types-yaml/resources/rest-service/cloudify/types/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.2/plugin.yaml
   - manager-types.yaml
 
@@ -195,6 +196,41 @@ node_templates:
       install_agent: false
       ip: { get_input: public_ip }
 
+  manager_configuration:
+    type: cloudify.nodes.CloudifyManager
+    properties:
+      ssh_user: { get_input: ssh_user }
+      ssh_key_filename: { get_input: ssh_key_filename }
+      cloudify:
+        resources_prefix: { get_input: resources_prefix }
+
+        cloudify_agent:
+          min_workers: 0
+          max_workers: 5
+          remote_execution_port: 22
+          user: { get_input: agents_user }
+
+        workflows:
+          task_retries: -1  # this means forever
+          task_retry_interval: 30
+
+        policy_engine:
+          start_timeout: 30
+
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: provider_context
+        source_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            postconfigure: components/set_provider_context.sh
+      - type: cloudify.relationships.depends_on
+        target: nginx
+        source_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            postconfigure: components/set_manager_ip.sh
+
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
   # on specific hosts. It allows us to define the runtime environment
@@ -342,7 +378,7 @@ node_templates:
   # service or entity.
   ######################################################################
   provider_context:
-    type: cloudify.nodes.Root
+    type: manager.nodes.ProviderContext
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host

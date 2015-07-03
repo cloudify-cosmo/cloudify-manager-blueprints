@@ -432,6 +432,9 @@ node_types:
               default: components/cli/scripts/start.sh
             fabric_env: *simple_fabric_env
 
+  manager.nodes.ProviderContext:
+    derived_from: cloudify.nodes.Root
+
 ######################################################################
 # The relationships don't provide any configuration related
 # functionality but are rather here just to provide the dependency
