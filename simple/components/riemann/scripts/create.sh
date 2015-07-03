@@ -35,8 +35,11 @@ ctx logger info "Installing Daemonize..."
 yum_install ${DAEMONIZE_SOURCE_URL}
 yum_install ${RIEMANN_SOURCE_URL}
 
+ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/riemann"
-config="$RIEMANN_LOG_PATH/*.log {
+
+cat << EOF | sudo tee $lconf > /dev/null
+$RIEMANN_LOG_PATH/*.log {
         daily
         rotate 7
         copytruncate
@@ -44,10 +47,9 @@ config="$RIEMANN_LOG_PATH/*.log {
         delaycompress
         missingok
         notifempty
-}"
+}
+EOF
 
-ctx logger info "Configuring logrotate..."
-echo "$config" | sudo tee $lconf
 sudo chmod 644 $lconf
 
 ctx logger info "Deploying Riemann manager.config..."

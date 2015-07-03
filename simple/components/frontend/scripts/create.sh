@@ -40,8 +40,11 @@ ctx logger info "Copying rest-location.cloudify file to /etc/nginx/conf.d/rest-l
 cloudify_conf=$(ctx download-resource "components/frontend/config/rest-location.cloudify")
 sudo mv ${cloudify_conf} "/etc/nginx/conf.d/rest-location.cloudify"
 
+ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/nginx"
-config="$NGINX_LOG_PATH/*.log"' {
+
+cat << EOF | sudo tee $lconf > /dev/null
+$NGINX_LOG_PATH/*.log {
         daily
         missingok
         rotate 7
@@ -51,12 +54,11 @@ config="$NGINX_LOG_PATH/*.log"' {
         create 640 nginx adm
         sharedscripts
         postrotate
-                [ -f /var/run/nginx.pid ] && kill -USR1 \`cat /var/run/nginx.pid\`
+                [ -f /var/run/nginx.pid ] && kill -USR1 \$(cat /var/run/nginx.pid)
         endscript
-}'
+}
+EOF
 
-ctx logger info "Configuring logrotate..."
-echo "$config" | sudo tee $lconf
 sudo chmod 644 $lconf
 
 

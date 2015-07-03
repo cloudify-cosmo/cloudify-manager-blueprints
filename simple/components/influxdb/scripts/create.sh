@@ -22,18 +22,20 @@ yum_install ${INFLUXDB_SOURCE_URL}
 
 # influxdb 0.8 rotates its log files every midnight
 # so that's the files we going to logrotate here (*.txt.*)
+ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/influxdb"
-config="$INFLUXDB_LOG_PATH/*.txt.* {
+
+cat << EOF | sudo tee $lconf > /dev/null
+$INFLUXDB_LOG_PATH/*.txt.* {
         daily
         rotate 7
         compress
         delaycompress
         missingok
         notifempty
-}"
+}
+EOF
 
-ctx logger info "Configuring logrotate..."
-echo "$config" | sudo tee $lconf
 sudo chmod 644 $lconf
 
 ctx logger info "Deploying InfluxDB Config file..."
