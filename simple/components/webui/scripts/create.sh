@@ -33,7 +33,7 @@ ctx logger info "Installing Cloudify's WebUI..."
 webui=$(download_file ${WEBUI_SOURCE_URL})
 sudo tar -xzvf ${webui} -C ${WEBUI_HOME} --strip-components=1 >/dev/null
 ctx logger info "Applying Workaround for missing dependencies..."
-sudo ${NODEJS_HOME}/bin/npm install --prefix ${WEBUI_HOME} request tar
+sudo ${NODEJS_HOME}/bin/npm install --prefix ${WEBUI_HOME} request tar >/dev/null
 
 ctx logger info "Installing Grafana..."
 grafana=$(download_file ${GRAFANA_SOURCE_URL})
@@ -49,7 +49,7 @@ sudo mv ${grafana_conf} "${GRAFANA_HOME}/config.js"
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/cloudify-webui"
 
-cat << EOF | sudo tee $lconf > /dev/null
+cat << EOF | sudo tee $lconf >/dev/null
 $WEBUI_LOG_PATH/*.log {
         daily
         rotate 7

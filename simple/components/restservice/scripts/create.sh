@@ -9,13 +9,13 @@ export SECUREST_SOURCE_URL=$(ctx node properties securest_module_source_url)  # 
 export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
 
 # TODO: change to /opt/cloudify-rest-service
-export REST_SERVICE_HOME=/opt/manager
-export REST_SERVICE_VIRTUALENV=${REST_SERVICE_HOME}/env
+export REST_SERVICE_HOME="/opt/manager"
+export REST_SERVICE_VIRTUALENV="${REST_SERVICE_HOME}/env"
 # guni.conf currently contains localhost for all endpoints. We need to change that.
 # Also, MANAGER_REST_CONFIG_PATH is mandatory since the manager's code reads this env var. it should be renamed to REST_SERVICE_CONFIG_PATH.
-export MANAGER_REST_CONFIG_PATH=${REST_SERVICE_HOME}/guni.conf
-export REST_SERVICE_CONFIG_PATH=${REST_SERVICE_HOME}/guni.conf
-export REST_SERVICE_LOG_PATH=/var/log/cloudify/rest
+export MANAGER_REST_CONFIG_PATH="${REST_SERVICE_HOME}/guni.conf"
+export REST_SERVICE_CONFIG_PATH="${REST_SERVICE_HOME}/guni.conf"
+export REST_SERVICE_LOG_PATH="/var/log/cloudify/rest"
 
 
 ctx logger info "Installing REST Service..."

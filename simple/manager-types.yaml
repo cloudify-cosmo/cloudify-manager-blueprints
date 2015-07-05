@@ -37,7 +37,9 @@ node_types:
             fabric_env: &simple_fabric_env
               default:
                 user: { get_input: ssh_user }
+                # user: { get_property: [manager_configuration, ssh_user] }
                 key_filename: { get_input: ssh_key_filename }
+                # key_filename: { get_property: [manager_configuration, ssh_key_filename] }
                 host_string: { get_input: public_ip }
                 always_use_pty: false
 
@@ -89,18 +91,10 @@ node_types:
   manager.nodes.Elasticsearch:
     derived_from: cloudify.nodes.DBMS
     properties:
-      es_tar_source_url:
+      es_rpm_source_url:
         description: Elasticsearch tar.gz Source URL
         type: string
         default: { get_input: elasticsearch_source_url }
-      es_api_port:
-        description: Elasticsearch API Port
-        type: integer
-        default: { get_input: elasticsearch_port }
-      es_discovery_port:
-        description: Elasticsearch Zen Discovery Port
-        type: integer
-        default: { get_input: elasticsearch_discovery_port }
       es_java_opts:
         description: >
           ES_JAVA_OPTS Env Var. Allows to provide arguments
@@ -131,7 +125,7 @@ node_types:
   manager.nodes.Logstash:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      logstash_tar_source_url:
+      logstash_rpm_source_url:
         description: Logstash tar.gz Source URL
         type: string
         default: { get_input: logstash_source_url }
@@ -159,10 +153,6 @@ node_types:
         description: InfluxDB RPM Source URL
         type: string
         default: { get_input: influxdb_source_url }
-      influxdb_api_port:
-        description: InfluxDB API Port
-        type: integer
-        default: { get_input: influxdb_port }
     interfaces:
       cloudify.interfaces.lifecycle:
         # create: components/influxdb/scripts/create.sh
@@ -271,10 +261,6 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: rest_service_source_url }
-      rest_service_port:
-        description: Port to expose the REST Service on
-        type: integer
-        default: 8100
     interfaces:
       cloudify.interfaces.lifecycle:
         # create: components/restservice/scripts/create.sh
@@ -371,10 +357,6 @@ node_types:
         description: NodeJS tgz Source URL
         type: string
         default: { get_input: nodejs_source_url }
-      webui_backend_port:
-        description: Port to the WebUI's backend
-        type: integer
-        default: { get_input: webui_backend_port }
     interfaces:
       cloudify.interfaces.lifecycle:
         # create: components/webui/scripts/create.sh
@@ -432,8 +414,6 @@ node_types:
               default: components/cli/scripts/start.sh
             fabric_env: *simple_fabric_env
 
-  manager.nodes.ProviderContext:
-    derived_from: cloudify.nodes.Root
 
 ######################################################################
 # The relationships don't provide any configuration related

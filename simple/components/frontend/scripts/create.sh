@@ -43,7 +43,7 @@ sudo mv ${cloudify_conf} "/etc/nginx/conf.d/rest-location.cloudify"
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/nginx"
 
-cat << EOF | sudo tee $lconf > /dev/null
+cat << EOF | sudo tee $lconf >/dev/null
 $NGINX_LOG_PATH/*.log {
         daily
         missingok

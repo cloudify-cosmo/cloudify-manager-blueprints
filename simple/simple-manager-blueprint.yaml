@@ -47,27 +47,27 @@ inputs:
 
   cli_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-cli/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-cli/archive/master.tar.gz
 
   rest_service_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
 
   dsl_parser_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/master.tar.gz
 
   rest_client_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/master.tar.gz
 
   plugins_common_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/master.tar.gz
 
   script_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/master.tar.gz
 
   securest_source_url:
     type: string
@@ -75,7 +75,7 @@ inputs:
 
   amqpinflux_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/master.tar.gz
 
   #############################
   # Java Inputs
@@ -102,14 +102,6 @@ inputs:
   elasticsearch_source_url:
     type: string
     default: https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.6.0.noarch.rpm
-
-  elasticsearch_port:
-    type: integer
-    default: 9200
-
-  elasticsearch_discovery_port:
-    type: integer
-    default: 54329
 
   elasticsearch_java_opts:
     type: string
@@ -140,10 +132,6 @@ inputs:
     type: string
     default: https://s3.amazonaws.com/influxdb/influxdb-0.8.8-1.x86_64.rpm
 
-  influxdb_port:
-    type: integer
-    default: 8086
-
   #############################
   # Riemann Inputs
   #############################
@@ -160,13 +148,6 @@ inputs:
     default: https://aphyr.com/riemann/riemann-0.2.6-1.noarch.rpm
 
   #############################
-  # Rest Service Inputs
-  #############################
-  rest_service_port:
-    type: integer
-    default: 8100
-
-  #############################
   # WebUI Inputs
   #############################
   webui_source_url:
@@ -181,10 +162,6 @@ inputs:
     type: string
     default: http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz
 
-  webui_backend_port:
-    type: integer
-    default: 9001
-
 
 ######################################################################
 # These nodes comprise the manager's infrastructure and components
@@ -196,6 +173,11 @@ node_templates:
       install_agent: false
       ip: { get_input: public_ip }
 
+  # #####################################################################
+  # The manager_configuration node is meant to be read by Cloudify to
+  # provide runtime configuration and information for the CLI and the
+  # Manager.
+  # #####################################################################
   manager_configuration:
     type: cloudify.nodes.CloudifyManager
     properties:
@@ -217,17 +199,29 @@ node_templates:
         policy_engine:
           start_timeout: 30
 
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        # create: components/upload_provider_context.sh
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/upload_provider_context.sh
+            fabric_env:
+              user: { get_input: ssh_user }
+              # user: { get_property: [manager_configuration, ssh_user] }
+              key_filename: { get_input: ssh_key_filename }
+              # key_filename: { get_property: [manager_configuration, ssh_key_filename] }
+              host_string: { get_input: public_ip }
+              always_use_pty: false
+
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
       - type: cloudify.relationships.depends_on
-        target: provider_context
-        source_interfaces:
-          cloudify.interfaces.relationship_lifecycle:
-            postconfigure: components/set_provider_context.sh
+        target: rest_service
       - type: cloudify.relationships.depends_on
         target: nginx
-        source_interfaces:
+        target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
             postconfigure: components/set_manager_ip.sh
 
@@ -370,34 +364,6 @@ node_templates:
   #     - type: cloudify.relationships.depends_on
   #       target: restservice
 
-  ######################################################################
-  # The provider context node does not represent a service or any other
-  # entity for that matter. It is here to all us to update the provider
-  # context as a part of the deployment process and is not represented
-  # within another node as it doesn't directly relate to a specific
-  # service or entity.
-  ######################################################################
-  provider_context:
-    type: manager.nodes.ProviderContext
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: rest_service
-      - type: cloudify.relationships.depends_on
-        target: nginx
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        # create: components/upload_provider_context.sh
-        create:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/upload_provider_context.sh
-            fabric_env:
-              user: { get_input: ssh_user }
-              key_filename: { get_input: ssh_key_filename }
-              host_string: { get_input: public_ip }
-              always_use_pty: false
 
 plugins:
   cli:

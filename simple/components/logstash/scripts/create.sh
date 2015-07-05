@@ -3,7 +3,7 @@
 . $(ctx download-resource "components/utils")
 
 
-export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_tar_source_url)  # (e.g. "https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz")
+export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_rpm_source_url)  # (e.g. "https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz")
 
 # export LOGSTASH_HOME="/opt/logstash"
 export LOGSTASH_LOG_PATH="/var/log/cloudify/logstash"

@@ -48,8 +48,8 @@ ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
 sudo systemctl start cloudify-rabbitmq.service
 
 ctx logger info "Enabling RabbitMQ Plugins..."
-sudo rabbitmq-plugins enable rabbitmq_management
-sudo rabbitmq-plugins enable rabbitmq_tracing
+sudo rabbitmq-plugins enable rabbitmq_management >/dev/null
+sudo rabbitmq-plugins enable rabbitmq_tracing >/dev/null
 
 # enable guest user access where cluster not on localhost
 ctx logger info "Enabling RabbitMQ user access..."

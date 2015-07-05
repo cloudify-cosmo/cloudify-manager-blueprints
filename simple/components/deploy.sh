@@ -13,6 +13,6 @@ agent_private_key_path: /root/.ssh/id_rsa
 
 cfy init
 cfy use -t 10.10.1.10
-cfy blueprints upload -b nodecellar -p singlehost-blueprint.yaml
-cfy deployments create -b nodecellar -d nodecellar --inputs inputs/nodecellar-singlehost.yaml
-cfy executions start -w install -d nodecellar
+cfy blueprints upload -b nodecellar1 -p singlehost-blueprint.yaml
+cfy deployments create -b nodecellar1 -d nodecellar1 --inputs inputs/nodecellar-singlehost.yaml
+cfy executions start -w install -d nodecellar1
