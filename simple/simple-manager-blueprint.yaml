@@ -37,13 +37,6 @@ inputs:
   #############################
   # Cloudify Modules
   #############################
-  # cloudify_version:
-  #   type: string
-  #   default: 3.2
-
-  # cloudify_source_rpm:
-  #   type: string
-  #   default: https://dl.dropboxusercontent.com/u/407576/3.2/cloudify-3.2.0-1.x86_64.rpm
 
   cli_source_url:
     type: string
