@@ -3,7 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_1
 imports:
   # - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
   - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/CFY-3065-refactor-manager-node-types-yaml/resources/rest-service/cloudify/types/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.2/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-fabric-plugin/CFY-3085-implement-reverse-tunnel/plugin.yaml
   - manager-types.yaml
 
 
