@@ -183,9 +183,6 @@ node_types:
         description: Centos 7 Agent required for the manager
         type: string
         default: { get_input: centos7_agent_source_url }
-      # should also have a source_url for nginx.
-      # currently it seems that they don't directly provide
-      # an rpm for us to download, we'll have to fix that :)
     interfaces:
       cloudify.interfaces.lifecycle:
         # create: components/nginx/scripts/create.sh

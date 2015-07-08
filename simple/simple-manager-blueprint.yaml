@@ -198,7 +198,7 @@ node_templates:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path: components/upload_provider_context.sh
+            script_path: components/manager/scripts/upload_provider_context.sh
             fabric_env:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
@@ -214,7 +214,7 @@ node_templates:
         target: nginx
         target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
-            postconfigure: components/set_manager_ip.sh
+            postconfigure: components/manager/scripts/set_manager_ip.sh
 
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments

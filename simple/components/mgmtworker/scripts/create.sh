@@ -59,4 +59,4 @@ install_module "/tmp/workflows" ${VIRTUALENV_DIR}
 ctx logger info "Cleaning up unneeded packages..."
 sudo yum remove -y python-devel g++ gcc >/dev/null
 
-configure_systemd_service "mgmgworker"
+configure_systemd_service "mgmtworker"
