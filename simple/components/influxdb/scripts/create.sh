@@ -3,7 +3,7 @@
 . $(ctx download-resource "components/utils")
 
 
-CONFIG_REL_PATH="components/influxdb"
+CONFIG_REL_PATH="components/influxdb/config"
 
 export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)  # (e.g. "https://s3.amazonaws.com/influxdb/influxdb-0.8.8-1.x86_64.rpm")
 
