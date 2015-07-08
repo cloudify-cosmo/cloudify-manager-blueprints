@@ -188,19 +188,19 @@ node_types:
       # an rpm for us to download, we'll have to fix that :)
     interfaces:
       cloudify.interfaces.lifecycle:
-        # create: components/frontend/scripts/create.sh
+        # create: components/nginx/scripts/create.sh
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/frontend/scripts/create.sh
+              default: components/nginx/scripts/create.sh
             fabric_env: *simple_fabric_env
-        # start: components/frontend/scripts/start.sh
+        # start: components/nginx/scripts/start.sh
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/frontend/scripts/start.sh
+              default: components/nginx/scripts/start.sh
             fabric_env: *simple_fabric_env
 
   manager.nodes.Riemann:

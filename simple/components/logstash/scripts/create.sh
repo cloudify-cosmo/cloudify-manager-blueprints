@@ -3,6 +3,8 @@
 . $(ctx download-resource "components/utils")
 
 
+CONFIG_REL_PATH="components/logstash/config"
+
 export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_rpm_source_url)  # (e.g. "https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz")
 
 # export LOGSTASH_HOME="/opt/logstash"
@@ -17,8 +19,8 @@ create_dir ${LOGSTASH_LOG_PATH}
 
 yum_install ${LOGSTASH_SOURCE_URL}
 
-logstash_conf=$(ctx download-resource "components/logstash/config/logstash.conf")
-sudo mv ${logstash_conf} "${LOGSTASH_CONF_PATH}/logstash.conf"
+ctx logger info "Deploying Logstash conf..."
+deploy_file "${CONFIG_REL_PATH}/logstash.conf" "${LOGSTASH_CONF_PATH}/logstash.conf"
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/logstash"

@@ -4,6 +4,8 @@
 . $(ctx download-resource "components/elasticsearch/scripts/configure_es")
 
 
+CONFIG_REL_PATH="components/elasticsearch/config"
+
 export ES_JAVA_OPRT=$(ctx node properties es_java_opts)  # (e.g. "-Xmx1024m -Xms1024m")
 export ELASTICHSEARCH_SOURCE_URL=$(ctx node properties es_rpm_source_url)  # (e.g. "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz")
 
@@ -21,11 +23,8 @@ create_dir ${ELASTICSEARCH_LOG_PATH}
 
 yum_install ${ELASTICHSEARCH_SOURCE_URL}
 
-blueprint_es_conf_path="components/elasticsearch/config/elasticsearch.yml"
-destination_es_conf_path="${ELASTICSEARCH_CONF_PATH}/elasticsearch.yml"
-ctx logger info "Deploying Elasticsearch Config file ${blueprint_es_conf_path} to ${destination_es_conf_path}..."
-tmp_es_conf_path=$(ctx download-resource ${blueprint_es_conf_path})
-sudo mv ${tmp_es_conf_path} ${destination_es_conf_path}
+ctx logger info "Deploying Elasticsearch Configuration..."
+deploy_file "${CONFIG_REL_PATH}/elasticsearch.yml" "${ELASTICSEARCH_CONF_PATH}/elasticsearch.yml"
 
 ctx logger info "Starting Elasticsearch for configuration purposes..."
 sudo systemctl enable elasticsearch.service
@@ -38,5 +37,5 @@ ctx logger info "Configuring Elasticsearch Indices, Mappings, etc..."
 # per a function in configure_es
 configure_elasticsearch
 
-ctx logger info "Killing Elasticsearch..."
+ctx logger info "Stopping Elasticsearch Service..."
 sudo systemctl stop elasticsearch.service

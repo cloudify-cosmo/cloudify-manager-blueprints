@@ -3,6 +3,8 @@
 . $(ctx download-resource "components/utils")
 
 
+CONFIG_REL_PATH="components/webui/config"
+
 export NODEJS_SOURCE_URL=$(ctx node properties nodejs_tar_source_url)  # (e.g. "http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz")
 export WEBUI_SOURCE_URL=$(ctx node properties webui_tar_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0-m4.tgz")
 export GRAFANA_SOURCE_URL=$(ctx node properties grafana_tar_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz")
@@ -40,11 +42,9 @@ grafana=$(download_file ${GRAFANA_SOURCE_URL})
 sudo tar -xzvf ${grafana} -C ${GRAFANA_HOME} --strip-components=1 >/dev/null
 
 ctx logger info "Deploying WebUI Configuration..."
-webui_conf=$(ctx download-resource "components/webui/config/gsPresets.json")
-sudo mv ${webui_conf} "${WEBUI_HOME}/backend/gsPresets.json"
+deploy_file "${CONFIG_REL_PATH}/gsPresets.json" "${WEBUI_HOME}/backend/gsPresets.json"
 ctx logger info "Deploying Grafana Configuration..."
-grafana_conf=$(ctx download-resource "components/webui/config/config.js")
-sudo mv ${grafana_conf} "${GRAFANA_HOME}/config.js"
+deploy_file "${CONFIG_REL_PATH}/grafana_config.js" "${GRAFANA_HOME}/config.js"
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/cloudify-webui"

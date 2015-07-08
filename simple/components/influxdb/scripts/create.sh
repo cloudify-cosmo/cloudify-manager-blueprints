@@ -3,6 +3,8 @@
 . $(ctx download-resource "components/utils")
 
 
+CONFIG_REL_PATH="components/influxdb"
+
 export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)  # (e.g. "https://s3.amazonaws.com/influxdb/influxdb-0.8.8-1.x86_64.rpm")
 
 export INFLUXDB_PORT="8086"
@@ -39,8 +41,7 @@ EOF
 sudo chmod 644 $lconf
 
 ctx logger info "Deploying InfluxDB Config file..."
-influx_config=$(ctx download-resource "components/influxdb/config/config.toml")
-sudo mv ${influx_config} "${INFLUXDB_HOME}/shared/config.toml"
+deploy_file "${CONFIG_REL_PATH}/config.toml" "${INFLUXDB_HOME}/shared/config.toml"
 
 ctx logger info "Chowning InfluxDB logs path..."
 sudo chown -R influxdb:influxdb ${INFLUXDB_LOG_PATH}

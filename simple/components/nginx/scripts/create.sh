@@ -2,6 +2,7 @@
 
 . $(ctx download-resource "components/utils")
 
+CONFIG_REL_PATH="components/nginx/config"
 
 export NGINX_SOURCE_URL=$(ctx node properties nginx_rpm_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/3.2/nginx-1.8.0-1.el7.ngx.x86_64.rpm")
 export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
@@ -21,7 +22,7 @@ export SSL_CERTS_ROOT="/root/cloudify"
 
 ctx logger info "Installing Nginx..."
 
-copy_notice "frontend"
+copy_notice "nginx"
 create_dir ${NGINX_LOG_PATH}
 create_dir ${MANAGER_RESOURCES_HOME}
 create_dir ${SSL_CERTS_ROOT}
@@ -32,13 +33,11 @@ create_dir ${MANAGER_TEMPLATES_PATH}
 
 yum_install ${NGINX_SOURCE_URL}
 
-ctx logger info "Copying default.conf file to /etc/nginx/conf.d/default.conf..."
-default_conf=$(ctx download-resource "components/frontend/config/default.conf")
-sudo mv ${default_conf} "/etc/nginx/conf.d/default.conf"
+ctx logger info "Deploying Nginx conf..."
+deploy_file "${CONFIG_REL_PATH}/default.conf" "/etc/nginx/conf.d/default.conf"
 
-ctx logger info "Copying rest-location.cloudify file to /etc/nginx/conf.d/rest-location.cloudify..."
-cloudify_conf=$(ctx download-resource "components/frontend/config/rest-location.cloudify")
-sudo mv ${cloudify_conf} "/etc/nginx/conf.d/rest-location.cloudify"
+ctx logger info "Deploying Nginx rest-location conf..."
+deploy_file "${CONFIG_REL_PATH}/rest-location.cloudify" "/etc/nginx/conf.d/rest-location.cloudify"
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/nginx"
@@ -63,10 +62,8 @@ sudo chmod 644 $lconf
 
 
 ctx logger info "Copying SSL Certs..."
-crt=$(ctx download-resource "components/frontend/config/ssl/server.crt")
-sudo mv ${crt} "${SSL_CERTS_ROOT}/server.crt"
-key=$(ctx download-resource "components/frontend/config/ssl/server.key")
-sudo mv ${key} "${SSL_CERTS_ROOT}/server.key"
+deploy_file "${CONFIG_REL_PATH}/ssl/server.crt" "${SSL_CERTS_ROOT}/server.crt"
+deploy_file "${CONFIG_REL_PATH}/ssl/server.key" "${SSL_CERTS_ROOT}/server.key"
 
 ctx logger info "Deploying Required Manager Resources..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
@@ -75,8 +72,12 @@ tar -xzf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
 sudo cp -R "/tmp/resources/rest-service/cloudify/" "${MANAGER_RESOURCES_HOME}"
 
 ctx logger info "Downloading Centos Agent resources..."
+# the same mechanism should be used to create a loop for downloading multiple agents
+# from an inputs of a list of agent urls or paths
 centos_agent=$(download_file ${CENTOS7_AGENT_SOURCE_URL})
-sudo mv ${centos_agent} "${MANAGER_AGENTS_PATH}/centos-Core-agent.tar.gz"
+agent_file_name=$(get_file_name "${CENTOS7_AGENT_SOURCE_URL}")
+deploy_file ${centos_agent} "${MANAGER_AGENTS_PATH}/${agent_file_name}"
+
 require_tty_script=$(download_file ${REQUIRE_TTY_SOURCE_URL})
 sudo mv ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/centos-agent-disable-requiretty.sh"
 celery_conf=$(download_file ${CELERY_CONF_SOURCE_URL})

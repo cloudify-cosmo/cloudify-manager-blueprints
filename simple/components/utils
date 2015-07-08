@@ -123,11 +123,10 @@ function download_file
         else
             sys_error "Cannot download ${url}. Neither 'cURL' nor 'wget' were found on the system"
         fi
-        echo ${destination_file}
     else
         ctx logger info "File ${destination_file} already exists..."
-        echo ${destination_file}
     fi
+    echo ${destination_file}
 }
 
 function copy_notice
@@ -183,17 +182,47 @@ function yum_install
 }
 
 function configure_systemd_service() {
+    ###
+    # This configure systemd for a specific service.
+    # It requires that two files are present for each service one containing
+    # the environment variables and one contains the systemd config.
+    # All env files will be named "cloudify-SERVICENAME".
+    # All systemd config files will be named "cloudify-SERVIVENAME.service".
+    ###
     service_name=$1
 
+    env_dir="/etc/sysconfig/cloudify-${service_name}"
+    service_dir="/usr/lib/systemd/system/cloudify-${service_name}.service"
+    env_file="components/${service_name}/config/cloudify-${service_name}"
+    service_file="components/${service_name}/config/cloudify-${service_name}.service"
+
     ctx logger info "Deploying systemd EnvironmentFile..."
-    envfile=$(ctx download-resource "components/${service_name}/config/cloudify-${service_name}")
-    sudo mv ${envfile} "/etc/sysconfig/cloudify-${service_name}"
+    deploy_file ${env_file} ${env_dir}
 
     ctx logger info "Deploying systemd .service file..."
-    servicefile=$(ctx download-resource "components/${service_name}/config/cloudify-${service_name}.service")
-    sudo mv ${servicefile} "/usr/lib/systemd/system/cloudify-${service_name}.service"
+    deploy_file ${service_file} ${service_dir}
 
     ctx logger info "Enabling .service..."
     sudo systemctl enable cloudify-${service_name}.service >/dev/null
     sudo systemctl daemon-reload
+}
+
+function deploy_file() {
+    ###
+    # Deploys a blueprint resource to a given path.
+    ###
+    source_path=$1
+    destination_path=$2
+
+    ctx logger info "Deploying ${source_path} to ${destination_path}..."
+    tmp_file=$(ctx download-resource ${source_path})
+    sudo mv ${tmp_file} ${destination_path}
+}
+
+function get_file_name() {
+    ###
+    # Extracts a file name from a path or url
+    ###
+    string="$1"; echo "${string##*/}"
+    echo $string
 }
