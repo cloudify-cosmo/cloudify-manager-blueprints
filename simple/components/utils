@@ -191,10 +191,12 @@ function configure_systemd_service() {
     ###
     service_name=$1
 
-    env_dir="/etc/sysconfig/cloudify-${service_name}"
-    service_dir="/usr/lib/systemd/system/cloudify-${service_name}.service"
-    env_file="components/${service_name}/config/cloudify-${service_name}"
-    service_file="components/${service_name}/config/cloudify-${service_name}.service"
+    service_identifier="cloudify-${service_name}"
+
+    env_dir="/etc/sysconfig/${service_identifier}"
+    service_dir="/usr/lib/systemd/system/${service_identifier}.service"
+    env_file="components/${service_name}/config/${service_identifier}"
+    service_file="components/${service_name}/config/${service_identifier}.service"
 
     ctx logger info "Deploying systemd EnvironmentFile..."
     deploy_file ${env_file} ${env_dir}
@@ -202,8 +204,8 @@ function configure_systemd_service() {
     ctx logger info "Deploying systemd .service file..."
     deploy_file ${service_file} ${service_dir}
 
-    ctx logger info "Enabling .service..."
-    sudo systemctl enable cloudify-${service_name}.service >/dev/null
+    ctx logger info "Enabling systemd .service..."
+    sudo systemctl enable ${service_identifier}.service &>/dev/null
     sudo systemctl daemon-reload
 }
 

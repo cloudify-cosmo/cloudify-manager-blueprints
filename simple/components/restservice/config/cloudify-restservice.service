@@ -5,7 +5,7 @@ Description=Cloudify REST Service
 PIDFile=/var/run/gunicorn.pid
 TimeoutStartSec=0
 Restart=on-failure
-EnvironmentFile=-/etc/sysconfig/cloudify-rest
+EnvironmentFile=-/etc/sysconfig/cloudify-restservice
 ExecStart=/bin/sh -c '/opt/manager/env/bin/gunicorn \
     --pid /var/run/gunicorn.pid \
     -w $(($(nproc)*2+1)) \
