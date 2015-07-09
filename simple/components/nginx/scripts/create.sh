@@ -74,10 +74,10 @@ sudo cp -R "/tmp/resources/rest-service/cloudify/" "${MANAGER_RESOURCES_HOME}"
 ctx logger info "Downloading Centos Agent resources..."
 # the same mechanism should be used to create a loop for downloading multiple agents
 # from an inputs of a list of agent urls or paths
-centos_agent=$(download_file ${CENTOS7_AGENT_SOURCE_URL})
-# agent_file_name=$(get_file_name "${CENTOS7_AGENT_SOURCE_URL}")
-# deploy_file ${centos_agent} "${MANAGER_AGENTS_PATH}/${agent_file_name}"
-sudo mv ${centos_agent} "${MANAGER_AGENTS_PATH}/centos-Core-agent.tar.gz"
+agent_file=$(download_file ${CENTOS7_AGENT_SOURCE_URL})
+agent_file_name=$(get_file_name "${CENTOS7_AGENT_SOURCE_URL}")
+sudo mv ${agent_file} "${MANAGER_AGENTS_PATH}/${agent_file_name}"
+# sudo mv ${agent_file} "${MANAGER_AGENTS_PATH}/centos-Core-agent.tar.gz"
 
 require_tty_script=$(download_file ${REQUIRE_TTY_SOURCE_URL})
 sudo mv ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/centos-agent-disable-requiretty.sh"
