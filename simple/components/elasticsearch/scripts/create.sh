@@ -27,7 +27,7 @@ ctx logger info "Deploying Elasticsearch Configuration..."
 deploy_file "${CONFIG_REL_PATH}/elasticsearch.yml" "${ELASTICSEARCH_CONF_PATH}/elasticsearch.yml"
 
 ctx logger info "Starting Elasticsearch for configuration purposes..."
-sudo systemctl enable elasticsearch.service
+sudo systemctl enable elasticsearch.service &>/dev/null
 sudo systemctl start elasticsearch.service
 
 ctx logger info "Waiting for Elasticsearch to become available..."
