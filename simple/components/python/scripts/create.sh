@@ -34,9 +34,9 @@ function install_virtualenv
     version=${1:-""}
 
     if [[ ! -z "${version}" ]]; then
-        install_module virtualenv==${version}
+        install_module virtualenv==${version} >/dev/null
     else
-        install_module virtualenv
+        install_module virtualenv >/dev/null
     fi
 }
 
@@ -44,9 +44,9 @@ function install_pip
 {
     version=${1:-""}
 
-    curl --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python
+    curl --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py >/dev/null | sudo python
     if [[ ! -z "${version}" ]]; then
-        install_module "pip==${version} --upgrade"
+        install_module "pip==${version} --upgrade" >/dev/null
     fi
 }
 

@@ -25,7 +25,6 @@ create_dir ${MGMTWORKER_HOME}/config
 create_dir ${CELERY_LOG_DIR}
 create_dir ${CELERY_WORK_DIR}
 
-ctx logger info "Creating virtualenv ${VIRTUALENV_DIR}..."
 create_virtualenv "${VIRTUALENV_DIR}"
 
 # NOT SURE WE NEED THIS ANYMORE...
@@ -57,6 +56,6 @@ install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}
 install_module "/tmp/workflows" ${VIRTUALENV_DIR}
 
 ctx logger info "Cleaning up unneeded packages..."
-sudo yum remove -y python-devel g++ gcc >/dev/null
+sudo yum remove -y python-devel gcc >/dev/null
 
 configure_systemd_service "mgmtworker"

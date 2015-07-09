@@ -21,7 +21,7 @@ function create_virtualenv
     virtualenv_path=$1
 
     ctx logger info "Creating virtualenv ${virtualenv_path}..."
-    sudo virtualenv ${virtualenv_path}
+    sudo virtualenv ${virtualenv_path} >/dev/null
 }
 
 function create_dir
