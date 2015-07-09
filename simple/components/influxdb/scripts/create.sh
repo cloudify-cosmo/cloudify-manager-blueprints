@@ -53,8 +53,8 @@ sudo systemctl start cloudify-influxdb.service
 ctx logger info "Waiting for InfluxDB to become available..."
 wait_for_port "${INFLUXDB_PORT}"
 ctx logger info "Creating InfluxDB Database..."
-sudo curl "http://localhost:8086/db?u=root&p=root" -d "{\"name\": \"cloudify\"}" >/dev/null
-test_db_creation=$(curl 'http://localhost:8086/cluster_admins?u=root&p=root')
+sudo curl --show-error --silent --retry 5 "http://localhost:8086/db?u=root&p=root" -d "{\"name\": \"cloudify\"}"
+test_db_creation=$(curl --show-error --silent --retry 5 'http://localhost:8086/cluster_admins?u=root&p=root')
 ctx logger info "InfluxDB Database Creation test: ${test_db_creation}"
 ctx logger info "Killing InfluxDB..."
 sudo systemctl stop cloudify-influxdb.service

@@ -154,7 +154,7 @@ function wait_for_port
     port=$1
 
     counter=0
-    while ! echo exit | curl http://localhost:$1 >/dev/null;
+    while ! echo exit | curl --silent http://localhost:$1 >/dev/null;
     do
             if [[ $counter -gt 24 ]]; then
                 sys_error "Failed to connect to port ${port}... (status $?)"
@@ -163,6 +163,7 @@ function wait_for_port
             sleep 5;
             counter=$((counter+1))
     done
+    ctx logger info "Port ${port} is available!"
 }
 
 function yum_install
