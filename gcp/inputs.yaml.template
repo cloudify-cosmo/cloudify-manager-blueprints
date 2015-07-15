@@ -1,0 +1,14 @@
+config:
+  auth: # put path to GCP auth json file
+  project: # put project name
+  zone: # put project zone
+  network: # put network name
+manager_key_pair_file_path: # put file path where manager key should be placed
+agent_key_pair_file_path: # put file path where agent key should be placed
+image_id: # put image_id of manager server
+instance_type: # put manager server instance type
+agents_user: ubuntu # put agents default users
+manager_server_user: ubuntu # put manager server user
+manager_server_name: cloudify-manager-server # put name of the manager server
+network:
+  name: # put name of the network
