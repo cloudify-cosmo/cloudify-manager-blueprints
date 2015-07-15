@@ -169,10 +169,14 @@ node_types:
         description: REST Service repo tar URL for resources
         type: string
         default: { get_input: rest_service_source_url }
-      centos7_agent_source_url:
+      centos_7_agent_source_url:
         description: Centos 7 Agent required for the manager
         type: string
-        default: { get_input: centos7_agent_source_url }
+        default: { get_input: centos_7_agent_source_url }
+      ubuntu_trusty_agent_source_url:
+        description: Ubuntu Trusty Agent
+        type: string
+        default: { get_input: ubuntu_trusty_agent_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

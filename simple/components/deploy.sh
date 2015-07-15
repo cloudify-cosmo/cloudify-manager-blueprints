@@ -5,10 +5,18 @@ wget https://github.com/cloudify-cosmo/cloudify-nodecellar-example/archive/3.2.t
 tar -xzvf /tmp/nc.tar.gz
 cd cloudify-nodecellar-example-3.2/
 
+# local - if you want to deploy on the same machine your manager is on
+# echo '
+# host_ip: 10.10.1.10
+# agent_user: vagrant
+# agent_private_key_path: /root/.ssh/id_rsa
+# ' >> inputs/nodecellar-singlehost.yaml
+
+#remote - deploying on an externally provisioned machine
 echo '
-host_ip: 10.10.1.10
+host_ip: 10.10.1.11
 agent_user: vagrant
-agent_private_key_path: /root/.ssh/id_rsa
+agent_private_key_path: /vagrant/test_private_key
 ' >> inputs/nodecellar-singlehost.yaml
 
 cfy init
