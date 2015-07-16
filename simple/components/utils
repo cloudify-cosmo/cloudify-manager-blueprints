@@ -210,6 +210,22 @@ function configure_systemd_service() {
     sudo systemctl daemon-reload
 }
 
+function get_systemd_vars_file_path() {
+    service_name=$1
+
+    service_identifier="cloudify-${service_name}"
+
+    echo "/etc/sysconfig/${service_identifier}"
+}
+
+function get_systemd_service_file_path() {
+    service_name=$1
+
+    service_identifier="cloudify-${service_name}"
+
+    echo "/usr/lib/systemd/system/${service_identifier}.service"
+}
+
 function deploy_file() {
     ###
     # Deploys a blueprint resource to a given path.
@@ -228,4 +244,40 @@ function get_file_name() {
     ###
     string="$1"; echo "${string##*/}"
     echo $string
+}
+
+function replace() {
+    this=$1
+    with_this=$2
+    in_here=$3
+
+    # using pipe prevents / being escaped
+    sudo sed -i "s|${this}|${with_this}|g" ${in_here}
+}
+
+function inject_service_env_var() {
+    ###
+    # Injects a variable into a service's env var file
+    ###
+    field=$1
+    value=$2
+    service_name=$3
+
+    ctx logger info "Injecting variable..."
+    vars_path=$(get_systemd_vars_file_path "${service_name}")
+    replace "${field}" "${value}" $vars_path
+}
+
+function inject_management_ip() {
+    ###
+    # Injects the manager's ip into a service's env var file
+    # Note that this currently requires that a relationship
+    # operation sets this ip as a runtime property to the node.
+    ###
+    service_name=$1
+
+    # management_ip=$(ctx instance runtime_properties manager_host_ip)
+    management_ip=$(ctx instance host_ip)
+    ctx logger info "Setting service management_ip variable..."
+    inject_service_env_var "{{ ctx.instance.runtime_properties.manager_host_ip }}" "${management_ip}" "${service_name}"
 }

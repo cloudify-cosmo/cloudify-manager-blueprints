@@ -16,7 +16,7 @@ cd cloudify-nodecellar-example-3.2/
 echo '
 host_ip: 10.10.1.11
 agent_user: vagrant
-agent_private_key_path: /vagrant/test_private_key
+agent_private_key_path: ~/.ssh/test_private_key
 ' >> inputs/nodecellar-singlehost.yaml
 
 cfy init
