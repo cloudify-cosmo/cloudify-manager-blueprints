@@ -107,7 +107,7 @@ node_templates:
         - ip_protocol: tcp
           from_port: 443
           to_port: 443
-          cidr_ip: 0.0.0.0/0          
+          cidr_ip: 0.0.0.0/0
         - ip_protocol: tcp
           from_port: 8101
           to_port: 8101
@@ -168,8 +168,9 @@ node_templates:
     properties:
       cloudify_packages:
         agents:
-          ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-agent_3.3.0-m3-b273_amd64.deb
-          centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-final-agent_3.3.0-m3-b273_amd64.deb
+          ubuntu-trusty-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-trusty-agent_3.3.0-m3-b273.tar.gz
+          centos-final-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-agent_3.3.0-m3-b273.tar.gz
+          ubuntu-precise-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m3-b273.tar.gz
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-windows-agent_3.3.0-m3-b273_amd64.deb
         docker:
            docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-docker_3.3.0-m3-b273.tar
