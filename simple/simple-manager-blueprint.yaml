@@ -43,23 +43,23 @@ inputs:
 
   rest_service_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m2.tar.gz
 
   dsl_parser_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3m2.tar.gz
 
   rest_client_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3m2.tar.gz
 
   plugins_common_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3m2.tar.gz
 
   script_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3m2.tar.gz
 
   securest_source_url:
     type: string
@@ -67,7 +67,7 @@ inputs:
 
   amqpinflux_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.3m2.tar.gz
 
   #############################
   # Java Inputs

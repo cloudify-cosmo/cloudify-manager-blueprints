@@ -36,10 +36,8 @@ create_dir ${MANAGER_TEMPLATES_PATH}
 
 yum_install ${NGINX_SOURCE_URL}
 
-ctx logger info "Deploying Nginx conf..."
+ctx logger info "Deploying Nginx configuration files..."
 deploy_file "${CONFIG_REL_PATH}/default.conf" "/etc/nginx/conf.d/default.conf"
-
-ctx logger info "Deploying Nginx rest-location conf..."
 deploy_file "${CONFIG_REL_PATH}/rest-location.cloudify" "/etc/nginx/conf.d/rest-location.cloudify"
 
 ctx logger info "Configuring logrotate..."
