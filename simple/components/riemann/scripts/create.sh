@@ -62,3 +62,4 @@ ctx logger info "Deploying Riemann conf..."
 deploy_file "${CONFIG_REL_PATH}/main.clj" "${RIEMANN_CONFIG_PATH}/main.clj"
 
 configure_systemd_service "riemann"
+inject_management_ip_as_env_var "riemann"

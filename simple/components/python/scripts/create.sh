@@ -50,6 +50,8 @@ function install_pip
     fi
 }
 
+# need to look for a better place to position this
+set_selinux_permissive
 
 ctx logger info "Installing Python requirements..."
 copy_notice "python"

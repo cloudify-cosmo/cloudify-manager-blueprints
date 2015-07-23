@@ -7,16 +7,6 @@ function update_local_cache
 
 
 update_local_cache
-# sudo yum install python-devel g++ gcc -y
-
-# curl --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python
-# sudo pip install virtualenv
-# virtualenv cfy
-# source cfy/bin/activate
-# pip install cloudify==3.2
-
-# wget http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/get-cloudify.py
-# python get-cloudify.py -v -f
 
 echo '
 -----BEGIN RSA PRIVATE KEY-----
@@ -53,10 +43,3 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjM5GpakaKCpVJgt4biaTH4CP76qlJc0L5JkRFnhS9
 ' >> ~/.ssh/test_public_key.pub
 
 cat ~/.ssh/test_public_key.pub >> ~/.ssh/authorized_keys
-# cat /vagrant/test_public_key.pub >> ~/.ssh/authorized_keys
-# sudo cp /vagrant/test_public_key.pub ~/.ssh/test_public_key.pub
-
-# sudo mkdir /root/.ssh
-# ssh-keygen -t rsa -f ~/.ssh/id_rsa -q -N ''
-# cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-# sudo cp ~/.ssh/id_rsa /root/.ssh/id_rsa

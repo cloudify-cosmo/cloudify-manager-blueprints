@@ -9,7 +9,7 @@ cd cloudify-nodecellar-example-3.2/
 # echo '
 # host_ip: 10.10.1.10
 # agent_user: vagrant
-# agent_private_key_path: /root/.ssh/id_rsa
+# agent_private_key_path: ~/.ssh/test_private_key
 # ' >> inputs/nodecellar-singlehost.yaml
 
 #remote - deploying on an externally provisioned machine

@@ -59,4 +59,4 @@ ctx logger info "Cleaning up unneeded packages..."
 sudo yum remove -y python-devel gcc >/dev/null
 
 configure_systemd_service "mgmtworker"
-inject_management_ip "mgmtworker"
+inject_management_ip_as_env_var "mgmtworker"

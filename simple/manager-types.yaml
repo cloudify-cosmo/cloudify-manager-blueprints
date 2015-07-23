@@ -32,6 +32,8 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
+              # Note that this also sets SELinux to Permissive
+              # mode until we find a better position for it.
               default: components/python/scripts/create.sh
             fabric_env: &simple_fabric_env
               default:
@@ -39,6 +41,7 @@ node_types:
                 key_filename: { get_input: ssh_key_filename }
                 host_string: { get_input: public_ip }
                 always_use_pty: false
+                hide: running
 
   manager.nodes.JavaRuntime:
     derived_from: cloudify.nodes.SoftwareComponent
