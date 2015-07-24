@@ -286,24 +286,21 @@ function get_selinux_state() {
     ###
     # This checks whether SELinux is Enforcing or Permissive
     ###
-    ctx logger info "Checking SELinux State..."
     set +e
     selinux_mode=$(getenforce)
     set -e
 
     if [[ ! -z ${selinux_mode} ]]; then
-        ctx logger info "SELinux is in ${selinux_mode} mode..."
         echo ${selinux_mode}
     else
-        ctx logger info "SELinux does not exist in kernel..."
         echo "None"
     fi
 }
 
 function set_selinux_permissive() {
     ctx logger info "Checking if SELinux is enforced..."
-    if [ "get_selinux_state" == 'Enforcing' ]; then
-        ctx logger info "Setting SELinux Permissive State..."
+    if [ "$(get_selinux_state)" == 'Enforcing' ]; then
+        ctx logger info "SELinux is enforcing, setting SELinux Permissive State..."
         sudo setenforce Permissive
     else
         ctx logger info "SELinux not enforced."
