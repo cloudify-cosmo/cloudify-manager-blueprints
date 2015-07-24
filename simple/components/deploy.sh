@@ -13,11 +13,9 @@ cd cloudify-nodecellar-example-3.2/
 # ' >> inputs/nodecellar-singlehost.yaml
 
 #remote - deploying on an externally provisioned machine
-echo '
-host_ip: 10.10.1.11
-agent_user: vagrant
-agent_private_key_path: ~/.ssh/test_private_key
-' >> inputs/nodecellar-singlehost.yaml
+echo 'host_ip: "10.10.1.11"
+agent_user: "vagrant"
+agent_private_key_path: "/home/vagrant/.ssh/test_private_key"' >> inputs/nodecellar-singlehost.yaml
 
 cfy init
 cfy use -t 10.10.1.10
