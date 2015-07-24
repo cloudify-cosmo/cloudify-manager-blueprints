@@ -206,7 +206,7 @@ node_templates:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
               host_string: { get_input: public_ip }
-              always_use_pty: false
+              always_use_pty: true
 
     relationships:
       - type: cloudify.relationships.contained_in
