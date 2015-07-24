@@ -105,7 +105,6 @@ function download_file
 
     set +e
     curl_cmd=$(which curl)
-    wget_cmd=$(which wget)
     set -e
 
     if [[ -z ${destination_file} ]]; then
@@ -116,12 +115,12 @@ function download_file
         if [[ ! -z ${curl_cmd} ]]; then
             ctx logger info "Downloading ${url} to ${destination_file}..."
             curl_download_with_retries ${url} ${destination_file}
-        elif [[ ! -z ${wget_cmd} ]]; then
-            ctx logger info "Downloading ${url} to ${destination_file}..."
-            # should create dir struct here as wget doesn't do it for us
-            wget_download_with_retries ${url} ${destination_file}
+        # elif [[ ! -z ${wget_cmd} ]]; then
+        #     ctx logger info "Downloading ${url} to ${destination_file}..."
+        #     # should create dir struct here as wget doesn't do it for us
+        #     wget_download_with_retries ${url} ${destination_file}
         else
-            sys_error "Cannot download ${url}. Neither 'cURL' nor 'wget' were found on the system"
+            sys_error "Cannot download ${url}. 'cURL' was not found on the system."
         fi
     else
         ctx logger info "File ${destination_file} already exists..."
@@ -207,7 +206,7 @@ function configure_systemd_service() {
 
     ctx logger info "Enabling systemd .service..."
     sudo systemctl enable ${service_identifier}.service &>/dev/null
-    sudo systemctl daemon-reload
+    sudo systemctl daemon-reload >/dev/null
 }
 
 function get_systemd_vars_file_path() {
@@ -265,7 +264,7 @@ function inject_service_env_var() {
 
     ctx logger info "Injecting variable..."
     vars_path=$(get_systemd_vars_file_path "${service_name}")
-    replace "${field}" "${value}" $vars_path
+    replace "${field}" "${value}" $vars_path >/dev/null
 }
 
 function inject_management_ip_as_env_var() {

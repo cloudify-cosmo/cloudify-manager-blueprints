@@ -1,12 +1,17 @@
 #!/bin/bash
 
-function update_local_cache
-{
+function update_local_cache() {
     sudo yum -y update
 }
 
+function suppress_pip_ssl_err() {
+    sudo yum install -y libssl-dev
+    curl --show-error --silent --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python
+    sudo pip install requests[security]
+}
 
 update_local_cache
+# suppress_pip_ssl_err
 
 echo '
 -----BEGIN RSA PRIVATE KEY-----
