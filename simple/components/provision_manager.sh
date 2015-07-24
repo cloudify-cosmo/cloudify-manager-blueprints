@@ -5,12 +5,14 @@ function update_local_cache() {
 }
 
 function suppress_pip_ssl_err() {
-    sudo yum install -y libssl-dev
+    sudo yum install -y gcc libffi-devel python-devel openssl-devel
     curl --show-error --silent --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python
     sudo pip install requests[security]
 }
 
 update_local_cache
+# if you want to suppress the annoying SSL context messages, enable this.
+# Notice that this will add to machine provisioning time and will not suppress pip in virtualenvs.
 # suppress_pip_ssl_err
 
 echo '

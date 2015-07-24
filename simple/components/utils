@@ -152,7 +152,7 @@ function wait_for_port
     ###
     port=$1
 
-    counter=0
+    counter=1
     while ! echo exit | curl --silent http://localhost:$1 >/dev/null;
     do
             if [[ $counter -gt 24 ]]; then
