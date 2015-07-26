@@ -159,15 +159,24 @@ inputs:
     default: http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz
 
 
+node_types:
+  cloudify.nodes.ManagerHost:
+    derived_from: cloudify.nodes.Compute
+    properties:
+      public_ip:
+        type: string
+        default: { get_input: public_ip }
+
+
 ######################################################################
 # These nodes comprise the manager's infrastructure and components
 ######################################################################
 node_templates:
   manager_host:
-    type: cloudify.nodes.Compute
+    type: cloudify.nodes.ManagerHost
     properties:
       install_agent: false
-      ip: { get_input: public_ip }
+      ip: { get_input: private_ip }
 
   # #####################################################################
   # The manager_configuration node is meant to be read by Cloudify to
@@ -201,23 +210,28 @@ node_templates:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path: components/manager/scripts/upload_provider_context.sh
+            script_path: components/manager/scripts/configure_manager.sh
             fabric_env:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
-              host_string: { get_input: public_ip }
+              # SCREAM! should use get_property from the manager_host node?
+              host_string: { get_property: [manager_host, public_ip] }
+              # host_string: { get_input: public_ip }
               always_use_pty: true
 
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+        target_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            postconfigure: components/manager/scripts/set_manager_public_ip.sh
       - type: cloudify.relationships.depends_on
         target: rest_service
       - type: cloudify.relationships.depends_on
         target: nginx
         target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
-            postconfigure: components/manager/scripts/set_manager_ip.sh
+            postconfigure: components/manager/scripts/set_manager_private_ip.sh
 
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments

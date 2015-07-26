@@ -86,13 +86,17 @@ sudo mv ${centos_7_agent_file} "${MANAGER_AGENTS_PATH}/centos-Core-agent.tar.gz"
 ubuntu_trusty_agent_file=$(download_file ${UBUNTU_TRUSTY_AGENT_SOURCE_URL})
 sudo mv ${ubuntu_trusty_agent_file} "${MANAGER_AGENTS_PATH}/Ubuntu-trusty-agent.tar.gz"
 
-require_tty_script=$(download_file ${REQUIRE_TTY_SOURCE_URL})
-sudo cp ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/centos-agent-disable-requiretty.sh"
-sudo mv ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/Ubuntu-agent-disable-requiretty.sh"
-celery_conf=$(download_file ${CELERY_CONF_SOURCE_URL})
+# in the new agent, this should not be relevant anymore as the scripts are contained within it.
+ctx logger info "Deploying disable-requiretty script..."
+disable_requiretty_script=$(ctx download-resource "components/nginx/agent-files/disable-requiretty.sh")
+sudo cp ${disable_requiretty_script} "${MANAGER_SCRIPTS_PATH}/centos-agent-disable-requiretty.sh"
+sudo mv ${disable_requiretty_script} "${MANAGER_SCRIPTS_PATH}/Ubuntu-agent-disable-requiretty.sh"
+ctx logger info "Deploying celeryd-cloudify.conf template..."
+celery_conf=$(ctx download-resource "components/nginx/agent-files/celeryd-cloudify.conf.template")
 sudo cp ${celery_conf} "${MANAGER_TEMPLATES_PATH}/centos-celeryd-cloudify.conf.template"
 sudo mv ${celery_conf} "${MANAGER_TEMPLATES_PATH}/Ubuntu-celeryd-cloudify.conf.template"
-celery_init=$(download_file ${CELERY_INIT_SOURCE_URL})
+ctx logger info "Deploying celeryd-cloudify.init template..."
+celery_init=$(ctx download-resource "components/nginx/agent-files/celeryd-cloudify.init.template")
 sudo cp ${celery_init} "${MANAGER_TEMPLATES_PATH}/centos-celeryd-cloudify.init.template"
 sudo mv ${celery_init} "${MANAGER_TEMPLATES_PATH}/Ubuntu-celeryd-cloudify.init.template"
 

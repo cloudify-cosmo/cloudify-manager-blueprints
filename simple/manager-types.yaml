@@ -428,7 +428,7 @@ relationships:
     derived_from: cloudify.relationships.connected_to
     target_interfaces:
       cloudify.interfaces.relationship_lifecycle:
-        postconfigure: components/manager/scripts/set_manager_ip.sh
+        postconfigure: components/manager/scripts/set_manager_private_ip.sh
 
 
   amqpinflux_to_rabbitmq:
