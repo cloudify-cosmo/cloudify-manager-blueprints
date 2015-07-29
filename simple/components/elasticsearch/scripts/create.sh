@@ -8,6 +8,7 @@ CONFIG_REL_PATH="components/elasticsearch/config"
 
 export ES_JAVA_OPRT=$(ctx node properties es_java_opts)  # (e.g. "-Xmx1024m -Xms1024m")
 export ELASTICHSEARCH_SOURCE_URL=$(ctx node properties es_rpm_source_url)  # (e.g. "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz")
+export ELASTICSEARCH_INDEX_ROTATION_DAY_COUNT=$(ctx node properties es_index_rotation_day_count)
 
 export ELASTICSEARCH_PORT="9200"
 export ELASTICSEARCH_HOME="/opt/elasticsearch"
@@ -44,6 +45,7 @@ ctx logger info "Installing Elasticsearch Curator..."
 install_module "elasticsearch-curator==3.2.0"
 
 rotator_script=$(ctx download-resource components/elasticsearch/scripts/rotate_es_indices)
+replace "{{ ctx.node.properties.elasticsearch_index_rotation_day_count }}" "${ELASTICSEARCH_INDEX_ROTATION_DAY_COUNT}" $rotator_script
 
 ctx logger info "Configuring Elasticsearch Index Rotation cronjob for logstash-YYYY.mm.dd index patterns..."
 # testable manually by running: sudo run-parts /etc/cron.daily

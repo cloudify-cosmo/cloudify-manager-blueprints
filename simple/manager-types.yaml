@@ -102,6 +102,13 @@ node_types:
           for more info.
         type: string
         default: { get_input: elasticsearch_java_opts }
+      es_index_rotation_day_count:
+        description: >
+          Defines how many days of indices you want to keep in Elasticsearch.
+          This is only relevant to the Events/Logs indices and does not
+          interfere with the data model.
+        type: integer
+        default: { get_input: elasticsearch_index_rotation_day_count }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
