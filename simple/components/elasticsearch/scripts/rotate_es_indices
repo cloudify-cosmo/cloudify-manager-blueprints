@@ -1,0 +1,8 @@
+#!/bin/sh
+
+curator --host localhost delete indices --timestring '%Y.%m.%d' --older-than 7 --time-unit days
+EXITVALUE=$?
+if [ $EXITVALUE != 0 ]; then
+    /usr/bin/logger -t elasticsearch-curator "ALERT exited abnormally with [$EXITVALUE]"
+fi
+exit 0

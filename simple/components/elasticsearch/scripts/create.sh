@@ -39,3 +39,14 @@ configure_elasticsearch
 
 ctx logger info "Stopping Elasticsearch Service..."
 sudo systemctl stop elasticsearch.service
+
+ctx logger info "Installing Elasticsearch Curator..."
+install_module "elasticsearch-curator==3.2.0"
+
+rotator_script=$(ctx download-resource components/elasticsearch/scripts/rotate_es_indices)
+
+ctx logger info "Configuring Elasticsearch Index Rotation cronjob for logstash-YYYY.mm.dd index patterns..."
+# testable manually by running: sudo run-parts /etc/cron.daily
+sudo mv ${rotator_script} /etc/cron.daily/rotate_es_indices
+sudo chown -R root:root /etc/cron.daily/rotate_es_indices
+sudo chmod +x /etc/cron.daily/rotate_es_indices
