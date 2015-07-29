@@ -22,6 +22,9 @@ export MANAGER_SCRIPTS_PATH="${MANAGER_RESOURCES_HOME}/packages/scripts"
 export MANAGER_TEMPLATES_PATH="${MANAGER_RESOURCES_HOME}/packages/templates"
 export SSL_CERTS_ROOT="/root/cloudify"
 
+# this is propagated to the agent retrieval script later on so that it's not defined twice.
+ctx instance runtime_properties agent_packages_path "${MANAGER_AGENTS_PATH}"
+
 
 ctx logger info "Installing Nginx..."
 
@@ -89,9 +92,11 @@ sudo mv ${ubuntu_trusty_agent_file} "${MANAGER_AGENTS_PATH}/Ubuntu-trusty-agent.
 require_tty_script=$(download_file ${REQUIRE_TTY_SOURCE_URL})
 sudo cp ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/centos-agent-disable-requiretty.sh"
 sudo mv ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/Ubuntu-agent-disable-requiretty.sh"
+
 celery_conf=$(download_file ${CELERY_CONF_SOURCE_URL})
 sudo cp ${celery_conf} "${MANAGER_TEMPLATES_PATH}/centos-celeryd-cloudify.conf.template"
 sudo mv ${celery_conf} "${MANAGER_TEMPLATES_PATH}/Ubuntu-celeryd-cloudify.conf.template"
+
 celery_init=$(download_file ${CELERY_INIT_SOURCE_URL})
 sudo cp ${celery_init} "${MANAGER_TEMPLATES_PATH}/centos-celeryd-cloudify.init.template"
 sudo mv ${celery_init} "${MANAGER_TEMPLATES_PATH}/Ubuntu-celeryd-cloudify.init.template"

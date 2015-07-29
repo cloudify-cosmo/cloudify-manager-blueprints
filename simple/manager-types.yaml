@@ -172,14 +172,6 @@ node_types:
         description: REST Service repo tar URL for resources
         type: string
         default: { get_input: rest_service_source_url }
-      centos_7_agent_source_url:
-        description: Centos 7 Agent required for the manager
-        type: string
-        default: { get_input: centos_7_agent_source_url }
-      ubuntu_trusty_agent_source_url:
-        description: Ubuntu Trusty Agent
-        type: string
-        default: { get_input: ubuntu_trusty_agent_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -187,6 +179,17 @@ node_types:
           inputs:
             script_path:
               default: components/nginx/scripts/create.sh
+            fabric_env: *simple_fabric_env
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file:
+              default: components/nginx/scripts/retrieve_agents.py
+            task_name:
+              default: retrieve
+            task_properties:
+              default:
+                agent_packages: { get_input: agent_packages }
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
