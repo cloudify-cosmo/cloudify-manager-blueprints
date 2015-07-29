@@ -95,6 +95,11 @@ inputs:
     type: string
     default: https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.6.0.noarch.rpm
 
+  elasticsearch_heap_size:
+    type: string
+    default: "2g"
+
+  # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
   elasticsearch_java_opts:
     type: string
     default: "-Xmx1024m -Xms1024m"
