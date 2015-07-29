@@ -1,9 +1,9 @@
 #!/bin/bash
 
 cd /tmp
-wget https://github.com/cloudify-cosmo/cloudify-nodecellar-example/archive/3.2.tar.gz -O /tmp/nc.tar.gz
+wget https://github.com/cloudify-cosmo/cloudify-nodecellar-example/archive/3.3m3.tar.gz -O /tmp/nc.tar.gz
 tar -xzvf /tmp/nc.tar.gz
-cd cloudify-nodecellar-example-3.2/
+cd cloudify-nodecellar-example-3.3m3/
 
 # local - if you want to deploy on the same machine your manager is on
 # echo '

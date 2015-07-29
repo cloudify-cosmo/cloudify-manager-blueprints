@@ -1,8 +1,8 @@
 tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
-  # - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
-  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/CFY-3065-refactor-manager-node-types-yaml/resources/rest-service/cloudify/types/types.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.3m3/types.yaml
+  # - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/CFY-3065-refactor-manager-node-types-yaml/resources/rest-service/cloudify/types/types.yaml
   - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-fabric-plugin/master/plugin.yaml
   - manager-types.yaml
 
@@ -43,23 +43,23 @@ inputs:
 
   rest_service_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m3.tar.gz
 
   dsl_parser_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3m2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3m3.tar.gz
 
   rest_client_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3m2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3m3.tar.gz
 
   plugins_common_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3m2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3m3.tar.gz
 
   script_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3m2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3m3.tar.gz
 
   securest_source_url:
     type: string
@@ -67,7 +67,15 @@ inputs:
 
   amqpinflux_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.3m2.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.3m3.tar.gz
+
+  agent_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-agent/archive/3.3m3.tar.gz
+
+  diamond_plugin_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/1.3m3.tar.gz
 
   #############################
   # Java Inputs
@@ -115,11 +123,11 @@ inputs:
 
   centos_7_agent_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/centos-Core-agent.tar.gz
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/centos-Core-agent.tar.gz
 
   ubuntu_trusty_agent_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/3.2/Ubuntu-trusty-agent.tar.gz
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/Ubuntu-trusty-agent.tar.gz
 
   #############################
   # InfluxDB Inputs
@@ -184,7 +192,7 @@ node_templates:
   # Manager.
   # #####################################################################
   manager_configuration:
-    type: cloudify.nodes.CloudifyManager
+    type: cloudify.nodes.MyCloudifyManager
     properties:
       ssh_user: { get_input: ssh_user }
       ssh_key_filename: { get_input: ssh_key_filename }

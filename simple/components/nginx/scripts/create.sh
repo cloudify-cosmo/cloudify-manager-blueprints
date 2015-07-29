@@ -79,12 +79,12 @@ ctx logger info "Downloading Centos Agent resources..."
 centos_7_agent_file=$(download_file ${CENTOS_7_AGENT_SOURCE_URL})
 # agent_file_name=$(get_file_name "${CENTOS_7_AGENT_SOURCE_URL}")
 # sudo mv ${agent_file} "${MANAGER_AGENTS_PATH}/${agent_file_name}"
-sudo mv ${centos_7_agent_file} "${MANAGER_AGENTS_PATH}/centos-Core-agent.tar.gz"
+sudo mv ${centos_7_agent_file} "${MANAGER_AGENTS_PATH}/centos-core-agent.tar.gz"
 
 # temporarily explicitly download Ubuntu trusty agent for testing.
 # this will be removed when we download multiple agents
 ubuntu_trusty_agent_file=$(download_file ${UBUNTU_TRUSTY_AGENT_SOURCE_URL})
-sudo mv ${ubuntu_trusty_agent_file} "${MANAGER_AGENTS_PATH}/Ubuntu-trusty-agent.tar.gz"
+sudo mv ${ubuntu_trusty_agent_file} "${MANAGER_AGENTS_PATH}/ubuntu-trusty-agent.tar.gz"
 
 # in the new agent, this should not be relevant anymore as the scripts are contained within it.
 ctx logger info "Deploying disable-requiretty script..."
