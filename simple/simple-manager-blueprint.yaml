@@ -126,13 +126,10 @@ inputs:
     type: string
     default: https://dl.dropboxusercontent.com/u/407576/3.2/nginx-1.8.0-1.el7.ngx.x86_64.rpm
 
-  centos_7_agent_source_url:
-    type: string
-    default: https://dl.dropboxusercontent.com/u/407576/3.3/centos-Core-agent.tar.gz
-
-  ubuntu_trusty_agent_source_url:
-    type: string
-    default: https://dl.dropboxusercontent.com/u/407576/3.3/Ubuntu-trusty-agent.tar.gz
+  agent_packages:
+    default:
+      ubuntu_trusty_agent: https://dl.dropboxusercontent.com/u/407576/3.3/Ubuntu-trusty-agent.tar.gz
+      centos_core_agent: https://dl.dropboxusercontent.com/u/407576/3.3/centos-Core-agent.tar.gz
 
   #############################
   # InfluxDB Inputs
