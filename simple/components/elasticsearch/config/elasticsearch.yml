@@ -3,7 +3,7 @@
 http.port: 9200
 discovery.zen.ping.multicast.port: 54329
 path.logs: /var/log/cloudify/elasticsearch
-
+bootstrap.mlockall: true
 
 
 ##################### Elasticsearch Configuration Example #####################

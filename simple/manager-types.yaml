@@ -118,14 +118,19 @@ node_types:
         description: Elasticsearch tar.gz Source URL
         type: string
         default: { get_input: elasticsearch_source_url }
-      es_java_opts:
+      es_heap_size:
         description: >
-          ES_JAVA_OPTS Env Var. Allows to provide arguments
-          to Elasticsearch. This is crucial when scaling up as it
+          This is crucial when scaling up as it
           allows to set the amount of memory allocated and affects
           indexing and searching performance. See
           https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
           for more info.
+        type: string
+        default: { get_input: elasticsearch_heap_size }
+      es_java_opts:
+        description: >
+          ES_JAVA_OPTS Env Var. Allows to provide arguments
+          to Elasticsearch.
         type: string
         default: { get_input: elasticsearch_java_opts }
     interfaces:
