@@ -7,10 +7,6 @@ CONFIG_REL_PATH="components/nginx/config"
 export NGINX_SOURCE_URL=$(ctx node properties nginx_rpm_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/3.2/nginx-1.8.0-1.el7.ngx.x86_64.rpm")
 export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
 
-export REQUIRE_TTY_SOURCE_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/CFY-2596-centos7-agent/package-configuration/centos-agent/centos-agent-disable-requiretty.sh"
-export CELERY_CONF_SOURCE_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/CFY-2596-centos7-agent/package-configuration/centos-agent/centos-celeryd-cloudify.conf.template"
-export CELERY_INIT_SOURCE_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/CFY-2596-centos7-agent/package-configuration/centos-agent/centos-celeryd-cloudify.init.template"
-
 
 export NGINX_LOG_PATH="/var/log/cloudify/nginx"
 # export NGINX_REPO="http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm"
@@ -72,18 +68,5 @@ manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager Resources to ${MANAGER_RESOURCES_HOME}..."
 tar -xzf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
 sudo cp -R "/tmp/resources/rest-service/cloudify/" "${MANAGER_RESOURCES_HOME}"
-
-
-require_tty_script=$(download_file ${REQUIRE_TTY_SOURCE_URL})
-sudo cp ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/centos-agent-disable-requiretty.sh"
-sudo mv ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/Ubuntu-agent-disable-requiretty.sh"
-
-celery_conf=$(download_file ${CELERY_CONF_SOURCE_URL})
-sudo cp ${celery_conf} "${MANAGER_TEMPLATES_PATH}/centos-celeryd-cloudify.conf.template"
-sudo mv ${celery_conf} "${MANAGER_TEMPLATES_PATH}/Ubuntu-celeryd-cloudify.conf.template"
-
-celery_init=$(download_file ${CELERY_INIT_SOURCE_URL})
-sudo cp ${celery_init} "${MANAGER_TEMPLATES_PATH}/centos-celeryd-cloudify.init.template"
-sudo mv ${celery_init} "${MANAGER_TEMPLATES_PATH}/Ubuntu-celeryd-cloudify.init.template"
 
 sudo systemctl enable nginx.service &>/dev/null

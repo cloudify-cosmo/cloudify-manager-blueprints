@@ -9,6 +9,32 @@
 
 node_types:
 
+  cloudify.nodes.MyCloudifyManager:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      ssh_user:
+        default: ubuntu
+      ssh_key_filename:
+        default: ''
+      cloudify:
+        description: >
+          Configuration for Cloudify Manager
+        default:
+          transient_deployment_workers_mode:
+            enabled: false
+            global_parallel_executions_limit: -1  # -1 means no limit
+          resources_prefix: ''
+          cloudify_agent:
+            min_workers: 2
+            max_workers: 5
+            remote_execution_port: 22
+            user: ubuntu
+          workflows:
+            task_retries: -1  # this means forever
+            task_retry_interval: 30
+          policy_engine:
+            start_timeout: 30
+
   manager.nodes.PythonRuntime:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
@@ -252,6 +278,22 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: rest_service_source_url }
+      plugins_common_module_source_url:
+        description: Plugins Common module Source URL
+        type: string
+        default: { get_input: plugins_common_source_url }
+      script_plugin_module_source_url:
+        description: Script Plugin module Source URL
+        type: string
+        default: { get_input: script_plugin_source_url }
+      diamond_plugin_module_source_url:
+        description: Diamond Plugin module Source URL
+        type: string
+        default: { get_input: diamond_plugin_source_url }
+      agent_module_source_url:
+        description: Agent module Source URL
+        type: string
+        default: { get_input: agent_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -290,6 +332,14 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: rest_service_source_url }
+      diamond_plugin_module_source_url:
+        description: Diamond Plugin module Source URL
+        type: string
+        default: { get_input: diamond_plugin_source_url }
+      agent_module_source_url:
+        description: Agent module Source URL
+        type: string
+        default: { get_input: agent_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -431,7 +481,7 @@ relationships:
     derived_from: cloudify.relationships.connected_to
     target_interfaces:
       cloudify.interfaces.relationship_lifecycle:
-        postconfigure: components/manager/scripts/set_manager_ip.sh
+        postconfigure: components/manager/scripts/set_manager_private_ip.sh
 
 
   amqpinflux_to_rabbitmq:

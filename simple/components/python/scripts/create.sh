@@ -67,3 +67,8 @@ if [[ ! -z "${VIRTUALENV_VERSION}" ]]; then
 else
     install_virtualenv >/dev/null
 fi
+
+ctx logger info "Installing Compilers..."
+# instead of installing these, our build process should create wheels of the required dependencies which could be later installed directory
+# sudo yum install -y python-devel g++ gcc # libxslt-dev libxml2-dev
+yum_install "python-devel g++ gcc" >/dev/null
