@@ -107,6 +107,10 @@ inputs:
     type: string
     default: "-Xmx1024m -Xms1024m"
 
+  elasticsearch_index_rotation_day_count:
+    type: integer
+    default: 7
+
   #############################
   # Logstash Inputs
   #############################
