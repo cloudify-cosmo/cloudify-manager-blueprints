@@ -9,10 +9,6 @@ export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_
 export CENTOS_7_AGENT_SOURCE_URL=$(ctx node properties centos_7_agent_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/centos-Core-agent.tar.gz")
 export UBUNTU_TRUSTY_AGENT_SOURCE_URL=$(ctx node properties ubuntu_trusty_agent_source_url)
 
-export REQUIRE_TTY_SOURCE_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/CFY-2596-centos7-agent/package-configuration/centos-agent/centos-agent-disable-requiretty.sh"
-export CELERY_CONF_SOURCE_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/CFY-2596-centos7-agent/package-configuration/centos-agent/centos-celeryd-cloudify.conf.template"
-export CELERY_INIT_SOURCE_URL="https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/CFY-2596-centos7-agent/package-configuration/centos-agent/centos-celeryd-cloudify.init.template"
-
 
 export NGINX_LOG_PATH="/var/log/cloudify/nginx"
 # export NGINX_REPO="http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm"
@@ -79,21 +75,11 @@ ctx logger info "Downloading Centos Agent resources..."
 centos_7_agent_file=$(download_file ${CENTOS_7_AGENT_SOURCE_URL})
 # agent_file_name=$(get_file_name "${CENTOS_7_AGENT_SOURCE_URL}")
 # sudo mv ${agent_file} "${MANAGER_AGENTS_PATH}/${agent_file_name}"
-sudo mv ${centos_7_agent_file} "${MANAGER_AGENTS_PATH}/centos-Core-agent.tar.gz"
+sudo mv ${centos_7_agent_file} "${MANAGER_AGENTS_PATH}/centos-core-agent.tar.gz"
 
 # temporarily explicitly download Ubuntu trusty agent for testing.
 # this will be removed when we download multiple agents
 ubuntu_trusty_agent_file=$(download_file ${UBUNTU_TRUSTY_AGENT_SOURCE_URL})
-sudo mv ${ubuntu_trusty_agent_file} "${MANAGER_AGENTS_PATH}/Ubuntu-trusty-agent.tar.gz"
-
-require_tty_script=$(download_file ${REQUIRE_TTY_SOURCE_URL})
-sudo cp ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/centos-agent-disable-requiretty.sh"
-sudo mv ${require_tty_script} "${MANAGER_SCRIPTS_PATH}/Ubuntu-agent-disable-requiretty.sh"
-celery_conf=$(download_file ${CELERY_CONF_SOURCE_URL})
-sudo cp ${celery_conf} "${MANAGER_TEMPLATES_PATH}/centos-celeryd-cloudify.conf.template"
-sudo mv ${celery_conf} "${MANAGER_TEMPLATES_PATH}/Ubuntu-celeryd-cloudify.conf.template"
-celery_init=$(download_file ${CELERY_INIT_SOURCE_URL})
-sudo cp ${celery_init} "${MANAGER_TEMPLATES_PATH}/centos-celeryd-cloudify.init.template"
-sudo mv ${celery_init} "${MANAGER_TEMPLATES_PATH}/Ubuntu-celeryd-cloudify.init.template"
+sudo mv ${ubuntu_trusty_agent_file} "${MANAGER_AGENTS_PATH}/ubuntu-trusty-agent.tar.gz"
 
 sudo systemctl enable nginx.service &>/dev/null
