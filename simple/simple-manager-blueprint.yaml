@@ -43,7 +43,7 @@ inputs:
 
   rest_service_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/CFY-2926-elasticsearc-index-rotation.tar.gz
 
   dsl_parser_source_url:
     type: string
