@@ -4,8 +4,6 @@ ES_HOST="localhost"
 ES_PORT="9200"
 
  function configure_elasticsearch() {
-    ctx logger info "Creating events index..." && \
-    curl --fail --silent --retry 5 --retry-delay 3 -XPUT http://${ES_HOST}:${ES_PORT}/cloudify_events -d '{"settings": {"analysis": {"analyzer": {"default": {"tokenizer": "whitespace"}}}}}' >/dev/null && \
     ctx logger info "Creating data model index..." && \
     curl --fail --silent --retry 5 --retry-delay 3 -XPUT http://${ES_HOST}:${ES_PORT}/cloudify_storage -d '{"settings": {"analysis": {"analyzer": {"default": {"tokenizer": "whitespace"}}}}}' >/dev/null && \
     ctx logger info "Creating blueprint mapping..." && \

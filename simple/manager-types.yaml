@@ -1,10 +1,7 @@
 ######################################################################
 # By default, the types are using the Fabric plugin to create
 # and start the nodes so that you can choose a machine and run this
-# blueprint on it. You can replace the create and start lifecycle
-# operations with the ones commented below to use the Script plugin
-# instead which will allow you to bootstrap without using SSH on the
-# local machine.
+# blueprint on it.
 ######################################################################
 
 node_types:
@@ -90,7 +87,6 @@ node_types:
       erlang_rpm_source_url:
         description: Erlang RPM to install.
         type: string
-        # default: default: { concat: [ "https://dl.dropboxusercontent.com/u/407576/" , { get_input: cloudify_version} , "/erlang-17.4-1.el6.x86_64.rpm"]}
         default: { get_input: erlang_source_url }
       rabbitmq_rpm_source_url:
         description: RabbitMQ RPM Source URL
@@ -277,7 +273,6 @@ node_types:
         description: DSL Parser module Source URL
         type: string
         default: { get_input: dsl_parser_source_url }
-      # DO WE NEED THE REST CLIENT HERE? ITS NOT IN THE setup.py REQUIREMENTS
       rest_client_module_source_url:
         description: REST Client module Source URL
         type: string
@@ -459,9 +454,10 @@ node_types:
 
 
 ######################################################################
-# The relationships don't provide any configuration related
-# functionality but are rather here just to provide the dependency
-# graph. Host configuration for all components assumes "localhost"
+# most relationship declarations here do not provide any functionality
+# aside from to allow to build the dependency graph.
+# They can be used to implement a different relationship between
+# each of the services.
 ######################################################################
 relationships:
 

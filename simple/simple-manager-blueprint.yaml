@@ -2,7 +2,6 @@ tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.3m3/types.yaml
-  # - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/CFY-3065-refactor-manager-node-types-yaml/resources/rest-service/cloudify/types/types.yaml
   - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-fabric-plugin/master/plugin.yaml
   - manager-types.yaml
 
@@ -44,6 +43,7 @@ inputs:
   rest_service_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/CFY-2926-elasticsearc-index-rotation.tar.gz
+    # default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m3.tar.gz
 
   dsl_parser_source_url:
     type: string
