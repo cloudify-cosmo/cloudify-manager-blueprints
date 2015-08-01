@@ -1,12 +1,17 @@
-public_ip: ''
-private_ip: ''
-ssh_user: ''
-ssh_key_filename: ''
+#############################
+# Provider specific Inputs
+#############################
+# public_ip: ''
+# private_ip: ''
+# ssh_user: ''
+# ssh_key_filename: ''
 
-agents_user: ''
-resources_prefix: ''
+# agents_user: ''
+# resources_prefix: ''
 
-
+#############################
+# Cloudify Modules
+#############################
 # rest_client_source_url: ''
 # dsl_parser_source_url: ''
 # plugins_common_source_url: ''
@@ -15,30 +20,70 @@ resources_prefix: ''
 # securest_source_url: ''
 # amqpinflux_source_url: ''
 
+#############################
+# Java Inputs
+#############################
 # java_source_url: ''
 
-# centos7_agent_source_url: ''
-
+#############################
+# RabbitMQ Inputs
+#############################
+# RabbitMQ Distribution of Erlang
 # erlang_source_url: ''
 # rabbitmq_source_url: ''
 
+#############################
+# Elasticsearch Inputs
+#############################
 # elasticsearch_source_url: ''
-# elasticsearch_port: ''
-# elasticsearch_discovery_port:''
+
+# https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
+# elasticsearch_heap_size:
+
+# This allows to provide any JAVA_OPTS to Elasticsearch.
 # elasticsearch_java_opts: ''
 
+# The index for events will be named `logstash-YYYY.mm.dd`.
+# Elasticsearch Curator is used to rotate the indices on a daily basis
+# via a cronjob. This allows to determine the number of days to keep.
+# elasticsearch_index_rotation_day_count:
+
+#############################
+# Logstash Inputs
+#############################
 # logstash_source_url: ''
 
-# influxdb_source_url: ''
-# influxdb_port: ''
+#############################
+# Nginx and FileServer Inputs
+#############################
+# nginx_source_url: ''
 
+# Nginx, being the fileserver, also serves agent packages.
+# The key names of the agents must be in the format: distro_release_agent
+# as the key is what's used to name the file, which later allows our
+# agent installer to identify it for your distro and release automatically.
+# agent_packages:
+#   default:
+#     ubuntu_trusty_agent: ''
+#     centos_core_agent: ''
+
+#############################
+# InfluxDB Inputs
+#############################
+# influxdb_source_url: ''
+
+#############################
+# Riemann Inputs
+#############################
 # riemann_source_url: ''
 # langohr_source_url: ''
 # daemonize_source_url: ''
 
-# rest_service_port: ''
-
-# nginx_source_url: ''
+#############################
+# WebUI Inputs
+#############################
 # nodejs_source_url: ''
 # webui_source_url: ''
+
+# This is a Cloudify specific redistribution of Grafana.
 # grafana_source_url: ''

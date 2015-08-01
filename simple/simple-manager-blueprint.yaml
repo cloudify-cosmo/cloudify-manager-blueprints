@@ -2,6 +2,7 @@ tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.3m3/types.yaml
+  # - http://www.getcloudify.org/spec/fabric-plugin/1.3m3/plugin.yaml
   - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-fabric-plugin/master/plugin.yaml
   - manager-types.yaml
 
@@ -103,15 +104,19 @@ inputs:
     type: string
     default: https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.6.0.noarch.rpm
 
+  # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
   elasticsearch_heap_size:
     type: string
     default: "2g"
 
-  # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
+  # This allows to provide any JAVA_OPTS to Elasticsearch.
   elasticsearch_java_opts:
     type: string
-    default: "-Xmx1024m -Xms1024m"
+    default: ''
 
+  # The index for events will be named `logstash-YYYY.mm.dd`.
+  # Elasticsearch Curator is used to rotate the indices on a daily basis
+  # via a cronjob. This allows to determine the number of days to keep.
   elasticsearch_index_rotation_day_count:
     type: integer
     default: 7
@@ -130,6 +135,10 @@ inputs:
     type: string
     default: https://dl.dropboxusercontent.com/u/407576/3.2/nginx-1.8.0-1.el7.ngx.x86_64.rpm
 
+  # Nginx, being the fileserver, also serves agent packages.
+  # The key names of the agents must be in the format: distro_release_agent
+  # as the key is what's used to name the file, which later allows our
+  # agent installer to identify it for your distro and release automatically.
   agent_packages:
     default:
       ubuntu_trusty_agent: https://dl.dropboxusercontent.com/u/407576/3.3/Ubuntu-trusty-agent.tar.gz
@@ -164,6 +173,7 @@ inputs:
     type: string
     default: https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0.tgz
 
+  # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
     type: string
     default: https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz
@@ -173,6 +183,11 @@ inputs:
     default: http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz
 
 
+######################################################################
+# This is a simple blueprint specific node_type to allow us to define
+# The public_ip of the machine is an accessible property of the host.
+# By default, the `ip` property is the private ip.
+######################################################################
 node_types:
   cloudify.nodes.ManagerHost:
     derived_from: cloudify.nodes.Compute
@@ -220,7 +235,6 @@ node_templates:
 
     interfaces:
       cloudify.interfaces.lifecycle:
-        # create: components/upload_provider_context.sh
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
@@ -228,9 +242,7 @@ node_templates:
             fabric_env:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
-              # SCREAM! should use get_property from the manager_host node?
               host_string: { get_property: [manager_host, public_ip] }
-              # host_string: { get_input: public_ip }
               always_use_pty: true
 
     relationships:
@@ -306,7 +318,7 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
-      # awaiting solution for circular relationship
+      # circular relationship
       # - type: nginx_to_webui
       #   target: webui
       - type: nginx_to_restservice
@@ -365,7 +377,7 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
-      # awaiting solution for circular relationship
+      # circular relationship
       # - type: webui_to_nginx
       #   target: nginx
       - type: webui_to_influxdb
