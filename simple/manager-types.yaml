@@ -223,7 +223,7 @@ node_types:
               default: retrieve
             task_properties:
               default:
-                agent_packages: { get_input: agent_packages }
+                agent_packages: { get_input: agent_package_urls }
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
@@ -247,10 +247,10 @@ node_types:
         description: Riemann RPM Source URL
         type: string
         default: { get_input: riemann_source_url }
-      riemann_master_config_url:
-        description: Riemann master.config Source URL
+      rest_service_module_source_url:
+        description: REST Service module Source URL
         type: string
-        default: "https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/master/plugins/riemann-controller/riemann_controller/resources/manager.config"
+        default: { get_input: rest_service_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

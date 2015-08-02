@@ -3,3 +3,4 @@ LANGOHR_HOME="/opt/lib"
 EXTRA_CLASSPATH="/opt/lib/langohr.jar"
 
 RABBITMQ_HOST="{{ ctx.instance.runtime_properties.manager_host_ip }}"
+MANAGEMENT_IP="{{ ctx.instance.runtime_properties.manager_host_ip }}"

@@ -37,25 +37,21 @@ create_virtualenv "${VIRTUALENV_DIR}"
 ctx logger info "Installing Management Worker Modules..."
 install_module "celery==${CELERY_VERSION}" ${VIRTUALENV_DIR}
 install_module ${REST_CLIENT_SOURCE_URL} ${VIRTUALENV_DIR}
-# do we need these two?
 install_module ${PLUGINS_COMMON_SOURCE_URL} ${VIRTUALENV_DIR}
+# Currently cloudify-agent requires the script and diamond plugins
+# so we must install them here. The mgmtworker doesn't use them.
 install_module ${SCRIPT_PLUGIN_SOURCE_URL} ${VIRTUALENV_DIR}
 install_module ${DIAMOND_PLUGIN_SOURCE_URL} ${VIRTUALENV_DIR}
 install_module ${AGENT_SOURCE_URL} ${VIRTUALENV_DIR}
 
-ctx logger info "Downloading Manager Repository..."
+ctx logger info "Downloading cloudify-manager Repository..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager Repository..."
 tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
 
 ctx logger info "Installing Management Worker Plugins..."
-# install_module "/tmp/plugins/plugin-installer" ${VIRTUALENV_DIR}
-# install_module "/tmp/plugins/agent-installer" ${VIRTUALENV_DIR}
 install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}
 install_module "/tmp/workflows" ${VIRTUALENV_DIR}
-
-# ctx logger info "Cleaning up unneeded packages..."
-# sudo yum remove -y python-devel gcc >/dev/null
 
 configure_systemd_service "mgmtworker"
 inject_management_ip_as_env_var "mgmtworker"

@@ -139,7 +139,7 @@ inputs:
   # The key names of the agents must be in the format: distro_release_agent
   # as the key is what's used to name the file, which later allows our
   # agent installer to identify it for your distro and release automatically.
-  agent_packages:
+  agent_package_urls:
     default:
       ubuntu_trusty_agent: https://dl.dropboxusercontent.com/u/407576/3.3/Ubuntu-trusty-agent.tar.gz
       centos_core_agent: https://dl.dropboxusercontent.com/u/407576/3.3/centos-Core-agent.tar.gz

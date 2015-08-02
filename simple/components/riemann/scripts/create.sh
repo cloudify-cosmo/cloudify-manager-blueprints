@@ -8,17 +8,13 @@ CONFIG_REL_PATH="components/riemann/config"
 export LANGOHR_SOURCE_URL=$(ctx node properties langohr_jar_source_url)  # (e.g. "https://s3-eu-west-1.amazonaws.com/gigaspaces-repository-eu/langohr/2.11.0/langohr.jar")
 export DAEMONIZE_SOURCE_URL=$(ctx node properties daemonize_rpm_source_url)  # (e.g. "https://forensics.cert.org/centos/cert/7/x86_64/daemonize-1.7.3-7.el7.x86_64.rpm")
 export RIEMANN_SOURCE_URL=$(ctx node properties riemann_rpm_source_url)  # (e.g. "https://aphyr.com/riemann/riemann-0.2.6-1.noarch.rpm")
-export RIEMANN_MASTER_CONFIG_URL=$(ctx node properties riemann_master_config_url)
+# Needed for Riemann's config
+export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)
 
 export RIEMANN_CONFIG_PATH="/etc/riemann"
 export RIEMANN_LOG_PATH="/var/log/cloudify/riemann"
 export LANGOHR_HOME="/opt/lib"
 export EXTRA_CLASSPATH="${LANGOHR_HOME}/langohr.jar"
-
-# our riemann configuration will (by default) try to read these environment variables. If they don't exist, it will assume
-# that they're found at "localhost"
-# export MANAGEMENT_IP=""
-# export RABBITMQ_HOST=""
 
 
 ctx logger info "Installing Riemann..."
@@ -54,12 +50,22 @@ EOF
 
 sudo chmod 644 $lconf
 
+ctx logger info "Downloading cloudify-manager Repository..."
+manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
+ctx logger info "Extracting Manager Repository..."
+tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
 ctx logger info "Deploying Riemann manager.config..."
-manager_config=$(download_file ${RIEMANN_MASTER_CONFIG_URL})
-sudo mv ${manager_config} ${RIEMANN_CONFIG_PATH}/conf.d/manager.config
+sudo mv "/tmp/plugins/riemann-controller/riemann_controller/resources/manager.config" "${RIEMANN_CONFIG_PATH}/conf.d/manager.config"
 
 ctx logger info "Deploying Riemann conf..."
 deploy_file "${CONFIG_REL_PATH}/main.clj" "${RIEMANN_CONFIG_PATH}/main.clj"
 
 configure_systemd_service "riemann"
+
+# our riemann configuration will (by default) try to read these environment variables. If they don't exist, it will assume
+# that they're found at "localhost"
+# export MANAGEMENT_IP=""
+# export RABBITMQ_HOST=""
+# we inject the management_ip for both of these to Riemann's systemd config. These should be potentially different
+# if the manager and rabbitmq are running on different hosts.
 inject_management_ip_as_env_var "riemann"
