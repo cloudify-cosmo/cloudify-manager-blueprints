@@ -49,6 +49,7 @@ ctx logger info "Configuring File Descriptors Limit..."
 deploy_file "components/rabbitmq/config/rabbitmq_ulimit.conf" "/etc/security/limits.d/rabbitmq.conf"
 replace "{{ ctx.node.properties.rabbitmq_fd_limit }}" ${RABBITMQ_FD_LIMIT} "/etc/security/limits.d/rabbitmq.conf"
 replace "{{ ctx.node.properties.rabbitmq_fd_limit }}" ${RABBITMQ_FD_LIMIT} "/usr/lib/systemd/system/cloudify-rabbitmq.service"
+sudo systemctl daemon-reload
 
 ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
 sudo systemctl start cloudify-rabbitmq.service
