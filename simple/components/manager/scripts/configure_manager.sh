@@ -83,8 +83,7 @@ function _disable_requiretty() {
 
 # REMOVE, TEST ONLY!
 # test for when requiretty is enabled and the disable-requiretty script should disable it.
-replace "#Defaults requiretty" "Defaults requiretty" "/etc/sudoers"
-
+# sudo sed -i '0,/^#Defaults.*requiretty/s//Defaults requiretty/' "/etc/sudoers"
 
 _post_provider_context
-_disable_requiretty
+_disable_requirettys
