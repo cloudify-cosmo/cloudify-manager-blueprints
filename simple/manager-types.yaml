@@ -92,6 +92,15 @@ node_types:
         description: RabbitMQ RPM Source URL
         type: string
         default: { get_input: rabbitmq_source_url }
+      rabbitmq_events_queue_length_limit:
+        type: integer
+        default: { get_input: rabbitmq_events_queue_length_limit }
+      rabbitmq_logs_queue_length_limit:
+        type: integer
+        default: { get_input: rabbitmq_logs_queue_length_limit }
+      rabbitmq_metrics_queue_length_limit:
+        type: integer
+        default: { get_input: rabbitmq_metrics_queue_length_limit }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

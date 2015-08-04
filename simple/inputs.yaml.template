@@ -56,6 +56,14 @@
 #erlang_source_url: ''
 #rabbitmq_source_url: ''
 
+# note that for each of the queue length limit properties, new messages
+# will be queued in RabbitMQ and old messages will be deleted once the
+# limit is reached!
+# https://www.rabbitmq.com/maxlength.html
+#rabbitmq_events_queue_length_limit: ''
+#rabbitmq_logs_queue_length_limit: ''
+#rabbitmq_metrics_queue_length_limit: ''
+
 #############################
 # Elasticsearch Inputs
 #############################
