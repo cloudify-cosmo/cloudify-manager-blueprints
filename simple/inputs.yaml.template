@@ -29,7 +29,9 @@
 #agent_package_urls:
 #   default:
 #     ubuntu_trusty_agent: ''
+#     ubuntu_precise_agent: ''
 #     centos_core_agent: ''
+#     centos_final_agent: ''
 
 #############################
 # Cloudify Modules
