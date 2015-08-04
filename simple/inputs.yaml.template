@@ -55,6 +55,9 @@
 #RabbitMQ Distribution of Erlang
 #erlang_source_url: ''
 #rabbitmq_source_url: ''
+#rabbitmq_events_queue_message_ttl:
+#rabbitmq_logs_queue_message_ttl:
+#rabbitmq_metrics_queue_message_ttl:
 
 #############################
 # Elasticsearch Inputs

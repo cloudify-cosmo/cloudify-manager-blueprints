@@ -5,6 +5,9 @@
 
 export ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/erlang/erlang-17.4-1.el6.x86_64.rpm")
 export RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm")
+export RABBITMQ_EVENTS_QUEUE_MESSAGE_TTL=$(ctx node properties rabbitmq_events_queue_message_ttl)
+export RABBITMQ_LOGS_QUEUE_MESSAGE_TTL=$(ctx node properties rabbitmq_logs_queue_message_ttl)
+export RABBITMQ_METRICS_QUEUE_MESSAGE_TTL=$(ctx node properties rabbitmq_metrics_queue_message_ttl)
 
 export RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
 
@@ -50,6 +53,18 @@ sudo systemctl start cloudify-rabbitmq.service
 ctx logger info "Enabling RabbitMQ Plugins..."
 sudo rabbitmq-plugins enable rabbitmq_management >/dev/null
 sudo rabbitmq-plugins enable rabbitmq_tracing >/dev/null
+
+sleep 10
+
+ctx logger info "Configuring RabbitMQ Policies..."
+ctx logger info "Configuring cloudify-logs per queue message ttl..."
+sudo rabbitmqctl set_policy logs_queue_message_ttl "^cloudify-logs$" "{"\"message-ttl"\":${RABBITMQ_LOGS_QUEUE_MESSAGE_TTL}}" --apply-to queues
+ctx logger info "Configuring cloudify-events per queue message ttl..."
+sudo rabbitmqctl set_policy events_queue_message_ttl "^cloudify-events$" "{"\"message-ttl"\":${RABBITMQ_EVENTS_QUEUE_MESSAGE_TTL}}" --apply-to queues
+ctx logger info "Configuring cloudify-monitoring per queue message ttl..."
+sudo rabbitmqctl set_policy metrics_queue_message_ttl "^amq\.gen.*$" "{"\"message-ttl"\":${RABBITMQ_METRICS_QUEUE_MESSAGE_TTL}}" --apply-to queues
+sudo rabbitmqctl set_policy riemann_deployment_queues_message_ttl "^.*-riemann$" "{"\"message-ttl"\":${RABBITMQ_METRICS_QUEUE_MESSAGE_TTL}}" --apply-to queues
+
 
 # enable guest user access where cluster not on localhost
 ctx logger info "Enabling RabbitMQ user access..."
