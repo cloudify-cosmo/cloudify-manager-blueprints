@@ -305,3 +305,17 @@ function set_selinux_permissive() {
         ctx logger info "SELinux not enforced."
     fi
 }
+
+function set_rabbitmq_policy() {
+    ###
+    # Sets RabbitMQ Policies
+    ###
+
+    policy_name=$1
+    queue_regex=$2
+    policy_type=$3
+    value=$4
+
+    ctx logger info "Setting Policy ${policy_name} on queues ${queue_regex} of type ${policy_type} with value ${value}..."
+    sudo rabbitmqctl set_policy ${policy_name} "${queue_regex}" "{"\"${policy_type}"\":${value}}" --apply-to queues
+}

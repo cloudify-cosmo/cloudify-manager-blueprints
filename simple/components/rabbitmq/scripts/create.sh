@@ -25,6 +25,16 @@ yum_install ${RABBITMQ_SOURCE_URL}
 # sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 # sudo yum install /tmp/rabbitmq.rpm -y
 
+
+# Creating rabbitmq systemd stop script
+cat << EOF | sudo tee /usr/local/bin/kill-rabbit > /dev/null
+#! /usr/bin/env bash
+for proc in "\$(/usr/bin/ps aux | /usr/bin/grep rabbitmq | /usr/bin/grep -v grep | /usr/bin/awk '{ print \$2 }')"; do
+    /usr/bin/kill \${proc}
+done
+EOF
+sudo chmod 500 /usr/local/bin/kill-rabbit
+
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/rabbitmq-server"
 
@@ -54,17 +64,6 @@ ctx logger info "Enabling RabbitMQ Plugins..."
 sudo rabbitmq-plugins enable rabbitmq_management >/dev/null
 sudo rabbitmq-plugins enable rabbitmq_tracing >/dev/null
 
-sleep 10
-
-ctx logger info "Configuring RabbitMQ Policies..."
-ctx logger info "Configuring cloudify-logs per queue message ttl..."
-sudo rabbitmqctl set_policy logs_queue_message_ttl "^cloudify-logs$" "{"\"message-ttl"\":${RABBITMQ_LOGS_QUEUE_MESSAGE_TTL}}" --apply-to queues
-ctx logger info "Configuring cloudify-events per queue message ttl..."
-sudo rabbitmqctl set_policy events_queue_message_ttl "^cloudify-events$" "{"\"message-ttl"\":${RABBITMQ_EVENTS_QUEUE_MESSAGE_TTL}}" --apply-to queues
-ctx logger info "Configuring cloudify-monitoring per queue message ttl..."
-sudo rabbitmqctl set_policy metrics_queue_message_ttl "^amq\.gen.*$" "{"\"message-ttl"\":${RABBITMQ_METRICS_QUEUE_MESSAGE_TTL}}" --apply-to queues
-sudo rabbitmqctl set_policy riemann_deployment_queues_message_ttl "^.*-riemann$" "{"\"message-ttl"\":${RABBITMQ_METRICS_QUEUE_MESSAGE_TTL}}" --apply-to queues
-
 
 # enable guest user access where cluster not on localhost
 ctx logger info "Enabling RabbitMQ user access..."
@@ -74,4 +73,18 @@ ctx logger info "Chowning RabbitMQ logs path..."
 sudo chown rabbitmq:rabbitmq ${RABBITMQ_LOG_BASE}
 
 ctx logger info "Stopping RabbitMQ Service..."
+
+sleep 30
+
+
+ctx logger info "Configuring RabbitMQ Policies..."
+ctx logger info "Configuring cloudify-logs queue message ttl..."
+sudo rabbitmqctl set_policy logs_queue_message_ttl "^cloudify-logs$" "{"\"message-ttl"\":${RABBITMQ_LOGS_QUEUE_MESSAGE_TTL}}" --apply-to queues
+ctx logger info "Configuring cloudify-events queue message ttl..."
+sudo rabbitmqctl set_policy events_queue_message_ttl "^cloudify-events$" "{"\"message-ttl"\":${RABBITMQ_EVENTS_QUEUE_MESSAGE_TTL}}" --apply-to queues
+ctx logger info "Configuring cloudify-monitoring queue message ttl..."
+sudo rabbitmqctl set_policy metrics_queue_message_ttl "^amq\.gen.*$" "{"\"message-ttl"\":${RABBITMQ_METRICS_QUEUE_MESSAGE_TTL}}" --apply-to queues
+sudo rabbitmqctl set_policy riemann_deployment_queues_message_ttl "^.*-riemann$" "{"\"message-ttl"\":${RABBITMQ_METRICS_QUEUE_MESSAGE_TTL}}" --apply-to queues
+
+
 sudo systemctl stop cloudify-rabbitmq.service

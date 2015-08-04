@@ -6,6 +6,7 @@ TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-rabbitmq
 ExecStart=/usr/sbin/rabbitmq-server
+ExecStop=/usr/local/bin/kill-rabbit
 
 [Install]
 WantedBy=multi-user.target
