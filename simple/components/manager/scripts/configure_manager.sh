@@ -29,7 +29,7 @@ function _disable_requiretty() {
         # http://0pointer.de/blog/projects/os-release.html
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
         ###
-        if grep -i 'centos' /proc/version > /dev/null; then
+        if grep -i 'centoss' /proc/version > /dev/null; then
             echo 'supported'
         elif grep -i 'ubuntu' /proc/version > /dev/null; then
             echo 'supported'
@@ -50,13 +50,9 @@ function _disable_requiretty() {
         whoami=$(whoami)
         requiretty='!requiretty'
 
-        if sudo grep -q -E '[^!]requiretty' /etc/sudoers; then
-            ctx logger info "Creating sudoers user file and setting disable requiretty directive."
-            echo "Defaults:${whoami} ${requiretty}" | sudo tee /etc/sudoers.d/${whoami} >/dev/null
-            sudo chmod 0440 /etc/sudoers.d/${whoami}
-        else
-            ctx logger info "No requiretty directive found, nothing to do."
-        fi
+        ctx logger info "Creating sudoers user file and setting disable requiretty directive."
+        echo "Defaults:${whoami} ${requiretty}" | sudo tee /etc/sudoers.d/${whoami} >/dev/null
+        sudo chmod 0440 /etc/sudoers.d/${whoami}
     }
 
     function disable_for_all_users() {
@@ -72,18 +68,24 @@ function _disable_requiretty() {
 
     # for supported distros, this will disable requiretty for a specific user.
     # Otherwise, it will disable it for all users.
-    if [ "$(get_distro)" != 'unsupported' ]; then
-        ctx logger info "Distro is supported."
-        disable_for_user
+    if sudo grep -q -E '[^!]requiretty' /etc/sudoers; then
+        if [ "$(get_distro)" != 'unsupported' ]; then
+            ctx logger info "Distro is supported."
+            disable_for_user
+        else
+            ctx logger info "Distro is unsupported."
+            disable_for_all_users
+        fi
     else
-        ctx logger info "Distro is unsupported."
-        disable_for_all_users
+        ctx logger info "No requiretty directive found, nothing to do."
     fi
 }
 
 # REMOVE, TEST ONLY!
 # test for when requiretty is enabled and the disable-requiretty script should disable it.
+# ctx logger info "Applying requiretty test..."
 # sudo sed -i '0,/^#Defaults.*requiretty/s//Defaults requiretty/' "/etc/sudoers"
+# ctx logger info "OUTCOME: $(sudo cat /etc/sudoers | grep requiretty)"
 
 _post_provider_context
 _disable_requiretty
