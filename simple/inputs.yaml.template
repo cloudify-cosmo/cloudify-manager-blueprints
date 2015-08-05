@@ -56,24 +56,23 @@
 #erlang_source_url: ''
 #rabbitmq_source_url: ''
 
-<<<<<<< HEAD
 # Allows defining the message-ttl for the different types of queues.
 # https://www.rabbitmq.com/ttl.html
 #rabbitmq_events_queue_message_ttl:
 #rabbitmq_logs_queue_message_ttl:
 #rabbitmq_metrics_queue_message_ttl:
-=======
+
 # note that for each of the queue length limit properties, new messages
 # will be queued in RabbitMQ and old messages will be deleted once the
 # limit is reached!
 # https://www.rabbitmq.com/maxlength.html
-#rabbitmq_events_queue_length_limit: ''
-#rabbitmq_logs_queue_length_limit: ''
-#rabbitmq_metrics_queue_length_limit: ''
->>>>>>> CFY-3220-configure-max-queue-length
+#rabbitmq_events_queue_length_limit:
+#rabbitmq_logs_queue_length_limit:
+#rabbitmq_metrics_queue_length_limit:
+
 
 # RabbitMQ File Descriptors Limit
-#rabbitmq_fd_limit: ''
+#rabbitmq_fd_limit:
 
 #############################
 # Elasticsearch Inputs
