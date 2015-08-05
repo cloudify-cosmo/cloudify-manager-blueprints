@@ -58,6 +58,7 @@ ctx logger info "Enabling RabbitMQ Plugins..."
 sudo rabbitmq-plugins enable rabbitmq_management >/dev/null
 sudo rabbitmq-plugins enable rabbitmq_tracing >/dev/null
 
+
 # enable guest user access where cluster not on localhost
 ctx logger info "Enabling RabbitMQ user access..."
 echo "[{rabbit, [{loopback_users, []}]}]." | sudo tee --append /etc/rabbitmq/rabbitmq.config >/dev/null
