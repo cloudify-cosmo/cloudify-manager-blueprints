@@ -5,9 +5,6 @@
 
 export ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/erlang/erlang-17.4-1.el6.x86_64.rpm")
 export RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm")
-export RABBITMQ_EVENTS_QUEUE_MESSAGE_TTL=$(ctx node properties rabbitmq_events_queue_message_ttl)
-export RABBITMQ_LOGS_QUEUE_MESSAGE_TTL=$(ctx node properties rabbitmq_logs_queue_message_ttl)
-export RABBITMQ_METRICS_QUEUE_MESSAGE_TTL=$(ctx node properties rabbitmq_metrics_queue_message_ttl)
 export RABBITMQ_FD_LIMIT=$(ctx node properties rabbitmq_fd_limit)
 
 export RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
@@ -26,15 +23,6 @@ yum_install ${RABBITMQ_SOURCE_URL}
 # sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 # sudo yum install /tmp/rabbitmq.rpm -y
 
-
-# Creating rabbitmq systemd stop script
-cat << EOF | sudo tee /usr/local/bin/kill-rabbit > /dev/null
-#! /usr/bin/env bash
-for proc in "\$(/usr/bin/ps aux | /usr/bin/grep rabbitmq | /usr/bin/grep -v grep | /usr/bin/awk '{ print \$2 }')"; do
-    /usr/bin/kill \${proc}
-done
-EOF
-sudo chmod 500 /usr/local/bin/kill-rabbit
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/rabbitmq-server"
