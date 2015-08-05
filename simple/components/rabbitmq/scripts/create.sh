@@ -23,6 +23,7 @@ yum_install ${RABBITMQ_SOURCE_URL}
 # sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 # sudo yum install /tmp/rabbitmq.rpm -y
 
+
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/rabbitmq-server"
 
