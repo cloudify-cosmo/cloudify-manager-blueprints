@@ -96,6 +96,7 @@ inputs:
     type: string
     default: http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm
 
+<<<<<<< HEAD
   rabbitmq_events_queue_message_ttl:
     type: integer
     default: 60000
@@ -107,6 +108,23 @@ inputs:
   rabbitmq_metrics_queue_message_ttl:
     type: integer
     default: 60000
+=======
+  # note that for each of the queue length limit properties, new messages
+  # will be queued in RabbitMQ and old messages will be deleted once the
+  # limit is reached!
+  # https://www.rabbitmq.com/maxlength.html
+  rabbitmq_events_queue_length_limit:
+    type: integer
+    default: 1000000
+
+  rabbitmq_logs_queue_length_limit:
+    type: integer
+    default: 1000000
+
+  rabbitmq_metrics_queue_length_limit:
+    type: integer
+    default: 1000000
+>>>>>>> CFY-3220-configure-max-queue-length
 
   rabbitmq_fd_limit:
     type: integer
