@@ -80,18 +80,4 @@ ctx logger info "Chowning RabbitMQ logs path..."
 sudo chown rabbitmq:rabbitmq ${RABBITMQ_LOG_BASE}
 
 ctx logger info "Stopping RabbitMQ Service..."
-
-sleep 30
-
-
-ctx logger info "Configuring RabbitMQ Policies..."
-ctx logger info "Configuring cloudify-logs queue message ttl..."
-sudo rabbitmqctl set_policy logs_queue_message_ttl "^cloudify-logs$" "{"\"message-ttl"\":${RABBITMQ_LOGS_QUEUE_MESSAGE_TTL}}" --apply-to queues
-ctx logger info "Configuring cloudify-events queue message ttl..."
-sudo rabbitmqctl set_policy events_queue_message_ttl "^cloudify-events$" "{"\"message-ttl"\":${RABBITMQ_EVENTS_QUEUE_MESSAGE_TTL}}" --apply-to queues
-ctx logger info "Configuring cloudify-monitoring queue message ttl..."
-sudo rabbitmqctl set_policy metrics_queue_message_ttl "^amq\.gen.*$" "{"\"message-ttl"\":${RABBITMQ_METRICS_QUEUE_MESSAGE_TTL}}" --apply-to queues
-sudo rabbitmqctl set_policy riemann_deployment_queues_message_ttl "^.*-riemann$" "{"\"message-ttl"\":${RABBITMQ_METRICS_QUEUE_MESSAGE_TTL}}" --apply-to queues
-
-
 sudo systemctl stop cloudify-rabbitmq.service
