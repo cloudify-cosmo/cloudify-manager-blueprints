@@ -64,6 +64,9 @@
 #rabbitmq_logs_queue_length_limit: ''
 #rabbitmq_metrics_queue_length_limit: ''
 
+# RabbitMQ File Descriptors Limit
+#rabbitmq_fd_limit: ''
+
 #############################
 # Elasticsearch Inputs
 #############################

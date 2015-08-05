@@ -10,8 +10,7 @@ function _post_provider_context() {
     ctx instance runtime_properties manager_provider_context "$PROVIDER_CONTEXT_DATA"
 
     ctx logger info "Posting Provider Context..."
-    curl --fail --silent --request POST --data @${PROVIDER_CONTEXT_FILE} http://localhost/provider/context --header "Content-Type:application/json" >/dev/null
-}
+    curl --fail --silent --request POST --data @${PROVIDER_CONTEXT_FILE} http://localhost/api/v2/provider/context --header "Content-Type:application/json" >/dev/null
 
 
 function _disable_requiretty() {
