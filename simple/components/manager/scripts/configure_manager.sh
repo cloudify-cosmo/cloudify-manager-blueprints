@@ -11,6 +11,7 @@ function _post_provider_context() {
 
     ctx logger info "Posting Provider Context..."
     curl --fail --silent --request POST --data @${PROVIDER_CONTEXT_FILE} http://localhost/api/v2/provider/context --header "Content-Type:application/json" >/dev/null
+}
 
 
 function _disable_requiretty() {
