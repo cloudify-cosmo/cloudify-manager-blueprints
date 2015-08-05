@@ -5,6 +5,7 @@
 
 export ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/erlang/erlang-17.4-1.el6.x86_64.rpm")
 export RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm")
+export RABBITMQ_FD_LIMIT=$(ctx node properties rabbitmq_fd_limit)
 
 export RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
 
@@ -43,6 +44,12 @@ EOF
 sudo chmod 644 $lconf
 
 configure_systemd_service "rabbitmq"
+
+ctx logger info "Configuring File Descriptors Limit..."
+deploy_file "components/rabbitmq/config/rabbitmq_ulimit.conf" "/etc/security/limits.d/rabbitmq.conf"
+replace "{{ ctx.node.properties.rabbitmq_fd_limit }}" ${RABBITMQ_FD_LIMIT} "/etc/security/limits.d/rabbitmq.conf"
+replace "{{ ctx.node.properties.rabbitmq_fd_limit }}" ${RABBITMQ_FD_LIMIT} "/usr/lib/systemd/system/cloudify-rabbitmq.service"
+sudo systemctl daemon-reload
 
 ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
 sudo systemctl start cloudify-rabbitmq.service

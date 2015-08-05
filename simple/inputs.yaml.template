@@ -56,6 +56,9 @@
 #erlang_source_url: ''
 #rabbitmq_source_url: ''
 
+# RabbitMQ File Descriptors Limit
+#rabbitmq_fd_limit: ''
+
 #############################
 # Elasticsearch Inputs
 #############################
