@@ -241,7 +241,7 @@ function deploy_file() {
     destination_path=$2
 
     ctx logger info "Deploying ${source_path} to ${destination_path}..."
-    tmp_file=$(ctx download-resource ${source_path})
+    tmp_file=$(ctx download-resource-and-render ${source_path})
     sudo mv ${tmp_file} ${destination_path}
 }
 

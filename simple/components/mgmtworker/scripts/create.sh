@@ -54,4 +54,4 @@ install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}
 install_module "/tmp/workflows" ${VIRTUALENV_DIR}
 
 configure_systemd_service "mgmtworker"
-inject_management_ip_as_env_var "mgmtworker"
+# inject_management_ip_as_env_var "mgmtworker"

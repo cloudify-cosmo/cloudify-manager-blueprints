@@ -68,4 +68,4 @@ configure_systemd_service "riemann"
 # export RABBITMQ_HOST=""
 # we inject the management_ip for both of these to Riemann's systemd config. These should be potentially different
 # if the manager and rabbitmq are running on different hosts.
-inject_management_ip_as_env_var "riemann"
+# inject_management_ip_as_env_var "riemann"
