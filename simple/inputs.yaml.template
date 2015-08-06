@@ -65,6 +65,7 @@
 # note that for each of the queue length limit properties, new messages
 # will be queued in RabbitMQ and old messages will be deleted once the
 # limit is reached!
+# Note this is NOT the message byte length!
 # https://www.rabbitmq.com/maxlength.html
 #rabbitmq_events_queue_length_limit:
 #rabbitmq_logs_queue_length_limit:
@@ -86,6 +87,7 @@
 #elasticsearch_java_opts: ''
 
 # The index for events will be named `logstash-YYYY.mm.dd`.
+# A new index corresponding with today's date will be added each day.
 # Elasticsearch Curator is used to rotate the indices on a daily basis
 # via a cronjob. This allows to determine the number of days to keep.
 #elasticsearch_index_rotation_day_count:
