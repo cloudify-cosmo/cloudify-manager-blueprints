@@ -120,7 +120,8 @@ inputs:
   # will be queued in RabbitMQ and old messages will be deleted once the
   # limit is reached!
   # https://www.rabbitmq.com/maxlength.html
-  rabbitmq_events_queue_length_limit: >
+  rabbitmq_events_queue_length_limit:
+    description: >
       Sets the number of messages the logs queue can hold.
       Note this is NOT the message byte length!
     type: integer
@@ -201,6 +202,7 @@ inputs:
       ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m3-b273.tar.gz
       centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-core-agent_3.3.0-m3-b273.tar.gz
       centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-final-agent_3.3.0-m3-b273.tar.gz
+
   #############################
   # InfluxDB Inputs
   #############################
@@ -228,12 +230,12 @@ inputs:
   #############################
   webui_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0.tgz
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/cosmo-ui-3.3.0-m3.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/grafana-1.9.0.tgz
 
   nodejs_source_url:
     type: string

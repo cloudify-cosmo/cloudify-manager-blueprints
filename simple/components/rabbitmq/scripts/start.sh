@@ -4,6 +4,7 @@ ctx logger info "Starting RabbitMQ Service..."
 sudo systemctl start cloudify-rabbitmq.service
 
 
+# This should be done in the create.sh script. For some reason, it fails. Need to check.
 export RABBITMQ_EVENTS_QUEUE_MESSAGE_TTL=$(ctx node properties rabbitmq_events_queue_message_ttl)
 export RABBITMQ_LOGS_QUEUE_MESSAGE_TTL=$(ctx node properties rabbitmq_logs_queue_message_ttl)
 export RABBITMQ_METRICS_QUEUE_MESSAGE_TTL=$(ctx node properties rabbitmq_metrics_queue_message_ttl)

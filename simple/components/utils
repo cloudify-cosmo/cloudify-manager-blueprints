@@ -153,7 +153,7 @@ function wait_for_port
     port=$1
 
     counter=1
-    while ! echo exit | curl --silent http://localhost:$1 >/dev/null;
+    while ! echo exit | curl --silent http://localhost:${port} >/dev/null;
     do
             if [[ $counter -gt 24 ]]; then
                 sys_error "Failed to connect to port ${port}... (status $?)"
@@ -187,7 +187,7 @@ function configure_systemd_service() {
     # It requires that two files are present for each service one containing
     # the environment variables and one contains the systemd config.
     # All env files will be named "cloudify-SERVICENAME".
-    # All systemd config files will be named "cloudify-SERVIVENAME.service".
+    # All systemd config files will be named "cloudify-SERVICENAME.service".
     ###
     service_name=$1
 
@@ -210,6 +210,10 @@ function configure_systemd_service() {
 }
 
 function get_systemd_vars_file_path() {
+    ###
+    # Returns the path to a systemd environment variables file
+    # for a given service_name. (e.g. /etc/sysconfig/cloudify-rabbitmq)
+    ###
     service_name=$1
 
     service_identifier="cloudify-${service_name}"
@@ -218,6 +222,10 @@ function get_systemd_vars_file_path() {
 }
 
 function get_systemd_service_file_path() {
+    ###
+    # Returns the path to a systemd service file
+    # for a given service_name. (e.g. /usr/lib/systemd/system/cloudify-rabbitmq.service)
+    ###
     service_name=$1
 
     service_identifier="cloudify-${service_name}"
@@ -250,7 +258,8 @@ function replace() {
     with_this=$2
     in_here=$3
 
-    # using pipe prevents / being escaped
+    ctx logger info "Replacing ${this} with ${with_this} in ${in_here}..."
+    # using pipe prevents / from having to be escaped
     sudo sed -i "s|${this}|${with_this}|g" ${in_here}
 }
 
