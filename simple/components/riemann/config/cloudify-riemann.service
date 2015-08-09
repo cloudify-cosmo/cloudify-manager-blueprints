@@ -5,6 +5,8 @@ Description=Riemann Service
 TimeoutStartSec=0
 Restart=always
 EnvironmentFile=-/etc/sysconfig/cloudify-riemann
+User=riemann
+Group=riemann
 ExecStart=/usr/bin/riemann -a ${RIEMANN_CONFIG_PATH}/main.clj
 
 [Install]

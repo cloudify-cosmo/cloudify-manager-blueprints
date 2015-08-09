@@ -13,6 +13,8 @@ export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_sou
 export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_module_source_url)
 export DIAMOND_PLUGIN_SOURCE_URL=$(ctx node properties diamond_plugin_module_source_url)
 export AGENT_SOURCE_URL=$(ctx node properties agent_module_source_url)
+export REST_SERVICE_USER="restservice"
+export REST_SERVICE_GROUP="restservice"
 
 # TODO: change to /opt/cloudify-rest-service
 export REST_SERVICE_HOME="/opt/manager"
@@ -22,6 +24,7 @@ export REST_SERVICE_VIRTUALENV="${REST_SERVICE_HOME}/env"
 export MANAGER_REST_CONFIG_PATH="${REST_SERVICE_HOME}/guni.conf"
 export REST_SERVICE_CONFIG_PATH="${REST_SERVICE_HOME}/guni.conf"
 export REST_SERVICE_LOG_PATH="/var/log/cloudify/rest"
+export REST_SERVICE_PID_PATH="/var/run/gunicorn"
 
 
 ctx logger info "Installing REST Service..."
@@ -29,6 +32,7 @@ ctx logger info "Installing REST Service..."
 copy_notice "restservice"
 create_dir ${REST_SERVICE_HOME}
 create_dir ${REST_SERVICE_LOG_PATH}
+create_dir ${REST_SERVICE_PID_PATH}
 
 ctx logger info "Creating virtualenv ${REST_SERVICE_VIRTUALENV}..."
 create_virtualenv ${REST_SERVICE_VIRTUALENV}
@@ -71,5 +75,13 @@ sudo chmod 644 $lconf
 
 ctx logger info "Deploying Gunicorn and REST Service Configuration file..."
 deploy_file "${CONFIG_REL_PATH}/guni.conf" "${REST_SERVICE_HOME}/guni.conf"
+
+ctx logger info "Creating user..."
+sudo useradd --shell /sbin/nologin --home-dir "${REST_SERVICE_HOME}" --no-create-home --system "${REST_SERVICE_USER}"
+
+ctx logger info "Fixing permissions..."
+sudo chown -R "${REST_SERVICE_USER}:${REST_SERVICE_GROUP}" "${REST_SERVICE_HOME}"
+sudo chown -R "${REST_SERVICE_USER}:${REST_SERVICE_GROUP}" "${REST_SERVICE_LOG_PATH}"
+sudo chown -R "${REST_SERVICE_USER}:${REST_SERVICE_GROUP}" "${REST_SERVICE_PID_PATH}"
 
 configure_systemd_service "restservice"
