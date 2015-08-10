@@ -249,6 +249,10 @@ node_templates:
       cloudify:
         resources_prefix: { get_input: resources_prefix }
 
+        transient_deployment_workers_mode:
+          enabled: false
+          global_parallel_executions_limit: 50
+
         cloudify_agent:
           min_workers: 0
           max_workers: 5
