@@ -199,10 +199,10 @@ function configure_systemd_service() {
     service_file="components/${service_name}/config/${service_identifier}.service"
 
     ctx logger info "Deploying systemd EnvironmentFile..."
-    deploy_file ${env_file} ${env_dir}
+    deploy_blueprint_resource ${env_file} ${env_dir}
 
     ctx logger info "Deploying systemd .service file..."
-    deploy_file ${service_file} ${service_dir}
+    deploy_blueprint_resource ${service_file} ${service_dir}
 
     ctx logger info "Enabling systemd .service..."
     sudo systemctl enable ${service_identifier}.service &>/dev/null
@@ -233,7 +233,7 @@ function get_systemd_service_file_path() {
     echo "/usr/lib/systemd/system/${service_identifier}.service"
 }
 
-function deploy_file() {
+function deploy_blueprint_resource() {
     ###
     # Deploys a blueprint resource to a given path.
     ###

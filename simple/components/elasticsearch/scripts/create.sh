@@ -39,7 +39,7 @@ if [ ! -z "${ES_JAVA_OPTS}" ]; then
 fi
 
 ctx logger info "Deploying Elasticsearch Configuration..."
-deploy_file "${CONFIG_REL_PATH}/elasticsearch.yml" "${ELASTICSEARCH_CONF_PATH}/elasticsearch.yml"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/elasticsearch.yml" "${ELASTICSEARCH_CONF_PATH}/elasticsearch.yml"
 
 ctx logger info "Starting Elasticsearch for configuration purposes..."
 sudo systemctl enable elasticsearch.service &>/dev/null
@@ -59,7 +59,6 @@ ctx logger info "Installing Elasticsearch Curator..."
 install_module "elasticsearch-curator==3.2.0"
 
 rotator_script=$(ctx download-resource-and-render components/elasticsearch/scripts/rotate_es_indices)
-# replace "{{ ctx.node.properties.elasticsearch_index_rotation_day_count }}" "${ELASTICSEARCH_INDEX_ROTATION_DAY_COUNT}" $rotator_script
 
 ctx logger info "Configuring Elasticsearch Index Rotation cronjob for logstash-YYYY.mm.dd index patterns..."
 # testable manually by running: sudo run-parts /etc/cron.daily

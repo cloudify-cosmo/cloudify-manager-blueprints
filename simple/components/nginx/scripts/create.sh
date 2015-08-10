@@ -34,8 +34,8 @@ create_dir ${MANAGER_TEMPLATES_PATH}
 yum_install ${NGINX_SOURCE_URL}
 
 ctx logger info "Deploying Nginx configuration files..."
-deploy_file "${CONFIG_REL_PATH}/default.conf" "/etc/nginx/conf.d/default.conf"
-deploy_file "${CONFIG_REL_PATH}/rest-location.cloudify" "/etc/nginx/conf.d/rest-location.cloudify"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/default.conf" "/etc/nginx/conf.d/default.conf"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/rest-location.cloudify" "/etc/nginx/conf.d/rest-location.cloudify"
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/nginx"
@@ -60,8 +60,8 @@ sudo chmod 644 $lconf
 
 
 ctx logger info "Copying SSL Certs..."
-deploy_file "${CONFIG_REL_PATH}/ssl/server.crt" "${SSL_CERTS_ROOT}/server.crt"
-deploy_file "${CONFIG_REL_PATH}/ssl/server.key" "${SSL_CERTS_ROOT}/server.key"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/ssl/server.crt" "${SSL_CERTS_ROOT}/server.crt"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/ssl/server.key" "${SSL_CERTS_ROOT}/server.key"
 
 ctx logger info "Deploying Required Manager Resources..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})

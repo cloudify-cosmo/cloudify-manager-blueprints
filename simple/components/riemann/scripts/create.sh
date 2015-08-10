@@ -58,7 +58,7 @@ ctx logger info "Deploying Riemann manager.config..."
 sudo mv "/tmp/plugins/riemann-controller/riemann_controller/resources/manager.config" "${RIEMANN_CONFIG_PATH}/conf.d/manager.config"
 
 ctx logger info "Deploying Riemann conf..."
-deploy_file "${CONFIG_REL_PATH}/main.clj" "${RIEMANN_CONFIG_PATH}/main.clj"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/main.clj" "${RIEMANN_CONFIG_PATH}/main.clj"
 
 configure_systemd_service "riemann"
 
