@@ -399,6 +399,10 @@ node_types:
         description: NodeJS tgz Source URL
         type: string
         default: { get_input: nodejs_source_url }
+      kibana_tar_source_url:
+        description: Cloudify's Kibana Source URL
+        type: string
+        default: { get_input: kibana_source_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

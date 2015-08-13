@@ -182,6 +182,9 @@ inputs:
     type: string
     default: http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz
 
+  kibana_source_url:
+    type: string
+    default: https://s3.amazonaws.com/cloudify-ui-automations/cloudify-kibana/builds/3.3/cloudify-kibana-3.3.0.tgz
 
 ######################################################################
 # This is a simple blueprint specific node_type to allow us to define
