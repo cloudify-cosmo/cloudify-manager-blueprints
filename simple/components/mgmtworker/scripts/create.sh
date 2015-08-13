@@ -10,6 +10,8 @@ export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_module_sourc
 export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
 export DIAMOND_PLUGIN_SOURCE_URL=$(ctx node properties diamond_plugin_module_source_url)
 export AGENT_SOURCE_URL=$(ctx node properties agent_module_source_url)
+export CELERY_USER="celery"
+export CELERY_GROUP="celery"
 
 # these must all be exported as part of the start operation. they will not persist, so we should use the new agent
 # don't forget to change all localhosts to the relevant ips
@@ -52,6 +54,13 @@ tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
 ctx logger info "Installing Management Worker Plugins..."
 install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}
 install_module "/tmp/workflows" ${VIRTUALENV_DIR}
+
+ctx logger info "Creating user..."
+sudo useradd --shell /sbin/nologin --home-dir "${MGMTWORKER_HOME}" --no-create-home --system "${CELERY_USER}"
+
+ctx logger info "Fixing permissions..."
+sudo chown -R "${CELERY_USER}:${CELERY_GROUP}" "${MGMTWORKER_HOME}"
+sudo chown -R "${CELERY_USER}:${CELERY_GROUP}" "${CELERY_LOG_DIR}"
 
 configure_systemd_service "mgmtworker"
 inject_management_ip_as_env_var "mgmtworker"

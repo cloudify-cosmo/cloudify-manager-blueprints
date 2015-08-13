@@ -8,6 +8,8 @@ CONFIG_REL_PATH="components/influxdb/config"
 export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)  # (e.g. "https://s3.amazonaws.com/influxdb/influxdb-0.8.8-1.x86_64.rpm")
 
 export INFLUXDB_PORT="8086"
+export INFLUXDB_USER="influxdb"
+export INFLUXDB_GROUP="influxdb"
 export INFLUXDB_HOME="/opt/influxdb"
 export INFLUXDB_LOG_PATH="/var/log/cloudify/influxdb"
 
@@ -21,6 +23,10 @@ create_dir ${INFLUXDB_HOME}/scripts
 create_dir ${INFLUXDB_LOG_PATH}
 
 yum_install ${INFLUXDB_SOURCE_URL}
+
+ctx logger info "Fixing permissions..."
+sudo chown -R "${INFLUXDB_USER}:${INFLUXDB_GROUP}" "${INFLUXDB_HOME}"
+sudo chown -R "${INFLUXDB_USER}:${INFLUXDB_GROUP}" "${INFLUXDB_LOG_PATH}"
 
 # influxdb 0.8 rotates its log files every midnight
 # so that's the files we going to logrotate here (*.txt.*)
