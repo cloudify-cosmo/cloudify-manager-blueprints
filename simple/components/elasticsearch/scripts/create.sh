@@ -12,7 +12,6 @@ export ES_HEAP_SIZE=$(ctx node properties es_heap_size)
 export ES_HEAP_SIZE=${ES_HEAP_SIZE:-1g}
 
 export ELASTICHSEARCH_SOURCE_URL=$(ctx node properties es_rpm_source_url)  # (e.g. "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz")
-# export ELASTICSEARCH_INDEX_ROTATION_DAY_COUNT=$(ctx node properties es_index_rotation_interval)
 
 export ELASTICSEARCH_PORT="9200"
 export ELASTICSEARCH_HOME="/opt/elasticsearch"
@@ -29,7 +28,7 @@ create_dir ${ELASTICSEARCH_LOG_PATH}
 yum_install ${ELASTICHSEARCH_SOURCE_URL}
 
 
-# we can't use inject_service_env_var from utils as the elasticsearch systemd vars file is not provided by us.
+# we should treat these as templates.
 ctx logger info "Setting Elasticsearch Heap size..."
 replace "#ES_HEAP_SIZE=2g" "ES_HEAP_SIZE=${ES_HEAP_SIZE}" "/etc/sysconfig/elasticsearch"
 

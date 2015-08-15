@@ -1,8 +1,8 @@
 tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.3m3/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.3m3/plugin.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.3m4/types.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.3m4/plugin.yaml
   - manager-types.yaml
 
 
@@ -43,23 +43,23 @@ inputs:
   rest_service_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/CFY-2926-elasticsearc-index-rotation.tar.gz
-    # default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m3.tar.gz
+    # default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m4.tar.gz
 
   dsl_parser_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3m4.tar.gz
 
   rest_client_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3m4.tar.gz
 
   plugins_common_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3m4.tar.gz
 
   script_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3m4.tar.gz
 
   securest_source_url:
     type: string
@@ -67,15 +67,15 @@ inputs:
 
   amqpinflux_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.3m4.tar.gz
 
   agent_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-agent/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-agent/archive/3.3m4.tar.gz
 
   diamond_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/1.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/1.3m4.tar.gz
 
   #############################
   # Java Inputs
@@ -198,10 +198,10 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-trusty-agent_3.3.0-m3-b273.tar.gz
-      ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m3-b273.tar.gz
-      centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-core-agent_3.3.0-m3-b273.tar.gz
-      centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-final-agent_3.3.0-m3-b273.tar.gz
+      ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0-m4/Ubuntu-trusty-agent.tar.gz
+      # ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m4-b273.tar.gz
+      centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0-m4/centos-Core-agent.tar.gz
+      # centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-centos-final-agent_3.3.0-m4-b273.tar.gz
 
   #############################
   # InfluxDB Inputs
@@ -278,6 +278,10 @@ node_templates:
       ssh_key_filename: { get_input: ssh_key_filename }
       cloudify:
         resources_prefix: { get_input: resources_prefix }
+
+        transient_deployment_workers_mode:
+          enabled: false
+          global_parallel_executions_limit: 50
 
         cloudify_agent:
           min_workers: 0

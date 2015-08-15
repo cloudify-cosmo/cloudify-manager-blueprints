@@ -87,5 +87,5 @@ function _disable_requiretty() {
 # sudo sed -i '0,/^#Defaults.*requiretty/s//Defaults requiretty/' "/etc/sudoers"
 # ctx logger info "OUTCOME: $(sudo cat /etc/sudoers | grep requiretty)"
 
-_post_provider_context
+# _post_provider_context
 _disable_requiretty

@@ -276,6 +276,7 @@ function inject_service_env_var() {
     replace "${field}" "${value}" $vars_path >/dev/null
 }
 
+# DEPRACATED by download-resource-and-render
 function inject_management_ip_as_env_var() {
     ###
     # Injects the manager's ip into a service's env var file
