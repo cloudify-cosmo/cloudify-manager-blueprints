@@ -20,7 +20,7 @@ create_dir ${LOGSTASH_LOG_PATH}
 yum_install ${LOGSTASH_SOURCE_URL}
 
 ctx logger info "Deploying Logstash conf..."
-deploy_file "${CONFIG_REL_PATH}/logstash.conf" "${LOGSTASH_CONF_PATH}/logstash.conf"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/logstash.conf" "${LOGSTASH_CONF_PATH}/logstash.conf"
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/logstash"

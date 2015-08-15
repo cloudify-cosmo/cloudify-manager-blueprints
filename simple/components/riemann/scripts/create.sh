@@ -58,14 +58,13 @@ ctx logger info "Deploying Riemann manager.config..."
 sudo mv "/tmp/plugins/riemann-controller/riemann_controller/resources/manager.config" "${RIEMANN_CONFIG_PATH}/conf.d/manager.config"
 
 ctx logger info "Deploying Riemann conf..."
-deploy_file "${CONFIG_REL_PATH}/main.clj" "${RIEMANN_CONFIG_PATH}/main.clj"
-
-configure_systemd_service "riemann"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/main.clj" "${RIEMANN_CONFIG_PATH}/main.clj"
 
 # our riemann configuration will (by default) try to read these environment variables. If they don't exist, it will assume
 # that they're found at "localhost"
 # export MANAGEMENT_IP=""
 # export RABBITMQ_HOST=""
+
 # we inject the management_ip for both of these to Riemann's systemd config. These should be potentially different
 # if the manager and rabbitmq are running on different hosts.
-inject_management_ip_as_env_var "riemann"
+configure_systemd_service "riemann"
