@@ -171,7 +171,7 @@ node_templates:
           ubuntu-trusty-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-trusty-agent_3.3.0-m3-b273.tar.gz
           centos-final-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-final-agent_3.3.0-m3-b273.tar.gz
           ubuntu-precise-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m3-b273.tar.gz
-          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-windows-agent_3.3.0-m3-b273_amd64.deb
+          # windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-windows-agent_3.3.0-m3-b273_amd64.deb
         docker:
            docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-docker_3.3.0-m3-b273.tar
 
