@@ -50,8 +50,8 @@ ctx logger info "Extracting Manager Repository..."
 tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
 
 ctx logger info "Installing Management Worker Plugins..."
-# shouldn't we extract the riemann-controller and workflows modules to their own repos?
 install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}
 install_module "/tmp/workflows" ${VIRTUALENV_DIR}
 
 configure_systemd_service "mgmtworker"
+inject_management_ip_as_env_var "mgmtworker"

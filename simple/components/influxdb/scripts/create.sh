@@ -41,7 +41,7 @@ EOF
 sudo chmod 644 $lconf
 
 ctx logger info "Deploying InfluxDB Config file..."
-deploy_blueprint_resource "${CONFIG_REL_PATH}/config.toml" "${INFLUXDB_HOME}/shared/config.toml"
+deploy_file "${CONFIG_REL_PATH}/config.toml" "${INFLUXDB_HOME}/shared/config.toml"
 
 ctx logger info "Chowning InfluxDB logs path..."
 sudo chown -R influxdb:influxdb ${INFLUXDB_LOG_PATH}

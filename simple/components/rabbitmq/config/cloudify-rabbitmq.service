@@ -6,7 +6,6 @@ TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-rabbitmq
 ExecStart=/usr/sbin/rabbitmq-server
-LimitNOFILE={{ ctx.node.properties.rabbitmq_fd_limit }}
 
 [Install]
 WantedBy=multi-user.target

@@ -1,6 +1,4 @@
 #!/bin/bash
-# NOTE THAT THIS SCRIPT MUST RUN WITH A TTY!
-
 # now modify sudoers configuration to allow execution without tty
 
 # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script

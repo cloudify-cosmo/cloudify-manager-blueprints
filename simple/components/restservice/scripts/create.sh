@@ -70,6 +70,6 @@ EOF
 sudo chmod 644 $lconf
 
 ctx logger info "Deploying Gunicorn and REST Service Configuration file..."
-deploy_blueprint_resource "${CONFIG_REL_PATH}/guni.conf" "${REST_SERVICE_HOME}/guni.conf"
+deploy_file "${CONFIG_REL_PATH}/guni.conf" "${REST_SERVICE_HOME}/guni.conf"
 
 configure_systemd_service "restservice"

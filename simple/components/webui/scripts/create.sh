@@ -49,9 +49,9 @@ kibana=$(download_file ${KIBANA_SOURCE_URL})
 sudo tar -xzvf ${kibana} -C ${KIBANA_HOME} --strip-components=1 >/dev/null
 
 ctx logger info "Deploying WebUI Configuration..."
-deploy_blueprint_resource "${CONFIG_REL_PATH}/gsPresets.json" "${WEBUI_HOME}/backend/gsPresets.json"
+deploy_file "${CONFIG_REL_PATH}/gsPresets.json" "${WEBUI_HOME}/backend/gsPresets.json"
 ctx logger info "Deploying Grafana Configuration..."
-deploy_blueprint_resource "${CONFIG_REL_PATH}/grafana_config.js" "${GRAFANA_HOME}/config.js"
+deploy_file "${CONFIG_REL_PATH}/grafana_config.js" "${GRAFANA_HOME}/config.js"
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/cloudify-webui"

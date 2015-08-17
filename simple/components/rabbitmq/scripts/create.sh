@@ -5,7 +5,6 @@
 
 export ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/erlang/erlang-17.4-1.el6.x86_64.rpm")
 export RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm")
-export RABBITMQ_FD_LIMIT=$(ctx node properties rabbitmq_fd_limit)
 
 export RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
 
@@ -22,7 +21,6 @@ yum_install ${RABBITMQ_SOURCE_URL}
 # curl --fail --location http://www.rabbitmq.com/releases/rabbitmq-server/v${RABBITMQ_VERSION}/rabbitmq-server-${RABBITMQ_VERSION}-1.noarch.rpm -o /tmp/rabbitmq.rpm
 # sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 # sudo yum install /tmp/rabbitmq.rpm -y
-
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/rabbitmq-server"
@@ -46,17 +44,12 @@ sudo chmod 644 $lconf
 
 configure_systemd_service "rabbitmq"
 
-ctx logger info "Configuring File Descriptors Limit..."
-deploy_blueprint_resource "components/rabbitmq/config/rabbitmq_ulimit.conf" "/etc/security/limits.d/rabbitmq.conf"
-sudo systemctl daemon-reload
-
 ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
 sudo systemctl start cloudify-rabbitmq.service
 
 ctx logger info "Enabling RabbitMQ Plugins..."
 sudo rabbitmq-plugins enable rabbitmq_management >/dev/null
 sudo rabbitmq-plugins enable rabbitmq_tracing >/dev/null
-
 
 # enable guest user access where cluster not on localhost
 ctx logger info "Enabling RabbitMQ user access..."

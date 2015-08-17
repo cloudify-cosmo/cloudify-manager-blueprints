@@ -9,9 +9,9 @@ CONFIG_REL_PATH="components/elasticsearch/config"
 export ES_JAVA_OPRT=$(ctx node properties es_java_opts)  # (e.g. "-Xmx1024m -Xms1024m")
 export ES_JAVA_OPTS=$(ctx node properties es_java_opts)  # (e.g. "-Xmx1024m -Xms1024m")
 export ES_HEAP_SIZE=$(ctx node properties es_heap_size)
-export ES_HEAP_SIZE=${ES_HEAP_SIZE:-1g}
 
 export ELASTICHSEARCH_SOURCE_URL=$(ctx node properties es_rpm_source_url)  # (e.g. "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz")
+export ELASTICSEARCH_INDEX_ROTATION_DAY_COUNT=$(ctx node properties es_index_rotation_day_count)
 
 export ELASTICSEARCH_PORT="9200"
 export ELASTICSEARCH_HOME="/opt/elasticsearch"
@@ -28,17 +28,21 @@ create_dir ${ELASTICSEARCH_LOG_PATH}
 yum_install ${ELASTICHSEARCH_SOURCE_URL}
 
 
-# we should treat these as templates.
+# we can't use inject_service_env_var from utils as the elasticsearch systemd vars file is not provided by us.
 ctx logger info "Setting Elasticsearch Heap size..."
-replace "#ES_HEAP_SIZE=2g" "ES_HEAP_SIZE=${ES_HEAP_SIZE}" "/etc/sysconfig/elasticsearch"
-
 if [ ! -z "${ES_JAVA_OPTS}" ]; then
-    ctx logger info "Setting additional Java OPTS..."
+    replace "#ES_HEAP_SIZE=2g" "ES_HEAP_SIZE=${ES_HEAP_SIZE}" "/etc/sysconfig/elasticsearch"
+else
+    replace "#ES_HEAP_SIZE=2g" "ES_HEAP_SIZE=1g" "/etc/sysconfig/elasticsearch"
+fi
+
+ctx logger info "Setting additional Java OPTS..."
+if [ ! -z "${ES_JAVA_OPTS}" ]; then
     replace "#ES_JAVA_OPTS=" "ES_JAVA_OPTS=${ES_JAVA_OPTS}" "/etc/sysconfig/elasticsearch"
 fi
 
 ctx logger info "Deploying Elasticsearch Configuration..."
-deploy_blueprint_resource "${CONFIG_REL_PATH}/elasticsearch.yml" "${ELASTICSEARCH_CONF_PATH}/elasticsearch.yml"
+deploy_file "${CONFIG_REL_PATH}/elasticsearch.yml" "${ELASTICSEARCH_CONF_PATH}/elasticsearch.yml"
 
 ctx logger info "Starting Elasticsearch for configuration purposes..."
 sudo systemctl enable elasticsearch.service &>/dev/null
@@ -57,7 +61,8 @@ sudo systemctl stop elasticsearch.service
 ctx logger info "Installing Elasticsearch Curator..."
 install_module "elasticsearch-curator==3.2.0"
 
-rotator_script=$(ctx download-resource-and-render components/elasticsearch/scripts/rotate_es_indices)
+rotator_script=$(ctx download-resource components/elasticsearch/scripts/rotate_es_indices)
+replace "{{ ctx.node.properties.elasticsearch_index_rotation_day_count }}" "${ELASTICSEARCH_INDEX_ROTATION_DAY_COUNT}" $rotator_script
 
 ctx logger info "Configuring Elasticsearch Index Rotation cronjob for logstash-YYYY.mm.dd index patterns..."
 # testable manually by running: sudo run-parts /etc/cron.daily
