@@ -1,9 +1,8 @@
 tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.3m3/types.yaml
-  # - http://www.getcloudify.org/spec/fabric-plugin/1.3m3/plugin.yaml
-  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-fabric-plugin/master/plugin.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.3m4/types.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.3m4/plugin.yaml
   - manager-types.yaml
 
 
@@ -44,23 +43,23 @@ inputs:
   rest_service_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/CFY-2926-elasticsearc-index-rotation.tar.gz
-    # default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m3.tar.gz
+    # default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m4.tar.gz
 
   dsl_parser_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3m4.tar.gz
 
   rest_client_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3m4.tar.gz
 
   plugins_common_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3m4.tar.gz
 
   script_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3m4.tar.gz
 
   securest_source_url:
     type: string
@@ -68,22 +67,21 @@ inputs:
 
   amqpinflux_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.3m4.tar.gz
 
   agent_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-agent/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-agent/archive/3.3m4.tar.gz
 
   diamond_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/1.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/1.3m4.tar.gz
 
   #############################
   # Java Inputs
   #############################
   java_source_url:
     type: string
-    # default: http://javadl.sun.com/webapps/download/AutoDL?BundleId=106239
     default: https://dl.dropboxusercontent.com/u/407576/3.2/java.rpm
 
   #############################
@@ -97,6 +95,60 @@ inputs:
     type: string
     default: http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm
 
+  rabbitmq_events_queue_message_ttl:
+    description: >
+      Sets the number of milliseconds to wait before a message expires
+      in the events queue.
+    type: integer
+    default: 60000
+
+  rabbitmq_logs_queue_message_ttl:
+    description: >
+      Sets the number of milliseconds to wait before a message expires
+      in the logs queue.
+    type: integer
+    default: 60000
+
+  rabbitmq_metrics_queue_message_ttl:
+    description: >
+      Sets the number of milliseconds to wait before a message expires
+      in the metrics queues.
+    type: integer
+    default: 60000
+
+  # note that for each of the queue length limit properties, new messages
+  # will be queued in RabbitMQ and old messages will be deleted once the
+  # limit is reached!
+  # https://www.rabbitmq.com/maxlength.html
+  rabbitmq_events_queue_length_limit:
+    description: >
+      Sets the number of messages the logs queue can hold.
+      Note this is NOT the message byte length!
+    type: integer
+    default: 1000000
+
+  rabbitmq_logs_queue_length_limit:
+    description: >
+      Sets the number of messages the logs queue can hold.
+      Note this is NOT the message byte length!
+    type: integer
+    default: 1000000
+
+  rabbitmq_metrics_queue_length_limit:
+    description: >
+      Sets the number of messages the metrics queues can hold.
+      This applies to both the queue that amqp-influx pulls from and
+      the ones Riemann pulls from.
+      Note this is NOT the message byte length!
+    type: integer
+    default: 1000000
+
+  rabbitmq_fd_limit:
+    description: >
+      Sets the File Descriptor limit for the rabbitmq user.
+    type: integer
+    default: 102400
+
   #############################
   # Elasticsearch Inputs
   #############################
@@ -109,15 +161,20 @@ inputs:
     type: string
     default: "2g"
 
-  # This allows to provide any JAVA_OPTS to Elasticsearch.
   elasticsearch_java_opts:
+    description: >
+      Provide any JAVA_OPTS to Elasticsearch.
     type: string
     default: ''
 
-  # The index for events will be named `logstash-YYYY.mm.dd`.
+  # The index for events/logs will be named `logstash-YYYY.mm.dd` and
+  # A new index corresponding with today's date will be added each day.
   # Elasticsearch Curator is used to rotate the indices on a daily basis
-  # via a cronjob. This allows to determine the number of days to keep.
-  elasticsearch_index_rotation_day_count:
+  # via a cronjob.
+  # https://www.elastic.co/blog/curator-tending-your-time-series-indices
+  elasticsearch_index_rotation_interval:
+    description: >
+      Determines the number of days to keep.
     type: integer
     default: 7
 
@@ -141,8 +198,10 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: https://dl.dropboxusercontent.com/u/407576/3.3/Ubuntu-trusty-agent.tar.gz
-      centos_core_agent: https://dl.dropboxusercontent.com/u/407576/3.3/centos-Core-agent.tar.gz
+      ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0-m4/Ubuntu-trusty-agent.tar.gz
+      # ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m4-b273.tar.gz
+      centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0-m4/centos-Core-agent.tar.gz
+      # centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-centos-final-agent_3.3.0-m4-b273.tar.gz
 
   #############################
   # InfluxDB Inputs
@@ -171,12 +230,12 @@ inputs:
   #############################
   webui_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0.tgz
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/cosmo-ui-3.3.0-m3.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/grafana-1.9.0.tgz
 
   nodejs_source_url:
     type: string
@@ -222,6 +281,10 @@ node_templates:
       ssh_key_filename: { get_input: ssh_key_filename }
       cloudify:
         resources_prefix: { get_input: resources_prefix }
+
+        transient_deployment_workers_mode:
+          enabled: false
+          global_parallel_executions_limit: 50
 
         cloudify_agent:
           min_workers: 0

@@ -29,11 +29,15 @@
 #agent_package_urls:
 #   default:
 #     ubuntu_trusty_agent: ''
+#     ubuntu_precise_agent: ''
 #     centos_core_agent: ''
+#     centos_final_agent: ''
 
 #############################
 # Cloudify Modules
 #############################
+
+# These should be pip installable tar.gz files.
 #rest_client_source_url: ''
 #dsl_parser_source_url: ''
 #plugins_common_source_url: ''
@@ -50,9 +54,28 @@
 #############################
 # RabbitMQ Inputs
 #############################
-#RabbitMQ Distribution of Erlang
+# RabbitMQ Distribution of Erlang
 #erlang_source_url: ''
 #rabbitmq_source_url: ''
+
+# Allows defining the message-ttl for the different types of queues.
+# https://www.rabbitmq.com/ttl.html
+#rabbitmq_events_queue_message_ttl:
+#rabbitmq_logs_queue_message_ttl:
+#rabbitmq_metrics_queue_message_ttl:
+
+# note that for each of the queue length limit properties, new messages
+# will be queued in RabbitMQ and old messages will be deleted once the
+# limit is reached!
+# Note this is NOT the message byte length!
+# https://www.rabbitmq.com/maxlength.html
+#rabbitmq_events_queue_length_limit:
+#rabbitmq_logs_queue_length_limit:
+#rabbitmq_metrics_queue_length_limit:
+
+
+# RabbitMQ File Descriptors Limit
+#rabbitmq_fd_limit:
 
 #############################
 # Elasticsearch Inputs
@@ -66,9 +89,10 @@
 #elasticsearch_java_opts: ''
 
 # The index for events will be named `logstash-YYYY.mm.dd`.
+# A new index corresponding with today's date will be added each day.
 # Elasticsearch Curator is used to rotate the indices on a daily basis
 # via a cronjob. This allows to determine the number of days to keep.
-#elasticsearch_index_rotation_day_count:
+#elasticsearch_index_rotation_interval:
 
 #############################
 # Logstash Inputs

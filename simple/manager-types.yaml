@@ -92,6 +92,28 @@ node_types:
         description: RabbitMQ RPM Source URL
         type: string
         default: { get_input: rabbitmq_source_url }
+      rabbitmq_events_queue_message_ttl:
+        type: integer
+        default: { get_input: rabbitmq_events_queue_message_ttl }
+      rabbitmq_logs_queue_message_ttl:
+        type: integer
+        default: { get_input: rabbitmq_logs_queue_message_ttl }
+      rabbitmq_metrics_queue_message_ttl:
+        type: integer
+        default: { get_input: rabbitmq_metrics_queue_message_ttl }
+      rabbitmq_events_queue_length_limit:
+        type: integer
+        default: { get_input: rabbitmq_events_queue_length_limit }
+      rabbitmq_logs_queue_length_limit:
+        type: integer
+        default: { get_input: rabbitmq_logs_queue_length_limit }
+      rabbitmq_metrics_queue_length_limit:
+        type: integer
+        default: { get_input: rabbitmq_metrics_queue_length_limit }
+      rabbitmq_fd_limit:
+        description: RabbitMQ File Descriptors Limit
+        type: integer
+        default: { get_input: rabbitmq_fd_limit }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -129,13 +151,13 @@ node_types:
           to Elasticsearch.
         type: string
         default: { get_input: elasticsearch_java_opts }
-      es_index_rotation_day_count:
+      es_index_rotation_interval:
         description: >
           Defines how many days of indices you want to keep in Elasticsearch.
           This is only relevant to the Events/Logs indices and does not
           interfere with the data model.
         type: integer
-        default: { get_input: elasticsearch_index_rotation_day_count }
+        default: { get_input: elasticsearch_index_rotation_interval }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
