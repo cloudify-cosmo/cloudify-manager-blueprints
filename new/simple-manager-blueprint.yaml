@@ -3,7 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_1
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.3m4/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.3m4/plugin.yaml
-  - manager-types.yaml
+  - types/manager-types.yaml
 
 
 
