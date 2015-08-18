@@ -1,0 +1,130 @@
+#############################
+# Provider specific Inputs
+#############################
+
+# The public IP of the manager to which the CLI will connect.
+#public_ip: ''
+
+# The manager's private IP address. This is the address which will be used by the
+# application hosts to connect to the Manager's fileserver and message broker.
+#private_ip: ''
+
+# SSH user used to connect to the manager
+#ssh_user: ''
+
+# SSH key path used to connect to the manager
+#ssh_key_filename: ''
+
+# This is the user with which the Manager will try to connect to the application hosts.
+#agents_user: ''
+#resources_prefix: ''
+
+#############################
+# Agent Packages
+#############################
+
+# The key names must be in the format: distro_release_agent (e.g. ubuntu_trusty_agent)
+# as the key is what's used to name the file, which later allows our
+# agent installer to identify it for your distro and release automatically.
+#agent_package_urls:
+#   default:
+#     ubuntu_trusty_agent: ''
+#     ubuntu_precise_agent: ''
+#     centos_core_agent: ''
+#     centos_final_agent: ''
+
+#############################
+# Cloudify Modules
+#############################
+
+# These should be pip installable tar.gz files.
+#rest_client_source_url: ''
+#dsl_parser_source_url: ''
+#plugins_common_source_url: ''
+#rest_service_source_url: ''
+#script_plugin_source_url: ''
+#securest_source_url: ''
+#amqpinflux_source_url: ''
+
+#############################
+# Java Inputs
+#############################
+#java_source_url: ''
+
+#############################
+# RabbitMQ Inputs
+#############################
+# RabbitMQ Distribution of Erlang
+#erlang_source_url: ''
+#rabbitmq_source_url: ''
+
+# Allows defining the message-ttl for the different types of queues.
+# https://www.rabbitmq.com/ttl.html
+#rabbitmq_events_queue_message_ttl:
+#rabbitmq_logs_queue_message_ttl:
+#rabbitmq_metrics_queue_message_ttl:
+
+# note that for each of the queue length limit properties, new messages
+# will be queued in RabbitMQ and old messages will be deleted once the
+# limit is reached!
+# Note this is NOT the message byte length!
+# https://www.rabbitmq.com/maxlength.html
+#rabbitmq_events_queue_length_limit:
+#rabbitmq_logs_queue_length_limit:
+#rabbitmq_metrics_queue_length_limit:
+
+
+# RabbitMQ File Descriptors Limit
+#rabbitmq_fd_limit:
+
+#############################
+# Elasticsearch Inputs
+#############################
+#elasticsearch_source_url: ''
+
+# https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
+#elasticsearch_heap_size:
+
+# This allows to provide any JAVA_OPTS to Elasticsearch.
+#elasticsearch_java_opts: ''
+
+# The index for events will be named `logstash-YYYY.mm.dd`.
+# A new index corresponding with today's date will be added each day.
+# Elasticsearch Curator is used to rotate the indices on a daily basis
+# via a cronjob. This allows to determine the number of days to keep.
+#elasticsearch_index_rotation_interval:
+
+#############################
+# Logstash Inputs
+#############################
+#logstash_source_url: ''
+
+#############################
+# Nginx
+#############################
+#nginx_source_url: ''
+
+#############################
+# InfluxDB Inputs
+#############################
+#influxdb_source_url: ''
+
+#############################
+# Riemann Inputs
+#############################
+#riemann_source_url: ''
+
+# A RabbitMQ Client for Riemann
+#langohr_source_url: ''
+
+# Riemann's default daemonizer
+#daemonize_source_url: ''
+
+#############################
+# WebUI Inputs
+#############################
+#nodejs_source_url: ''
+#webui_source_url: ''
+
+# This is a Cloudify specific redistribution of Grafana.
+#grafana_source_url: ''
