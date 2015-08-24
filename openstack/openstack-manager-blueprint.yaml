@@ -82,21 +82,49 @@ inputs:
     default: ''
     type: string
 
+  use_existing_management_network:
+    type: boolean
+    default: false
+
   management_network_name:
     default: cloudify-management-network
     type: string
+
+  use_existing_management_subnet:
+    type: boolean
+    default: false
 
   management_subnet_name:
     default: cloudify-management-network-subnet
     type: string
 
+  management_subnet_ip_version:
+    type: string
+    default: 4
+
+  management_subnet_cidr:
+    type: string
+    default: 10.67.79.0/24
+
+  use_existing_management_router:
+    type: boolean
+    default: false
+
   management_router:
     default: cloudify-management-router
     type: string
 
+  use_existing_manager_security_group:
+    type: boolean
+    default: false
+
   manager_security_group_name:
     default: cloudify-sg-manager
     type: string
+
+  use_existing_agents_security_group:
+    type: boolean
+    default: false
 
   agents_security_group_name:
     default: cloudify-sg-agents
@@ -109,6 +137,18 @@ inputs:
   manager_volume_name:
     default: cloudify-manager-volume
     type: string
+
+  security_audit_log_file:
+    type: string
+    default: /var/log/cloudify/rest-security-audit.log
+
+  security_audit_log_file_size:
+    type: integer
+    default: 100
+
+  security_audit_log_files_backup_count:
+    type: integer
+    default: 20
 
 node_templates:
 
@@ -131,16 +171,18 @@ node_templates:
   management_network:
     type: cloudify.openstack.nodes.Network
     properties:
+      use_external_resource: { get_input: use_existing_management_network }
       resource_id: { get_input: management_network_name }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
 
   management_subnet:
     type: cloudify.openstack.nodes.Subnet
     properties:
+      use_external_resource: { get_input: use_existing_management_subnet }
       resource_id: { get_input: management_subnet_name }
       subnet:
-        ip_version: 4
-        cidr: 10.67.79.0/24
+        ip_version: { get_input: management_subnet_ip_version }
+        cidr: { get_input: management_subnet_cidr }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
     relationships:
       - target: management_network
@@ -164,6 +206,7 @@ node_templates:
   router:
     type: cloudify.openstack.nodes.Router
     properties:
+      use_external_resource: { get_input: use_existing_management_router }
       resource_id: { get_input: management_router }
       openstack_config: { get_property: [openstack_configuration, openstack_config] }
     relationships:
@@ -180,6 +223,7 @@ node_templates:
   agents_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
     properties:
+      use_external_resource: { get_input: use_existing_agents_security_group }
       resource_id: { get_input: agents_security_group_name }
       security_group:
         description: Security group for Cloudify agent VMs
@@ -193,6 +237,7 @@ node_templates:
   management_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
     properties:
+      use_external_resource: { get_input: use_existing_manager_security_group }
       resource_id: { get_input: manager_security_group_name }
       security_group:
         description: Security group for Cloudify Manager VM
@@ -420,10 +465,10 @@ node_templates:
           # shown below).
           # ** Note: The log file is located on the rest-service container
           #
-          audit_log_file: /var/log/cloudify/rest-security-audit.log
+          audit_log_file: { get_input: security_audit_log_file }
           audit_log_level: INFO # values: CRITICAL, ERROR, WARNING, INFO, DEBUG
-          audit_log_file_size_MB: 100
-          audit_log_files_backup_count: 20
+          audit_log_file_size_MB: { get_input: security_audit_log_file_size }
+          audit_log_files_backup_count: { get_input: security_audit_log_files_backup_count }
 
     relationships:
       - target: manager_server

@@ -16,13 +16,24 @@ manager_server_user: ubuntu
 manager_private_key_path: ~/.ssh/cloudify-manager-kp.pem
 agent_private_key_path: ~/.ssh/cloudify-agent-kp.pem
 agents_user: ubuntu
+use_existing_management_network: false
 management_network_name: cloudify-management-network
+use_existing_management_subnet: false
 management_subnet_name: cloudify-management-network-subnet
+management_subnet_ip_version: 4
+management_subnet_cidr: 10.67.79.0/24
+use_existing_management_router: false
 management_router: cloudify-management-router
+use_existing_manager_security_group: false
 manager_security_group_name: cloudify-sg-manager
+use_existing_agents_security_group: false
 agents_security_group_name: cloudify-sg-agents
 manager_port_name: cloudify-manager-port
 manager_volume_name: cloudify-manager-volume
+security_audit_log_file: /var/log/cloudify/rest-security-audit.log
+security_audit_log_file_size: 100
+security_audit_log_files_backup_count: 20
+
 nova_url: ''
 neutron_url: ''
 resources_prefix: ''
