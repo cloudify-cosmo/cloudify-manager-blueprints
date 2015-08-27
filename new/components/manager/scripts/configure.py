@@ -90,8 +90,7 @@ def _set_provider_context():
             resources[provider_context_field] = {
                 'external_resource': props[USE_EXTERNAL_RESOURCE_PROPERTY],
                 'type': run_props[OPENSTACK_TYPE_PROPERTY],
-                'id': run_props[OPENSTACK_ID_PROPERTY],
-                }
+                'id': run_props[OPENSTACK_ID_PROPERTY]}
             if node_instance.node_id == 'manager_server_ip':
                 resources[provider_context_field]['ip'] = \
                     run_props[IP_ADDRESS_PROPERTY]
