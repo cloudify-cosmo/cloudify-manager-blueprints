@@ -197,10 +197,10 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0-m4/Ubuntu-trusty-agent.tar.gz
-      # ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m4-b273.tar.gz
-      centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0-m4/centos-Core-agent.tar.gz
-      # centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-centos-final-agent_3.3.0-m4-b273.tar.gz
+      ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0-m4-b274/Ubuntu-trusty-agent.tar.gz
+      # ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m4-b274.tar.gz
+      centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0-m4-b274/centos-Core-agent.tar.gz
+      # centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-centos-final-agent_3.3.0-m4-b274.tar.gz
 
   #############################
   # InfluxDB Inputs
