@@ -1,0 +1,11 @@
+[Unit]
+Description=Riemann Service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+EnvironmentFile=-/etc/sysconfig/cloudify-riemann
+ExecStart=/usr/bin/riemann -a ${RIEMANN_CONFIG_PATH}/main.clj
+
+[Install]
+WantedBy=multi-user.target
