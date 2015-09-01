@@ -38,27 +38,27 @@ inputs:
   #############################
   cli_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-cli/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-cli/archive/3.3m4.tar.gz
 
   rest_service_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m4.tar.gz
 
   dsl_parser_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3m4.tar.gz
 
   rest_client_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3m4.tar.gz
 
   plugins_common_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3m4.tar.gz
 
   script_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3m4.tar.gz
 
   securest_source_url:
     type: string
@@ -66,15 +66,15 @@ inputs:
 
   amqpinflux_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.3m4.tar.gz
 
   agent_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-agent/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-agent/archive/3.3m4.tar.gz
 
   diamond_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/1.3m4.tar.gz
 
   #############################
   # Java Inputs

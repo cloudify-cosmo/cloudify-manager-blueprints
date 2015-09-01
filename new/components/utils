@@ -20,7 +20,12 @@ function create_virtualenv
 {
     virtualenv_path=$1
 
-    [ ! -d $virtualenv_path ] || ctx logger info "Virtualenv directory already exists. Recreating..."
+    ctx logger info "Checking if Virtualenv ${virtualenv_path} exists..."
+    # if [ -f "$virtualenv_path/bin/python" ]; then
+    #     ctx logger info "Virtualenv directory already exists, skipping..."
+    #     return 0
+    # fi
+    [ -f "$virtualenv_path/bin/python" ] && ctx logger info "Virtualenv directory already exists..." && return 0
     ctx logger info "Creating virtualenv ${virtualenv_path}..."
     sudo virtualenv ${virtualenv_path} >/dev/null
 }
@@ -206,20 +211,17 @@ function yum_install
     source_name=$(get_file_name $source)
     extension="${source_name##*.}"
     archive_path=$source_name
-    # package_name=${source_name%%.rpm}
 
     if [ "$extension" == "rpm" ]; then
         archive_path="/etc/cloudify/$source_name"
-        ctx logger info "Archive path is: ${archive_path}."
-        ctx logger info "Package ${source_name} is an rpm file."
+        ctx logger info "Checking if rpm file $archive_path exists..."
         if [ ! -f "$archive_path" ]; then
-            ctx logger info "Checking if rpm file $archive_path exists..."
             tmp_path=$(download_file $source)
             create_dir "/etc/cloudify/"
             ctx logger info "Saving ${source_name} under /etc/cloudify/..."
             sudo mv $tmp_path $archive_path
         fi
-        source_name=$(rpm -qp $archive_path) #2>&1 >/dev/null)
+        source_name=$(rpm -qp $archive_path)
     fi
 
     ctx logger info "Checking if $archive_path is already installed..."
