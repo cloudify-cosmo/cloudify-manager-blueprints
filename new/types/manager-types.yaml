@@ -128,6 +128,12 @@ node_types:
             script_path:
               default: components/rabbitmq/scripts/start.sh
             fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/rabbitmq/scripts/stop.sh
+            fabric_env: *simple_fabric_env
 
   manager.nodes.Elasticsearch:
     derived_from: cloudify.nodes.DBMS
@@ -172,6 +178,12 @@ node_types:
             script_path:
               default: components/elasticsearch/scripts/start.sh
             fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/elasticsearch/scripts/stop.sh
+            fabric_env: *simple_fabric_env
 
   manager.nodes.Logstash:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -194,6 +206,12 @@ node_types:
             script_path:
               default: components/logstash/scripts/start.sh
             fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/logstash/scripts/stop.sh
+            fabric_env: *simple_fabric_env
 
   manager.nodes.InfluxDB:
     derived_from: cloudify.nodes.DBMS
@@ -215,6 +233,12 @@ node_types:
           inputs:
             script_path:
               default: components/influxdb/scripts/start.sh
+            fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/influxdb/scripts/stop.sh
             fabric_env: *simple_fabric_env
 
   manager.nodes.Nginx:
@@ -253,6 +277,12 @@ node_types:
             script_path:
               default: components/nginx/scripts/start.sh
             fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/nginx/scripts/stop.sh
+            fabric_env: *simple_fabric_env
 
   manager.nodes.Riemann:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -286,6 +316,12 @@ node_types:
           inputs:
             script_path:
               default: components/riemann/scripts/start.sh
+            fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/riemann/scripts/stop.sh
             fabric_env: *simple_fabric_env
 
   manager.nodes.RestService:
@@ -337,6 +373,12 @@ node_types:
             script_path:
               default: components/restservice/scripts/start.sh
             fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/restservice/scripts/stop.sh
+            fabric_env: *simple_fabric_env
 
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -383,6 +425,12 @@ node_types:
             script_path:
               default: components/mgmtworker/scripts/start.sh
             fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/mgmtworker/scripts/stop.sh
+            fabric_env: *simple_fabric_env
 
   manager.nodes.AmqpInfluxBroker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -404,6 +452,12 @@ node_types:
           inputs:
             script_path:
               default: components/amqpinflux/scripts/start.sh
+            fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/amqpinflux/scripts/stop.sh
             fabric_env: *simple_fabric_env
 
   manager.nodes.WebUI:
@@ -434,6 +488,12 @@ node_types:
           inputs:
             script_path:
               default: components/webui/scripts/start.sh
+            fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/webui/scripts/stop.sh
             fabric_env: *simple_fabric_env
 
   manager.nodes.CLI:
