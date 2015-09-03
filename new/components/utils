@@ -6,25 +6,11 @@ function sys_error
     exit 1
 }
 
-# DEPRECATED
-function log
-{
-    level=$1
-    message=$2
-    timestamp=$(date +"%Y-%m-%dT%T%z")
-
-    echo "### ${timestamp}, ${level}: ${message}"
-}
-
 function create_virtualenv
 {
     virtualenv_path=$1
 
-    ctx logger info "Checking if Virtualenv ${virtualenv_path} exists..."
-    # if [ -f "$virtualenv_path/bin/python" ]; then
-    #     ctx logger info "Virtualenv directory already exists, skipping..."
-    #     return 0
-    # fi
+    ctx logger info "Creating Virtualenv ${virtualenv_path} if it doesn't exist..."
     [ -f "$virtualenv_path/bin/python" ] && ctx logger info "Virtualenv directory already exists..." && return 0
     ctx logger info "Creating virtualenv ${virtualenv_path}..."
     sudo virtualenv ${virtualenv_path} >/dev/null
@@ -53,22 +39,6 @@ function install_module
         ctx logger info "Installing ${module}..."
         sudo pip install ${module} >/dev/null
     fi
-}
-
-
-# DEPRECATED
-function install_rpm
-{
-    source=$1
-    if [[ -z "${source}" ]]; then
-        sys_error "Must supply url as param (install_rpm #URL#)."
-    fi
-
-    tmp_file_path="/tmp/${RANDOM}.rpm"
-    download_file ${source} ${tmp_file_path}
-    ctx logger info "Installing RPM ${tmp_file_path}..."
-    sudo rpm --nodeps -ivh ${tmp_file_path}
-    clean_tmp
 }
 
 function clean_tmp
@@ -328,21 +298,6 @@ function inject_service_env_var() {
     replace "${field}" "${value}" $vars_path >/dev/null
 }
 
-# DEPRACATED by download-resource-and-render
-function inject_management_ip_as_env_var() {
-    ###
-    # Injects the manager's ip into a service's env var file
-    # Note that this currently requires that a relationship
-    # operation sets this ip as a runtime property to the node.
-    ###
-    service_name=$1
-
-    # management_ip=$(ctx instance runtime_properties manager_host_ip)
-    management_ip=$(ctx instance host_ip)
-    ctx logger info "Setting service management_ip variable..."
-    inject_service_env_var "{{ ctx.instance.runtime_properties.manager_host_ip }}" "${management_ip}" "${service_name}"
-}
-
 function get_selinux_state() {
     ###
     # This checks whether SELinux is Enforcing or Permissive
@@ -380,35 +335,4 @@ function set_rabbitmq_policy() {
 
     ctx logger info "Setting Policy ${policy_name} on queues ${queue_regex} of type ${policy_type} with value ${value}..."
     sudo rabbitmqctl set_policy ${policy_name} "${queue_regex}" "{"\"${policy_type}"\":${value}}" --apply-to queues
-}
-
-
-function remove_notice() {
-    # See copy_notice()
-    service=$1
-
-    destination_notice="/opt/${service}_NOTICE.txt"
-    ctx logger info "Deleting ${service} NOTICE file..."
-    sudo rm ${destination_notice}
-}
-
-function yum_uninstall() {
-    package=$1
-
-    ctx logger info "yum Removing ${package}..."
-    sudo yum remove -y ${package} >/dev/null
-}
-
-function remove_systemd_service() {
-    service_name=$1
-
-    ctx logger info "Disabling .service..."
-    sudo systemctl disable cloudify-${service_name}.service
-    sudo systemctl daemon-reload
-
-    ctx logger info "Removing systemd EnvironmentFile..."
-    sudo rm "/etc/sysconfig/cloudify-${service_name}"
-
-    ctx logger info "Removing systemd .service file..."
-    sudo rm "/usr/lib/systemd/system/cloudify-${service_name}.service"
 }
