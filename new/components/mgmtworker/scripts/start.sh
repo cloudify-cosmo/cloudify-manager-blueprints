@@ -1,5 +1,4 @@
 #!/bin/bash -e
 
-ctx logger info "Starting Management Worker..."
+ctx logger info "Starting Management Worker Service..."
 sudo systemctl start cloudify-mgmtworker.service
-# sudo ${MGMTWORKER_HOME}/startup.sh
