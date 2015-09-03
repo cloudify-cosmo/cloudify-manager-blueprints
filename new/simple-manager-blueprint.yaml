@@ -1,8 +1,8 @@
 tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.3m4/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.3m4/plugin.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.3m5/types.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.3m5/plugin.yaml
   - types/manager-types.yaml
 
 
@@ -197,10 +197,10 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/Ubuntu-trusty-agent_3.3.0-m4-b274.tar.gz
-      # ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m4-b274.tar.gz
-      centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/centos-Core-agent_3.3.0-m4-b274.tar.gz
-      # centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-centos-final-agent_3.3.0-m4-b274.tar.gz
+      ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-trusty-agent_3.3.0-m5-b275.tar.gz
+      # ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m5-b275.tar.gz
+      centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Core-agent_3.3.0-m5-b275.tar.gz
+      # centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-centos-final-agent_3.3.0-m5-b275.tar.gz
 
   #############################
   # InfluxDB Inputs
