@@ -107,6 +107,21 @@ function download_file
     echo ${destination_file}
 }
 
+function download_cloudify_resource() {
+    url=$1
+    destination_file="/etc/cloudify/$(get_file_name $url)"
+
+    ctx logger info "Downloading ${url}..."
+    if [ -f "${destination_file}" ]; then
+        ctx logger info "Resource already exists (${destination_file}). Skipping..."
+    else
+        tmppath=$(download_file "${url}")
+        ctx logger info "Saving ${tmppath} under ${destination_file}..."
+        sudo mv "${tmppath}" "${destination_file}"
+    fi
+    echo ${destination_file}
+}
+
 function copy_notice
 {
     ###

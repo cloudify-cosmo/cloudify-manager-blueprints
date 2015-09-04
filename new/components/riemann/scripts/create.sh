@@ -25,8 +25,8 @@ create_dir ${LANGOHR_HOME}
 create_dir ${RIEMANN_CONFIG_PATH}
 create_dir ${RIEMANN_CONFIG_PATH}/conf.d
 
-langohr=$(download_file ${LANGOHR_SOURCE_URL})
-sudo mv ${langohr} ${EXTRA_CLASSPATH}
+langohr=$(download_cloudify_resource ${LANGOHR_SOURCE_URL})
+sudo cp ${langohr} ${EXTRA_CLASSPATH}
 ctx logger info "Applying Langohr permissions..."
 sudo chmod 644 ${EXTRA_CLASSPATH}
 ctx logger info "Installing Daemonize..."
@@ -51,7 +51,7 @@ EOF
 sudo chmod 644 $lconf
 
 ctx logger info "Downloading cloudify-manager Repository..."
-manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
+manager_repo=$(download_cloudify_resource ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager Repository..."
 tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
 ctx logger info "Deploying Riemann manager.config..."

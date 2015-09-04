@@ -28,17 +28,17 @@ create_dir ${WEBUI_LOG_PATH}
 create_dir ${GRAFANA_HOME}
 
 ctx logger info "Installing NodeJS..."
-nodejs=$(download_file ${NODEJS_SOURCE_URL})
+nodejs=$(download_cloudify_resource ${NODEJS_SOURCE_URL})
 sudo tar -xzvf ${nodejs} -C ${NODEJS_HOME} --strip-components=1 >/dev/null
 
 ctx logger info "Installing Cloudify's WebUI..."
-webui=$(download_file ${WEBUI_SOURCE_URL})
+webui=$(download_cloudify_resource ${WEBUI_SOURCE_URL})
 sudo tar -xzvf ${webui} -C ${WEBUI_HOME} --strip-components=1 >/dev/null
 # ctx logger info "Applying Workaround for missing dependencies..."
 # sudo ${NODEJS_HOME}/bin/npm install --prefix ${WEBUI_HOME} request tar >/dev/null
 
 ctx logger info "Installing Grafana..."
-grafana=$(download_file ${GRAFANA_SOURCE_URL})
+grafana=$(download_cloudify_resource ${GRAFANA_SOURCE_URL})
 sudo tar -xzvf ${grafana} -C ${GRAFANA_HOME} --strip-components=1 >/dev/null
 
 ctx logger info "Deploying WebUI Configuration..."

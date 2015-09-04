@@ -43,7 +43,7 @@ install_module ${AGENT_SOURCE_URL} ${REST_SERVICE_VIRTUALENV}
 
 # insecure matters here?
 # curl --fail --insecure -L ${REST_SERVICE_SOURCE_URL} --create-dirs -o /tmp/cloudify-manager/manager.tar.gz
-manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
+manager_repo=$(download_cloudify_resource ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager..."
 tar -xzf ${manager_repo} --strip-components=1 -C "/tmp"
 install_module "/tmp/rest-service" ${REST_SERVICE_VIRTUALENV}
