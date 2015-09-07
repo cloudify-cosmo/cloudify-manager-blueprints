@@ -33,6 +33,12 @@ create_dir ${REST_SERVICE_LOG_PATH}
 ctx logger info "Creating virtualenv ${REST_SERVICE_VIRTUALENV}..."
 create_virtualenv ${REST_SERVICE_VIRTUALENV}
 
+# link dbus-python-1.1.1-9.el7.x86_64 to the venv (module in pypi is very old)
+if [ -d "/usr/lib64/python2.7/site-packages/dbus" ]; then
+  sudo ln -sf /usr/lib64/python2.7/site-packages/dbus "$REST_SERVICE_VIRTUALENV/lib64/python2.7/site-packages/dbus"
+  sudo ln -sf /usr/lib64/python2.7/site-packages/_dbus_*.so "$REST_SERVICE_VIRTUALENV/lib64/python2.7/site-packages/"
+fi
+
 ctx logger info "Installing Required REST Service Modules..."
 install_module ${DSL_PARSER_SOURCE_URL} ${REST_SERVICE_VIRTUALENV}
 install_module ${REST_CLIENT_SOURCE_URL} ${REST_SERVICE_VIRTUALENV}
