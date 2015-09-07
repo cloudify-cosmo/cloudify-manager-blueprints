@@ -13,6 +13,12 @@ node_types:
         default: ubuntu
       ssh_key_filename:
         default: ''
+      agent_local_key_path:
+        default: ''
+      agent_remote_key_path:
+        default: /root/.ssh/agent_key.pem
+      public_ip:
+        default: ''
       cloudify:
         description: >
           Configuration for Cloudify Manager
@@ -62,7 +68,7 @@ node_types:
               default:
                 user: { get_input: ssh_user }
                 key_filename: { get_input: ssh_key_filename }
-                host_string: { get_input: public_ip }
+                host_string: { get_attribute: [manager_host, public_ip] }
                 always_use_pty: true
                 hide: running
 
