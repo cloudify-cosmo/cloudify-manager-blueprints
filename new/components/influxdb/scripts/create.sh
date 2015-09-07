@@ -8,6 +8,8 @@ CONFIG_REL_PATH="components/influxdb/config"
 export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)  # (e.g. "https://s3.amazonaws.com/influxdb/influxdb-0.8.8-1.x86_64.rpm")
 
 export INFLUXDB_PORT="8086"
+export INFLUXDB_USER="influxdb"
+export INFLUXDB_GROUP="influxdb"
 export INFLUXDB_HOME="/opt/influxdb"
 export INFLUXDB_LOG_PATH="/var/log/cloudify/influxdb"
 
@@ -44,8 +46,9 @@ sudo chmod 644 $lconf
 ctx logger info "Deploying InfluxDB Config file..."
 deploy_blueprint_resource "${CONFIG_REL_PATH}/config.toml" "${INFLUXDB_HOME}/shared/config.toml"
 
-ctx logger info "Chowning InfluxDB logs path..."
-sudo chown -R influxdb:influxdb ${INFLUXDB_LOG_PATH}
+ctx logger info "Fixing permissions..."
+sudo chown -R "${INFLUXDB_USER}:${INFLUXDB_GROUP}" "${INFLUXDB_HOME}"
+sudo chown -R "${INFLUXDB_USER}:${INFLUXDB_GROUP}" "${INFLUXDB_LOG_PATH}"
 
 configure_systemd_service "influxdb"
 
