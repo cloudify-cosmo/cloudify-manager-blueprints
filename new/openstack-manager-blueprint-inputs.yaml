@@ -61,12 +61,14 @@
 # The key names must be in the format: distro_release_agent (e.g. ubuntu_trusty_agent)
 # as the key is what's used to name the file, which later allows our
 # agent installer to identify it for your distro and release automatically.
+# Note that the windows agent key name MUST be `cloudify_windows_agent`
 #agent_package_urls:
 #   default:
 #     ubuntu_trusty_agent: ''
 #     ubuntu_precise_agent: ''
 #     centos_core_agent: ''
 #     centos_final_agent: ''
+#     cloudify_windows_agent: ''
 
 #############################
 # Cloudify Modules
