@@ -13,6 +13,7 @@ export LOGSTASH_CONF_PATH="/etc/logstash/conf.d"
 
 
 ctx logger info "Installing Logstash..."
+set_selinux_permissive
 
 copy_notice "logstash"
 create_dir ${LOGSTASH_LOG_PATH}

@@ -14,6 +14,7 @@ export INFLUXDB_LOG_PATH="/var/log/cloudify/influxdb"
 
 
 ctx logger info "Installing InfluxDB..."
+set_selinux_permissive
 
 copy_notice "influxdb"
 create_dir ${INFLUXDB_HOME}

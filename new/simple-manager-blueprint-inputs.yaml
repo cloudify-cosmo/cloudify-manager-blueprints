@@ -28,25 +28,25 @@
 # agent installer to identify it for your distro and release automatically.
 # Note that the windows agent key name MUST be `cloudify_windows_agent`
 #agent_package_urls:
-#   default:
-#     ubuntu_trusty_agent: ''
-#     ubuntu_precise_agent: ''
-#     centos_core_agent: ''
-#     centos_final_agent: ''
-#     cloudify_windows_agent: ''
+#   ubuntu_trusty_agent: ''
+#   ubuntu_precise_agent: ''
+#   centos_core_agent: ''
+#   centos_final_agent: ''
+#   cloudify_windows_agent: ''
 
 #############################
 # Cloudify Modules
 #############################
 
-# These should be pip installable tar.gz files.
-#rest_client_source_url: ''
-#dsl_parser_source_url: ''
-#plugins_common_source_url: ''
-#rest_service_source_url: ''
-#script_plugin_source_url: ''
-#securest_source_url: ''
-#amqpinflux_source_url: ''
+#rest_service_rpm_url:
+#management_worker_rpm_source_url:
+#amqpinflux_rpm_source_url:
+#cloudify_resources_url:
+
+#############################
+# Python Inputs
+#############################
+#pip_source_rpm_url: ''
 
 #############################
 # Java Inputs
@@ -82,7 +82,7 @@
 #############################
 # Elasticsearch Inputs
 #############################
-#elasticsearch_source_url: ''
+#elasticsearch_curator_rpm_source_url: ''
 
 # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
 #elasticsearch_heap_size:

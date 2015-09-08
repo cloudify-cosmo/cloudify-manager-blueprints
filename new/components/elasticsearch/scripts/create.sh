@@ -6,12 +6,14 @@
 
 CONFIG_REL_PATH="components/elasticsearch/config"
 
-export ES_JAVA_OPRT=$(ctx node properties es_java_opts)  # (e.g. "-Xmx1024m -Xms1024m")
 export ES_JAVA_OPTS=$(ctx node properties es_java_opts)  # (e.g. "-Xmx1024m -Xms1024m")
 export ES_HEAP_SIZE=$(ctx node properties es_heap_size)
 export ES_HEAP_SIZE=${ES_HEAP_SIZE:-1g}
+export ES_CURATOR_RPM_SOURCE_URL=$(ctx node properties es_curator_rpm_source_url)
+export ES_SOURCE_URL=$(ctx node properties es_rpm_source_url)  # (e.g. "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz")
 
-export ELASTICHSEARCH_SOURCE_URL=$(ctx node properties es_rpm_source_url)  # (e.g. "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.3.tar.gz")
+# this will be used only if elasticsearch-curator is not installed via an rpm
+export ES_CURATOR_VERSION="3.2.3"
 
 export ELASTICSEARCH_PORT="9200"
 export ELASTICSEARCH_HOME="/opt/elasticsearch"
@@ -20,12 +22,13 @@ export ELASTICSEARCH_CONF_PATH="/etc/elasticsearch"
 
 
 ctx logger info "Installing Elasticsearch..."
+set_selinux_permissive
 
 copy_notice "elasticsearch"
 create_dir ${ELASTICSEARCH_HOME}
 create_dir ${ELASTICSEARCH_LOGS_PATH}
 
-yum_install ${ELASTICHSEARCH_SOURCE_URL}
+yum_install ${ES_SOURCE_URL}
 
 ctx logger info "Chowning ${ELASTICSEARCH_LOGS_PATH} by elasticsearch user..."
 sudo chown -R elasticsearch:elasticsearch ${ELASTICSEARCH_LOGS_PATH}
@@ -86,7 +89,11 @@ ctx logger info "Stopping Elasticsearch Service..."
 sudo systemctl stop elasticsearch.service
 
 ctx logger info "Installing Elasticsearch Curator..."
-install_module "elasticsearch-curator==3.2.0"
+if [ -z ${ES_CURATOR_RPM_SOURCE_URL} ]; then
+    install_module "elasticsearch-curator==${ES_CURATOR_VERSION}"
+else
+    yum_install ${ES_CURATOR_RPM_SOURCE_URL}
+fi
 
 rotator_script=$(ctx download-resource-and-render components/elasticsearch/scripts/rotate_es_indices)
 
