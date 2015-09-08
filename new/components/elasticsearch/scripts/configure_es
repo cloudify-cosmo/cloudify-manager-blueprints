@@ -4,6 +4,8 @@ ES_HOST="localhost"
 ES_PORT="9200"
 
  function configure_elasticsearch() {
+    ctx logger info "Cleaning up data model index..."
+    curl --silent --retry 5 --retry-delay 3 -XDELETE http://localhost:9200/cloudify_storage/ >/dev/null && \
     ctx logger info "Creating data model index..." && \
     curl --fail --silent --retry 5 --retry-delay 3 -XPUT http://${ES_HOST}:${ES_PORT}/cloudify_storage -d '{"settings": {"analysis": {"analyzer": {"default": {"tokenizer": "whitespace"}}}}}' >/dev/null && \
     ctx logger info "Setting blueprints mapping..." && \

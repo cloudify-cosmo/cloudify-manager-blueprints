@@ -30,7 +30,6 @@ copy_notice "restservice"
 create_dir ${REST_SERVICE_HOME}
 create_dir ${REST_SERVICE_LOG_PATH}
 
-ctx logger info "Creating virtualenv ${REST_SERVICE_VIRTUALENV}..."
 create_virtualenv ${REST_SERVICE_VIRTUALENV}
 
 # link dbus-python-1.1.1-9.el7.x86_64 to the venv (module in pypi is very old)
@@ -52,7 +51,7 @@ install_module ${AGENT_SOURCE_URL} ${REST_SERVICE_VIRTUALENV}
 
 # insecure matters here?
 # curl --fail --insecure -L ${REST_SERVICE_SOURCE_URL} --create-dirs -o /tmp/cloudify-manager/manager.tar.gz
-manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
+manager_repo=$(download_cloudify_resource ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager..."
 tar -xzf ${manager_repo} --strip-components=1 -C "/tmp"
 install_module "/tmp/rest-service" ${REST_SERVICE_VIRTUALENV}

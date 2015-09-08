@@ -81,7 +81,7 @@ inputs:
   #############################
   java_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/3.2/java.rpm
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/jre1.8.0_45-1.8.0_45-fcs.x86_64.rpm
 
   #############################
   # RabbitMQ Inputs

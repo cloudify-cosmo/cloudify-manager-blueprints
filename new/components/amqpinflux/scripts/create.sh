@@ -5,7 +5,7 @@
 
 export AMQPINFLUX_HOME="/opt/amqpinflux"
 export AMQPINFLUX_VIRTUALENV_DIR="${AMQPINFLUX_HOME}/env"
-export AMQPINFLUX_SOURCE_URL=$(ctx node properties amqpinflux_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.2.zip")
+export AMQPINFLUX_SOURCE_URL=$(ctx node properties amqpinflux_module_source_url)
 
 ctx logger info "Installing AQMPInflux..."
 
