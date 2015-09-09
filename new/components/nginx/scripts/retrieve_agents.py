@@ -23,8 +23,12 @@ def retrieve(agent_packages):
 
     for agent, source_url in agent_packages.items():
         dest_path = ctx.instance.runtime_properties['agent_packages_path']
-        dest_file = os.path.join(dest_path, '{0}.tar.gz'.format(
-            agent.replace('_', '-')))
+        agent_name = agent.replace('_', '-')
+        if agent_name == 'cloudify-windows-agent':
+            filename = '{0}.exe'.format(agent_name)
+        else:
+            filename = '{0}.tar.gz'.format(agent_name)
+        dest_file = os.path.join(dest_path, filename)
         dl_cmd = 'curl --retry 10 -f -s -S -L {0} --create-dirs -o {1}'.format(
             source_url, dest_file)
 
