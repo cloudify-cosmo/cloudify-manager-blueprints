@@ -198,9 +198,10 @@ inputs:
   agent_package_urls:
     default:
       ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-trusty-agent_3.3.0-m5-b275.tar.gz
-      # ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m5-b275.tar.gz
+      ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m5-b275.tar.gz
       centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Core-agent_3.3.0-m5-b275.tar.gz
-      # centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-centos-final-agent_3.3.0-m5-b275.tar.gz
+      centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-centos-final-agent_3.3.0-m5-b275.tar.gz
+      cloudify_windows_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-windows-agent_3.3.0-m5-b275.exe
 
   #############################
   # InfluxDB Inputs
