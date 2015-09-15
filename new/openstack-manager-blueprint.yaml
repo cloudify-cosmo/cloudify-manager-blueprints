@@ -162,18 +162,18 @@ inputs:
   #############################
   java_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/3.2/java.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/jre1.8.0_45-1.8.0_45-fcs.x86_64.rpm
 
   #############################
   # RabbitMQ Inputs
   #############################
   erlang_source_url:
     type: string
-    default: http://www.rabbitmq.com/releases/erlang/erlang-17.4-1.el6.x86_64.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/erlang-17.4-1.el6.x86_64.rpm
 
   rabbitmq_source_url:
     type: string
-    default: http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/rabbitmq-server-3.5.3-1.noarch.rpm
 
   rabbitmq_events_queue_message_ttl:
     description: >
@@ -234,7 +234,7 @@ inputs:
   #############################
   elasticsearch_source_url:
     type: string
-    default: https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.6.0.noarch.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-1.6.0.noarch.rpm
 
   # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
   elasticsearch_heap_size:
@@ -263,14 +263,14 @@ inputs:
   #############################
   logstash_source_url:
     type: string
-    default: http://download.elastic.co/logstash/logstash/packages/centos/logstash-1.5.0-1.noarch.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/logstash-1.5.0-1.noarch.rpm
 
   #############################
   # Nginx Inputs
   #############################
   nginx_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/3.2/nginx-1.8.0-1.el7.ngx.x86_64.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/nginx-1.8.0-1.el7.ngx.x86_64.rpm
 
   # Nginx, being the fileserver, also serves agent packages.
   # The key names of the agents must be in the format: distro_release_agent
@@ -278,32 +278,33 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-trusty-agent_3.3.0-m5-b275.tar.gz
-      centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Core-agent_3.3.0-m5-b275.tar.gz
-      ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-precise-agent_3.3.0-m5-b275.tar.gz
-      centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Final-agent_3.3.0-m5-b275.tar.gz
-      cloudify_windows_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-windows-agent_3.3.0-m5-b275.exe
+      ubuntu_trusty_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-trusty-agent_3.3.0-m5-b275.tar.gz
+      ubuntu_precise_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-precise-agent_3.3.0-m5-b275.tar.gz
+      centos_core_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Core-agent_3.3.0-m5-b275.tar.gz
+      centos_final_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Final-agent_3.3.0-m5-b275.tar.gz
+      cloudify_windows_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-windows-agent_3.3.0-m5-b275.exe
+
   #############################
   # InfluxDB Inputs
   #############################
   influxdb_source_url:
     type: string
-    default: https://s3.amazonaws.com/influxdb/influxdb-0.8.8-1.x86_64.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/influxdb-0.8.8-1.x86_64.rpm
 
   #############################
   # Riemann Inputs
   #############################
   langohr_source_url:
     type: string
-    default: https://s3-eu-west-1.amazonaws.com/gigaspaces-repository-eu/langohr/2.11.0/langohr.jar
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/langohr.jar
 
   daemonize_source_url:
     type: string
-    default: https://forensics.cert.org/centos/cert/7/x86_64/daemonize-1.7.3-7.el7.x86_64.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/daemonize-1.7.3-7.el7.x86_64.rpm
 
   riemann_source_url:
     type: string
-    default: https://aphyr.com/riemann/riemann-0.2.6-1.noarch.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/riemann-0.2.6-1.noarch.rpm
 
   #############################
   # WebUI Inputs
@@ -319,7 +320,7 @@ inputs:
 
   nodejs_source_url:
     type: string
-    default: https://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
 
 
 dsl_definitions:
