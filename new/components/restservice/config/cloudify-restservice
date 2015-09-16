@@ -1,8 +1,10 @@
 # REST Service's Home directory
 REST_SERVICE_HOME="/opt/manager"
 
-# REST Service's config file. This is currently misnamed.. should probably renamed to cloudify-rest.config or something.
-MANAGER_REST_CONFIG_PATH="/opt/manager/guni.conf"
+# REST Service's config files
+REST_SERVICE_CONFIG_PATH="/opt/manager/cloudify-rest.conf"
+MANAGER_REST_CONFIG_PATH="/opt/manager/cloudify-rest.conf"
+MANAGER_REST_SECURITY_CONFIG_PATH="/opt/manager/rest-security.conf"
 
 # REST Service's virtualenv
 REST_SERVICE_VIRTUALENV="/opt/manager/env"

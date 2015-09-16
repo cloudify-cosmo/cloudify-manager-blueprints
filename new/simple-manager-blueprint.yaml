@@ -42,7 +42,8 @@ inputs:
 
   rest_service_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/CFY-3084-Add-security-configuration-support-to-new-manager-blueprint.tar.gz
+    # default: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
 
   dsl_parser_source_url:
     type: string
@@ -239,7 +240,7 @@ inputs:
 
   nodejs_source_url:
     type: string
-    default: http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz
+    default: https://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz
 
 
 ######################################################################
@@ -318,8 +319,6 @@ node_templates:
               inputs:
                 public_ip: { get_property: [manager_host, public_ip] }
       - type: cloudify.relationships.depends_on
-        target: rest_service
-      - type: cloudify.relationships.depends_on
         target: nginx
         target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
@@ -387,8 +386,6 @@ node_templates:
       # circular relationship
       # - type: nginx_to_webui
       #   target: webui
-      - type: nginx_to_restservice
-        target: rest_service
 
   riemann:
     type: manager.nodes.Riemann
@@ -409,6 +406,8 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: python_runtime
+      - type: rest_to_mgr_config
+        target: manager_configuration
       - type: restservice_to_elasticsearch
         target: elasticsearch
       - type: restservice_to_rabbitmq

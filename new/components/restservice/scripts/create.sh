@@ -17,12 +17,12 @@ export AGENT_SOURCE_URL=$(ctx node properties agent_module_source_url)
 # TODO: change to /opt/cloudify-rest-service
 export REST_SERVICE_HOME="/opt/manager"
 export REST_SERVICE_VIRTUALENV="${REST_SERVICE_HOME}/env"
-# guni.conf currently contains localhost for all endpoints. We need to change that.
+# cloudify-rest.conf currently contains localhost for all endpoints. We need to change that.
 # Also, MANAGER_REST_CONFIG_PATH is mandatory since the manager's code reads this env var. it should be renamed to REST_SERVICE_CONFIG_PATH.
-export MANAGER_REST_CONFIG_PATH="${REST_SERVICE_HOME}/guni.conf"
-export REST_SERVICE_CONFIG_PATH="${REST_SERVICE_HOME}/guni.conf"
+export MANAGER_REST_CONFIG_PATH="${REST_SERVICE_HOME}/cloudify-rest.conf"
+export REST_SERVICE_CONFIG_PATH="${REST_SERVICE_HOME}/cloudify-rest.conf"
+export MANAGER_REST_SECURITY_CONFIG_PATH="${REST_SERVICE_HOME}/rest-security.conf"
 export REST_SERVICE_LOG_PATH="/var/log/cloudify/rest"
-
 
 ctx logger info "Installing REST Service..."
 
@@ -34,12 +34,10 @@ ctx logger info "Creating virtualenv ${REST_SERVICE_VIRTUALENV}..."
 create_virtualenv ${REST_SERVICE_VIRTUALENV}
 
 # link dbus-python-1.1.1-9.el7.x86_64 to the venv (module in pypi is very old)
-# used by cfy status
 if [ -d "/usr/lib64/python2.7/site-packages/dbus" ]; then
   sudo ln -sf /usr/lib64/python2.7/site-packages/dbus "$REST_SERVICE_VIRTUALENV/lib64/python2.7/site-packages/dbus"
   sudo ln -sf /usr/lib64/python2.7/site-packages/_dbus_*.so "$REST_SERVICE_VIRTUALENV/lib64/python2.7/site-packages/"
 fi
-
 
 ctx logger info "Installing Required REST Service Modules..."
 install_module ${DSL_PARSER_SOURCE_URL} ${REST_SERVICE_VIRTUALENV}
@@ -56,6 +54,7 @@ manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager..."
 tar -xzf ${manager_repo} --strip-components=1 -C "/tmp"
 install_module "/tmp/rest-service" ${REST_SERVICE_VIRTUALENV}
+
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/gunicorn"
@@ -77,7 +76,6 @@ EOF
 
 sudo chmod 644 $lconf
 
-ctx logger info "Deploying Gunicorn and REST Service Configuration file..."
-deploy_blueprint_resource "${CONFIG_REL_PATH}/guni.conf" "${REST_SERVICE_HOME}/guni.conf"
-
-configure_systemd_service "restservice"
+ctx logger info "Deploying REST Service Configuration file..."
+# rest service ports are set as runtime properties in nginx/scripts/create.sh
+deploy_blueprint_resource "${CONFIG_REL_PATH}/cloudify-rest.conf" "${REST_SERVICE_HOME}/cloudify-rest.conf"
