@@ -21,8 +21,7 @@ function create_virtualenv
     virtualenv_path=$1
 
     ctx logger info "Creating virtualenv ${virtualenv_path}..."
-    # why was this redirected to /dev/null
-    sudo virtualenv ${virtualenv_path}
+    sudo virtualenv ${virtualenv_path} >/dev/null
 }
 
 function create_dir
@@ -40,12 +39,10 @@ function install_module
 
     if [[ ! -z "${venv}" ]]; then
         ctx logger info "Installing ${module} in virtualenv ${venv}..."
-        # why was this redirected to /dev/null
-        sudo ${venv}/bin/pip install ${module}
+        sudo ${venv}/bin/pip install ${module} >/dev/null
     else
         ctx logger info "Installing ${module}..."
-        # why was this redirected to /dev/null
-        sudo pip install ${module}
+        sudo pip install ${module} >/dev/null
     fi
 }
 
@@ -156,8 +153,7 @@ function wait_for_port
     port=$1
 
     counter=1
-    # why was this redirected to /dev/null
-    while ! echo exit | curl --silent http://localhost:${port};
+    while ! echo exit | curl --silent http://localhost:${port} >/dev/null;
     do
             if [[ $counter -gt 24 ]]; then
                 sys_error "Failed to connect to port ${port}... (status $?)"
@@ -182,8 +178,7 @@ function yum_install
     source=$1
 
     ctx logger info "yum Installing ${source}..."
-    # why was this redirected to /dev/null
-    sudo yum install -y ${source} || true
+    sudo yum install -y ${source} >/dev/null
 }
 
 function configure_systemd_service() {
@@ -210,10 +205,8 @@ function configure_systemd_service() {
     deploy_blueprint_resource ${service_file} ${service_dir}
 
     ctx logger info "Enabling systemd .service..."
-    # why was this redirected to /dev/null
-    sudo systemctl enable ${service_identifier}.service
-    # why was this redirected to /dev/null
-    sudo systemctl daemon-reload
+    sudo systemctl enable ${service_identifier}.service &>/dev/null
+    sudo systemctl daemon-reload >/dev/null
 }
 
 function get_systemd_vars_file_path() {
@@ -280,8 +273,7 @@ function inject_service_env_var() {
 
     ctx logger info "Injecting variable..."
     vars_path=$(get_systemd_vars_file_path "${service_name}")
-    # why was this redirected to /dev/null
-    replace "${field}" "${value}" $vars_path
+    replace "${field}" "${value}" $vars_path >/dev/null
 }
 
 # DEPRACATED by download-resource-and-render
