@@ -109,7 +109,7 @@ function download_file
 
 function download_cloudify_resource() {
     url=$1
-    destination_file="/etc/cloudify/$(get_file_name $url)"
+    destination_file="${CLOUDIFY_SOURCES_PATH}/$(get_file_name $url)"
 
     ctx logger info "Downloading ${url}..."
     if [ -f "${destination_file}" ]; then
@@ -117,6 +117,7 @@ function download_cloudify_resource() {
     else
         tmppath=$(download_file "${url}")
         ctx logger info "Saving ${tmppath} under ${destination_file}..."
+        create_dir "${CLOUDIFY_SOURCES_PATH}/"
         sudo mv "${tmppath}" "${destination_file}"
     fi
     echo ${destination_file}
@@ -177,7 +178,7 @@ function yum_install
     # If it is, it will do nothing. It not, it will install it.
     #
     # If the source is a url to an rpm and the file doesn't already exist
-    # in a predesignated archives file path (/etc/cloudify/),
+    # in a predesignated archives file path (${CLOUDIFY_SOURCES_PATH}/),
     # it will download it. It will then use that file to check if the
     # package is already installed.
     # If it is, it will do nothing. It not, it will install it.
@@ -198,12 +199,12 @@ function yum_install
     archive_path=$source_name
 
     if [ "$extension" == "rpm" ]; then
-        archive_path="/etc/cloudify/$source_name"
+        archive_path="${CLOUDIFY_SOURCES_PATH}/$source_name"
         ctx logger info "Checking if rpm file $archive_path exists..."
         if [ ! -f "$archive_path" ]; then
             tmp_path=$(download_file $source)
-            create_dir "/etc/cloudify/"
-            ctx logger info "Saving ${source_name} under /etc/cloudify/..."
+            create_dir "${CLOUDIFY_SOURCES_PATH}/"
+            ctx logger info "Saving ${source_name} under ${CLOUDIFY_SOURCES_PATH}/..."
             sudo mv $tmp_path $archive_path
         fi
         source_name=$(rpm -qp $archive_path)
@@ -351,3 +352,5 @@ function set_rabbitmq_policy() {
     ctx logger info "Setting Policy ${policy_name} on queues ${queue_regex} of type ${policy_type} with value ${value}..."
     sudo rabbitmqctl set_policy ${policy_name} "${queue_regex}" "{"\"${policy_type}"\":${value}}" --apply-to queues
 }
+
+CLOUDIFY_SOURCES_PATH="/opt/cloudify/sources"
