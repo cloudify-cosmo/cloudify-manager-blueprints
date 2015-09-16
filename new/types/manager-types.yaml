@@ -13,6 +13,12 @@ node_types:
         default: centos
       ssh_key_filename:
         default: ''
+      agent_local_key_path:
+        default: ''
+      agent_remote_key_path:
+        default: /root/.ssh/agent_key.pem
+      public_ip:
+        default: ''
       cloudify:
         description: >
           Configuration for Cloudify Manager
