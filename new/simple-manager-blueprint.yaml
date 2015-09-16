@@ -317,11 +317,6 @@ node_templates:
               implementation: components/manager/scripts/set_manager_public_ip.sh
               inputs:
                 public_ip: { get_property: [manager_host, public_ip] }
-      - type: cloudify.relationships.depends_on
-        target: nginx
-        target_interfaces:
-          cloudify.interfaces.relationship_lifecycle:
-            postconfigure: components/manager/scripts/set_manager_private_ip.sh
 
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
@@ -382,6 +377,11 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+        target_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            postconfigure: components/manager/scripts/set_manager_private_ip.sh
       # circular relationship
       # - type: nginx_to_webui
       #   target: webui
