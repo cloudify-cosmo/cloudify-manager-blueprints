@@ -382,6 +382,8 @@ node_templates:
         target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
             postconfigure: components/manager/scripts/set_manager_private_ip.sh
+      - type: nginx_to_restservice
+        target: rest_service
       # circular relationship
       # - type: nginx_to_webui
       #   target: webui
