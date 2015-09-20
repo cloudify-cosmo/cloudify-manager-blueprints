@@ -12,7 +12,6 @@ export SECUREST_SOURCE_URL=$(ctx node properties securest_module_source_url)  # 
 export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
 export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_source_url)
 export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_module_source_url)
-export DIAMOND_PLUGIN_SOURCE_URL=$(ctx node properties diamond_plugin_module_source_url)
 export AGENT_SOURCE_URL=$(ctx node properties agent_module_source_url)
 
 # TODO: change to /opt/cloudify-rest-service
