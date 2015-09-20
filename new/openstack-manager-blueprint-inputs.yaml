@@ -155,3 +155,9 @@
 # Elasticsearch Curator is used to rotate the indices on a daily basis
 # via a cronjob. This allows to determine the number of days to keep.
 #elasticsearch_index_rotation_interval: 7
+
+# You can configure an external endpoint of an Elasticsearch Cluster to use
+# instead of the built in one. The built in Elasticsearch cluster will not run.
+# You need to provide an IP (defaults to localhost) and Port (defaults to 9200) of your Elasticsearch Cluster.
+#elasticsearch_endpoint_ip: localhost
+#elasticsearch_endpoint_port: 9200

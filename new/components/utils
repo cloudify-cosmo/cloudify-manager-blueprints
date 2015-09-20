@@ -151,9 +151,12 @@ function wait_for_port
     # and wait for its port to be opened.
     ###
     port=$1
+    host=${2:-localhost}
 
     counter=1
-    while ! echo exit | curl --silent http://localhost:${port} >/dev/null;
+
+    ctx logger info "Waiting for ${host}:${port} to become available..."
+    while ! echo exit | curl --silent http://${host}:${port} >/dev/null;
     do
             if [[ $counter -gt 24 ]]; then
                 sys_error "Failed to connect to port ${port}... (status $?)"
