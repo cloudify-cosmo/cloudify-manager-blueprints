@@ -16,6 +16,7 @@ export GRAFANA_HOME="${WEBUI_HOME}/grafana"
 
 
 ctx logger info "Installing Cloudify's WebUI..."
+set_selinux_permissive
 
 copy_notice "webui"
 webui_notice=$(ctx download-resource "components/webui/LICENSE")

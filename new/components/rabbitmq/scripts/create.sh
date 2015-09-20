@@ -11,6 +11,7 @@ export RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
 
 
 ctx logger info "Installing RabbitMQ..."
+set_selinux_permissive
 
 copy_notice "rabbitmq"
 create_dir "${RABBITMQ_LOG_BASE}"

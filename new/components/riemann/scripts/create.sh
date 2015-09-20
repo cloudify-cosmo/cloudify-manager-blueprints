@@ -9,7 +9,7 @@ export LANGOHR_SOURCE_URL=$(ctx node properties langohr_jar_source_url)  # (e.g.
 export DAEMONIZE_SOURCE_URL=$(ctx node properties daemonize_rpm_source_url)  # (e.g. "https://forensics.cert.org/centos/cert/7/x86_64/daemonize-1.7.3-7.el7.x86_64.rpm")
 export RIEMANN_SOURCE_URL=$(ctx node properties riemann_rpm_source_url)  # (e.g. "https://aphyr.com/riemann/riemann-0.2.6-1.noarch.rpm")
 # Needed for Riemann's config
-export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)
+export CLOUDIFY_RESOURCES_URL=$(ctx node properties cloudify_resources_url)
 
 export RIEMANN_CONFIG_PATH="/etc/riemann"
 export RIEMANN_LOG_PATH="/var/log/cloudify/riemann"
@@ -18,6 +18,7 @@ export EXTRA_CLASSPATH="${LANGOHR_HOME}/langohr.jar"
 
 
 ctx logger info "Installing Riemann..."
+set_selinux_permissive
 
 copy_notice "riemann"
 create_dir ${RIEMANN_LOG_PATH}
@@ -51,7 +52,7 @@ EOF
 sudo chmod 644 $lconf
 
 ctx logger info "Downloading cloudify-manager Repository..."
-manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
+manager_repo=$(download_file ${CLOUDIFY_RESOURCES_URL})
 ctx logger info "Extracting Manager Repository..."
 tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
 ctx logger info "Deploying Riemann manager.config..."

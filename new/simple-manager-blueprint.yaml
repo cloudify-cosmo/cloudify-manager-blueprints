@@ -36,45 +36,28 @@ inputs:
   #############################
   # Cloudify Modules
   #############################
-  cli_source_url:
+  rest_service_rpm_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-cli/archive/master.tar.gz
+    default: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-rest-service-3.3.0-m5_b275.x86_64.rpm
 
-  rest_service_source_url:
+  management_worker_rpm_source_url:
+    type: string
+    default: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-management-worker-3.3.0-m5_b275.x86_64.rpm
+
+  amqpinflux_rpm_source_url:
+    type: string
+    default: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-amqp-influx-3.3.0-m5_b275.x86_64.rpm
+
+  cloudify_resources_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
 
-  dsl_parser_source_url:
+  #############################
+  # Python Inputs
+  #############################
+  pip_source_rpm_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/master.tar.gz
-
-  rest_client_source_url:
-    type: string
-    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/master.tar.gz
-
-  plugins_common_source_url:
-    type: string
-    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/master.tar.gz
-
-  script_plugin_source_url:
-    type: string
-    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/master.tar.gz
-
-  securest_source_url:
-    type: string
-    default: https://github.com/cloudify-cosmo/flask-securest/archive/0.6.tar.gz
-
-  amqpinflux_source_url:
-    type: string
-    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/master.tar.gz
-
-  agent_source_url:
-    type: string
-    default: https://github.com/cloudify-cosmo/cloudify-agent/archive/master.tar.gz
-
-  diamond_plugin_source_url:
-    type: string
-    default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/master.tar.gz
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/python-pip-7.1.0-1.el7.noarch.rpm
 
   #############################
   # Java Inputs
@@ -154,6 +137,10 @@ inputs:
   elasticsearch_source_url:
     type: string
     default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-1.6.0.noarch.rpm
+
+  elasticsearch_curator_rpm_source_url:
+    type: string
+    default: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-curator-3.2.3-1.x86_64.rpm
 
   # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
   elasticsearch_heap_size:
@@ -241,6 +228,55 @@ inputs:
     type: string
     default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
 
+
+  #############################
+  # Dev Inputs
+  #############################
+
+  # For development purposes, you can use these, which will override the modules
+  # supplied within the rpm.
+  # These should be pip installable tar.gz files.
+  # Note that `install_python_compilers` must not be an empty string if one of the
+  # below modules require compilation.
+  install_python_compilers:
+    type: string
+    default: ''
+
+  cli_source_url:
+    type: string
+    default: ''
+
+  rest_service_source_url:
+    type: string
+    default: ''
+
+  dsl_parser_source_url:
+    type: string
+    default: ''
+
+  rest_client_source_url:
+    type: string
+    default: ''
+
+  plugins_common_source_url:
+    type: string
+    default: ''
+
+  script_plugin_source_url:
+    type: string
+    default: ''
+
+  securest_source_url:
+    type: string
+    default: ''
+
+  amqpinflux_source_url:
+    type: string
+    default: ''
+
+  agent_source_url:
+    type: string
+    default: ''
 
 ######################################################################
 # This is a simple blueprint specific node_type to allow us to define

@@ -26,6 +26,7 @@ ctx instance runtime_properties ssl_rest_service_port "443"
 ctx instance runtime_properties internal_rest_service_port "8101"
 
 ctx logger info "Installing Nginx..."
+set_selinux_permissive
 
 copy_notice "nginx"
 create_dir ${NGINX_LOG_PATH}
@@ -67,11 +68,5 @@ sudo chmod 644 $lconf
 ctx logger info "Copying SSL Certs..."
 deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.crt" "${SSL_CERTS_ROOT}/server.crt"
 deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.key" "${SSL_CERTS_ROOT}/server.key"
-
-ctx logger info "Deploying Required Manager Resources..."
-manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
-ctx logger info "Extracting Manager Resources to ${MANAGER_RESOURCES_HOME}..."
-tar -xzf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
-sudo cp -R "/tmp/resources/rest-service/cloudify/" "${MANAGER_RESOURCES_HOME}"
 
 sudo systemctl enable nginx.service &>/dev/null

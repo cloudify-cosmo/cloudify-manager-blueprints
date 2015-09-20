@@ -39,10 +39,10 @@ function install_module
 
     if [[ ! -z "${venv}" ]]; then
         ctx logger info "Installing ${module} in virtualenv ${venv}..."
-        sudo ${venv}/bin/pip install ${module} >/dev/null
+        sudo ${venv}/bin/pip install ${module} --upgrade >/dev/null
     else
         ctx logger info "Installing ${module}..."
-        sudo pip install ${module} >/dev/null
+        sudo pip install ${module} --upgrade >/dev/null
     fi
 }
 

@@ -46,7 +46,7 @@ node_types:
         description: >
           Security Configuration for Cloudify Manager
         default:
-          enabled: true
+          enabled: false
           #########################################################################
           # A list of one or more authentication providers. Cloudify will use
           # these providers in the order specified in the list (Mandatory).
@@ -122,6 +122,13 @@ node_types:
   manager.nodes.PythonRuntime:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
+      install_python_compilers:
+        description:
+        type: string
+        default: { get_input: install_python_compilers }
+      pip_source_rpm_url:
+        type: string
+        default: { get_input: pip_source_rpm_url }
       pip_version:
         description: >
           The pip version to use on the host.
@@ -220,9 +227,12 @@ node_types:
     derived_from: cloudify.nodes.DBMS
     properties:
       es_rpm_source_url:
-        description: Elasticsearch tar.gz Source URL
+        description: Elasticsearch RPM Source URL
         type: string
         default: { get_input: elasticsearch_source_url }
+      es_curator_rpm_source_url:
+        description: Elasticsearch Curator RPM Source URL
+        default: { get_input: elasticsearch_curator_rpm_source_url}
       es_heap_size:
         description: >
           This is crucial when scaling up as it
@@ -356,10 +366,10 @@ node_types:
         description: Riemann RPM Source URL
         type: string
         default: { get_input: riemann_source_url }
-      rest_service_module_source_url:
+      cloudify_resources_url:
         description: REST Service module Source URL
         type: string
-        default: { get_input: rest_service_source_url }
+        default: { get_input: cloudify_resources_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -378,6 +388,9 @@ node_types:
   manager.nodes.RestService:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      rest_service_rpm_source_url:
+        type: string
+        default: { get_input: rest_service_rpm_source_url }
       dsl_parser_module_source_url:
         description: DSL Parser module Source URL
         type: string
@@ -402,10 +415,6 @@ node_types:
         description: Script Plugin module Source URL
         type: string
         default: { get_input: script_plugin_source_url }
-      diamond_plugin_module_source_url:
-        description: Diamond Plugin module Source URL
-        type: string
-        default: { get_input: diamond_plugin_source_url }
       agent_module_source_url:
         description: Agent module Source URL
         type: string
@@ -434,10 +443,10 @@ node_types:
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
-      celery_version:
-        description: Celery version to use
+      management_worker_rpm_source_url:
+        description: Management Worker RPM Source URL
         type: string
-        default: 3.1.17
+        default: { get_input: management_worker_rpm_source_url }
       rest_client_module_source_url:
         description: REST Client module Source URL
         type: string
@@ -454,10 +463,6 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: rest_service_source_url }
-      diamond_plugin_module_source_url:
-        description: Diamond Plugin module Source URL
-        type: string
-        default: { get_input: diamond_plugin_source_url }
       agent_module_source_url:
         description: Agent module Source URL
         type: string
@@ -480,6 +485,10 @@ node_types:
   manager.nodes.AmqpInfluxBroker:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      amqpinflux_rpm_source_url:
+        description: AMQP to InfluxDB Broker RPM Source URL
+        type: string
+        default: { get_input: amqpinflux_rpm_source_url }
       amqpinflux_module_source_url:
         description: AMQP to InfluxDB Broker Source URL
         type: string

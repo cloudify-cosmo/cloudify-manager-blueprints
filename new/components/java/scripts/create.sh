@@ -6,6 +6,7 @@ JAVA_SOURCE_URL=$(ctx node properties java_rpm_source_url)
 
 
 ctx logger info "Installing Java..."
+set_selinux_permissive
 copy_notice "java"
 
 if [[ "$JAVA_SOURCE_URL" == *rpm ]]; then
