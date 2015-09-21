@@ -14,5 +14,6 @@ yum_install ${PIP_SOURCE_RPM_URL}
 
 if [ ! -z "${INSTALL_PYTHON_COMPILERS}" ]; then
     ctx logger info "Installing Compilers..."
-    yum_install "python-devel gcc" >/dev/null
+    yum_install "python-devel" >/dev/null
+    yum_install "gcc" >/dev/null
 fi
