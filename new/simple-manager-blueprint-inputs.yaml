@@ -20,6 +20,13 @@
 #resources_prefix: ''
 
 #############################
+# Security Settings
+#############################
+# Username and password to be used for login, if the simple userstore implementation is used.
+#username: 'admin'
+#password: 'admin'
+
+#############################
 # Agent Packages
 #############################
 

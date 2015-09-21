@@ -15,12 +15,13 @@ function _post_provider_context() {
 
 
 function _set_rest_port() {
+    security_enabled=$(ctx -j node properties security.enabled)
     ssl_enabled=$(ctx -j node properties security.ssl.enabled)
-    if [ ${ssl_enabled} == true ]; then
+    if ${security_enabled} == true && ${ssl_enabled} == true ; then
         ctx logger info "SSL is enabled, setting rest port to 443..."
         ctx instance runtime_properties rest_port 443
     else
-        ctx logger info "SSL is Not enabled, setting rest port to 80..."
+        ctx logger info "Security is off or SSL not enabled, setting rest port to 80..."
         ctx instance runtime_properties rest_port 80
     fi
 }
