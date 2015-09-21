@@ -140,7 +140,7 @@ inputs:
 
   elasticsearch_curator_rpm_source_url:
     type: string
-    default: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-curator-3.3.0-m5-b2751.x86_64.rpm
+    default: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-curator-3.3.0-m5-b275.x86_64.rpm
 
   # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
   elasticsearch_heap_size:
