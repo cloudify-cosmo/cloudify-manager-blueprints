@@ -68,6 +68,9 @@ node_types:
               implementation: flask_securest.authentication_providers.token:TokenAuthenticator
               properties:
                 secret_key: my_secret
+          authorization_provider:
+            implementation: flask_securest.authorization_providers.authorize_all:AuthorizeAll
+            properties: {}
           #########################################################################
           # A user-store implementation is used to find a matching user
           # and load its details (Mandatory unless you specified a custom

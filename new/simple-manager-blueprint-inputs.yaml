@@ -3,21 +3,21 @@
 #############################
 
 # The public IP of the manager to which the CLI will connect.
-#public_ip: ''
+public_ip: '185.98.148.103'
 
 # The manager's private IP address. This is the address which will be used by the
 # application hosts to connect to the Manager's fileserver and message broker.
-#private_ip: ''
+private_ip: '192.168.0.132'
 
 # SSH user used to connect to the manager
-#ssh_user: ''
+ssh_user: 'centos'
 
 # SSH key path used to connect to the manager
-#ssh_key_filename: ''
+ssh_key_filename: '/home/noak/.ssh/noak-dc-kp.pem'
 
 # This is the user with which the Manager will try to connect to the application hosts.
-#agents_user: ''
-#resources_prefix: ''
+agents_user: 'centos'
+resources_prefix: 'noak'
 
 #############################
 # Security Settings
@@ -58,13 +58,19 @@
 # Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
 # That is, as long as they provide the exact same version of that module.
 
-#rest_service_rpm_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify-rest-service-3.3.0-m7_b277.x86_64.rpm
-#management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify-management-worker-3.3.0-m7_b277.x86_64.rpm
-#amqpinflux_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify-amqp-influx-3.3.0-m7_b277.x86_64.rpm
-#cloudify_resources_url: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
-#webui_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify-ui-3.3.0-m7-b277.tgz
-# This is a Cloudify specific redistribution of Grafana.
-#grafana_source_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/grafana-1.9.0.tgz
+#rest_client_source_url: ''
+#dsl_parser_source_url: ''
+plugins_common_source_url: 'https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/acl_support_only.tar.gz'
+cli_source_url: 'https://github.com/cloudify-cosmo/cloudify-cli/tree/acl_support_only.tar.gz'
+rest_service_source_url: 'https://github.com/cloudify-cosmo/cloudify-manager/archive/acl_support_only.tar.gz'
+#script_plugin_source_url: ''
+securest_source_url: 'https://github.com/cloudify-cosmo/flask-securest/archive/acl_support_only.tar.gz'
+# agent_source_url: 'https://github.com/cloudify-cosmo/cloudify-agent/archive/noak_test.tar.gz'
+#amqpinflux_source_url: ''
+#rest_service_rpm_url:
+#management_worker_rpm_source_url:
+#amqpinflux_rpm_source_url:
+#cloudify_resources_url:
 
 #############################
 # External Components
