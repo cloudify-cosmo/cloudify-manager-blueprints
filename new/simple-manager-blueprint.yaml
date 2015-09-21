@@ -217,7 +217,7 @@ inputs:
   #############################
   webui_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/3.3/cosmo-ui-3.3.0-m3.tgz
+    default: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/ui-blueprint-3.3.0-m5-b275.tar.gz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
