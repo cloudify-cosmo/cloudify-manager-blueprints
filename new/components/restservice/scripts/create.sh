@@ -4,6 +4,7 @@
 
 
 CONFIG_REL_PATH="components/restservice/config"
+REST_RESOURCES_REL_PATH="resources/rest"
 
 # Set broker port for rabbit
 BROKER_PORT_SSL=5671
@@ -84,6 +85,9 @@ if [ ! -z ${REST_SERVICE_SOURCE_URL} ]; then
     ctx logger info "Deploying Required Manager Resources..."
     sudo cp -R "/tmp/resources/rest-service/cloudify/" "${MANAGER_RESOURCES_HOME}"
 fi
+
+ctx logger info "Copying role configuration files..."
+deploy_blueprint_resource "${REST_RESOURCES_REL_PATH}/roles_config.yaml" "${REST_SERVICE_HOME}/roles_config.yaml"
 
 deploy_logrotate_config "restservice"
 

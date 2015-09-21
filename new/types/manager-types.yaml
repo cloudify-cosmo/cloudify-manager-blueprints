@@ -68,6 +68,12 @@ node_types:
               implementation: flask_securest.authentication_providers.token:TokenAuthenticator
               properties:
                 secret_key: my_secret
+          authorization_provider:
+            implementation: flask_securest.authorization_providers.role_based_authorization_provider:RoleBasedAuthorizationProvider
+            properties:
+              role_loader:
+                implementation: flask_securest.authorization_providers.role_loaders.simple_role_loader:SimpleRoleLoader
+
           #########################################################################
           # A user-store implementation is used to find a matching user
           # and load its details (Mandatory unless you specified a custom
@@ -82,6 +88,36 @@ node_types:
                 user:
                   username: { get_input: admin_username }
                   password: { get_input: admin_password }
+                users:
+                  - username: { get_input: admin_username }
+                    password: { get_input: admin_password }
+                    groups:
+                      - cfy_admins
+                  - username: deployment_manager
+                    password: deployment_manager
+                    groups:
+                      - managers
+                      - users
+                  - username: deployment_viewer
+                    password: deployment_viewer
+                    roles:
+                      - viewer
+                    groups:
+                      - users
+                  - username: user
+                    password: user
+                    groups:
+                      - users
+                groups:
+                  - name: cfy_admins
+                    roles:
+                      - administrator
+                  - name: managers
+                    roles:
+                      - deployer
+                      - viewer
+                  - name: users
+                    roles: {}
           #########################################################################
           # REST calls to "MANAGER_IP/tokens" will generate and return
           # authentication tokens if an auth_token_generator is set (Optional).
