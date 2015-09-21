@@ -34,6 +34,15 @@ inputs:
     type: string
 
   #############################
+  # Security Settings
+  #############################
+  username:
+    default: admin
+
+  password:
+    default: admin
+
+  #############################
   # Cloudify Modules
   #############################
   rest_service_rpm_source_url:

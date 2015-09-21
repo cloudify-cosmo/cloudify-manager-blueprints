@@ -77,18 +77,10 @@ node_types:
             implementation: flask_securest.userstores.simple:SimpleUserstore
             properties:
               userstore:
-                user1:
-                  username: example_user1
-                  password: example_password1
-                  email: example_user1@your_domain.dom
-                user2:
-                  username: example_user2
-                  password: example_password2
-                  email: example_user2@your_domain.dom
-                user3:
-                  username: example_user3
-                  password: example_password3
-                  email: example_user3@your_domain.dom
+                user:
+                  username: { get_input: username }
+                  password: { get_input: password }
+                  email: { concat: [{ get_input: username }, '@domain.com'] }
               identifying_attribute: username
           #########################################################################
           # REST calls to "MANAGER_IP/tokens" will generate and return
