@@ -65,3 +65,4 @@ openstack-docker/.cloudify
 
 # Cloudify
 .cloudify
+.idea
