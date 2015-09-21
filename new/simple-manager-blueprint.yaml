@@ -75,7 +75,7 @@ inputs:
 
   cloudify_resources_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m5.tar.gz
 
   webui_source_url:
     type: string
