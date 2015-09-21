@@ -20,6 +20,8 @@ function create_virtualenv
 {
     virtualenv_path=$1
 
+    ctx logger info "Creating Virtualenv ${virtualenv_path} if it doesn't exist..."
+    [ -f "$virtualenv_path/bin/python" ] && ctx logger info "Virtualenv directory already exists..." && return 0
     ctx logger info "Creating virtualenv ${virtualenv_path}..."
     sudo virtualenv ${virtualenv_path} >/dev/null
 }
@@ -27,6 +29,10 @@ function create_virtualenv
 function create_dir
 {
     dir=$1
+
+    if [ -d $dir ]; then
+        return 0
+    fi
 
     ctx logger info "Creating directory ${dir}..."
     sudo mkdir -p ${dir}
@@ -44,22 +50,6 @@ function install_module
         ctx logger info "Installing ${module}..."
         sudo pip install ${module} --upgrade >/dev/null
     fi
-}
-
-
-# DEPRECATED
-function install_rpm
-{
-    source=$1
-    if [[ -z "${source}" ]]; then
-        sys_error "Must supply url as param (install_rpm #URL#)."
-    fi
-
-    tmp_file_path="/tmp/${RANDOM}.rpm"
-    download_file ${source} ${tmp_file_path}
-    ctx logger info "Installing RPM ${tmp_file_path}..."
-    sudo rpm --nodeps -ivh ${tmp_file_path}
-    clean_tmp
 }
 
 function clean_tmp
@@ -128,8 +118,23 @@ function download_file
     echo ${destination_file}
 }
 
-function copy_notice
-{
+function download_cloudify_resource() {
+    url=$1
+    destination_file="${CLOUDIFY_SOURCES_PATH}/$(get_file_name $url)"
+
+    ctx logger info "Downloading ${url}..."
+    if [ -f "${destination_file}" ]; then
+        ctx logger info "Resource already exists (${destination_file}). Skipping..."
+    else
+        tmppath=$(download_file "${url}")
+        ctx logger info "Saving ${tmppath} under ${destination_file}..."
+        create_dir "${CLOUDIFY_SOURCES_PATH}/"
+        sudo mv "${tmppath}" "${destination_file}"
+    fi
+    echo ${destination_file}
+}
+
+function copy_notice() {
     ###
     # This is a generic implementation for copying NOTICE files for different
     # services to /opt.
@@ -137,6 +142,10 @@ function copy_notice
     service=$1
 
     destination_notice="/opt/${service}_NOTICE.txt"
+    if [ -f $destination_notice ]; then
+        ctx logger info "NOTICE file ${destination_notice} already exists. Skipping..."
+        return 0
+    fi
     ctx logger info "Copying ${service} NOTICE file to ${destination_notice}..."
     notice_file=$(ctx download-resource "components/${service}/NOTICE.txt")
     sudo mv ${notice_file} ${destination_notice}
@@ -168,20 +177,59 @@ function wait_for_port
     ctx logger info "Port ${port} is available!"
 }
 
-function yum_install
-{
+function yum_install() {
     ###
     # yum supports installing from URL, path and the default yum repo
-    # configured within your image
+    # configured within your image.
     # you can specify one of the following:
-    # [yum install -y] http://www.myrpmrepo.com/file.rpm
     # [yum install -y] mylocalfile.rpm
     # [yum install -y] mypackagename
+    #
+    # If the source is a package name, it will check whether it is already
+    # installed.
+    # If it is, it will do nothing. It not, it will install it.
+    #
+    # If the source is a url to an rpm and the file doesn't already exist
+    # in a predesignated archives file path (${CLOUDIFY_SOURCES_PATH}/),
+    # it will download it. It will then use that file to check if the
+    # package is already installed.
+    # If it is, it will do nothing. It not, it will install it.
+    #
+    # NOTE: This will currently not take into considerations situations
+    # in which a file was downloaded partially. If a file is partially
+    # downloaded, a redownload will not take place and rather an
+    # installation will be attempted, which will obviously fail since
+    # the rpm file is incomplete.
+    #
+    # ALSO NOTE: you cannot run yum_install and provide it with a space
+    # separated array of packages as you can with yum install. You must
+    # provide one package per invocation.
     ###
     source=$1
+    source_name=$(get_file_name $source)
+    extension="${source_name##*.}"
+    archive_path=$source_name
 
-    ctx logger info "yum Installing ${source}..."
-    sudo yum install -y ${source} >/dev/null
+    if [ "$extension" == "rpm" ]; then
+        archive_path="${CLOUDIFY_SOURCES_PATH}/$source_name"
+        ctx logger info "Checking if rpm file $archive_path exists..."
+        if [ ! -f "$archive_path" ]; then
+            tmp_path=$(download_file $source)
+            create_dir "${CLOUDIFY_SOURCES_PATH}/"
+            ctx logger info "Saving ${source_name} under ${CLOUDIFY_SOURCES_PATH}/..."
+            sudo mv $tmp_path $archive_path
+        fi
+        source_name=$(rpm -qp $archive_path)
+    fi
+
+    ctx logger info "Checking if $archive_path is already installed..."
+    if rpm -q $source_name 2>&1 >/dev/null; then
+        ctx logger info "Package ${source} is already installed."
+        return 0
+    fi
+
+    ctx logger info "yum Installing ${archive_path}..."
+    sudo yum install -y ${archive_path} >/dev/null
 }
 
 function configure_systemd_service() {
@@ -253,7 +301,6 @@ function get_file_name() {
     # Extracts a file name from a path or url
     ###
     string="$1"; echo "${string##*/}"
-    echo $string
 }
 
 function replace() {
@@ -277,21 +324,6 @@ function inject_service_env_var() {
     ctx logger info "Injecting variable..."
     vars_path=$(get_systemd_vars_file_path "${service_name}")
     replace "${field}" "${value}" $vars_path >/dev/null
-}
-
-# DEPRACATED by download-resource-and-render
-function inject_management_ip_as_env_var() {
-    ###
-    # Injects the manager's ip into a service's env var file
-    # Note that this currently requires that a relationship
-    # operation sets this ip as a runtime property to the node.
-    ###
-    service_name=$1
-
-    # management_ip=$(ctx instance runtime_properties manager_host_ip)
-    management_ip=$(ctx instance host_ip)
-    ctx logger info "Setting service management_ip variable..."
-    inject_service_env_var "{{ ctx.instance.runtime_properties.manager_host_ip }}" "${management_ip}" "${service_name}"
 }
 
 function get_selinux_state() {
@@ -332,3 +364,5 @@ function set_rabbitmq_policy() {
     ctx logger info "Setting Policy ${policy_name} on queues ${queue_regex} of type ${policy_type} with value ${value}..."
     sudo rabbitmqctl set_policy ${policy_name} "${queue_regex}" "{"\"${policy_type}"\":${value}}" --apply-to queues
 }
+
+CLOUDIFY_SOURCES_PATH="/opt/cloudify/sources"

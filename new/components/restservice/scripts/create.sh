@@ -52,7 +52,7 @@ ctx logger info "Installing Optional REST Service Modules..."
 [ -z ${AGENT_SOURCE_URL} ] || install_module ${AGENT_SOURCE_URL} ${RESTSERVICE_VIRTUALENV}
 
 if [ ! -z ${REST_SERVICE_SOURCE_URL} ]; then
-    manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
+    manager_repo=$(download_cloudify_resource ${REST_SERVICE_SOURCE_URL})
     ctx logger info "Extracting Manager Resources to ${MANAGER_RESOURCES_HOME}..."
     tar -xzf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
     install_module "/tmp/rest-service" ${RESTSERVICE_VIRTUALENV}

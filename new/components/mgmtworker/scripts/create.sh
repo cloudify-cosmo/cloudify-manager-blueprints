@@ -42,7 +42,7 @@ ctx logger info "Installing Optional Management Worker Modules..."
 
 if [ ! -z ${REST_SERVICE_SOURCE_URL} ]; then
     ctx logger info "Downloading cloudify-manager Repository..."
-    manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
+    manager_repo=$(download_cloudify_resource ${REST_SERVICE_SOURCE_URL})
     ctx logger info "Extracting Manager Repository..."
     tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
 
