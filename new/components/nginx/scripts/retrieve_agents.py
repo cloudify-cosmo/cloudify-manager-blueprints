@@ -24,6 +24,14 @@ def retrieve(agent_packages):
     for agent, source_url in agent_packages.items():
         dest_path = ctx.instance.runtime_properties['agent_packages_path']
         agent_name = agent.replace('_', '-')
+
+        # This is a workaround for mapping Centos release names to versions
+        # to provide a better UX when providing agent inputs.
+        if agent_name == 'centos-7x-agent':
+            agent_name = 'centos-core-agent'
+        elif agent_name == 'centos-6x-agent':
+            agent_name = 'centos-final-agent'
+
         if agent_name == 'cloudify-windows-agent':
             filename = '{0}.exe'.format(agent_name)
         else:
