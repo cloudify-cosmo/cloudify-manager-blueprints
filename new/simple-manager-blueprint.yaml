@@ -34,6 +34,31 @@ inputs:
     type: string
 
   #############################
+  # Security Settings
+  #############################
+  username:
+    default: admin
+
+  password:
+    default: admin
+
+  #############################
+  # Agent Packages
+  #############################
+
+  # Nginx, being the fileserver, also serves agent packages.
+  # The key names of the agents must be in the format: distro_release_agent
+  # as the key is what's used to name the file, which later allows our
+  # agent installer to identify it for your distro and release automatically.
+  agent_package_urls:
+    default:
+      ubuntu_trusty_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-trusty-agent_3.3.0-m5-b275.tar.gz
+      ubuntu_precise_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-precise-agent_3.3.0-m5-b275.tar.gz
+      centos_core_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Core-agent_3.3.0-m5-b275.tar.gz
+      centos_final_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Final-agent_3.3.0-m5-b275.tar.gz
+      cloudify_windows_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-windows-agent_3.3.0-m5-b275.exe
+
+  #############################
   # Cloudify Modules
   #############################
   rest_service_rpm_source_url:
@@ -52,23 +77,26 @@ inputs:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
 
+  webui_source_url:
+    type: string
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/cosmo-ui-3.3.0-m3.tgz
+
+  # This is a Cloudify specific redistribution of Grafana.
+  grafana_source_url:
+    type: string
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/grafana-1.9.0.tgz
+
   #############################
-  # Python Inputs
+  # External Components
   #############################
   pip_source_rpm_url:
     type: string
     default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/python-pip-7.1.0-1.el7.noarch.rpm
 
-  #############################
-  # Java Inputs
-  #############################
   java_source_url:
     type: string
     default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/jre1.8.0_45-1.8.0_45-fcs.x86_64.rpm
 
-  #############################
-  # RabbitMQ Inputs
-  #############################
   erlang_source_url:
     type: string
     default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/erlang-17.4-1.el6.x86_64.rpm
@@ -77,6 +105,45 @@ inputs:
     type: string
     default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/rabbitmq-server-3.5.3-1.noarch.rpm
 
+  elasticsearch_source_url:
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-1.6.0.noarch.rpm
+
+  elasticsearch_curator_rpm_source_url:
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-curator-3.2.3-1.x86_64.rpm
+
+  logstash_source_url:
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/logstash-1.5.0-1.noarch.rpm
+
+  nginx_source_url:
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/nginx-1.8.0-1.el7.ngx.x86_64.rpm
+
+  influxdb_source_url:
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/influxdb-0.8.8-1.x86_64.rpm
+
+  langohr_source_url:
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/langohr.jar
+
+  daemonize_source_url:
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/daemonize-1.7.3-7.el7.x86_64.rpm
+
+  riemann_source_url:
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/riemann-0.2.6-1.noarch.rpm
+
+  nodejs_source_url:
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
+
+  #############################
+  # RabbitMQ Inputs
+  #############################
   rabbitmq_events_queue_message_ttl:
     description: >
       Sets the number of milliseconds to wait before a message expires
@@ -134,14 +201,6 @@ inputs:
   #############################
   # Elasticsearch Inputs
   #############################
-  elasticsearch_source_url:
-    type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-1.6.0.noarch.rpm
-
-  elasticsearch_curator_rpm_source_url:
-    type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-curator-3.2.3-1.x86_64.rpm
-
   # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
   elasticsearch_heap_size:
     type: string
@@ -163,71 +222,6 @@ inputs:
       Determines the number of days to keep.
     type: integer
     default: 7
-
-  #############################
-  # Logstash Inputs
-  #############################
-  logstash_source_url:
-    type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/logstash-1.5.0-1.noarch.rpm
-
-  #############################
-  # Nginx Inputs
-  #############################
-  nginx_source_url:
-    type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/nginx-1.8.0-1.el7.ngx.x86_64.rpm
-
-  # Nginx, being the fileserver, also serves agent packages.
-  # The key names of the agents must be in the format: distro_release_agent
-  # as the key is what's used to name the file, which later allows our
-  # agent installer to identify it for your distro and release automatically.
-  agent_package_urls:
-    default:
-      ubuntu_trusty_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-trusty-agent_3.3.0-m5-b275.tar.gz
-      ubuntu_precise_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-precise-agent_3.3.0-m5-b275.tar.gz
-      centos_core_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Core-agent_3.3.0-m5-b275.tar.gz
-      centos_final_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Final-agent_3.3.0-m5-b275.tar.gz
-      cloudify_windows_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-windows-agent_3.3.0-m5-b275.exe
-
-  #############################
-  # InfluxDB Inputs
-  #############################
-  influxdb_source_url:
-    type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/influxdb-0.8.8-1.x86_64.rpm
-
-  #############################
-  # Riemann Inputs
-  #############################
-  langohr_source_url:
-    type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/langohr.jar
-
-  daemonize_source_url:
-    type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/daemonize-1.7.3-7.el7.x86_64.rpm
-
-  riemann_source_url:
-    type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/riemann-0.2.6-1.noarch.rpm
-
-  #############################
-  # WebUI Inputs
-  #############################
-  webui_source_url:
-    type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-ui-3.3.0-m5-b275.tgz
-
-  # This is a Cloudify specific redistribution of Grafana.
-  grafana_source_url:
-    type: string
-    default: https://dl.dropboxusercontent.com/u/407576/3.3/grafana-1.9.0.tgz
-
-  nodejs_source_url:
-    type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
-
 
   #############################
   # Dev Inputs
@@ -277,6 +271,7 @@ inputs:
   agent_source_url:
     type: string
     default: ''
+
 
 ######################################################################
 # This is a simple blueprint specific node_type to allow us to define
