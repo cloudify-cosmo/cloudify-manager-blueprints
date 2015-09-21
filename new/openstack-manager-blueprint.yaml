@@ -304,6 +304,18 @@ inputs:
     type: integer
     default: 7
 
+  elasticsearch_endpoint_ip:
+    description: >
+      An IP Endpoint of your Elasticsearch Cluster.
+    type: string
+    default: localhost
+
+  elasticsearch_endpoint_port:
+    description: >
+      The Port of your Elasticsearch Cluster.
+    type: integer
+    default: 9200
+
   #############################
   # Dev Inputs
   #############################

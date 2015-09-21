@@ -246,6 +246,12 @@ node_types:
           interfere with the data model.
         type: integer
         default: { get_input: elasticsearch_index_rotation_interval }
+      es_endpoint_ip:
+        type: string
+        default: { get_input: elasticsearch_endpoint_ip }
+      es_endpoint_port:
+        type: integer
+        default: { get_input: elasticsearch_endpoint_port }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -268,6 +274,12 @@ node_types:
         description: Logstash tar.gz Source URL
         type: string
         default: { get_input: logstash_source_url }
+      es_endpoint_ip:
+        type: string
+        default: { get_input: elasticsearch_endpoint_ip }
+      es_endpoint_port:
+        type: integer
+        default: { get_input: elasticsearch_endpoint_port }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -416,6 +428,12 @@ node_types:
       cloudify:
         description: Security settings from the manager configuration
         default: {}
+      es_endpoint_ip:
+        type: string
+        default: { get_input: elasticsearch_endpoint_ip }
+      es_endpoint_port:
+        type: integer
+        default: { get_input: elasticsearch_endpoint_port }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
