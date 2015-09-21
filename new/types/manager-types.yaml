@@ -120,20 +120,6 @@ node_types:
       pip_source_rpm_url:
         type: string
         default: { get_input: pip_source_rpm_url }
-      pip_version:
-        description: >
-          The pip version to use on the host.
-          Note that defaulting to an empty string means
-          installing the latest version available.
-        type: string
-        default: ''
-      virtualenv_version:
-        description: >
-          The virtualenv version to use on the host.
-          Note that defaulting to an empty string means
-          installing the latest version available.
-        type: string
-        default: ''
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
