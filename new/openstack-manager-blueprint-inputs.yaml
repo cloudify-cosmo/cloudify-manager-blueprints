@@ -87,9 +87,9 @@
 #management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-management-worker-3.3.0-m5_b275.x86_64.rpm
 #amqpinflux_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-amqp-influx-3.3.0-m5_b275.x86_64.rpm
 #cloudify_resources_url: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
-#webui_source_url: https://dl.dropboxusercontent.com/u/407576/3.3/cosmo-ui-3.3.0-m3.tgz
+#webui_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-ui-3.3.0-m5-b275.tgz
 # This is a Cloudify specific redistribution of Grafana.
-#grafana_source_url: https://dl.dropboxusercontent.com/u/407576/3.3/grafana-1.9.0.tgz
+#grafana_source_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/grafana-1.9.0.tgz
 
 #############################
 # External Components
