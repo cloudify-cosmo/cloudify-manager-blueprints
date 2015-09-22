@@ -458,6 +458,9 @@ node_types:
         description: Agent module Source URL
         type: string
         default: { get_input: agent_source_url }
+      plugins:
+        description: Enables installing custom plugins on the rest service
+        default: {}
       # what we would really like is to have the ref to cloudify security here (in the type) and not in the template
       # defined in each manager blueprint
       # and we also need just the security section...
@@ -477,6 +480,14 @@ node_types:
           inputs:
             script_path:
               default: components/restservice/scripts/create.sh
+            fabric_env: *simple_fabric_env
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file:
+              default: components/restservice/scripts/install_plugins.py
+            task_name:
+              default: install_plugins
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
@@ -692,7 +703,7 @@ relationships:
             implementation: fabric.fabric_plugin.tasks.run_script
             inputs:
               script_path:
-                default: components/restservice/scripts/configure.sh
+                default: components/restservice/scripts/preconfigure.sh
               fabric_env: *simple_fabric_env
 
   amqpinflux_to_rabbitmq:
