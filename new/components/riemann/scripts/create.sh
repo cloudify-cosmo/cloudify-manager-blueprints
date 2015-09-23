@@ -16,6 +16,16 @@ export RIEMANN_LOG_PATH="/var/log/cloudify/riemann"
 export LANGOHR_HOME="/opt/lib"
 export EXTRA_CLASSPATH="${LANGOHR_HOME}/langohr.jar"
 
+export RABBITMQ_USERNAME="$(ctx node properties rabbitmq_username)"
+export RABBITMQ_PASSWORD="$(ctx node properties rabbitmq_password)"
+
+# Confirm username and password have been supplied for broker before continuing
+# Components other than logstash and riemann have this handled in code already
+# Note that these are not directly used in this script, but are used by the deployed resources, hence the check here.
+if [[ -z "${RABBITMQ_USERNAME}" ]] ||
+   [[ -z "${RABBITMQ_PASSWORD}" ]]; then
+  sys_error "Both rabbitmq_username and rabbitmq_password must be supplied and at least 1 character long in the manager blueprint inputs."
+fi
 
 ctx logger info "Installing Riemann..."
 set_selinux_permissive
@@ -54,7 +64,7 @@ sudo chmod 644 $lconf
 ctx logger info "Downloading cloudify-manager Repository..."
 manager_repo=$(download_cloudify_resource ${CLOUDIFY_RESOURCES_URL})
 ctx logger info "Extracting Manager Repository..."
-tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
+extract_github_archive_to_tmp ${manager_repo}
 ctx logger info "Deploying Riemann manager.config..."
 sudo mv "/tmp/plugins/riemann-controller/riemann_controller/resources/manager.config" "${RIEMANN_CONFIG_PATH}/conf.d/manager.config"
 

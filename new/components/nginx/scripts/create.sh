@@ -8,7 +8,6 @@ SSL_RESOURCES_REL_PATH="resources/ssl"
 export NGINX_SOURCE_URL=$(ctx node properties nginx_rpm_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/3.2/nginx-1.8.0-1.el7.ngx.x86_64.rpm")
 export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
 
-
 export NGINX_LOG_PATH="/var/log/cloudify/nginx"
 # export NGINX_REPO="http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm"
 export MANAGER_RESOURCES_HOME="/opt/manager/resources"

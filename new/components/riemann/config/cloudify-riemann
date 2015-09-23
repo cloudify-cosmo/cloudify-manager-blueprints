@@ -4,3 +4,6 @@ EXTRA_CLASSPATH="/opt/lib/langohr.jar"
 
 RABBITMQ_HOST="{{ ctx.instance.host_ip }}"
 MANAGEMENT_IP="{{ ctx.instance.host_ip }}"
+
+RABBITMQ_USER="{{ ctx.node.properties.rabbitmq_username }}"
+RABBITMQ_PASS="{{ ctx.node.properties.rabbitmq_password }}"
