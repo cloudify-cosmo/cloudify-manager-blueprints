@@ -1,6 +1,6 @@
 ############################ Cloudify Configuration ############################
 
-http.port: 9200
+http.port: {{ ctx.node.properties.es_endpoint_port }}
 discovery.zen.ping.multicast.port: 54329
 path.logs: /var/log/cloudify/elasticsearch
 path.conf: /etc/elasticsearch

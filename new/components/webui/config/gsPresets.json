@@ -14,7 +14,7 @@
             ]
         },
         "influx": {
-            "host": "localhost",
+            "host": "{{ ctx.node.properties.influxdb_endpoint_ip }}",
             "user": "root",
             "pass": "root",
             "dbname": "cloudify"

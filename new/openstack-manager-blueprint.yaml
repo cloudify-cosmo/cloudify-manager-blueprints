@@ -317,6 +317,15 @@ inputs:
     default: 9200
 
   #############################
+  # InfluxDB Inputs
+  #############################
+  influxdb_endpoint_ip:
+    description: >
+      An IP Endpoint of your InfluxDB Cluster.
+    type: string
+    default: localhost
+
+  #############################
   # Dev Inputs
   #############################
 

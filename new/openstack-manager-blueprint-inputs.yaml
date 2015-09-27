@@ -161,3 +161,13 @@
 # You need to provide an IP (defaults to localhost) and Port (defaults to 9200) of your Elasticsearch Cluster.
 #elasticsearch_endpoint_ip: localhost
 #elasticsearch_endpoint_port: 9200
+
+#############################
+# InfluxDB Configuration
+#############################
+# You can configure an external endpoint of an InfluxDB Cluster to use
+# instead of the built in one. The built in InfluxDB cluster will not run.
+# You need to provide an IP (defaults to localhost) InfluxDB Cluster.
+# Note that the port is currently not configurable and must remain 8086.
+# Also note that the database username and password are hardcoded to root:root.
+#influxdb_endpoint_ip: localhost
