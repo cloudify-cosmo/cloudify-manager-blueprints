@@ -14,6 +14,8 @@ export WEBUI_HOME="/opt/cloudify-ui"
 export WEBUI_LOG_PATH="/var/log/cloudify/webui"
 export GRAFANA_HOME="${WEBUI_HOME}/grafana"
 
+export WEBUI_USER="webui"
+export WEBUI_GROUP="webui"
 
 ctx logger info "Installing Cloudify's WebUI..."
 set_selinux_permissive
@@ -27,6 +29,9 @@ create_dir ${WEBUI_HOME}
 create_dir ${WEBUI_HOME}/backend
 create_dir ${WEBUI_LOG_PATH}
 create_dir ${GRAFANA_HOME}
+
+ctx logger info "Creating user..."
+sudo useradd --shell /sbin/nologin --home-dir "${WEBUI_HOME}" --no-create-home --system "${WEBUI_USER}"
 
 ctx logger info "Installing NodeJS..."
 nodejs=$(download_file ${NODEJS_SOURCE_URL})
@@ -49,6 +54,12 @@ deploy_blueprint_resource "${CONFIG_REL_PATH}/grafana_config.js" "${GRAFANA_HOME
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/cloudify-webui"
+
+ctx logger info "Fixing permissions..."
+sudo chown -R "${WEBUI_USER}:${WEBUI_GROUP}" "${WEBUI_HOME}"
+sudo chown -R "${WEBUI_USER}:${WEBUI_GROUP}" "${NODEJS_HOME}"
+sudo chown -R "${WEBUI_USER}:${WEBUI_GROUP}" "${WEBUI_LOG_PATH}"
+
 
 cat << EOF | sudo tee $lconf >/dev/null
 $WEBUI_LOG_PATH/*.log {

@@ -5,6 +5,8 @@ Description=Cloudify WebUI Service
 TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-webui
+User=webui
+Group=webui
 ExecStart=/opt/nodejs/bin/node /opt/cloudify-ui/cosmoui.js localhost
 
 [Install]
