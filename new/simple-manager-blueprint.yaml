@@ -217,12 +217,12 @@ inputs:
   #############################
   webui_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/3.3/cosmo-ui-3.3.0-m3.tgz
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-ui-3.3.0-m5-b275.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/3.3/grafana-1.9.0.tgz
+    default: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/grafana-1.9.0.tgz
 
   nodejs_source_url:
     type: string
