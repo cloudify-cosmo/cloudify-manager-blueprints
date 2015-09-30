@@ -320,6 +320,9 @@ node_types:
         description: InfluxDB RPM Source URL
         type: string
         default: { get_input: influxdb_source_url }
+      influxdb_endpoint_ip:
+        type: string
+        default: { get_input: influxdb_endpoint_ip }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -561,6 +564,10 @@ node_types:
         description: AMQP to InfluxDB Broker Source URL
         type: string
         default: { get_input: amqpinflux_source_url }
+      influxdb_endpoint_ip:
+        type: string
+        default: { get_input: influxdb_endpoint_ip }
+
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -597,6 +604,10 @@ node_types:
         description: NodeJS tgz Source URL
         type: string
         default: { get_input: nodejs_source_url }
+      influxdb_endpoint_ip:
+        type: string
+        default: { get_input: influxdb_endpoint_ip }
+
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
