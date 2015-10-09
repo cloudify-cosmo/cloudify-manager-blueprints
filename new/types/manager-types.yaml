@@ -548,10 +548,6 @@ node_types:
         description: AMQP to InfluxDB Broker Source URL
         type: string
         default: { get_input: amqpinflux_source_url }
-      influxdb_endpoint_ip:
-        type: string
-        default: { get_input: influxdb_endpoint_ip }
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -560,6 +556,8 @@ node_types:
             script_path:
               default: components/amqpinflux/scripts/create.sh
             fabric_env: *simple_fabric_env
+            INFLUXDB_ENDPOINT_IP:
+              default: { get_attribute: [influxdb, influxdb_endpoint_ip] }
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
@@ -588,10 +586,6 @@ node_types:
         description: NodeJS tgz Source URL
         type: string
         default: { get_input: nodejs_source_url }
-      influxdb_endpoint_ip:
-        type: string
-        default: { get_input: influxdb_endpoint_ip }
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -600,6 +594,8 @@ node_types:
             script_path:
               default: components/webui/scripts/create.sh
             fabric_env: *simple_fabric_env
+            INFLUXDB_ENDPOINT_IP:
+              default: { get_attribute: [influxdb, influxdb_endpoint_ip] }
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:

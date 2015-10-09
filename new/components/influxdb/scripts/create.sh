@@ -58,13 +58,8 @@ EOF
     configure_systemd_service "influxdb"
 }
 
-if [ "${INFLUXDB_ENDPOINT_IP}" != "localhost" ]; then
-    ctx logger info "External InfluxDB Endpoint IP provided: ${INFLUXDB_ENDPOINT_IP}..."
-    sleep 5
-    wait_for_port "${INFLUXDB_ENDPOINT_PORT}" "${INFLUXDB_ENDPOINT_IP}"
-    # per a function in configure_influx
-    configure_influxdb "${INFLUXDB_ENDPOINT_IP}" "${INFLUXDB_ENDPOINT_PORT}"
-else
+if [ -z "${INFLUXDB_ENDPOINT_IP}" ]; then
+    INFLUXDB_ENDPOINT_IP=$(ctx instance host_ip)
     install_influxdb
 
     ctx logger info "Starting InfluxDB Service..."
@@ -76,4 +71,12 @@ else
 
     ctx logger info "Stopping InfluxDB Service..."
     sudo systemctl stop cloudify-influxdb.service
+else
+    ctx logger info "External InfluxDB Endpoint IP provided: ${INFLUXDB_ENDPOINT_IP}..."
+    sleep 5
+    wait_for_port "${INFLUXDB_ENDPOINT_PORT}" "${INFLUXDB_ENDPOINT_IP}"
+    # per a function in configure_influx
+    configure_influxdb "${INFLUXDB_ENDPOINT_IP}" "${INFLUXDB_ENDPOINT_PORT}"
 fi
+
+ctx instance runtime_properties influxdb_endpoint_ip ${INFLUXDB_ENDPOINT_IP}
