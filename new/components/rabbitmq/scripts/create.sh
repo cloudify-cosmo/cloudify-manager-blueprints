@@ -68,3 +68,5 @@ sudo chown rabbitmq:rabbitmq ${RABBITMQ_LOG_BASE}
 
 ctx logger info "Stopping RabbitMQ Service..."
 sudo systemctl stop cloudify-rabbitmq.service
+
+clean_var_log_dir rabbitmq

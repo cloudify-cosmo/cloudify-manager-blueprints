@@ -106,6 +106,7 @@ if [ -z "${ES_ENDPOINT_IP}" ]; then
 
     ctx logger info "Stopping Elasticsearch Service..."
     sudo systemctl stop elasticsearch.service
+    clean_var_log_dir elasticsearch
 else
     ctx logger info "External Elasticsearch Endpoint provided: ${ES_ENDPOINT_IP}:${ES_ENDPOINT_PORT}..."
     ctx logger info "NOTE THAT THE CURRENT 'cloudify_storage' INDEX IN THE PROVIDED ELASTICSEARCH CLUSTER WILL BE REBUILT!"

@@ -40,6 +40,7 @@ create_dir ${MANAGER_TEMPLATES_PATH}
 yum_install ${NGINX_SOURCE_URL}
 
 ctx logger info "Deploying Nginx configuration files..."
+deploy_blueprint_resource "${CONFIG_REL_PATH}/nginx.conf" "/etc/nginx/nginx.conf"
 deploy_blueprint_resource "${CONFIG_REL_PATH}/default.conf" "/etc/nginx/conf.d/default.conf"
 deploy_blueprint_resource "${CONFIG_REL_PATH}/rest-location.cloudify" "/etc/nginx/conf.d/rest-location.cloudify"
 
@@ -70,3 +71,5 @@ deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.crt" "${SSL_CERTS_RO
 deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.key" "${SSL_CERTS_ROOT}/server.key"
 
 sudo systemctl enable nginx.service &>/dev/null
+
+clean_var_log_dir nginx

@@ -19,12 +19,17 @@ ctx logger info "Installing Logstash..."
 set_selinux_permissive
 
 copy_notice "logstash"
-create_dir ${LOGSTASH_LOG_PATH}
 
 yum_install ${LOGSTASH_SOURCE_URL}
 
+create_dir ${LOGSTASH_LOG_PATH}
+sudo chown -R logstash.logstash ${LOGSTASH_LOG_PATH}
+
 ctx logger info "Deploying Logstash conf..."
 deploy_blueprint_resource "${CONFIG_REL_PATH}/logstash.conf" "${LOGSTASH_CONF_PATH}/logstash.conf"
+
+ctx logger info "Deploying Logstash sysconfig..."
+deploy_blueprint_resource "${CONFIG_REL_PATH}/logstash" "/etc/sysconfig/logstash"
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/logstash"
@@ -45,3 +50,5 @@ sudo chmod 644 $lconf
 
 # sudo systemctl enable logstash.service
 sudo /sbin/chkconfig logstash on
+
+clean_var_log_dir logstash
