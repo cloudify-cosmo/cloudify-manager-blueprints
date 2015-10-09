@@ -11,6 +11,8 @@ export INFLUXDB_ENDPOINT_IP=$(ctx node properties influxdb_endpoint_ip)
 # currently, cannot be changed due to the webui not allowing to configure it.
 export INFLUXDB_ENDPOINT_PORT="8086"
 
+export INFLUXDB_USER="influxdb"
+export INFLUXDB_GROUP="influxdb"
 export INFLUXDB_HOME="/opt/influxdb"
 export INFLUXDB_LOG_PATH="/var/log/cloudify/influxdb"
 
@@ -45,6 +47,10 @@ EOF
 
     ctx logger info "Deploying InfluxDB Config file..."
     deploy_blueprint_resource "${CONFIG_REL_PATH}/config.toml" "${INFLUXDB_HOME}/shared/config.toml"
+
+    ctx logger info "Fixing permissions..."
+    sudo chown -R "${INFLUXDB_USER}:${INFLUXDB_GROUP}" "${INFLUXDB_HOME}"
+    sudo chown -R "${INFLUXDB_USER}:${INFLUXDB_GROUP}" "${INFLUXDB_LOG_PATH}"
 
     ctx logger info "Chowning InfluxDB logs path..."
     sudo chown -R influxdb:influxdb ${INFLUXDB_LOG_PATH}
