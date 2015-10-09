@@ -30,8 +30,7 @@ create_dir ${WEBUI_HOME}/backend
 create_dir ${WEBUI_LOG_PATH}
 create_dir ${GRAFANA_HOME}
 
-ctx logger info "Creating user..."
-sudo useradd --shell /sbin/nologin --home-dir "${WEBUI_HOME}" --no-create-home --system "${WEBUI_USER}"
+create_service_user ${WEBUI_USER} ${WEBUI_HOME}
 
 ctx logger info "Installing NodeJS..."
 nodejs=$(download_file ${NODEJS_SOURCE_URL})

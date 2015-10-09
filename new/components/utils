@@ -365,4 +365,25 @@ function set_rabbitmq_policy() {
     sudo rabbitmqctl set_policy ${policy_name} "${queue_regex}" "{"\"${policy_type}"\":${value}}" --apply-to queues
 }
 
+function create_service_user() {
+    ###
+    # This create a user. It will not create the home dir for it
+    # and assume that it already exists.
+    # This user will only be created if it didn't already exist.
+    ###
+    user=$1
+    home=$2
+
+    ctx logger info "Checking if ${user} exists..."
+    ret=false
+    getent passwd $1 >/dev/null 2>&1 && ret=true
+
+    if $ret; then
+        ctx logger info "User ${user} already exists..."
+    else
+        ctx logger info "Creating user ${user} with home ${home}..."
+        sudo useradd --shell /sbin/nologin --home-dir "${home}" --no-create-home --system "${user}"
+    fi
+}
+
 CLOUDIFY_SOURCES_PATH="/opt/cloudify/sources"

@@ -21,8 +21,7 @@ yum_install ${AMQPINFLUX_RPM_SOURCE_URL}
 # this allows to upgrade amqpinflux if necessary.
 [ -z "${AMQPINFLUX_SOURCE_URL}" ] || install_module ${AMQPINFLUX_SOURCE_URL} "${AMQPINFLUX_VIRTUALENV_DIR}"
 
-ctx logger info "Creating user..."
-sudo useradd --shell /sbin/nologin --home-dir "${AMQPINFLUX_HOME}" --no-create-home --system "${AMQPINFLUX_USER}"
+create_service_user ${AMQPINFLUX_USER} ${AMQPINFLUX_HOME}
 
 ctx logger info "Fixing permissions..."
 sudo chown -R "${AMQPINFLUX_USER}:${AMQPINFLUX_GROUP}" "${AMQPINFLUX_HOME}"
