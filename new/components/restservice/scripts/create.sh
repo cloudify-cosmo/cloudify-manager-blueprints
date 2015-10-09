@@ -14,6 +14,9 @@ export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_sou
 export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_module_source_url)
 export AGENT_SOURCE_URL=$(ctx node properties agent_module_source_url)
 
+# injected as an input to the script
+ctx instance runtime_properties es_endpoint_ip ${ES_ENDPOINT_IP}
+
 # TODO: change to /opt/cloudify-rest-service
 export REST_SERVICE_HOME="/opt/manager"
 export MANAGER_RESOURCES_HOME="/opt/manager/resources"

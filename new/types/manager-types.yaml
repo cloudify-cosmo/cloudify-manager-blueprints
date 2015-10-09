@@ -272,9 +272,6 @@ node_types:
         description: Logstash tar.gz Source URL
         type: string
         default: { get_input: logstash_source_url }
-      es_endpoint_ip:
-        type: string
-        default: { get_input: elasticsearch_endpoint_ip }
       es_endpoint_port:
         type: integer
         default: { get_input: elasticsearch_endpoint_port }
@@ -286,6 +283,8 @@ node_types:
             script_path:
               default: components/logstash/scripts/create.sh
             fabric_env: *simple_fabric_env
+            ES_ENDPOINT_IP:
+              default: { get_attribute: [elasticsearch, es_endpoint_ip] }
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
@@ -456,9 +455,6 @@ node_types:
       cloudify:
         description: Security settings from the manager configuration
         default: {}
-      es_endpoint_ip:
-        type: string
-        default: { get_input: elasticsearch_endpoint_ip }
       es_endpoint_port:
         type: integer
         default: { get_input: elasticsearch_endpoint_port }
@@ -470,6 +466,8 @@ node_types:
             script_path:
               default: components/restservice/scripts/create.sh
             fabric_env: *simple_fabric_env
+            ES_ENDPOINT_IP:
+              default: { get_attribute: [elasticsearch, es_endpoint_ip] }
         configure:
           implementation: fabric.fabric_plugin.tasks.run_task
           inputs:

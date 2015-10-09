@@ -2,7 +2,7 @@
 
 ES_ENDPOINT_IP=$(ctx node properties es_endpoint_ip)
 
-if [ "${ES_ENDPOINT_IP}" == "localhost" ]; then
+if [ -z "${ES_ENDPOINT_IP}"]; then
     ctx logger info "Starting Elasticsearch..."
     sudo systemctl start elasticsearch.service
 fi
