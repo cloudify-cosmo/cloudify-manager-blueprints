@@ -323,7 +323,7 @@ inputs:
     description: >
       An IP Endpoint of your InfluxDB Cluster.
     type: string
-    default: localhost
+    default: ''
 
   #############################
   # Dev Inputs

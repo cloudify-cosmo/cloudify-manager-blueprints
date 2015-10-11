@@ -166,8 +166,8 @@
 # InfluxDB Configuration
 #############################
 # You can configure an external endpoint of an InfluxDB Cluster to use
-# instead of the built in one. The built in InfluxDB cluster will not run.
-# You need to provide an IP (defaults to localhost) InfluxDB Cluster.
+# instead of the built in one.
+# If one is provided, the built in InfluxDB cluster will not run.
 # Note that the port is currently not configurable and must remain 8086.
 # Also note that the database username and password are hardcoded to root:root.
-#influxdb_endpoint_ip: localhost
+#influxdb_endpoint_ip: ''

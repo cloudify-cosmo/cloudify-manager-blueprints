@@ -1,4 +1,4 @@
 AMQP_HOST="localhost"
-INFLUXDB_HOST="{{ ctx.node.properties.influxdb_endpoint_ip }}"
+INFLUXDB_HOST="{{ ctx.instance.runtime_properties.influxdb_endpoint_ip }}"
 AMQPINFLUX_HOME="/opt/amqpinflux"
 AMQPINFLUX_VIRTUALENV_DIR="/opt/amqpinflux/env"

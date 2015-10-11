@@ -9,6 +9,9 @@ export NODEJS_SOURCE_URL=$(ctx node properties nodejs_tar_source_url)  # (e.g. "
 export WEBUI_SOURCE_URL=$(ctx node properties webui_tar_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0-m4.tgz")
 export GRAFANA_SOURCE_URL=$(ctx node properties grafana_tar_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz")
 
+# injected as an input to the script
+ctx instance runtime_properties influxdb_endpoint_ip ${INFLUXDB_ENDPOINT_IP}
+
 export NODEJS_HOME="/opt/nodejs"
 export WEBUI_HOME="/opt/cloudify-ui"
 export WEBUI_LOG_PATH="/var/log/cloudify/webui"
