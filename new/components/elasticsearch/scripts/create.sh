@@ -93,14 +93,8 @@ EOF
     sudo systemctl enable elasticsearch.service &>/dev/null
 }
 
-if [ "${ES_ENDPOINT_IP}" != "localhost" ]; then
-    ctx logger info "External Elasticsearch Endpoint provided: ${ES_ENDPOINT_IP}:${ES_ENDPOINT_PORT}..."
-    ctx logger info "NOTE THAT THE CURRENT `cloudify_storage` INDEX IN THE PROVIDED ELASTICSEARCH CLUSTER WILL BE REBUILT!"
-    sleep 5
-    wait_for_port "${ES_ENDPOINT_PORT}" "${ES_ENDPOINT_IP}"
-    # per a function in configure_es
-    configure_elasticsearch "${ES_ENDPOINT_IP}" "${ES_ENDPOINT_PORT}"
-else
+if [ -z "${ES_ENDPOINT_IP}" ]; then
+    ES_ENDPOINT_IP=$(ctx instance host_ip)
     install_elasticsearch
 
     ctx logger info "Starting Elasticsearch Service..."
@@ -112,4 +106,13 @@ else
 
     ctx logger info "Stopping Elasticsearch Service..."
     sudo systemctl stop elasticsearch.service
+else
+    ctx logger info "External Elasticsearch Endpoint provided: ${ES_ENDPOINT_IP}:${ES_ENDPOINT_PORT}..."
+    ctx logger info "NOTE THAT THE CURRENT 'cloudify_storage' INDEX IN THE PROVIDED ELASTICSEARCH CLUSTER WILL BE REBUILT!"
+    sleep 5
+    wait_for_port "${ES_ENDPOINT_PORT}" "${ES_ENDPOINT_IP}"
+    # per a function in configure_es
+    configure_elasticsearch "${ES_ENDPOINT_IP}" "${ES_ENDPOINT_PORT}"
 fi
+
+ctx instance runtime_properties es_endpoint_ip ${ES_ENDPOINT_IP}
