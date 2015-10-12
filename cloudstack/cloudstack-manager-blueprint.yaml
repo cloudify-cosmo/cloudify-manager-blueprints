@@ -1,4 +1,4 @@
-tosca_definitions_version: cloudify_dsl_1_0
+tosca_definitions_version: cloudify_dsl_1_2
 
 imports:
     - http://www.getcloudify.org/spec/cloudify/3.3m6/types.yaml
@@ -125,7 +125,7 @@ node_templates:
                   public_port: 80
                 - protocol: TCP
                   private_port: 443
-                  public_port: 443                  
+                  public_port: 443
                 - protocol: TCP
                   private_port: 22
                   public_port: 22
