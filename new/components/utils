@@ -385,6 +385,7 @@ function create_service_user() {
         ctx logger info "Creating user ${user} with home ${home}..."
         sudo useradd --shell /sbin/nologin --home-dir "${home}" --no-create-home --system "${user}"
     fi
+}
 
 function clean_var_log_dir() {
     ###
