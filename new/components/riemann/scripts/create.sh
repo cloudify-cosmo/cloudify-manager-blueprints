@@ -69,3 +69,5 @@ deploy_blueprint_resource "${CONFIG_REL_PATH}/main.clj" "${RIEMANN_CONFIG_PATH}/
 # we inject the management_ip for both of these to Riemann's systemd config. These should be potentially different
 # if the manager and rabbitmq are running on different hosts.
 configure_systemd_service "riemann"
+
+clean_var_log_dir riemann
