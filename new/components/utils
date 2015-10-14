@@ -346,6 +346,7 @@ function set_selinux_permissive() {
     if [ "$(get_selinux_state)" == 'Enforcing' ]; then
         ctx logger info "SELinux is enforcing, setting SELinux Permissive State..."
         sudo setenforce Permissive
+        sudo sed -i 's/SELINUX=enforcing/SELINUX=permissive/' /etc/selinux/config
     else
         ctx logger info "SELinux not enforced."
     fi
