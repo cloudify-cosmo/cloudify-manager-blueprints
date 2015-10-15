@@ -30,4 +30,6 @@ fi
 create_dir /var/log/cloudify
 
 # Java install log is dropped in /var/log. Move it to live with the rest of the cloudify logs
-sudo mv /var/log/java_install.log /var/log/cloudify
+if [ -f "/var/log/java_install.log" ]; then
+    sudo mv /var/log/java_install.log /var/log/cloudify
+fi

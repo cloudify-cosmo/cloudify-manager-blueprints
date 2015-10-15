@@ -392,15 +392,21 @@ function clean_var_log_dir() {
     # Cleans up unused /var/log directory for named application.
     # Directory must be empty or this will fail.
     ###
-    for log in $(find /var/log/${1} -type f); do
+    service=$1
+
+    for log in $(find /var/log/${service} -type f) >> /dev/null ; do
         # Copy to timestamped file in case this is run again
-        sudo mv ${log} /var/log/cloudify/${1}/${log##/var/log/${1}/}-from_bootstrap-$(date +%Y-%m-%eT%T%z)
+        if [ ! -f ${log} ]; then
+            break
+        fi
+        sudo mv ${log} /var/log/cloudify/${service}/${log##/var/log/${service}/}-from_bootstrap-$(date +%Y-%m-%eT%T%z)
     done
-    ctx logger info "Removing unnecessary logs directory: /var/log/${1}"
     # Remove the directory if it's empty, ignoring failures due to lack of directory
-    # This won't remove /var/log if ${1} is empty, unless /var/log is empty.
+    # This won't remove /var/log if ${service} is empty, unless /var/log is empty.
     # It will, however, error if its target dir is non-empty
-    sudo rm -df /var/log/${1}
+
+    ctx logger info "Removing unnecessary logs directory: /var/log/${service}"
+    sudo rm -df /var/log/${service}
 }
 
 CLOUDIFY_SOURCES_PATH="/opt/cloudify/sources"
