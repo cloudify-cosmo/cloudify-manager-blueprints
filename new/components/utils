@@ -394,7 +394,7 @@ function clean_var_log_dir() {
     ###
     service=$1
 
-    for log in $(find /var/log/${service} -type f) >> /dev/null ; do
+    for log in $(find /var/log/${service} -type f 2> /dev/null); do
         # Copy to timestamped file in case this is run again
         if [ ! -f ${log} ]; then
             break
