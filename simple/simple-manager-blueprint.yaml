@@ -40,12 +40,12 @@ node_templates:
     properties:
       cloudify_packages:
         agents:
-          ubuntu-trusty-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-trusty-agent_3.3.0-m5-b275.tar.gz
-          centos-final-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/centos-Final-agent_3.3.0-m5-b275.tar.gz
-          ubuntu-precise-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/Ubuntu-precise-agent_3.3.0-m5-b275.tar.gz
-          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-windows-agent_3.3.0-m5-b275.exe
+          ubuntu-trusty-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/Ubuntu-trusty-agent_3.3.0-m7-b277.tar.gz
+          centos-final-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/centos-Final-agent_3.3.0-m7-b277.tar.gz
+          ubuntu-precise-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/Ubuntu-precise-agent_3.3.0-m7-b277.tar.gz
+          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify-windows-agent_3.3.0-m7-b277.exe
         docker:
-           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m5-RELEASE/cloudify-docker_3.3.0-m5-b275.tar
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify-docker_3.3.0-m7-b277.tar
 
       cloudify:
         resources_prefix: { get_input: resources_prefix }
