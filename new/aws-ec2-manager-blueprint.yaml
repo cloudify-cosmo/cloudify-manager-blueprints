@@ -354,7 +354,7 @@ node_templates:
           aws_config_path: /etc/cloudify/aws_plugin/boto
 
         transient_deployment_workers_mode:
-          enabled: false
+          enabled: true
           global_parallel_executions_limit: 50
 
         cloudify_agent:
