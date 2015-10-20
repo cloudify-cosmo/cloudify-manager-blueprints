@@ -109,9 +109,12 @@ if [ -z "${ES_ENDPOINT_IP}" ]; then
     clean_var_log_dir elasticsearch
 else
     ctx logger info "External Elasticsearch Endpoint provided: ${ES_ENDPOINT_IP}:${ES_ENDPOINT_PORT}..."
-    ctx logger info "NOTE THAT THE CURRENT 'cloudify_storage' INDEX IN THE PROVIDED ELASTICSEARCH CLUSTER WILL BE REBUILT!"
     sleep 5
     wait_for_port "${ES_ENDPOINT_PORT}" "${ES_ENDPOINT_IP}"
+    ctx logger info "Checking if 'cloudify_storage' index already exists..."
+    if curl --fail --silent -XHEAD -i "http://${ES_ENDPOINT_IP}:${ES_ENDPOINT_PORT}/cloudify_storage" >/dev/null; then
+        sys_error "'cloudify_storage' index already exists on ${ES_ENDPOINT_IP}, terminating bootstrap..."
+    fi
     # per a function in configure_es
     configure_elasticsearch "${ES_ENDPOINT_IP}" "${ES_ENDPOINT_PORT}"
 fi
