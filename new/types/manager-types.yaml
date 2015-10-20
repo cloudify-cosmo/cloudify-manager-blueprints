@@ -40,13 +40,15 @@ node_types:
       #########################################################################
       # Setting 'enabled' to true will activate security on the REST service,
       # according to the below configuration. Each request received by the
-      # REST service will be authenticated, and https is used by default.
+      # REST service will be authenticated.
       #########################################################################
       security:
         description: >
           Security Configuration for Cloudify Manager
         default:
-          enabled: false
+          enabled: { get_input: security_enabled }
+          admin_username: { get_input: admin_username }
+          admin_password: { get_input: admin_password }
           #########################################################################
           # A list of one or more authentication providers. Cloudify will use
           # these providers in the order specified in the list (Mandatory).
@@ -78,9 +80,8 @@ node_types:
             properties:
               userstore:
                 user:
-                  username: { get_input: username }
-                  password: { get_input: password }
-                  email: { concat: [{ get_input: username }, '@domain.com'] }
+                  username: { get_input: admin_username }
+                  password: { get_input: admin_password }
               identifying_attribute: username
           #########################################################################
           # REST calls to "MANAGER_IP/tokens" will generate and return
@@ -98,9 +99,10 @@ node_types:
           # Enabling SSL limits communication with the server to SSL only.
           # If enabled, the certificate and private key files must be found in
           # resources/ssl.
+          # Disabled by default.
           #########################################################################
           ssl:
-            enabled: true
+            enabled: { get_input: ssl_enabled }
           #########################################################################
           # Security log file properties (Optional, the default values are as
           # shown below).
