@@ -336,7 +336,7 @@ inputs:
   # below modules require compilation.
   install_python_compilers:
     type: string
-    default: ''
+    default: 'true'
 
   cli_source_url:
     type: string
