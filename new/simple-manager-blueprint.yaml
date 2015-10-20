@@ -366,7 +366,7 @@ node_templates:
         target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
             postconfigure:
-              implementation: components/manager/scripts/set_manager_public_ip.sh
+              implementation: components/manager/scripts/set_manager_public_ip.py
               inputs:
                 public_ip: { get_property: [manager_host, public_ip] }
 
@@ -433,7 +433,7 @@ node_templates:
         target: manager_configuration
         target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
-            postconfigure: components/manager/scripts/set_manager_private_ip.sh
+            postconfigure: components/manager/scripts/set_manager_private_ip.py
       - type: nginx_to_restservice
         target: rest_service
       # circular relationship

@@ -347,8 +347,8 @@ node_templates:
     properties:
       ssh_user: { get_input: ssh_user }
       ssh_key_filename: { get_input: ssh_key_filename }
-      agent_local_key_path: { get_input: agent_private_key_path }      
-            
+      agent_local_key_path: { get_input: agent_private_key_path }
+
       cloudify:
         plugins:
           aws_config_path: /etc/cloudify/aws_plugin/boto
@@ -365,7 +365,7 @@ node_templates:
           env:
             AWS_CONFIG_PATH: { get_property: [SELF, cloudify, plugins, aws_config_path] }
 
-          
+
         workflows:
           task_retries: -1  # this means forever
           task_retry_interval: 30
@@ -379,7 +379,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_task
           inputs:
             tasks_file: components/manager/scripts/aws-ec2/configure.py
-            task_name: configure_manager            
+            task_name: configure_manager
             task_properties:
               aws_config: { get_property: [ aws_configuration, aws_config ] }
               manager_config_path: { get_property: [SELF, cloudify, plugins, aws_config_path] }
@@ -402,14 +402,14 @@ node_templates:
         target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
             postconfigure:
-             implementation: components/manager/scripts/set_manager_public_ip.sh
+             implementation: components/manager/scripts/set_manager_public_ip.py
              inputs:
               public_ip: { get_attribute: [manager_server_ip, aws_resource_id] }
       - type: cloudify.relationships.depends_on
         target: nginx
         target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
-            postconfigure: components/manager/scripts/set_manager_private_ip.sh
+            postconfigure: components/manager/scripts/set_manager_private_ip.py
 
 
   management_keypair:
@@ -500,7 +500,7 @@ node_templates:
         source_interfaces:
           cloudify.interfaces.relationship_lifecycle:
             postconfigure:
-             implementation: components/manager/scripts/set_manager_public_ip.sh
+             implementation: components/manager/scripts/set_manager_public_ip.py
              inputs:
               public_ip: { get_attribute: [manager_server_ip, aws_resource_id] }
       - type: cloudify.aws.relationships.instance_connected_to_keypair
