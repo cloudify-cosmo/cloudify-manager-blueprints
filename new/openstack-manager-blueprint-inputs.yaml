@@ -57,9 +57,19 @@
 #############################
 # Security Settings
 #############################
-# Username and password to be used for login, if the simple userstore implementation is used.
-#username: 'admin'
-#password: 'admin'
+# Cloudify REST security is disabled by default. To enable security, set to true.
+# Note: If security is disabled, the other security inputs are irrelevant.
+#security_enabled: false
+
+# Enabling SSL limits communication with the server to SSL only.
+# NOTE: If enabled, the certificate and private key files must reside in resources/ssl.
+#ssl_enabled: false
+
+# Username and password of the Cloudify administrator.
+# This user will also be included in the simple userstore repostiroty if the
+# simple userstore implementation is used.
+#admin_username: 'admin'
+#admin_password: 'admin'
 
 #############################
 # Agent Packages
