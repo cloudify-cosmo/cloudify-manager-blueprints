@@ -75,16 +75,22 @@ inputs:
   instance_type:
     type: string
 
- #############################
+  #############################
   # Security Settings
   #############################
-  username:
+  security_enabled:
+    default: false
+
+  ssl_enabled:
+    default: false
+
+  admin_username:
     default: admin
 
-  password:
+  admin_password:
     default: admin
 
-#############################
+  #############################
   # Agent Packages
   #############################
 
