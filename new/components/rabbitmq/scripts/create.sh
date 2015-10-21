@@ -19,7 +19,7 @@ create_dir "${RABBITMQ_LOG_BASE}"
 
 export RABBITMQ_USERNAME="$(ctx node properties rabbitmq_username)"
 export RABBITMQ_PASSWORD="$(ctx node properties rabbitmq_password)"
-export RABBITMQ_SSL_ENABLED="$(ctx node properties rabbitmq_ssl_enabled)"
+export RABBITMQ_SSL_ENABLED="$(ctx -j node properties rabbitmq_ssl_enabled)"
 export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
 export RABBITMQ_CERT_PRIVATE="$(ctx node properties rabbitmq_cert_private)"
 

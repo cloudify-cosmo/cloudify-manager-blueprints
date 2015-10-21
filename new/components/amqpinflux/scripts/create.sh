@@ -13,7 +13,7 @@ export AMQPINFLUX_USER="amqpinflux"
 export AMQPINFLUX_GROUP="amqpinflux"
 export AMQPINFLUX_VIRTUALENV_DIR="${AMQPINFLUX_HOME}/env"
 
-export RABBITMQ_CERT_ENABLED="$(ctx node properties rabbitmq_ssl_enabled)"
+export RABBITMQ_CERT_ENABLED="$(ctx -j node properties rabbitmq_ssl_enabled)"
 export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
 
 ctx logger info "Installing AQMPInflux..."

@@ -25,7 +25,7 @@ export MGMTWORKER_VIRTUALENV_DIR="${MGMTWORKER_HOME}/env"
 export CELERY_WORK_DIR="${MGMTWORKER_HOME}/work"
 export CELERY_LOG_DIR="/var/log/cloudify/mgmtworker"
 
-export RABBITMQ_SSL_ENABLED="$(ctx node properties rabbitmq_ssl_enabled)"
+export RABBITMQ_SSL_ENABLED="$(ctx -j node properties rabbitmq_ssl_enabled)"
 export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
 
 # Fix possible injections in json of rabbit credentials
