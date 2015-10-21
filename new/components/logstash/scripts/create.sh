@@ -7,6 +7,9 @@ CONFIG_REL_PATH="components/logstash/config"
 
 export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_rpm_source_url)  # (e.g. "https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz")
 
+export RABBITMQ_USERNAME="$(ctx node properties rabbitmq_username)"
+export RABBITMQ_PASSWORD="$(ctx node properties rabbitmq_password)"
+
 # injected as an input to the script
 ctx instance runtime_properties es_endpoint_ip ${ES_ENDPOINT_IP}
 
@@ -14,6 +17,13 @@ ctx instance runtime_properties es_endpoint_ip ${ES_ENDPOINT_IP}
 export LOGSTASH_LOG_PATH="/var/log/cloudify/logstash"
 export LOGSTASH_CONF_PATH="/etc/logstash/conf.d"
 
+# Confirm username and password have been supplied for broker before continuing
+# Components other than logstash and riemann have this handled in code already
+# Note that these are not directly used in this script, but are used by the deployed resources, hence the check here.
+if [[ -z "${RABBITMQ_USERNAME}" ]] ||
+   [[ -z "${RABBITMQ_PASSWORD}" ]]; then
+  sys_error "Both rabbitmq_username and rabbitmq_password must be supplied and at least 1 character long in the manager blueprint inputs."
+fi
 
 ctx logger info "Installing Logstash..."
 set_selinux_permissive

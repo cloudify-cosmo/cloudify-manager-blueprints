@@ -342,6 +342,8 @@ function get_selinux_state() {
 }
 
 function set_selinux_permissive() {
+    # This will cause failures after reboots if a node has been manually set permissive using setenforce but
+    # not in the selinux config before running this
     ctx logger info "Checking if SELinux is enforced..."
     if [ "$(get_selinux_state)" == 'Enforcing' ]; then
         ctx logger info "SELinux is enforcing, setting SELinux Permissive State..."
@@ -407,6 +409,97 @@ function clean_var_log_dir() {
 
     ctx logger info "Removing unnecessary logs directory: /var/log/${service}"
     sudo rm -df /var/log/${service}
+}
+
+function run_command_with_retries() {
+    # Logging should be improved with consideration given to possible command injection accidents or attacks
+    ctx logger info "Attempting to run ${1} with up to 5 retries"
+    max_retries=5
+    retried=0
+    while ! ${*}; do
+        # Better logging would be good
+        ctx logger info "Command ${1} failed, retrying in 1 second."
+        retried=$(( ${retried} + 1 ))
+        sleep 1
+        if [[ ${retried} -eq ${max_retries} ]]; then
+            # Better logging would be good
+            ctx logger info "Max retries for command ${1} exceeded, aborting."
+            break
+        fi
+    done
+}
+
+function run_noglob_command_with_retries() {
+    # Logging should be improved with consideration given to possible command injection accidents or attacks
+    ctx logger info "Attempting to run ${1} with up to 5 retries"
+    max_retries=5
+    retried=0
+    while ! sh -c -f "${*}"; do
+        # Better logging would be good
+        ctx logger info "Command ${1} failed, retrying in 1 second."
+        retried=$(( ${retried} + 1 ))
+        sleep 1
+        if [[ ${retried} -eq ${max_retries} ]]; then
+            # Better logging would be good
+            ctx logger info "Max retries for command ${1} exceeded, aborting."
+            break
+        fi
+    done
+}
+
+function extract_github_archive_to_tmp () {
+    repo=${1}
+    if [[ "$(file ${repo})" =~ 'Zip archive data' ]]; then
+        # This is a zip, unzip it, assuming it is a github style zip
+        unzip ${repo} -d /tmp/github-archive-tmp > /dev/null
+        # Performing a strip-components equivalent, but the github style zips have
+        # an extra leading directory
+        # Using copy+delete to avoid errors when mv finds a target dir exists
+        cp -r /tmp/github-archive-tmp/*/* /tmp
+        rm -rf /tmp/github-archive-tmp
+    else
+        # We are expecting a tar.gz, untar it
+        tar -xzf ${repo} --strip-components=1 -C "/tmp"
+    fi
+}
+
+function deploy_ssl_certificate () {
+  private_or_public=${1}
+  destination=${2}
+  group=${3}
+  cert=${4}
+
+  # Root owner, with permissions set below, allow anyone to read a public cert, and allow the owner to read a private cert, but not change it, mitigating risk in the event of the associated service being vulnerable.
+  ownership=root.${group}
+
+  if [[ ${private_or_public} == "private" ]]; then
+    # This check should probably be done using an openssl command
+    if [[ "${cert}" =~ "BEGIN RSA PRIVATE KEY" ]]; then
+      # Owner read, Group read, Others no access
+      permissions=440
+    else
+      sys_error "Private certificate is expected to begin with a line containing 'BEGIN RSA PRIVATE KEY'."
+    fi
+  elif [[ ${private_or_public} == "public" ]]; then
+    # This check should probably be done using an openssl command
+    if [[ "${cert}" =~ "BEGIN CERTIFICATE" ]]; then
+      # Owner read, Group read, Others read
+      permissions=444
+    else
+      # This should probably be done using an openssl command
+      sys_error "Public certificate is expected to begin with a line containing 'BEGIN CERTIFICATE'."
+    fi
+  else
+    sys_error "Certificates may only be 'private' or 'public', not '${private_or_public}'"
+  fi
+
+  ctx logger info "Deploying ${private_or_public} SSL certificate in ${destination} for group ${group}"
+  echo "${cert}" | sudo tee ${destination} >/dev/null
+
+  ctx logger info "Setting permissions (${permissions}) and ownership (${ownership}) of SSL certificate at ${ddestination}"
+  # Set permissions first as the tee with sudo should mean its owner and group are root, leaving a negligible window for it to be accessed by an unauthorised user
+  sudo chmod ${permissions} ${destination}
+  sudo chown ${ownership} ${destination}
 }
 
 CLOUDIFY_SOURCES_PATH="/opt/cloudify/sources"
