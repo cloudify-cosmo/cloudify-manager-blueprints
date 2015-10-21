@@ -25,7 +25,6 @@ export ES_CONF_PATH="/etc/elasticsearch"
 
 function install_elasticsearch() {
     ctx logger info "Installing Elasticsearch..."
-    set_selinux_permissive
 
     copy_notice "elasticsearch"
     create_dir ${ES_HOME}

@@ -10,9 +10,9 @@ export RABBITMQ_FD_LIMIT=$(ctx node properties rabbitmq_fd_limit)
 
 export RABBITMQ_LOG_PATH="/var/log/cloudify/rabbitmq"
 
+export SELINUX_ENFORCING="$(ctx -j node properties selinux_enforcing)"
 
 ctx logger info "Installing RabbitMQ..."
-set_selinux_permissive
 
 copy_notice "rabbitmq"
 create_dir "${RABBITMQ_LOG_PATH}"
@@ -41,22 +41,6 @@ sudo systemctl daemon-reload
 ctx logger info "Chowning RabbitMQ logs path..."
 sudo chown rabbitmq:rabbitmq ${RABBITMQ_LOG_PATH}
 
-ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
-sudo systemctl start cloudify-rabbitmq.service
-
-ctx logger info "Enabling RabbitMQ Plugins..."
-# Occasional timing issues with rabbitmq starting have resulted in failures when first trying to enable plugins
-run_command_with_retries "sudo rabbitmq-plugins enable rabbitmq_management"
-run_command_with_retries "sudo rabbitmq-plugins enable rabbitmq_tracing"
-
-ctx logger info "Disabling RabbitMQ guest user"
-run_command_with_retries "sudo rabbitmqctl clear_permissions guest"
-run_command_with_retries "sudo rabbitmqctl delete_user guest"
-
-ctx logger info "Creating new RabbitMQ user and setting permissions"
-run_command_with_retries sudo rabbitmqctl add_user ${RABBITMQ_USERNAME} ${RABBITMQ_PASSWORD}
-run_noglob_command_with_retries sudo rabbitmqctl set_permissions ${RABBITMQ_USERNAME} '.*' '.*' '.*'
-
 # Deploy certificates if both have been provided. Complain loudly if one has been provided and the other hasn't.
 if [[ "${RABBITMQ_SSL_ENABLED}" == 'true' ]]; then
   if [[ -n "${RABBITMQ_CERT_PRIVATE}" ]]; then
@@ -80,6 +64,29 @@ else
     ctx logger warn "Broker SSL cert supplied but SSL not enabled (broker_ssl_enabled is False)."
   fi
 fi
+
+if [[ "${SELINUX_ENFORCING}" == 'true' ]]; then
+  apply_selinux_policy rabbitmq "${CONFIG_REL_PATH}/selinux"
+
+  fix_selinux_file_contexts /etc/rabbitmq
+  fix_selinux_file_contexts /var/log/cloudify/rabbitmq
+fi
+
+ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
+sudo systemctl start cloudify-rabbitmq.service
+
+ctx logger info "Enabling RabbitMQ Plugins..."
+# Occasional timing issues with rabbitmq starting have resulted in failures when first trying to enable plugins
+run_command_with_retries "sudo rabbitmq-plugins enable rabbitmq_management"
+run_command_with_retries "sudo rabbitmq-plugins enable rabbitmq_tracing"
+
+ctx logger info "Disabling RabbitMQ guest user"
+run_command_with_retries "sudo rabbitmqctl clear_permissions guest"
+run_command_with_retries "sudo rabbitmqctl delete_user guest"
+
+ctx logger info "Creating new RabbitMQ user and setting permissions"
+run_command_with_retries sudo rabbitmqctl add_user ${RABBITMQ_USERNAME} ${RABBITMQ_PASSWORD}
+run_noglob_command_with_retries sudo rabbitmqctl set_permissions ${RABBITMQ_USERNAME} '.*' '.*' '.*'
 
 ctx logger info "Stopping RabbitMQ Service..."
 # Systemd service stopping has been returning non zero when successful

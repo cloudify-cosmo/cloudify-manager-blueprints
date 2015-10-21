@@ -36,7 +36,6 @@ export MANAGER_REST_SECURITY_CONFIG_PATH="${REST_SERVICE_HOME}/rest-security.con
 export REST_SERVICE_LOG_PATH="/var/log/cloudify/rest"
 
 ctx logger info "Installing REST Service..."
-set_selinux_permissive
 
 copy_notice "restservice"
 create_dir ${REST_SERVICE_HOME}

@@ -9,6 +9,8 @@ export NODEJS_SOURCE_URL=$(ctx node properties nodejs_tar_source_url)
 export WEBUI_SOURCE_URL=$(ctx node properties webui_tar_source_url)
 export GRAFANA_SOURCE_URL=$(ctx node properties grafana_tar_source_url)
 
+export SELINUX_ENFORCING="$(ctx -j node properties selinux_enforcing)"
+
 # injected as an input to the script
 ctx instance runtime_properties influxdb_endpoint_ip ${INFLUXDB_ENDPOINT_IP}
 
@@ -21,7 +23,6 @@ export WEBUI_USER="webui"
 export WEBUI_GROUP="webui"
 
 ctx logger info "Installing Cloudify's WebUI..."
-set_selinux_permissive
 
 copy_notice "webui"
 webui_notice=$(ctx download-resource "components/webui/LICENSE")
@@ -60,3 +61,9 @@ sudo chown -R "${WEBUI_USER}:${WEBUI_GROUP}" "${WEBUI_LOG_PATH}"
 deploy_logrotate_config "webui"
 
 configure_systemd_service "webui"
+
+if [[ "${SELINUX_ENFORCING}" == 'true' ]]; then
+  apply_selinux_policy webui "${CONFIG_REL_PATH}/selinux"
+
+  fix_selinux_file_contexts /opt/cloudify-ui
+fi

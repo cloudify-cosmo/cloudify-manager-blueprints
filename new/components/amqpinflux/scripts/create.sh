@@ -17,7 +17,6 @@ export RABBITMQ_CERT_ENABLED="$(ctx -j node properties rabbitmq_ssl_enabled)"
 export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
 
 ctx logger info "Installing AQMPInflux..."
-set_selinux_permissive
 
 copy_notice "amqpinflux"
 create_dir "${AMQPINFLUX_HOME}"
