@@ -378,6 +378,14 @@ inputs:
     type: string
     default: ''
 
+
+dsl_definitions:
+  aws_configuration: &aws_configuration
+    aws_access_key_id: { get_input: aws_access_key_id }
+    aws_secret_access_key: { get_input: aws_secret_access_key }
+    ec2_region_name: { get_input: ec2_region_name }
+
+
 node_templates:
 
    # #####################################################################
@@ -428,7 +436,7 @@ node_templates:
             tasks_file: components/manager/scripts/aws-ec2/configure.py
             task_name: configure_manager
             task_properties:
-              aws_config: { get_property: [ aws_configuration, aws_config ] }
+              aws_config: *aws_configuration
               manager_config_path: { get_property: [SELF, cloudify, plugins, aws_config_path] }
 
             fabric_env: &manager_fabric_env
@@ -465,7 +473,7 @@ node_templates:
       use_external_resource: { get_input: use_existing_manager_keypair }
       resource_id: { get_input: manager_keypair_name }
       private_key_path: { get_input: ssh_key_filename }
-      aws_config: { get_property: [ aws_configuration, aws_config ] }
+      aws_config: *aws_configuration
 
   agent_keypair:
     type: cloudify.aws.nodes.KeyPair
@@ -473,7 +481,7 @@ node_templates:
       use_external_resource: { get_input: use_existing_agent_keypair }
       resource_id: { get_input: agent_keypair_name }
       private_key_path: { get_input: agent_private_key_path }
-      aws_config: { get_property: [ aws_configuration, aws_config ] }
+      aws_config: *aws_configuration
 
   management_security_group:
     type: cloudify.aws.nodes.SecurityGroup
@@ -506,7 +514,7 @@ node_templates:
           from_port: 53229
           to_port: 53229
           src_group_id: { get_property: [agents_security_group, resource_id] }
-      aws_config: { get_property: [ aws_configuration, aws_config ] }
+      aws_config: *aws_configuration
     relationships:
       - type: cloudify.relationships.depends_on
         target: agents_security_group
@@ -526,12 +534,12 @@ node_templates:
           from_port: 5985
           to_port: 5985
           cidr_ip: 0.0.0.0/0
-      aws_config: { get_property: [ aws_configuration, aws_config ] }
+      aws_config: *aws_configuration
 
   manager_server_ip:
     type: cloudify.aws.nodes.ElasticIP
     properties:
-      aws_config: { get_property: [ aws_configuration, aws_config ] }
+      aws_config: *aws_configuration
 
   manager_host:
     type: cloudify.aws.nodes.Instance
@@ -540,7 +548,7 @@ node_templates:
       image_id: { get_input: image_id }
       instance_type: { get_input: instance_type }
       install_agent: false
-      aws_config: { get_property: [ aws_configuration, aws_config ] }
+      aws_config: *aws_configuration
     relationships:
       - type: cloudify.aws.relationships.instance_connected_to_elastic_ip
         target: manager_server_ip
@@ -554,15 +562,6 @@ node_templates:
         target: management_keypair
       - type: cloudify.aws.relationships.instance_connected_to_security_group
         target: management_security_group
-
-  aws_configuration:
-    type: aws_configuration
-    properties:
-      aws_config:
-        aws_access_key_id: { get_input: aws_access_key_id }
-        aws_secret_access_key: { get_input: aws_secret_access_key }
-        ec2_region_name: { get_input: ec2_region_name }
-
 
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
@@ -688,12 +687,6 @@ node_templates:
       - type: webui_to_influxdb
         target: influxdb
 
-node_types:
-  aws_configuration:
-    derived_from: cloudify.nodes.Root
-    properties:
-      aws_config: {}
-
   ######################################################################
   # Enable this node if you want to have the CLI installed within
   # the manager. This might aid in debugging problems or just
@@ -717,4 +710,3 @@ plugins:
 outputs:
   manager_ip:
     value: { get_attribute: [ manager_server_ip, aws_resource_id ] }
-
