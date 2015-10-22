@@ -312,7 +312,7 @@ inputs:
     description: >
       An IP Endpoint of your Elasticsearch Cluster.
     type: string
-    default: localhost
+    default: ''
 
   elasticsearch_endpoint_port:
     description: >
@@ -327,7 +327,7 @@ inputs:
     description: >
       An IP Endpoint of your InfluxDB Cluster.
     type: string
-    default: localhost
+    default: ''
 
   #############################
   # Dev Inputs
