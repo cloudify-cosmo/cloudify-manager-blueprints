@@ -88,7 +88,6 @@ if [ ! -z ${REST_SERVICE_SOURCE_URL} ]; then
     install_module "/tmp/workflows" ${MGMTWORKER_VIRTUALENV_DIR}
 fi
 
-extract_github_archive_to_tmp ${manager_repo}
 ctx logger info "Configuring Management worker..."
 # Deploy the broker configuration
 # TODO: This will break interestingly if MGMTWORKER_VIRTUALENV_DIR is empty. Some sort of check for that would be sensible.
