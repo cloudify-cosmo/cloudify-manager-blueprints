@@ -44,7 +44,7 @@ create_dir ${REST_SERVICE_LOG_PATH}
 create_dir ${MANAGER_RESOURCES_HOME}
 
 # Add certificate and select port, as applicable
-if [[ "${RABBITMQ_SSL_ENABLED}" == 'True' ]]; then
+if [[ "${RABBITMQ_SSL_ENABLED}" == 'true' ]]; then
   BROKER_CERT_PATH="${REST_SERVICE_HOME}/amqp_pub.pem"
   deploy_ssl_certificate public "${BROKER_CERT_PATH}" "root" "${RABBITMQ_CERT_PUBLIC}"
   ctx instance runtime_properties broker_cert_path "${BROKER_CERT_PATH}"

@@ -62,7 +62,7 @@ ctx logger info "Installing Optional Management Worker Modules..."
 [ -z ${AGENT_SOURCE_URL} ] || install_module ${AGENT_SOURCE_URL} ${MGMTWORKER_VIRTUALENV_DIR}
 
 # Add certificate and select port, as applicable
-if [[ "${RABBITMQ_SSL_ENABLED}" == 'True' ]]; then
+if [[ "${RABBITMQ_SSL_ENABLED}" == 'true' ]]; then
   BROKER_CERT_PATH="${MGMTWORKER_HOME}/amqp_pub.pem"
   deploy_ssl_certificate public "${BROKER_CERT_PATH}" "root" "${RABBITMQ_CERT_PUBLIC}"
   ctx instance runtime_properties broker_cert_path "${BROKER_CERT_PATH}"
