@@ -29,7 +29,7 @@ yum_install ${AMQPINFLUX_RPM_SOURCE_URL}
 
 create_service_user ${AMQPINFLUX_USER} ${AMQPINFLUX_HOME}
 
-if [[ "${RABBITMQ_CERT_ENABLED}" == 'True' ]]; then
+if [[ "${RABBITMQ_CERT_ENABLED}" == 'true' ]]; then
   BROKER_CERT_PATH="${AMQPINFLUX_HOME}/amqp_pub.pem"
   # If no certificate was supplied, the deploy function will raise an error
   deploy_ssl_certificate public "${BROKER_CERT_PATH}" "${AMQPINFLUX_GROUP}" "${RABBITMQ_CERT_PUBLIC}"

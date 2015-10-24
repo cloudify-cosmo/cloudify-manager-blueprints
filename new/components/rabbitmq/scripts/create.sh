@@ -82,7 +82,7 @@ run_command_with_retries sudo rabbitmqctl add_user ${RABBITMQ_USERNAME} ${RABBIT
 run_noglob_command_with_retries sudo rabbitmqctl set_permissions ${RABBITMQ_USERNAME} '.*' '.*' '.*'
 
 # Deploy certificates if both have been provided. Complain loudly if one has been provided and the other hasn't.
-if [[ "${RABBITMQ_SSL_ENABLED}" == 'True' ]]; then
+if [[ "${RABBITMQ_SSL_ENABLED}" == 'true' ]]; then
   if [[ -n "${RABBITMQ_CERT_PRIVATE}" ]]; then
     if [[ -n "${RABBITMQ_CERT_PUBLIC}" ]]; then
       deploy_ssl_certificate private "/etc/rabbitmq/rabbit-priv.pem" "rabbitmq" "${RABBITMQ_CERT_PRIVATE}"
