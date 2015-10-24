@@ -5,10 +5,6 @@
 
 CONFIG_REL_PATH="components/restservice/config"
 
-# Set broker port for rabbit
-BROKER_PORT_SSL=5671
-BROKER_PORT_NO_SSL=5672
-
 export REST_SERVICE_RPM_SOURCE_URL=$(ctx node properties rest_service_rpm_source_url)
 export DSL_PARSER_SOURCE_URL=$(ctx node properties dsl_parser_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.2.tar.gz")
 export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.tar.gz")
@@ -17,12 +13,6 @@ export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_
 export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_source_url)
 export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_module_source_url)
 export AGENT_SOURCE_URL=$(ctx node properties agent_module_source_url)
-
-# injected as an input to the script
-ctx instance runtime_properties es_endpoint_ip ${ES_ENDPOINT_IP}
-
-export RABBITMQ_SSL_ENABLED="$(ctx -j node properties rabbitmq_ssl_enabled)"
-export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
 
 # TODO: change to /opt/cloudify-rest-service
 export REST_SERVICE_HOME="/opt/manager"
@@ -43,21 +33,6 @@ create_dir ${REST_SERVICE_HOME}
 create_dir ${REST_SERVICE_LOG_PATH}
 create_dir ${MANAGER_RESOURCES_HOME}
 
-# Add certificate and select port, as applicable
-if [[ "${RABBITMQ_SSL_ENABLED}" == 'True' ]]; then
-  BROKER_CERT_PATH="${REST_SERVICE_HOME}/amqp_pub.pem"
-  deploy_ssl_certificate public "${BROKER_CERT_PATH}" "root" "${RABBITMQ_CERT_PUBLIC}"
-  ctx instance runtime_properties broker_cert_path "${BROKER_CERT_PATH}"
-  # Use SSL port
-  ctx instance runtime_properties broker_port ${BROKER_PORT_SSL}
-else
-  # No SSL, don't use SSL port
-  ctx instance runtime_properties broker_port ${BROKER_PORT_NO_SSL}
-  if [[ -n "${RABBITMQ_CERT_PUBLIC}" ]]; then
-    ctx logger warn "Broker SSL cert supplied but SSL not enabled (broker_ssl_enabled is False)."
-  fi
-fi
-
 # this create the RESTSERVICE_VIRTUALENV and installs the relevant modules into it.
 yum_install ${REST_SERVICE_RPM_SOURCE_URL}
 
@@ -77,9 +52,9 @@ ctx logger info "Installing Optional REST Service Modules..."
 [ -z ${AGENT_SOURCE_URL} ] || install_module ${AGENT_SOURCE_URL} ${RESTSERVICE_VIRTUALENV}
 
 if [ ! -z ${REST_SERVICE_SOURCE_URL} ]; then
-    manager_repo=$(download_cloudify_resource ${REST_SERVICE_SOURCE_URL})
+    manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
     ctx logger info "Extracting Manager Resources to ${MANAGER_RESOURCES_HOME}..."
-    extract_github_archive_to_tmp ${manager_repo}
+    tar -xzf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
     install_module "/tmp/rest-service" ${RESTSERVICE_VIRTUALENV}
     ctx logger info "Deploying Required Manager Resources..."
     sudo cp -R "/tmp/resources/rest-service/cloudify/" "${MANAGER_RESOURCES_HOME}"

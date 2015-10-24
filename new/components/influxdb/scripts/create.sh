@@ -1,82 +1,61 @@
 #!/bin/bash -e
 
 . $(ctx download-resource "components/utils")
-. $(ctx download-resource "components/influxdb/scripts/configure_influx")
 
 
 CONFIG_REL_PATH="components/influxdb/config"
 
-export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)
-export INFLUXDB_ENDPOINT_IP=$(ctx node properties influxdb_endpoint_ip)
-# currently, cannot be changed due to the webui not allowing to configure it.
-export INFLUXDB_ENDPOINT_PORT="8086"
+export INFLUXDB_SOURCE_URL=$(ctx node properties influxdb_rpm_source_url)  # (e.g. "https://s3.amazonaws.com/influxdb/influxdb-0.8.8-1.x86_64.rpm")
 
-export INFLUXDB_USER="influxdb"
-export INFLUXDB_GROUP="influxdb"
+export INFLUXDB_PORT="8086"
 export INFLUXDB_HOME="/opt/influxdb"
 export INFLUXDB_LOG_PATH="/var/log/cloudify/influxdb"
 
 
-function install_influxdb() {
-    ctx logger info "Installing InfluxDB..."
-    set_selinux_permissive
 
-    copy_notice "influxdb"
-    create_dir ${INFLUXDB_HOME}
-    create_dir ${INFLUXDB_LOG_PATH}
+ctx logger info "Installing InfluxDB..."
+set_selinux_permissive
 
-    yum_install ${INFLUXDB_SOURCE_URL}
+copy_notice "influxdb"
+create_dir ${INFLUXDB_HOME}
+create_dir ${INFLUXDB_HOME}/scripts
+create_dir ${INFLUXDB_LOG_PATH}
 
-    # influxdb 0.8 rotates its log files every midnight
-    # so that's the files we going to logrotate here (*.txt.*)
-    ctx logger info "Configuring logrotate..."
-    lconf="/etc/logrotate.d/influxdb"
+yum_install ${INFLUXDB_SOURCE_URL}
 
-    cat << EOF | sudo tee $lconf >/dev/null
-    $INFLUXDB_LOG_PATH/*.txt.* {
-            daily
-            rotate 7
-            compress
-            delaycompress
-            missingok
-            notifempty
-    }
+# influxdb 0.8 rotates its log files every midnight
+# so that's the files we going to logrotate here (*.txt.*)
+ctx logger info "Configuring logrotate..."
+lconf="/etc/logrotate.d/influxdb"
+
+cat << EOF | sudo tee $lconf >/dev/null
+$INFLUXDB_LOG_PATH/*.txt.* {
+        daily
+        rotate 7
+        compress
+        delaycompress
+        missingok
+        notifempty
+}
 EOF
 
-    sudo chmod 644 $lconf
+sudo chmod 644 $lconf
 
-    ctx logger info "Deploying InfluxDB Config file..."
-    deploy_blueprint_resource "${CONFIG_REL_PATH}/config.toml" "${INFLUXDB_HOME}/shared/config.toml"
+ctx logger info "Deploying InfluxDB Config file..."
+deploy_blueprint_resource "${CONFIG_REL_PATH}/config.toml" "${INFLUXDB_HOME}/shared/config.toml"
 
-    ctx logger info "Fixing permissions..."
-    sudo chown -R "${INFLUXDB_USER}:${INFLUXDB_GROUP}" "${INFLUXDB_HOME}"
-    sudo chown -R "${INFLUXDB_USER}:${INFLUXDB_GROUP}" "${INFLUXDB_LOG_PATH}"
+ctx logger info "Chowning InfluxDB logs path..."
+sudo chown -R influxdb:influxdb ${INFLUXDB_LOG_PATH}
 
-    ctx logger info "Chowning InfluxDB logs path..."
-    sudo chown -R influxdb:influxdb ${INFLUXDB_LOG_PATH}
+configure_systemd_service "influxdb"
 
-    configure_systemd_service "influxdb"
-}
-
-if [ -z "${INFLUXDB_ENDPOINT_IP}" ]; then
-    INFLUXDB_ENDPOINT_IP=$(ctx instance host_ip)
-    install_influxdb
-
-    ctx logger info "Starting InfluxDB Service..."
-    sudo systemctl start cloudify-influxdb.service
-
-    wait_for_port "${INFLUXDB_ENDPOINT_PORT}" "${INFLUXDB_ENDPOINT_IP}"
-    # per a function in configure_influx
-    configure_influxdb "${INFLUXDB_ENDPOINT_IP}" "${INFLUXDB_ENDPOINT_PORT}"
-
-    ctx logger info "Stopping InfluxDB Service..."
-    sudo systemctl stop cloudify-influxdb.service
-else
-    ctx logger info "External InfluxDB Endpoint IP provided: ${INFLUXDB_ENDPOINT_IP}..."
-    sleep 5
-    wait_for_port "${INFLUXDB_ENDPOINT_PORT}" "${INFLUXDB_ENDPOINT_IP}"
-    # per a function in configure_influx
-    configure_influxdb "${INFLUXDB_ENDPOINT_IP}" "${INFLUXDB_ENDPOINT_PORT}"
-fi
-
-ctx instance runtime_properties influxdb_endpoint_ip ${INFLUXDB_ENDPOINT_IP}
+ctx logger info "Starting InfluxDB for configuration purposes..."
+sudo systemctl start cloudify-influxdb.service
+ctx logger info "Waiting for InfluxDB to become available..."
+wait_for_port "${INFLUXDB_PORT}"
+ctx logger info "Creating InfluxDB Database..."
+sudo curl --show-error --silent --retry 5 "http://localhost:8086/db?u=root&p=root" -d "{\"name\": \"cloudify\"}"
+test_db_creation=$(curl --show-error --silent --retry 5 'http://localhost:8086/cluster_admins?u=root&p=root')
+ctx logger info "InfluxDB Database Creation test: ${test_db_creation}"
+ctx logger info "Killing InfluxDB..."
+sudo systemctl stop cloudify-influxdb.service
