@@ -3,21 +3,6 @@
 . $(ctx download-resource "components/utils")
 
 
-function _post_provider_context() {
-    export PROVIDER_CONTEXT_FILE=$(ctx download-resource "components/manager/config/provider_context")
-    export PROVIDER_CONTEXT_DATA=$(cat $PROVIDER_CONTEXT_FILE)
-
-    sed_delimiter=$'\001'
-    cloudify_agent="$(ctx --json-output node properties cloudify.cloudify_agent)"
-    export PROVIDER_CONTEXT_DATA=$(echo "${PROVIDER_CONTEXT_DATA}" | sed s"${sed_delimiter}{{ cloudify_agent }}${sed_delimiter}${cloudify_agent//\\/\\\\}${sed_delimiter}")
-
-    ctx instance runtime_properties manager_provider_context "$PROVIDER_CONTEXT_DATA"
-
-    ctx logger info "Posting Provider Context..."
-    curl --fail --silent --request POST --data "${PROVIDER_CONTEXT_DATA}" http://localhost/api/v2/provider/context --header "Content-Type:application/json" >/dev/null
-}
-
-
 function _set_rest_port() {
     security_enabled=$(ctx -j node properties security.enabled)
     ssl_enabled=$(ctx -j node properties security.ssl.enabled)
@@ -98,12 +83,5 @@ function _disable_requiretty() {
     fi
 }
 
-# REMOVE, TEST ONLY!
-# test for when requiretty is enabled and the disable-requiretty script should disable it.
-# ctx logger info "Applying requiretty test..."
-# sudo sed -i '0,/^#Defaults.*requiretty/s//Defaults requiretty/' "/etc/sudoers"
-# ctx logger info "OUTCOME: $(sudo cat /etc/sudoers | grep requiretty)"
-
-# _post_provider_context
 _disable_requiretty
 _set_rest_port

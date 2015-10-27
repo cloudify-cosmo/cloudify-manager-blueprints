@@ -794,3 +794,6 @@ relationships:
 
   webui_to_influxdb:
     derived_from: cloudify.relationships.connected_to
+
+  webui_to_restservice:
+    derived_from: cloudify.relationships.connected_to

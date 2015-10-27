@@ -4,18 +4,18 @@
 
 CONFIG_REL_PATH="components/rabbitmq/config"
 
-export ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/erlang/erlang-17.4-1.el6.x86_64.rpm")
-export RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)  # (e.g. "http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm")
+export ERLANG_SOURCE_URL=$(ctx node properties erlang_rpm_source_url)
+export RABBITMQ_SOURCE_URL=$(ctx node properties rabbitmq_rpm_source_url)
 export RABBITMQ_FD_LIMIT=$(ctx node properties rabbitmq_fd_limit)
 
-export RABBITMQ_LOG_BASE="/var/log/cloudify/rabbitmq"
+export RABBITMQ_LOG_PATH="/var/log/cloudify/rabbitmq"
 
 
 ctx logger info "Installing RabbitMQ..."
 set_selinux_permissive
 
 copy_notice "rabbitmq"
-create_dir "${RABBITMQ_LOG_BASE}"
+create_dir "${RABBITMQ_LOG_PATH}"
 
 export RABBITMQ_USERNAME="$(ctx node properties rabbitmq_username)"
 export RABBITMQ_PASSWORD="$(ctx node properties rabbitmq_password)"
@@ -26,31 +26,7 @@ export RABBITMQ_CERT_PRIVATE="$(ctx node properties rabbitmq_cert_private)"
 yum_install ${ERLANG_SOURCE_URL}
 yum_install ${RABBITMQ_SOURCE_URL}
 
-# Dunno if required.. the key thing, that is... check please.
-# curl --fail --location http://www.rabbitmq.com/releases/rabbitmq-server/v${RABBITMQ_VERSION}/rabbitmq-server-${RABBITMQ_VERSION}-1.noarch.rpm -o /tmp/rabbitmq.rpm
-# sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
-# sudo yum install /tmp/rabbitmq.rpm -y
-
-
-ctx logger info "Configuring logrotate..."
-lconf="/etc/logrotate.d/rabbitmq-server"
-
-cat << EOF | sudo tee $lconf > /dev/null
-$RABBITMQ_LOG_BASE/*.log {
-        daily
-        missingok
-        rotate 7
-        compress
-        delaycompress
-        notifempty
-        sharedscripts
-        postrotate
-            /sbin/service rabbitmq-server rotate-logs > /dev/null
-        endscript
-}
-EOF
-
-sudo chmod 644 $lconf
+deploy_logrotate_config "rabbitmq"
 
 # Creating rabbitmq systemd stop script
 deploy_blueprint_resource "${CONFIG_REL_PATH}/kill-rabbit" "/usr/local/bin/kill-rabbit"
@@ -63,7 +39,7 @@ deploy_blueprint_resource "${CONFIG_REL_PATH}/rabbitmq_ulimit.conf" "/etc/securi
 sudo systemctl daemon-reload
 
 ctx logger info "Chowning RabbitMQ logs path..."
-sudo chown rabbitmq:rabbitmq ${RABBITMQ_LOG_BASE}
+sudo chown rabbitmq:rabbitmq ${RABBITMQ_LOG_PATH}
 
 ctx logger info "Starting RabbitMQ Server in Daemonized mode..."
 sudo systemctl start cloudify-rabbitmq.service
