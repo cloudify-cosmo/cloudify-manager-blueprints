@@ -57,22 +57,7 @@ function install_elasticsearch() {
     replace "#LOG_DIR=/var/log/elasticsearch" "LOG_DIR=${ES_LOGS_PATH}" "/etc/sysconfig/elasticsearch"
     replace "#ES_GC_LOG_FILE=/var/log/elasticsearch/gc.log" "ES_GC_LOG_FILE=${ES_LOGS_PATH}/gc.log" "/etc/sysconfig/elasticsearch"
 
-    ctx logger info "Configuring logrotate..."
-    lconf="/etc/logrotate.d/elasticsearch"
-    cat << EOF | sudo tee $lconf > /dev/null
-    $ES_LOGS_PATH/*.log {
-        daily
-        rotate 7
-        size 100M
-        copytruncate
-        compress
-        delaycompress
-        missingok
-        notifempty
-        create 644 elasticsearch elasticsearch
-    }
-EOF
-    sudo chmod 644 $lconf
+    deploy_logrotate_config "elasticsearch"
 
     ctx logger info "Installing Elasticsearch Curator..."
     if [ -z ${ES_CURATOR_RPM_SOURCE_URL} ]; then

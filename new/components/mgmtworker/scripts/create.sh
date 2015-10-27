@@ -4,15 +4,11 @@
 
 CONFIG_REL_PATH="components/mgmtworker/config"
 
-# Set broker port for rabbit
-BROKER_PORT_SSL=5671
-BROKER_PORT_NO_SSL=5672
-
 export MANAGEMENT_WORKER_RPM_SOURCE_URL=$(ctx node properties management_worker_rpm_source_url)
-export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.zip")
-export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.2.zip")
-export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.2.zip")
-export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
+export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)
+export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_source_url)
+export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_module_source_url)
+export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)
 export AGENT_SOURCE_URL=$(ctx node properties agent_module_source_url)
 
 # This will only be used if the management worker is not installed via an RPM
@@ -25,6 +21,9 @@ export MGMTWORKER_VIRTUALENV_DIR="${MGMTWORKER_HOME}/env"
 export CELERY_WORK_DIR="${MGMTWORKER_HOME}/work"
 export CELERY_LOG_DIR="/var/log/cloudify/mgmtworker"
 
+# Set broker port for rabbit
+export BROKER_PORT_SSL="5671"
+export BROKER_PORT_NO_SSL="5672"
 export RABBITMQ_SSL_ENABLED="$(ctx -j node properties rabbitmq_ssl_enabled)"
 export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
 

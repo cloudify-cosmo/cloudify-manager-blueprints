@@ -5,7 +5,7 @@
 
 CONFIG_REL_PATH="components/logstash/config"
 
-export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_rpm_source_url)  # (e.g. "https://download.elasticsearch.org/logstash/logstash/logstash-1.4.2.tar.gz")
+export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_rpm_source_url)
 
 export RABBITMQ_USERNAME="$(ctx node properties rabbitmq_username)"
 export RABBITMQ_PASSWORD="$(ctx node properties rabbitmq_password)"
@@ -41,24 +41,9 @@ deploy_blueprint_resource "${CONFIG_REL_PATH}/logstash.conf" "${LOGSTASH_CONF_PA
 ctx logger info "Deploying Logstash sysconfig..."
 deploy_blueprint_resource "${CONFIG_REL_PATH}/logstash" "/etc/sysconfig/logstash"
 
-ctx logger info "Configuring logrotate..."
-lconf="/etc/logrotate.d/logstash"
-
-cat << EOF | sudo tee $lconf > /dev/null
-$LOGSTASH_LOG_PATH/*.log {
-        daily
-        rotate 7
-        copytruncate
-        compress
-        delaycompress
-        missingok
-        notifempty
-}
-EOF
-
-sudo chmod 644 $lconf
+deploy_logrotate_config "logstash"
 
 # sudo systemctl enable logstash.service
 sudo /sbin/chkconfig logstash on
 
-clean_var_log_dir logstash
+clean_var_log_dir "logstash"

@@ -5,11 +5,10 @@
 CONFIG_REL_PATH="components/nginx/config"
 SSL_RESOURCES_REL_PATH="resources/ssl"
 
-export NGINX_SOURCE_URL=$(ctx node properties nginx_rpm_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/3.2/nginx-1.8.0-1.el7.ngx.x86_64.rpm")
-export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
+export NGINX_SOURCE_URL=$(ctx node properties nginx_rpm_source_url)
+export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)
 
 export NGINX_LOG_PATH="/var/log/cloudify/nginx"
-# export NGINX_REPO="http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm"
 export MANAGER_RESOURCES_HOME="/opt/manager/resources"
 export MANAGER_AGENTS_PATH="${MANAGER_RESOURCES_HOME}/packages/agents"
 export MANAGER_SCRIPTS_PATH="${MANAGER_RESOURCES_HOME}/packages/scripts"
@@ -43,27 +42,7 @@ deploy_blueprint_resource "${CONFIG_REL_PATH}/nginx.conf" "/etc/nginx/nginx.conf
 deploy_blueprint_resource "${CONFIG_REL_PATH}/default.conf" "/etc/nginx/conf.d/default.conf"
 deploy_blueprint_resource "${CONFIG_REL_PATH}/rest-location.cloudify" "/etc/nginx/conf.d/rest-location.cloudify"
 
-ctx logger info "Configuring logrotate..."
-lconf="/etc/logrotate.d/nginx"
-
-cat << EOF | sudo tee $lconf >/dev/null
-$NGINX_LOG_PATH/*.log {
-        daily
-        missingok
-        rotate 7
-        compress
-        delaycompress
-        notifempty
-        create 640 nginx adm
-        sharedscripts
-        postrotate
-                [ -f /var/run/nginx.pid ] && kill -USR1 \$(cat /var/run/nginx.pid)
-        endscript
-}
-EOF
-
-sudo chmod 644 $lconf
-
+deploy_logrotate_config "nginx"
 
 ctx logger info "Copying SSL Certs..."
 deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.crt" "${SSL_CERTS_ROOT}/server.crt"

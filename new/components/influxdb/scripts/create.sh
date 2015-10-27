@@ -29,21 +29,7 @@ function install_influxdb() {
 
     # influxdb 0.8 rotates its log files every midnight
     # so that's the files we going to logrotate here (*.txt.*)
-    ctx logger info "Configuring logrotate..."
-    lconf="/etc/logrotate.d/influxdb"
-
-    cat << EOF | sudo tee $lconf >/dev/null
-    $INFLUXDB_LOG_PATH/*.txt.* {
-            daily
-            rotate 7
-            compress
-            delaycompress
-            missingok
-            notifempty
-    }
-EOF
-
-    sudo chmod 644 $lconf
+    deploy_logrotate_config "influxdb"
 
     ctx logger info "Deploying InfluxDB Config file..."
     deploy_blueprint_resource "${CONFIG_REL_PATH}/config.toml" "${INFLUXDB_HOME}/shared/config.toml"

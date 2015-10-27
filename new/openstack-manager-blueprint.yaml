@@ -698,9 +698,6 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
-      # circular relationship
-      # - type: nginx_to_webui
-      #   target: webui
 
   riemann:
     type: manager.nodes.Riemann
@@ -757,9 +754,8 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
-      # circular relationship
-      # - type: webui_to_nginx
-      #   target: nginx
+      - type: webui_to_restservice
+        target: rest_service
       - type: webui_to_influxdb
         target: influxdb
 

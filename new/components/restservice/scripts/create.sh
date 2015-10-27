@@ -10,10 +10,10 @@ BROKER_PORT_SSL=5671
 BROKER_PORT_NO_SSL=5672
 
 export REST_SERVICE_RPM_SOURCE_URL=$(ctx node properties rest_service_rpm_source_url)
-export DSL_PARSER_SOURCE_URL=$(ctx node properties dsl_parser_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.2.tar.gz")
-export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.tar.gz")
-export SECUREST_SOURCE_URL=$(ctx node properties securest_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/flask-securest/archive/0.6.tar.gz")
-export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
+export DSL_PARSER_SOURCE_URL=$(ctx node properties dsl_parser_module_source_url)
+export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)
+export SECUREST_SOURCE_URL=$(ctx node properties securest_module_source_url)
+export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)
 export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_source_url)
 export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_module_source_url)
 export AGENT_SOURCE_URL=$(ctx node properties agent_module_source_url)
@@ -85,26 +85,7 @@ if [ ! -z ${REST_SERVICE_SOURCE_URL} ]; then
     sudo cp -R "/tmp/resources/rest-service/cloudify/" "${MANAGER_RESOURCES_HOME}"
 fi
 
-
-ctx logger info "Configuring logrotate..."
-lconf="/etc/logrotate.d/gunicorn"
-
-cat << EOF | sudo tee $lconf > /dev/null
-$REST_SERVICE_LOG_PATH/*.log {
-        daily
-        missingok
-        rotate 7
-        compress
-        delaycompress
-        notifempty
-        sharedscripts
-        postrotate
-                [ -f /var/run/gunicorn.pid ] && kill -USR1 \$(cat /var/run/gunicorn.pid)
-        endscript
-}
-EOF
-
-sudo chmod 644 $lconf
+deploy_logrotate_config "restservice"
 
 ctx logger info "Deploying REST Service Configuration file..."
 # rest service ports are set as runtime properties in nginx/scripts/create.sh

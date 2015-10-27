@@ -5,9 +5,9 @@
 
 CONFIG_REL_PATH="components/riemann/config"
 
-export LANGOHR_SOURCE_URL=$(ctx node properties langohr_jar_source_url)  # (e.g. "https://s3-eu-west-1.amazonaws.com/gigaspaces-repository-eu/langohr/2.11.0/langohr.jar")
-export DAEMONIZE_SOURCE_URL=$(ctx node properties daemonize_rpm_source_url)  # (e.g. "https://forensics.cert.org/centos/cert/7/x86_64/daemonize-1.7.3-7.el7.x86_64.rpm")
-export RIEMANN_SOURCE_URL=$(ctx node properties riemann_rpm_source_url)  # (e.g. "https://aphyr.com/riemann/riemann-0.2.6-1.noarch.rpm")
+export LANGOHR_SOURCE_URL=$(ctx node properties langohr_jar_source_url)
+export DAEMONIZE_SOURCE_URL=$(ctx node properties daemonize_rpm_source_url)
+export RIEMANN_SOURCE_URL=$(ctx node properties riemann_rpm_source_url)
 # Needed for Riemann's config
 export CLOUDIFY_RESOURCES_URL=$(ctx node properties cloudify_resources_url)
 
@@ -44,22 +44,7 @@ ctx logger info "Installing Daemonize..."
 yum_install ${DAEMONIZE_SOURCE_URL}
 yum_install ${RIEMANN_SOURCE_URL}
 
-ctx logger info "Configuring logrotate..."
-lconf="/etc/logrotate.d/riemann"
-
-cat << EOF | sudo tee $lconf > /dev/null
-$RIEMANN_LOG_PATH/*.log {
-        daily
-        rotate 7
-        copytruncate
-        compress
-        delaycompress
-        missingok
-        notifempty
-}
-EOF
-
-sudo chmod 644 $lconf
+deploy_logrotate_config "riemann"
 
 ctx logger info "Downloading cloudify-manager Repository..."
 manager_repo=$(download_cloudify_resource ${CLOUDIFY_RESOURCES_URL})

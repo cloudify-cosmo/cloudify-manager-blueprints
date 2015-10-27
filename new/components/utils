@@ -502,4 +502,18 @@ function deploy_ssl_certificate () {
   sudo chown ${ownership} ${destination}
 }
 
+function deploy_logrotate_config() {
+    ###
+    # Deploys a logrotate configuration for a specific service.
+    ###
+    service=$1
+
+    logrotate_config_path="/etc/logrotate.d/${service}"
+
+    ctx logger info "Configuring logrotate for ${service}..."
+    deploy_blueprint_resource "components/${service}/config/logrotate" ${logrotate_config_path}
+    sudo chmod 644 ${logrotate_config_path}
+}
+
+
 CLOUDIFY_SOURCES_PATH="/opt/cloudify/sources"
