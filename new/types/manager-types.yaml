@@ -82,7 +82,6 @@ node_types:
                 user:
                   username: { get_input: admin_username }
                   password: { get_input: admin_password }
-              identifying_attribute: username
           #########################################################################
           # REST calls to "MANAGER_IP/tokens" will generate and return
           # authentication tokens if an auth_token_generator is set (Optional).
