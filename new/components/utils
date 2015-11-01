@@ -401,7 +401,7 @@ function clean_var_log_dir() {
         if [ ! -f ${log} ]; then
             break
         fi
-        sudo mv ${log} /var/log/cloudify/${service}/${log##/var/log/${service}/}-from_bootstrap-$(date +%Y-%m-%eT%T%z)
+        sudo mv ${log} /var/log/cloudify/${service}/${log##/var/log/${service}/}-from_bootstrap-$(date +%Y-%m-%dT%T%z)
     done
     # Remove the directory if it's empty, ignoring failures due to lack of directory
     # This won't remove /var/log if ${service} is empty, unless /var/log is empty.
