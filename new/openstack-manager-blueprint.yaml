@@ -276,7 +276,7 @@ inputs:
   rabbitmq_cert_private:
     description: >
       The private certificate for RabbitMQ to use for SSL. This must be PEM formatted.
-      It is expected to begin with a line of dashes with 'BEGIN RSA PRIVATE KEY' in the middle.
+      It is expected to begin with a line containing 'PRIVATE KEY' in the middle.
     type: string
     default: ''
 

@@ -474,11 +474,11 @@ function deploy_ssl_certificate () {
 
   if [[ ${private_or_public} == "private" ]]; then
     # This check should probably be done using an openssl command
-    if [[ "${cert}" =~ "BEGIN RSA PRIVATE KEY" ]]; then
+    if [[ "${cert}" =~ "PRIVATE KEY" ]]; then
       # Owner read, Group read, Others no access
       permissions=440
     else
-      sys_error "Private certificate is expected to begin with a line containing 'BEGIN RSA PRIVATE KEY'."
+      sys_error "Private certificate is expected to begin with a line containing 'PRIVATE KEY'."
     fi
   elif [[ ${private_or_public} == "public" ]]; then
     # This check should probably be done using an openssl command
