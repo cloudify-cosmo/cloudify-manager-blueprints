@@ -1,4 +1,19 @@
 #!/usr/bin/env python
+#########
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+#  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  * See the License for the specific language governing permissions and
+#  * limitations under the License.
+
 
 import os
 import sys
@@ -167,6 +182,7 @@ def validate():
     disk_space = \
         ctx.node.properties['minimum_required_available_disk_space_in_gb']
     heap_size_gap = ctx.node.properties['allowed_heap_size_gap_in_mb']
+
     error_summary = []
 
     error_summary.append(_validate_python_version(
@@ -188,7 +204,7 @@ def validate():
         error_summary.append(_validate_resources_package_url(
             resources_package_url))
 
-    # if no error occured in a validation, we need to remove its reference.
+    # if no error occurred in a validation, we need to remove its reference.
     error_summary = [error for error in error_summary if error]
     if error_summary:
         printable_error_summary = '\n' + '\n'.join(error_summary)
