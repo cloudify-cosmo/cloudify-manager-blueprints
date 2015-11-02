@@ -1,0 +1,9 @@
+# File server.
+server {
+    # server listening
+    listen              53229;
+    server_name         _;
+
+    access_log    /var/log/cloudify/nginx/cloudify-files.log;
+    include "/etc/nginx/conf.d/fileserver-location.cloudify";
+}

@@ -66,6 +66,10 @@ else:
 ctx.logger.info('internal_rest_host set to: {0}'.format(
     source_runtime_props['internal_rest_host']))
 
+# set the internal rest host as the file-server host
+source_runtime_props['file_server_host'] = \
+    source_runtime_props['internal_rest_host']
+
 
 # set the external REST host according to the REST external endpoint type
 # (public ip / private ip)

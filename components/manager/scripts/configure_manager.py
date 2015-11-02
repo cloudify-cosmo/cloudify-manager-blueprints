@@ -70,6 +70,11 @@ def _configure_security_properties():
         ctx.instance.runtime_properties['rest_port'] = 80
         ctx.instance.runtime_properties['rest_protocol'] = 'http'
 
+    # set file-server protocol and port
+    ctx.instance.runtime_properties['file_server_protocol'] = \
+        ctx.instance.runtime_properties['rest_protocol']
+    ctx.instance.runtime_properties['file_server_port'] = 53229
+
 
 def main():
     if utils.is_upgrade:
