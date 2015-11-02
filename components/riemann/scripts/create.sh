@@ -2,9 +2,6 @@
 
 . $(ctx download-resource "components/utils")
 
-
-CONFIG_REL_PATH="components/riemann/config"
-
 export LANGOHR_SOURCE_URL=$(ctx node properties langohr_jar_source_url)
 export DAEMONIZE_SOURCE_URL=$(ctx node properties daemonize_rpm_source_url)
 export RIEMANN_SOURCE_URL=$(ctx node properties riemann_rpm_source_url)
@@ -52,19 +49,3 @@ ctx logger info "Downloading cloudify-manager Repository..."
 manager_repo=$(download_cloudify_resource ${CLOUDIFY_RESOURCES_URL})
 ctx logger info "Extracting Manager Repository..."
 extract_github_archive_to_tmp ${manager_repo}
-ctx logger info "Deploying Riemann manager.config..."
-sudo mv "/tmp/plugins/riemann-controller/riemann_controller/resources/manager.config" "${RIEMANN_CONFIG_PATH}/conf.d/manager.config"
-
-ctx logger info "Deploying Riemann conf..."
-deploy_blueprint_resource "${CONFIG_REL_PATH}/main.clj" "${RIEMANN_CONFIG_PATH}/main.clj"
-
-# our riemann configuration will (by default) try to read these environment variables. If they don't exist, it will assume
-# that they're found at "localhost"
-# export MANAGEMENT_IP=""
-# export RABBITMQ_HOST=""
-
-# we inject the management_ip for both of these to Riemann's systemd config. These should be potentially different
-# if the manager and rabbitmq are running on different hosts.
-configure_systemd_service "riemann"
-
-clean_var_log_dir riemann

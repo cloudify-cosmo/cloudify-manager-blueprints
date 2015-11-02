@@ -100,5 +100,3 @@ for python_path in ${MGMTWORKER_VIRTUALENV_DIR}/lib/python*; do
 done
 
 deploy_logrotate_config "mgmtworker"
-
-configure_systemd_service "mgmtworker"

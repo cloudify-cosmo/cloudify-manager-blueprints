@@ -34,6 +34,10 @@ node_types:
             task_retry_interval: 30
           policy_engine:
             start_timeout: 30
+          rest_username: ''
+          rest_password: ''
+          verify_manager_certificate: ''
+          manager_private_cert_on_agent: ''
       #########################################################################
       # Setting 'enabled' to true will activate security on the REST service,
       # according to the below configuration. Each request received by the
@@ -88,6 +92,10 @@ node_types:
                     password: { get_input: admin_password }
                     groups:
                       - cfy_admins
+                  - username: { get_input: agent_rest_username }
+                    password: { get_input: agent_rest_password }
+                    groups:
+                      - cfy_admins
                 groups:
                   - name: cfy_admins
                     roles:
@@ -112,6 +120,7 @@ node_types:
           #########################################################################
           ssl:
             enabled: { get_input: ssl_enabled }
+            verify_certificate: { get_input: verify_certificate }
           #########################################################################
           # Security log file properties (Optional, the default values are as
           # shown below).
@@ -395,8 +404,6 @@ node_types:
             script_path:
               default: components/nginx/scripts/create.sh
             fabric_env: *simple_fabric_env
-            REST_PROTOCOL:
-              default: { get_attribute: [manager_configuration, rest_protocol] }
         configure:
           implementation: fabric.fabric_plugin.tasks.run_task
           inputs:
@@ -459,6 +466,12 @@ node_types:
           inputs:
             script_path:
               default: components/riemann/scripts/create.sh
+            fabric_env: *simple_fabric_env
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/riemann/scripts/configure.sh
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
@@ -645,6 +658,12 @@ node_types:
             script_path:
               default: components/mgmtworker/scripts/create.sh
             fabric_env: *simple_fabric_env
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/mgmtworker/scripts/configure.sh
+            fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
@@ -826,6 +845,28 @@ relationships:
     target_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         postconfigure: components/manager/scripts/set_manager_private_ip.py
+
+  mgmtworker_to_manager_configuration:
+    derived_from: cloudify.relationships.depends_on
+    target_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/mgmtworker/scripts/preconfigure.sh
+            fabric_env: *simple_fabric_env
+
+  riemann_to_manager_configuration:
+    derived_from: cloudify.relationships.depends_on
+    target_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/riemann/scripts/preconfigure.sh
+            fabric_env: *simple_fabric_env
 
   nginx_to_manager_configuration:
     derived_from: cloudify.relationships.depends_on

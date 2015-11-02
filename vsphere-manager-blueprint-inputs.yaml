@@ -97,11 +97,23 @@
 # NOTE: If enabled, the certificate and private key files must reside in resources/ssl.
 #ssl_enabled: false
 
+# If SSL is enabled, certificates are verified by default.
+# To disable certificate verification, set this value to false.
+#verify_certificate: false
+
+# If certificate verification should use a copy of the public certificate -
+# specify the local path to it on the agent machine
+#manager_private_cert_on_agent: /root/cloudify/server.crt
+
 # Username and password of the Cloudify administrator.
 # This user will also be included in the simple userstore repostiroty if the
 # simple userstore implementation is used.
 #admin_username: 'admin'
 #admin_password: 'admin'
+
+# Username and password used by agents in REST calls
+#agent_rest_username: 'cfy_agent'
+#agent_rest_password: 'cfy_agent'
 
 #insecure_endpoints_disabled: false
 

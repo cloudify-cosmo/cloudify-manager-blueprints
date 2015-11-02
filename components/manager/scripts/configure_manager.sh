@@ -3,15 +3,20 @@
 . $(ctx download-resource "components/utils")
 
 
-function _set_rest_port() {
+function _set_rest_port_and_protocol() {
     security_enabled=$(ctx -j node properties security.enabled)
     ssl_enabled=$(ctx -j node properties security.ssl.enabled)
+
+    ctx instance runtime_properties security_enabled ${security_enabled}
+    ctx instance runtime_properties ssl_enabled ${ssl_enabled}
+
     if ${security_enabled} == true && ${ssl_enabled} == true ; then
-        ctx logger info "SSL is enabled, setting rest port to 443..."
+        ctx logger info "SSL is enabled, setting rest port to 443 and rest_protocol to https"
         ctx instance runtime_properties rest_port 443
         ctx instance runtime_properties rest_protocol https
+        ctx instance runtime_properties verify_certificate $(ctx -j node properties security.ssl.verify_certificate)
     else
-        ctx logger info "Security is off or SSL not enabled, setting rest port to 80..."
+        ctx logger info "Security is off or SSL disabled, setting rest port to 80 and rest protocols to http"
         ctx instance runtime_properties rest_port 80
         ctx instance runtime_properties rest_protocol http
     fi
@@ -86,4 +91,4 @@ function _disable_requiretty() {
 }
 
 _disable_requiretty
-_set_rest_port
+_set_rest_port_and_protocol

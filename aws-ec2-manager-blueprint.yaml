@@ -93,11 +93,23 @@ inputs:
   ssl_enabled:
     default: false
 
+  verify_certificate:
+    default: true
+
+  manager_private_cert_on_agent:
+    default: /root/cloudify/server.crt
+
   admin_username:
     default: admin
 
   admin_password:
     default: admin
+
+  agent_rest_username:
+    default: cfy_agent
+
+  agent_rest_password:
+    default: cfy_agent
 
   insecure_endpoints_disabled:
     description: Disables insecure REST endpoints
@@ -491,6 +503,10 @@ node_templates:
           broker_pass: { get_input: rabbitmq_password }
           broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
           broker_ssl_cert: { get_input: rabbitmq_cert_public }
+          rest_username: { get_input: agent_rest_username }
+          rest_password: { get_input: agent_rest_password }
+          verify_manager_certificate: { get_input: verify_certificate }
+          manager_private_cert_on_agent: { get_input: manager_private_cert_on_agent }
           env:
             AWS_CONFIG_PATH: { get_property: [SELF, cloudify, plugins, aws_config_path] }
 
@@ -586,10 +602,6 @@ node_templates:
           from_port: 443
           to_port: 443
           cidr_ip: 0.0.0.0/0
-        - ip_protocol: tcp
-          from_port: 8101
-          to_port: 8101
-          src_group_id: { get_property: [agents_security_group, resource_id] }
         - ip_protocol: tcp
           from_port: 5672
           to_port: 5672
@@ -716,6 +728,8 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: java_runtime
+      - type: riemann_to_manager_configuration
+        target: manager_configuration
       - type: riemann_to_rabbitmq
         target: rabbitmq
       - type: riemann_to_nginx
@@ -742,10 +756,14 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: python_runtime
+      - type: mgmtworker_to_manager_configuration
+        target: manager_configuration
       - type: mgmtworker_to_rabbitmq
         target: rabbitmq
       - type: mgmtworker_to_nginx
         target: nginx
+      - type: mgmtworker_to_manager_configuration
+        target: manager_configuration
 
   amqp_influx:
     type: manager.nodes.AmqpInfluxBroker

@@ -2,8 +2,18 @@ RIEMANN_CONFIG_PATH="/etc/riemann"
 LANGOHR_HOME="/opt/lib"
 EXTRA_CLASSPATH="/opt/lib/langohr.jar"
 
+MANAGER_REST_PROTOCOL="{{ ctx.instance.runtime_properties.rest_protocol }}"
+MANAGER_REST_PORT="{{ ctx.instance.runtime_properties.rest_port }}"
+SECURITY_ENABLED="{{ ctx.instance.runtime_properties.security_enabled }}"
+SSL_ENABLED="{{ ctx.instance.runtime_properties.ssl_enabled }}"
+CLOUDIFY_USERNAME="{{ ctx.instance.runtime_properties.cloudify_username }}"
+CLOUDIFY_PASSWORD="{{ ctx.instance.runtime_properties.cloudify_password }}"
+VERIFY_SSL_CERTIFICATE="{{ ctx.instance.runtime_properties.verify_certificate }}"
+MANAGER_PRIVATE_CERT_ON_AGENT="{{ ctx.instance.runtime_properties.manager_private_cert_on_agent }}"
+
 RABBITMQ_HOST="{{ ctx.instance.host_ip }}"
 MANAGEMENT_IP="{{ ctx.instance.host_ip }}"
+MANAGER_REST_PORT="{{ ctx.instance.runtime_properties.rest_port }}"
 
 RABBITMQ_HOST="{{ ctx.instance.runtime_properties.rabbitmq_endpoint_ip }}"
 RABBITMQ_USER="{{ ctx.node.properties.rabbitmq_username }}"

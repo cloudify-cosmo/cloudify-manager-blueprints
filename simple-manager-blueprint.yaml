@@ -42,11 +42,23 @@ inputs:
   ssl_enabled:
     default: false
 
+  verify_certificate:
+    default: true
+
+  manager_private_cert_on_agent:
+    default: /root/cloudify/server.crt
+
   admin_username:
     default: admin
 
   admin_password:
     default: admin
+
+  agent_rest_username:
+    default: cfy_agent
+
+  agent_rest_password:
+    default: cfy_agent
 
   insecure_endpoints_disabled:
     description: Disables insecure REST endpoints
@@ -453,6 +465,10 @@ node_templates:
           broker_pass: { get_input: rabbitmq_password }
           broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
           broker_ssl_cert: { get_input: rabbitmq_cert_public }
+          rest_username: { get_input: agent_username }
+          rest_password: { get_input: agent_password }
+          verify_manager_certificate: { get_input: verify_certificate }
+          manager_private_cert_on_agent: { get_input: manager_private_cert_on_agent }
 
         workflows:
           task_retries: -1  # this means forever
@@ -560,6 +576,9 @@ node_templates:
         target: manager_host
       - type: nginx_to_manager_configuration
         target: manager_configuration
+        target_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            postconfigure: components/manager/scripts/set_manager_private_ip.py
       - type: nginx_to_restservice
         target: rest_service
 
@@ -570,6 +589,8 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: java_runtime
+      - type: riemann_to_manager_configuration
+        target: manager_configuration
       - type: riemann_to_rabbitmq
         target: rabbitmq
       - type: riemann_to_nginx
@@ -600,6 +621,8 @@ node_templates:
         target: rabbitmq
       - type: mgmtworker_to_nginx
         target: nginx
+      - type: mgmtworker_to_manager_configuration
+        target: manager_configuration
 
   amqp_influx:
     type: manager.nodes.AmqpInfluxBroker
