@@ -27,14 +27,25 @@
 #security_enabled: false
 
 # Enabling SSL limits communication with the server to SSL only.
-# NOTE: If enabled, the certificate and private key files must reside in resources/ssl.
+# If true, the certificate and private key files must reside in resources/ssl.
 #ssl_enabled: false
+# If SSL is enabled, certificates are verified by default.
+# To disable certificate verification, set this value to false.
+#verify_certificate: false
+
+# if certificate verificate should use a local copy of the public
+# certificate - specify the path to it
+#local_manager_cert_path: /root/cloudify/server.crt
 
 # Username and password of the Cloudify administrator.
 # This user will also be included in the simple userstore repostiroty if the
 # simple userstore implementation is used.
 #admin_username: 'admin'
 #admin_password: 'admin'
+
+# Username and password of the Cloudify agents
+#agent_username: 'cfy_agent'
+#agent_password: 'cfy_agent'
 
 #############################
 # Agent Packages

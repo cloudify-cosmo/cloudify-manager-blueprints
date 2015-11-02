@@ -42,11 +42,23 @@ inputs:
   ssl_enabled:
     default: false
 
+  verify_certificate:
+    default: true
+
+  local_manager_cert_path:
+    default: /root/cloudify/server.crt
+
   admin_username:
     default: admin
 
   admin_password:
     default: admin
+
+  agent_username:
+    default: cfy_agent
+
+  agent_password:
+    default: cfy_agent
 
   #############################
   # Agent Packages
@@ -387,6 +399,10 @@ node_templates:
           broker_pass: { get_input: rabbitmq_password }
           broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
           broker_ssl_cert: { get_input: rabbitmq_cert_public }
+          manager_username: { get_input: agent_username }
+          manager_password: { get_input: agent_password }
+          verify_manager_certificate: { get_input: verify_certificate }
+          local_manager_cert_path: { get_input: local_manager_cert_path }
 
         workflows:
           task_retries: -1  # this means forever
