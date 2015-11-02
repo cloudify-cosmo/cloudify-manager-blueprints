@@ -13,5 +13,5 @@ server {
   include "/etc/nginx/conf.d/rest-location.cloudify";
 
   # Serves the File Server (backed by the cloudify-resources upstream).
-  include "/etc/nginx/conf.d/fileserver-location.cloudify";
+  include "/etc/nginx/conf.d/redirect-to-fileserver.cloudify";
 }
