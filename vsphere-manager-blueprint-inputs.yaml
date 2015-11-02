@@ -101,11 +101,19 @@
 # NOTE: If enabled, the certificate and private key files must reside in resources/ssl.
 #ssl_enabled: false
 
+# If SSL is enabled, agent requests to the REST service verify its certificate
+# by default. To disable certificate verification, set this value to false.
+#agent_verify_rest_certificate: true
+
 # Username and password of the Cloudify administrator.
 # This user will also be included in the simple userstore repostiroty if the
 # simple userstore implementation is used.
 #admin_username: 'admin'
 #admin_password: 'admin'
+
+# Username and password used by agents in REST calls
+#agent_rest_username: 'cfy_agent'
+#agent_rest_password: 'cfy_agent'
 
 #insecure_endpoints_disabled: false
 
@@ -314,6 +322,15 @@
 
 # Minimum number of worker processes maintained by the management worker.
 #management_worker_min_workers: 2
+
+#################################
+# REST Configuration
+#################################
+# valid values: public_ip, private_ip
+#rest_host_external_endpoint_type: public_ip
+
+# valid values: public_ip, private_ip
+#rest_host_internal_endpoint_type: private_ip
 
 #############################
 # Offline Resources Upload

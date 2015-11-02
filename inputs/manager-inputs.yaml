@@ -15,10 +15,28 @@ inputs:
   admin_password:
     default: admin
 
+  agent_rest_username:
+    default: cfy_agent
+
+  agent_rest_password:
+    default: cfy_agent
+
+  agent_verify_rest_certificate:
+    default: true
+
   insecure_endpoints_disabled:
     description: Disables insecure REST endpoints
     type: boolean
     default: false
+
+  #################################
+  # REST Configuration
+  #################################
+  rest_host_external_endpoint_type:
+    default: public_ip
+
+  rest_host_internal_endpoint_type:
+    default: private_ip
 
   #############################
   # Bootstrap Validations

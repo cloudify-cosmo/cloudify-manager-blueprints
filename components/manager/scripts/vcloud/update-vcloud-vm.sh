@@ -21,7 +21,6 @@ if [ "z$status" == 'zactive' ]; then
     # port for AQMP
     sudo firewall-cmd --zone=public --add-port=5672/tcp --permanent
     # port for diamond
-    sudo firewall-cmd --zone=public --add-port=8101/tcp --permanent
     sudo firewall-cmd --zone=public --add-port=8100/tcp --permanent
 
     sudo firewall-cmd --reload

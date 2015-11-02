@@ -9,37 +9,31 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+CONFIG_PATH = 'components/nginx/config'
+EXTERNAL_REST_CERT_PATH = '/root/cloudify/ssl/external_rest_host.crt'
+
 NGINX_SERVICE_NAME = 'nginx'
 ctx_properties = {'service_name': NGINX_SERVICE_NAME}
 
 
-CONFIG_PATH = 'components/nginx/config'
-
-
 def preconfigure_nginx():
-    ssl_resources_rel_path = 'resources/ssl'
-    ssl_certs_root = '/root/cloudify'
 
+    target_runtime_props = ctx.target.instance.runtime_properties
     # this is used by nginx's default.conf to select the relevant configuration
-    rest_protocol = ctx.target.instance.runtime_properties['rest_protocol']
+    rest_protocol = target_runtime_props['rest_protocol']
 
     # TODO: NEED TO IMPLEMENT THIS IN CTX UTILS
     ctx.source.instance.runtime_properties['rest_protocol'] = rest_protocol
     if rest_protocol == 'https':
-        ctx.logger.info('Copying SSL Certs...')
-        utils.mkdir(ssl_certs_root)
-        utils.deploy_blueprint_resource(
-            '{0}/server.crt'.format(ssl_resources_rel_path),
-            '{0}/server.crt'.format(ssl_certs_root),
-            NGINX_SERVICE_NAME,
-            user_resource=True,
-            load_ctx=False)
-        utils.deploy_blueprint_resource(
-            '{0}/server.key'.format(ssl_resources_rel_path),
-            '{0}/server.key'.format(ssl_certs_root),
-            NGINX_SERVICE_NAME,
-            user_resource=True,
-            load_ctx=False)
+        utils.deploy_rest_certificates(
+            internal_rest_host=target_runtime_props['internal_rest_host'],
+            external_rest_host=target_runtime_props['external_rest_host'])
+
+        # get rest public certificate for output later
+        external_rest_cert_content = \
+            utils.get_file_content(EXTERNAL_REST_CERT_PATH)
+        target_runtime_props['external_rest_cert_content'] = \
+            external_rest_cert_content
 
     ctx.logger.info('Deploying Nginx configuration files...')
     utils.deploy_blueprint_resource(

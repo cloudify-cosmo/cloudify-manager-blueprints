@@ -26,6 +26,9 @@ PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 MANAGER_RESOURCES_HOME = '/opt/manager/resources'
 AGENT_ARCHIVES_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
+SSL_CERTS_SOURCE_DIR = 'resources/ssl'
+SSL_CERTS_TARGET_DIR = '/root/cloudify/ssl'
+NGINX_SERVICE_NAME = 'nginx'
 DEFAULT_BUFFER_SIZE = 8192
 
 # Upgrade specific parameters
@@ -58,10 +61,11 @@ def retry(exception, tries=4, delay=3, backoff=2):
     return deco_retry
 
 
-def get_file_contents(file_path):
-    with open(file_path) as f:
-        data = f.read().rstrip('\n')
-    return data
+def escape_for_systemd(the_string):
+    if '\n' in the_string:
+        the_string = the_string.replace('\n', '\\\\n\\\n')
+        the_string = "\"" + the_string + "\""
+    return the_string
 
 
 def run(command, retries=0, ignore_failures=False, globx=False):
@@ -173,6 +177,93 @@ def remove(path, ignore_failure=False):
                         .format(path))
 
 
+def _generate_ssl_cert(cert_filename, key_filename, cn):
+
+    alt_name = 'IP:{0}'.format(cn)
+
+    fd, conf_file = tempfile.mkstemp()
+    os.close(fd)
+    with open(conf_file, 'w') as f:
+        f.write('subjectAltName={0}\n'
+                'distinguished_name = req_distinguished_name\n'
+                '[ req_distinguished_name ]'
+                'commonName={1}'.format(alt_name, cn))
+
+    # building openssl command
+    command_arr = shlex.split('openssl req -x509 -nodes -newkey rsa:2048 '
+                              '-out {0} -keyout {1} -days 3650 -batch '
+                              '-subj \'/CN={2}\' -config {3}'.
+                              format(cert_filename, key_filename, cn,
+                                     conf_file))
+    sudo(command_arr)
+    os.remove(conf_file)
+
+
+def deploy_ssl_cert_and_key(cert_filename, key_filename, cn):
+    """
+    SSL certificate and keys can be supplied by the user in the
+    manager-blueprint 'resources/ssl' directory.
+    If SSL certs were supplied - Cloudify will use them,
+    otherwise - they will be generated
+    :param cert_filename: the name of the certificate file (e.g. rest.crt)
+    :param key_filename: the name of the key file (e.g. rest.key)
+    :param cn: the common name to use for certificates creation (e.g.
+        myserver.com)
+    """
+    mkdir(SSL_CERTS_TARGET_DIR)
+    user_supplied_cert_path = \
+        os.path.join(SSL_CERTS_SOURCE_DIR, cert_filename)
+    user_supplied_key_path = \
+        os.path.join(SSL_CERTS_SOURCE_DIR, key_filename)
+    cert_target_path = os.path.join(SSL_CERTS_TARGET_DIR, cert_filename)
+    key_target_path = os.path.join(SSL_CERTS_TARGET_DIR, key_filename)
+    try:
+        # trying to deploy pre-existing certificates
+        ctx.logger.info('Deploying SSL certificate "{0}" and SSL private '
+                        'key "{1}"...'.format(cert_filename, key_filename))
+        deploy_blueprint_resource(user_supplied_cert_path,
+                                  cert_target_path,
+                                  NGINX_SERVICE_NAME,
+                                  user_resource=True,
+                                  load_ctx=False)
+        deploy_blueprint_resource(user_supplied_key_path,
+                                  key_target_path,
+                                  NGINX_SERVICE_NAME,
+                                  user_resource=True,
+                                  load_ctx=False)
+    except subprocess.CalledProcessError as e:
+        if "No such file or directory" in e.stderr:
+            # pre-existing cert not found, generating new cert
+            ctx.logger.info('Generating SSL certificate "{0}" and SSL private '
+                            'key "{1}" for CN "{2}"...'.
+                            format(cert_filename, key_filename, cn))
+            _generate_ssl_cert(cert_target_path, key_target_path, cn)
+        else:
+            raise
+
+
+def deploy_rest_certificates(internal_rest_host, external_rest_host):
+    deploy_ssl_cert_and_key(cert_filename='internal_rest_host.crt',
+                            key_filename='internal_rest_host.key',
+                            cn=internal_rest_host)
+    if internal_rest_host != external_rest_host:
+        deploy_ssl_cert_and_key(cert_filename='external_rest_host.crt',
+                                key_filename='external_rest_host.key',
+                                cn=external_rest_host)
+    else:
+        # use the same certificate for both internal and external access
+        internal_cert_path = \
+            os.path.join(SSL_CERTS_TARGET_DIR, 'internal_rest_host.crt')
+        internal_key_path = \
+            os.path.join(SSL_CERTS_TARGET_DIR, 'internal_rest_host.key')
+        external_cert_path = \
+            os.path.join(SSL_CERTS_TARGET_DIR, 'external_rest_host.crt')
+        external_key_path = \
+            os.path.join(SSL_CERTS_TARGET_DIR, 'external_rest_host.key')
+        copy(internal_cert_path, external_cert_path)
+        copy(internal_key_path, external_key_path)
+
+
 def install_python_package(source, venv=''):
     if venv:
         ctx.logger.info('Installing {0} in virtualenv {1}...'.format(
@@ -182,6 +273,27 @@ def install_python_package(source, venv=''):
     else:
         ctx.logger.info('Installing {0}'.format(source))
         sudo(['pip', 'install', source, '--upgrade'])
+
+
+def get_file_content(file_path):
+    """
+    using sudo to copy the file to a temp folder, to allow access to the file
+    even if it's in a restricted directory (e.g. '/root').
+    Then, chmoding the file so the current user can read it.
+    :param file_path: the path to the file
+    :return: the content of the file
+    """
+    try:
+        temp_dir = tempfile.mkdtemp()
+        copy(file_path, temp_dir)
+        filename = os.path.basename(file_path)
+        new_file_copy = os.path.join(temp_dir, filename)
+        chmod('644', new_file_copy)
+        with open(new_file_copy) as the_file:
+            return the_file.read()
+    finally:
+        if os.path.exists(temp_dir):
+            remove(temp_dir)
 
 
 def curl_download_with_retries(source, destination):
@@ -342,7 +454,7 @@ def yum_install(source, service_name):
 
     NOTE: This will currently not take into considerations situations
     in which a file was partially downloaded. If a file is partially
-    downloaded, a redownload will not take place and rather an
+    downloaded, a re-download will not take place and rather an
     installation will be attempted, which will obviously fail since
     the rpm file is incomplete.
     ALSO NOTE: you cannot provide `yum_install` with a space
@@ -1182,14 +1294,15 @@ def create_maintenance_headers(upgrade_props=True):
 def get_auth_headers(upgrade_props):
     headers = {}
     if upgrade_props:
-        config = ctx_factory.get('manager-config')
+        manager_config = ctx_factory.get('manager-config')
     else:
-        config = ctx_factory.load_rollback_props('manager-config')
-    security = config['security']
-    security_enabled = security['enabled']
+        manager_config = ctx_factory.load_rollback_props('manager-config')
+
+    security_enabled = manager_config['security']['enabled']
+    agent_config = manager_config['cloudify']['cloudify_agent']
     if security_enabled:
-        username = security.get('admin_username')
-        password = security.get('admin_password')
+        username = agent_config.get('rest_username')
+        password = agent_config.get('rest_password')
         headers.update({'Authorization':
                         'Basic ' + base64.b64encode('{0}:{1}'.format(
                             username, password))})
