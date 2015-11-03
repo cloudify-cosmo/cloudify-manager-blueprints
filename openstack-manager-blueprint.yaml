@@ -569,11 +569,6 @@ node_templates:
              implementation: components/manager/scripts/set_manager_public_ip.py
              inputs:
               public_ip: { get_attribute: [manager_server_ip, floating_ip_address] }
-      - type: cloudify.relationships.depends_on
-        target: nginx
-        target_interfaces:
-          cloudify.interfaces.relationship_lifecycle:
-            postconfigure: components/manager/scripts/set_manager_private_ip.py
 
   management_keypair:
     type: cloudify.openstack.nodes.KeyPair
@@ -764,6 +759,8 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: nginx_to_manager_configuration
+        target: manager_configuration
 
   riemann:
     type: manager.nodes.Riemann
