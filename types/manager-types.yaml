@@ -808,6 +808,20 @@ relationships:
       cloudify.interfaces.relationship_lifecycle:
         postconfigure: components/manager/scripts/set_manager_private_ip.py
 
+  nginx_to_manager_configuration:
+    derived_from: cloudify.relationships.depends_on
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/nginx/scripts/preconfigure.sh
+            fabric_env: *simple_fabric_env
+    target_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        postconfigure: components/manager/scripts/set_manager_private_ip.py
+
   rest_to_mgr_config:
       derived_from: cloudify.relationships.depends_on
       target_interfaces:
