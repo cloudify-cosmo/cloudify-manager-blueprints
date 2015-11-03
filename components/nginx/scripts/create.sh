@@ -20,7 +20,6 @@ ctx instance runtime_properties agent_packages_path "${MANAGER_AGENTS_PATH}"
 
 # TODO can we use static (not runtime) attributes for some of these? how to set them?
 ctx instance runtime_properties default_rest_service_port "8100"
-ctx instance runtime_properties ssl_rest_service_port "443"
 ctx instance runtime_properties internal_rest_service_port "8101"
 
 ctx logger info "Installing Nginx..."
@@ -29,7 +28,6 @@ set_selinux_permissive
 copy_notice "nginx"
 create_dir ${NGINX_LOG_PATH}
 create_dir ${MANAGER_RESOURCES_HOME}
-create_dir ${SSL_CERTS_ROOT}
 
 create_dir ${MANAGER_AGENTS_PATH}
 create_dir ${MANAGER_SCRIPTS_PATH}
@@ -37,17 +35,26 @@ create_dir ${MANAGER_TEMPLATES_PATH}
 
 yum_install ${NGINX_SOURCE_URL}
 
+# this is used by the nginx's default.conf to select the relevant configuration
+ctx instance runtime_properties rest_protocol "${REST_PROTOCOL}"
+
+if [ "${REST_PROTOCOL}" = "https" ]; then
+    ctx logger info "Copying SSL Certs..."
+    create_dir ${SSL_CERTS_ROOT}
+    deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.crt" "${SSL_CERTS_ROOT}/server.crt"
+    deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.key" "${SSL_CERTS_ROOT}/server.key"
+fi
+
 ctx logger info "Deploying Nginx configuration files..."
+deploy_blueprint_resource "${CONFIG_REL_PATH}/${REST_PROTOCOL}-rest-server.cloudify" "/etc/nginx/conf.d/${REST_PROTOCOL}-rest-server.cloudify"
 deploy_blueprint_resource "${CONFIG_REL_PATH}/nginx.conf" "/etc/nginx/nginx.conf"
 deploy_blueprint_resource "${CONFIG_REL_PATH}/default.conf" "/etc/nginx/conf.d/default.conf"
 deploy_blueprint_resource "${CONFIG_REL_PATH}/rest-location.cloudify" "/etc/nginx/conf.d/rest-location.cloudify"
 deploy_blueprint_resource "${CONFIG_REL_PATH}/fileserver-location.cloudify" "/etc/nginx/conf.d/fileserver-location.cloudify"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/ui-locations.cloudify" "/etc/nginx/conf.d/ui-locations.cloudify"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/logs-conf.cloudify" "/etc/nginx/conf.d/logs-conf.cloudify"
 
 deploy_logrotate_config "nginx"
-
-ctx logger info "Copying SSL Certs..."
-deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.crt" "${SSL_CERTS_ROOT}/server.crt"
-deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.key" "${SSL_CERTS_ROOT}/server.key"
 
 sudo systemctl enable nginx.service &>/dev/null
 
