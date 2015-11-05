@@ -11,36 +11,6 @@ imports:
 
 inputs:
 
-  vcloud_username:
-    type: string
-    description: >
-      User login for vcloud air
-
-  vcloud_password:
-    type: string
-    default: ''
-    description: >
-      User password for vcloud air - for login by name + password
-
-  vcloud_token:
-    type: string
-    default: ''
-    description: >
-      User token for vcloud air - for login by name + token
-
-  catalog:
-    type: string
-    default: Public Catalog
-    description: >
-      Name of catalog, can be 'Public Catalog'
-
-  template:
-    type: string
-    default: CentOS-7-x86_64-1406
-    description: >
-      Name of template from catalog,
-      can be 'CentOS-7-x86_64-1406'
-
   management_network_name:
     type: string
     description: >
@@ -58,46 +28,6 @@ inputs:
     default: centosmanager
     description: >
       Human readible name for server
-
-  vcloud_url:
-    type: string
-    default: 'vca.vmware.com'
-    description: >
-      Vcloud url
-
-  vcloud_service:
-    type: string
-    default: ''
-    description: >
-      Vcloud service
-
-  vcloud_service_type:
-    type: string
-    default: 'subscription'
-    description: >
-      Type of service: subscription, ondemand, vcd, private
-
-  vcloud_api_version:
-    type: string
-    default: '5.7'
-    description: >
-      Version of api, for now 5.6
-
-  vcloud_vdc:
-    type: string
-    description: >
-      Virtual data center name
-
-  vcloud_org:
-    type: string
-    description: >
-      Organization name
-
-  vcloud_instance:
-    type: string
-    default: ''
-    description: >
-      Only required for ondemand service type, instance uuid
 
   ssh_port:
     type: string
@@ -141,6 +71,80 @@ inputs:
     default: 4096
     description: >
       Manager host memory allocation
+
+  #############################
+  # vcloud Inputs
+  #############################
+
+  vcloud_username:
+    type: string
+    description: >
+      User login for vcloud air
+
+  vcloud_password:
+    type: string
+    default: ''
+    description: >
+      User password for vcloud air - for login by name + password
+
+  vcloud_token:
+    type: string
+    default: ''
+    description: >
+      User token for vcloud air - for login by name + token
+
+  vcloud_url:
+      type: string
+      default: 'vca.vmware.com'
+      description: >
+        Vcloud url
+
+  vcloud_service:
+    type: string
+    default: ''
+    description: >
+      Vcloud service
+
+  vcloud_service_type:
+    type: string
+    default: 'subscription'
+    description: >
+      Type of service: subscription, ondemand, vcd, private
+
+  vcloud_api_version:
+    type: string
+    default: '5.7'
+    description: >
+      Version of api, for now 5.6
+
+  vcloud_vdc:
+    type: string
+    description: >
+      Virtual data center name
+
+  vcloud_org:
+    type: string
+    description: >
+      Organization name
+
+  vcloud_instance:
+    type: string
+    default: ''
+    description: >
+      Only required for ondemand service type, instance uuid
+
+  catalog:
+      type: string
+      default: Public Catalog
+      description: >
+        Name of catalog, can be 'Public Catalog'
+
+  template:
+    type: string
+    default: CentOS-7-x86_64-1406
+    description: >
+      Name of template from catalog,
+      can be 'CentOS-7-x86_64-1406'
 
   #############################
   # Provider specific Inputs
