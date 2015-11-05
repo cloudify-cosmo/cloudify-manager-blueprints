@@ -5,6 +5,7 @@
 # Credentials:
 #vcloud_username:
 #vcloud_password:
+#vcloud_token:
 #vcloud_url:
 #vcloud_service:
 #vcloud_org:
@@ -13,6 +14,8 @@
 #vcloud_service_type:
 #edge_gateway:
 #ssl_verify: True
+
+#vcloud_api_version: '5.7'
 
 # Template
 #catalog:
@@ -41,6 +44,9 @@
 #ssh_key_filename: ''
 #agent_private_key_path: ~/.ssh/cloudify-agent-kp.pem
 
+# SSH port used to connect to the manager
+#ssh_port: 22
+
 # Public part from SSH key
 #user_public_key: ssh-rsa
 
@@ -51,9 +57,11 @@
 #############################
 # Security Settings
 #############################
+#security_enabled: false
+#ssl_enabled: false
 # Username and password to be used for login, if the simple userstore implementation is used.
-#username: 'admin'
-#password: 'admin'
+#admin_username: 'admin'
+#admin_password: 'admin'
 
 #############################
 # Agent Packages
@@ -77,7 +85,7 @@
 # Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
 # That is, as long as they provide the exact same version of that module.
 
-#rest_service_rpm_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-rest-service-3.3.0-rc1_b278.x86_64.rpm
+#rest_service_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-rest-service-3.3.0-rc1_b278.x86_64.rpm
 #management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-management-worker-3.3.0-rc1_b278.x86_64.rpm
 #amqpinflux_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-amqp-influx-3.3.0-rc1_b278.x86_64.rpm
 #cloudify_resources_url: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
@@ -117,6 +125,12 @@
 #############################
 # RabbitMQ Configuration
 #############################
+#rabbitmq_username: 'cloudify'
+#rabbitmq_password: 'c10udify'
+#rabbitmq_ssl_enabled: false
+#rabbitmq_cert_private: ''
+#rabbitmq_cert_public: ''
+
 # Allows defining the message-ttl for the different types of queues (in milliseconds).
 # https://www.rabbitmq.com/ttl.html
 #rabbitmq_events_queue_message_ttl: 60000

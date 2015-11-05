@@ -2,7 +2,7 @@
 # Provider specific Inputs
 #############################
 
-# Credentails and identification in order to connect to openstack
+# Credentials and identification in order to connect to openstack
 #keystone_username: ''
 #keystone_password: ''
 #keystone_tenant_name: ''
@@ -93,7 +93,7 @@
 # Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
 # That is, as long as they provide the exact same version of that module.
 
-#rest_service_rpm_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-rest-service-3.3.0-rc1_b278.x86_64.rpm
+#rest_service_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-rest-service-3.3.0-rc1_b278.x86_64.rpm
 #management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-management-worker-3.3.0-rc1_b278.x86_64.rpm
 #amqpinflux_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-amqp-influx-3.3.0-rc1_b278.x86_64.rpm
 #cloudify_resources_url: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
@@ -138,6 +138,11 @@
 #rabbitmq_events_queue_message_ttl: 60000
 #rabbitmq_logs_queue_message_ttl: 60000
 #rabbitmq_metrics_queue_message_ttl: 60000
+#rabbitmq_username: 'cloudify'
+#rabbitmq_password: 'c10udify'
+#rabbitmq_ssl_enabled: false
+#rabbitmq_cert_private: ''
+#rabbitmq_cert_public: ''
 
 # note that for each of the queue length limit properties, new messages
 # will be queued in RabbitMQ and old messages will be deleted once the

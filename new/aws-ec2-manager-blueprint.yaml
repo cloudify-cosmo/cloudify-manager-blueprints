@@ -52,7 +52,7 @@ inputs:
     type: boolean
     default: false
 
-  mananger_security_group_name:
+  manager_security_group_name:
     type: string
 
   agent_security_group_name:
@@ -498,7 +498,7 @@ node_templates:
   management_security_group:
     type: cloudify.aws.nodes.SecurityGroup
     properties:
-      resource_id: { get_input: mananger_security_group_name }
+      resource_id: { get_input: manager_security_group_name }
       use_external_resource: { get_input: use_existing_manager_group }
       description: Security group for Cloudify Manager VM
       rules:
