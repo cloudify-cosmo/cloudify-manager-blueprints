@@ -27,6 +27,8 @@ if [[ -z "${RABBITMQ_USERNAME}" ]] ||
   sys_error "Both rabbitmq_username and rabbitmq_password must be supplied and at least 1 character long in the manager blueprint inputs."
 fi
 
+ctx instance runtime_properties rabbitmq_endpoint_ip "$(get_rabbitmq_endpoint_ip)"
+
 ctx logger info "Installing Riemann..."
 set_selinux_permissive
 

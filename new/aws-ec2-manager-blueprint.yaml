@@ -192,10 +192,22 @@ inputs:
   #############################
   # RabbitMQ Inputs
   #############################
+  rabbitmq_endpoint_ip:
+    description: >
+      Location of the rabbit server. If blank, the manager IP will be used.
+      Note that if this is set, the external rabbit service must already exist with the appropriate
+      credentials and configuration.
+      If this is set, rabbit will not be installed on the manager. This may have security implications
+      if you are using SSL for rabbit as some normally internal (to the manager) traffic is not currently
+      encrypted.
+    type: string
+    default: ''
+
   rabbitmq_events_queue_message_ttl:
     description: >
       Sets the number of milliseconds to wait before a message expires
       in the events queue.
+      Not used if an external endpoint is used.
     type: integer
     default: 60000
 
@@ -203,6 +215,7 @@ inputs:
     description: >
       Sets the number of milliseconds to wait before a message expires
       in the logs queue.
+      Not used if an external endpoint is used.
     type: integer
     default: 60000
 
@@ -210,6 +223,7 @@ inputs:
     description: >
       Sets the number of milliseconds to wait before a message expires
       in the metrics queues.
+      Not used if an external endpoint is used.
     type: integer
     default: 60000
 
@@ -238,6 +252,7 @@ inputs:
     description: >
       The private certificate for RabbitMQ to use for SSL. This must be PEM formatted.
       It is expected to begin with a line containing 'PRIVATE KEY' in the middle.
+      Not used if an external endpoint is used.
     type: string
     default: ''
 
@@ -247,6 +262,8 @@ inputs:
       as it will be deployed and explicitly used for all other components.
       It may be self-signed. It must be PEM formatted.
       It is expected to begin with a line of dashes with 'BEGIN CERTIFICATE' in the middle.
+      If an external endpoint is used, this must be the public certificate associated with the private
+      certificate that has already been configured for use by that rabbit endpoint.
     type: string
     default: ''
 
@@ -256,8 +273,9 @@ inputs:
   # https://www.rabbitmq.com/maxlength.html
   rabbitmq_events_queue_length_limit:
     description: >
-      Sets the number of messages the logs queue can hold.
+      Sets the number of messages the events queue can hold.
       Note this is NOT the message byte length!
+      Not used if an external endpoint is used.
     type: integer
     default: 1000000
 
@@ -265,6 +283,7 @@ inputs:
     description: >
       Sets the number of messages the logs queue can hold.
       Note this is NOT the message byte length!
+      Not used if an external endpoint is used.
     type: integer
     default: 1000000
 
@@ -274,12 +293,14 @@ inputs:
       This applies to both the queue that amqp-influx pulls from and
       the ones Riemann pulls from.
       Note this is NOT the message byte length!
+      Not used if an external endpoint is used.
     type: integer
     default: 1000000
 
   rabbitmq_fd_limit:
     description: >
       Sets the File Descriptor limit for the rabbitmq user.
+      Not used if an external endpoint is used.
     type: integer
     default: 102400
 
@@ -426,6 +447,7 @@ node_templates:
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: agents_user }
+          broker_ip: { get_input: rabbitmq_endpoint_ip }
           broker_user: { get_input: rabbitmq_username }
           broker_pass: { get_input: rabbitmq_password }
           broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }

@@ -22,6 +22,8 @@ export AGENT_SOURCE_URL=$(ctx node properties agent_module_source_url)
 # injected as an input to the script
 ctx instance runtime_properties es_endpoint_ip ${ES_ENDPOINT_IP}
 
+ctx instance runtime_properties rabbitmq_endpoint_ip "$(get_rabbitmq_endpoint_ip)"
+
 export RABBITMQ_SSL_ENABLED="$(ctx -j node properties rabbitmq_ssl_enabled)"
 export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
 
