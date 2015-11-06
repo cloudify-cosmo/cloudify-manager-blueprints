@@ -515,5 +515,15 @@ function deploy_logrotate_config() {
     sudo chmod 644 ${logrotate_config_path}
 }
 
+function get_rabbitmq_endpoint_ip() {
+    ###
+    # Gets the rabbitmq endpoint IP, using the manager IP if the node property is blank.
+    ###
+    RABBITMQ_ENDPOINT_IP="$(ctx node properties rabbitmq_endpoint_ip)"
+    if [[ -z "${RABBITMQ_ENDPOINT_IP}" ]]; then
+        RABBITMQ_ENDPOINT_IP="$(ctx instance host_ip)"
+    fi
+    echo "${RABBITMQ_ENDPOINT_IP}"
+}
 
 CLOUDIFY_SOURCES_PATH="/opt/cloudify/sources"

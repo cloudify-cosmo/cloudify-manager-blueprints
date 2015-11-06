@@ -169,6 +169,10 @@ node_types:
   manager.nodes.RabbitMQ:
     derived_from: cloudify.nodes.MessageBusServer
     properties:
+      rabbitmq_endpoint_ip:
+        description: Location of the endpoint.
+        type: string
+        default: { get_input: rabbitmq_endpoint_ip }
       erlang_rpm_source_url:
         description: Erlang RPM to install.
         type: string
@@ -309,6 +313,10 @@ node_types:
       es_endpoint_port:
         type: integer
         default: { get_input: elasticsearch_endpoint_port }
+      rabbitmq_endpoint_ip:
+        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
+        type: string
+        default: { get_input: rabbitmq_endpoint_ip }
       rabbitmq_username:
         description: RabbitMQ username for access to queues.
         type: string
@@ -433,6 +441,10 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: cloudify_resources_url }
+      rabbitmq_endpoint_ip:
+        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
+        type: string
+        default: { get_input: rabbitmq_endpoint_ip }
       rabbitmq_username:
         description: RabbitMQ username for access to queues.
         type: string
@@ -484,6 +496,10 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: rest_service_source_url }
+      rabbitmq_endpoint_ip:
+        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
+        type: string
+        default: { get_input: rabbitmq_endpoint_ip }
       rabbitmq_ssl_enabled:
         description: Set whether SSL should be enabled for Rabbit.
         type: boolean
@@ -582,6 +598,10 @@ node_types:
         description: Agent module Source URL
         type: string
         default: { get_input: agent_source_url }
+      rabbitmq_endpoint_ip:
+        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
+        type: string
+        default: { get_input: rabbitmq_endpoint_ip }
       rabbitmq_username:
         description: RabbitMQ username for access to queues.
         type: string
@@ -630,6 +650,10 @@ node_types:
         description: AMQP to InfluxDB Broker Source URL
         type: string
         default: { get_input: amqpinflux_source_url }
+      rabbitmq_endpoint_ip:
+        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
+        type: string
+        default: { get_input: rabbitmq_endpoint_ip }
       rabbitmq_username:
         description: RabbitMQ username for access to queues.
         type: string

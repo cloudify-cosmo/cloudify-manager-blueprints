@@ -10,8 +10,12 @@ export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_rpm_source_url)
 export RABBITMQ_USERNAME="$(ctx node properties rabbitmq_username)"
 export RABBITMQ_PASSWORD="$(ctx node properties rabbitmq_password)"
 
+export RABBITMQ_ENDPOINT_IP="$(ctx node properties rabbitmq_endpoint_ip)"
+
 # injected as an input to the script
 ctx instance runtime_properties es_endpoint_ip ${ES_ENDPOINT_IP}
+
+ctx instance runtime_properties rabbitmq_endpoint_ip "$(get_rabbitmq_endpoint_ip)"
 
 # export LOGSTASH_HOME="/opt/logstash"
 export LOGSTASH_LOG_PATH="/var/log/cloudify/logstash"
