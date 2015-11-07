@@ -49,6 +49,15 @@ inputs:
     default: admin
 
   #############################
+  # SELinux settings
+  #############################
+  selinux_enforcing:
+    description: >
+      Determines whether SELinux will be enforcing (true) or permissive (false).
+    default: true
+    type: boolean
+
+  #############################
   # Agent Packages
   #############################
 
@@ -429,6 +438,16 @@ node_templates:
               inputs:
                 public_ip: { get_property: [manager_host, public_ip] }
 
+  #######################################################################
+  # SELinux happens before the rest so that it can ensure all settings
+  # are in place before anything tries to happen.
+  #######################################################################
+  selinux:
+    type: manager.nodes.SELinux
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
   # on specific hosts. It allows us to define the runtime environment
@@ -443,12 +462,16 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   java_runtime:
     type: manager.nodes.JavaRuntime
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   ######################################################################
   # These are the nodes comprising the Cloudify Manager's components
@@ -458,6 +481,8 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   elasticsearch:
     type: manager.nodes.Elasticsearch
@@ -466,6 +491,8 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: java_runtime
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   logstash:
     type: manager.nodes.Logstash
@@ -476,12 +503,16 @@ node_templates:
         target: java_runtime
       - type: logstash_to_elasticsearch
         target: elasticsearch
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   influxdb:
     type: manager.nodes.InfluxDB
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   nginx:
     type: manager.nodes.Nginx
@@ -507,6 +538,8 @@ node_templates:
         target: rabbitmq
       - type: riemann_to_nginx
         target: nginx
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   rest_service:
     type: manager.nodes.RestService
@@ -521,6 +554,8 @@ node_templates:
         target: elasticsearch
       - type: restservice_to_rabbitmq
         target: rabbitmq
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   mgmt_worker:
     type: manager.nodes.ManagementWorker
@@ -533,6 +568,8 @@ node_templates:
         target: rabbitmq
       - type: mgmtworker_to_nginx
         target: nginx
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   amqp_influx:
     type: manager.nodes.AmqpInfluxBroker
@@ -545,6 +582,8 @@ node_templates:
         target: rabbitmq
       - type: amqpinflux_to_influxdb
         target: influxdb
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   webui:
     type: manager.nodes.WebUI
@@ -555,6 +594,8 @@ node_templates:
         target: rest_service
       - type: webui_to_influxdb
         target: influxdb
+      - type: cloudify.relationships.depends_on
+        target: selinux
 
   ######################################################################
   # Enable this node if you want to have the CLI installed within

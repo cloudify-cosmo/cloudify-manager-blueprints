@@ -26,7 +26,6 @@ if [[ -z "${RABBITMQ_USERNAME}" ]] ||
 fi
 
 ctx logger info "Installing Logstash..."
-set_selinux_permissive
 
 copy_notice "logstash"
 

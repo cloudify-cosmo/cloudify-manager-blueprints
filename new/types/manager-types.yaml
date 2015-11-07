@@ -151,6 +151,21 @@ node_types:
                 always_use_pty: true
                 hide: running
 
+  manager.nodes.SELinux:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      selinux_enforcing:
+        type: boolean
+        default: { get_input: selinux_enforcing }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/selinux/scripts/create.sh
+            fabric_env: *simple_fabric_env
+
   manager.nodes.JavaRuntime:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
@@ -169,6 +184,9 @@ node_types:
   manager.nodes.RabbitMQ:
     derived_from: cloudify.nodes.MessageBusServer
     properties:
+      selinux_enforcing:
+        type: boolean
+        default: { get_input: selinux_enforcing }
       erlang_rpm_source_url:
         description: Erlang RPM to install.
         type: string
@@ -374,6 +392,9 @@ node_types:
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
     properties:
+      selinux_enforcing:
+        type: boolean
+        default: { get_input: selinux_enforcing }
       nginx_rpm_source_url:
         description: Nginx RPM Source URL
         type: string
@@ -465,6 +486,9 @@ node_types:
   manager.nodes.RestService:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      selinux_enforcing:
+        type: boolean
+        default: { get_input: selinux_enforcing }
       rest_service_rpm_source_url:
         type: string
         default: { get_input: rest_service_rpm_source_url }
@@ -672,6 +696,9 @@ node_types:
   manager.nodes.WebUI:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      selinux_enforcing:
+        type: boolean
+        default: { get_input: selinux_enforcing }
       webui_tar_source_url:
         description: Cloudify's WebUI Source URL
         type: string

@@ -1,0 +1,10 @@
+# Ensure there is a new line at the end of this file or it may break when deployed
+/opt/manager/resources(/.*)? gen_context(system_u:object_r:httpd_sys_rw_content_t,s0)
+/usr/lib/systemd/system/cloudify-restservice.service gen_context(system_u:object_r:httpd_unit_file_t,s0)
+/opt/manager/run_manager gen_context(system_u:object_r:httpd_exec_t,s0)
+/opt/manager/env(/.*)? gen_context(system_u:object_r:httpd_var_lib_t,s0)
+# This must come after the /env(/.*)? definition or it will be overridden
+/opt/manager/env/bin/.* gen_context(system_u:object_r:httpd_exec_t,s0)
+/opt/manager/.*\.conf gen_context(system_u:object_r:httpd_config_t,s0)
+/var/log/cloudify/rest(/.*)? gen_context(system_u:object_r:httpd_log_t,s0)
+

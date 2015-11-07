@@ -1,0 +1,13 @@
+# This file must exist with the above line for the policy (with file contexts, etc) to be compiled
+# Ensure there is a new line at the end of this file or it may break when deployed
+policy_module(cloudify-restservice, 1.0.0)
+
+require {
+  type httpd_t;
+  type httpd_var_lib_t;
+}
+
+allow httpd_t httpd_var_lib_t:file entrypoint;
+allow httpd_t httpd_var_lib_t:lnk_file read;
+allow httpd_t httpd_var_lib_t:lnk_file getattr;
+

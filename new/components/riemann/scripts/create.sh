@@ -28,7 +28,6 @@ if [[ -z "${RABBITMQ_USERNAME}" ]] ||
 fi
 
 ctx logger info "Installing Riemann..."
-set_selinux_permissive
 
 copy_notice "riemann"
 create_dir ${RIEMANN_LOG_PATH}

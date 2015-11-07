@@ -41,7 +41,6 @@ broker_ssl_enabled="$(echo ${RABBITMQ_SSL_ENABLED} | tr '[:upper:]' '[:lower:]')
 ctx instance runtime_properties rabbitmq_ssl_enabled "${broker_ssl_enabled}"
 
 ctx logger info "Installing Management Worker..."
-set_selinux_permissive
 
 copy_notice "mgmtworker"
 create_dir ${MGMTWORKER_HOME}
