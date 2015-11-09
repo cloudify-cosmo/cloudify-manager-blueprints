@@ -3,15 +3,22 @@
 . $(ctx download-resource "components/utils")
 
 
-function _set_rest_port() {
+function _set_security_settings() {
     security_enabled=$(ctx -j node properties security.enabled)
+    ctx instance runtime_properties security_enabled ${security_enabled}
     ssl_enabled=$(ctx -j node properties security.ssl.enabled)
+    ctx instance runtime_properties ssl_enabled ${ssl_enabled}
     if ${security_enabled} == true; then
-        ctx instance runtime_properties security_enabled true
+        admin_username=$(ctx -j node properties security.admin_username)
+        admin_password=$(ctx -j node properties security.admin_password)
+        ctx instance runtime_properties rest_protocol cloudify_username ${admin_username}
+        ctx instance runtime_properties rest_protocol cloudify_password ${admin_password}
         if ${ssl_enabled} == true ; then
+            verify_certificate=$(ctx -j node properties security.ssl.verify_certificate)
             ctx logger info "SSL is enabled, setting rest port to 443..."
             ctx instance runtime_properties rest_port 443
             ctx instance runtime_properties rest_protocol https
+            ctx instance runtime_properties rest_protocol verify_certificate ${verify_certificate}
         else
             ctx logger info "SSL not enabled, setting rest port to 80..."
             ctx instance runtime_properties rest_port 80
@@ -21,7 +28,6 @@ function _set_rest_port() {
         ctx logger info "Security is disabled, setting rest port to 80..."
         ctx instance runtime_properties rest_port 80
         ctx instance runtime_properties rest_protocol http
-        ctx instance runtime_properties security_enabled false
     fi
 }
 
@@ -94,4 +100,4 @@ function _disable_requiretty() {
 }
 
 _disable_requiretty
-_set_rest_port
+_set_security_settings
