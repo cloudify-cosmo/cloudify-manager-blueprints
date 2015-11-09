@@ -369,6 +369,19 @@ inputs:
     default: ''
 
   #############################
+  # Upload Resources Inputs
+  #############################
+  plugin_resources:
+    description: >
+      Holds any archives that should be uploaded to the manager.
+    default: []
+
+  dsl_resources:
+    description:
+      Holds a set of dsl required resources
+    default: []
+
+  #############################
   # Dev Inputs
   #############################
 
@@ -484,6 +497,10 @@ node_templates:
           parameters:
             rules:
             - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
+
+        upload_resources:
+          plugin_resources: { get_input: plugin_resources }
+          dsl_resources: { get_input: dsl_resources }
 
     interfaces:
       cloudify.interfaces.lifecycle:
