@@ -1,12 +1,12 @@
 #!/bin/python
 
+import platform
+
+import fabric.api
+from fabric.contrib.files import exists as remote_exists
 
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
-import platform
-import os
-import fabric.api
-from fabric.contrib.files import exists as remote_exists
 
 
 def _get_distro_info():
@@ -37,7 +37,7 @@ def retrieve(agent_packages):
             filename = '{0}.exe'.format(agent_name)
         else:
             filename = '{0}.tar.gz'.format(agent_name)
-        dest_file = os.path.join(dest_path, filename)
+        dest_file = '{0}/{1}'.format(dest_path, filename)
 
         ctx.logger.info('Downloading Agent Package {0} to {1} if it does not '
                         'already exist...'.format(source_url, dest_file))
