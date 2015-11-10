@@ -1,0 +1,23 @@
+#!/bin/bash -e
+
+ function configure_elasticsearch() {
+    ES_HOST=$1
+    ES_PORT=$2
+
+    ctx logger info "Configuring Elasticsearch Indices, Mappings, etc..."
+
+    ctx logger info "Cleaning up data model index..."
+    curl --silent --retry 5 --retry-delay 3 -XDELETE http://${ES_HOST}:${ES_PORT}/cloudify_storage/ >/dev/null && \
+    ctx logger info "Creating data model index..." && \
+    curl --fail --silent --retry 5 --retry-delay 3 -XPUT http://${ES_HOST}:${ES_PORT}/cloudify_storage -d '{"settings": {"analysis": {"analyzer": {"default": {"tokenizer": "whitespace"}}}}}' >/dev/null && \
+    ctx logger info "Setting blueprints mapping..." && \
+    curl --fail --silent --retry 5 --retry-delay 3 -XPUT http://${ES_HOST}:${ES_PORT}/cloudify_storage/blueprint/_mapping -d '{"blueprint": {"properties": {"plan": {"enabled": false}}}}' >/dev/null && \
+    ctx logger info "Setting deployments mapping..." && \
+    curl --fail --silent --retry 5 --retry-delay 3 -XPUT http://${ES_HOST}:${ES_PORT}/cloudify_storage/deployment/_mapping -d '{"deployment": {"properties": {"workflows": {"enabled": false}, "inputs": {"enabled": false}, "policy_type": {"enabled": false}, "policy_triggers": {"enabled": false}, "groups": {"enabled": false}, "outputs": {"enabled": false}}}}' >/dev/null && \
+    ctx logger info "Setting nodes mapping..." && \
+    curl --fail --silent --retry 5 --retry-delay 3 -XPUT http://${ES_HOST}:${ES_PORT}/cloudify_storage/node/_mapping -d '{ "node": { "_id": { "path": "id" }, "properties": { "types": { "type": "string", "index_name": "type" }, "properties": { "enabled": false }, "operations": { "enabled": false }, "relationships": { "enabled": false } } } }' >/dev/null && \
+    ctx logger info "Setting node-instances mapping..." && \
+    curl --fail --silent --retry 5 --retry-delay 3 -XPUT http://${ES_HOST}:${ES_PORT}/cloudify_storage/node_instance/_mapping -d '{ "node_instance": { "_id": { "path": "id" }, "properties": { "runtime_properties": { "enabled": false } } } }' >/dev/null && \
+    ctx logger info "Setting deployment_modifications mapping..." && \
+    curl --fail --silent --retry 5 --retry-delay 3 -XPUT http://${ES_HOST}:${ES_PORT}/cloudify_storage/deployment_modification/_mapping -d '{ "deployment_modification": { "_id": { "path": "id" }, "properties": { "modified_nodes": { "enabled": false }, "node_instances": { "enabled": false }, "context": { "enabled": false } } } }' >/dev/null
+ }

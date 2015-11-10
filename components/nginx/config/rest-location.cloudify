@@ -1,0 +1,28 @@
+location ~ ^/api/v2/(blueprints|executions|deployments|nodes|events|search|status|provider|api|node-instances|version|evaluate|deployment-modifications|tokens|plugins|snapshots) {
+    proxy_pass         http://cloudify-rest;
+    proxy_redirect     off;
+
+    proxy_set_header   Host             $host;
+    proxy_set_header   X-Real-IP        $remote_addr;
+    proxy_set_header   X-Server-Port    $server_port;
+    proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+}
+
+location ~ ^/api/v1/(blueprints|executions|deployments|nodes|events|search|status|provider|api|node-instances|version|evaluate|deployment-modifications|tokens) {
+    proxy_pass         http://cloudify-rest;
+    proxy_redirect     off;
+
+    proxy_set_header   Host             $host;
+    proxy_set_header   X-Real-IP        $remote_addr;
+    proxy_set_header   X-Server-Port    $server_port;
+    proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+}
+
+location ~ ^/(blueprints|snapshots|executions|deployments|nodes|events|search|status|provider|api|node-instances|version|evaluate|deployment-modifications|tokens)(.*)$ {
+   rewrite ^/(blueprints|snapshots|executions|deployments|nodes|events|search|status|provider|api|node-instances|version|evaluate|deployment-modifications|tokens)(.*)$ /api/v1/$1$2;
+
+   proxy_set_header   Host             $host;
+   proxy_set_header   X-Real-IP        $remote_addr;
+   proxy_set_header   X-Server-Port    $server_port;
+   proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+}
