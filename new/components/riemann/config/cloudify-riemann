@@ -4,6 +4,7 @@ EXTRA_CLASSPATH="/opt/lib/langohr.jar"
 
 RABBITMQ_HOST="{{ ctx.instance.host_ip }}"
 MANAGEMENT_IP="{{ ctx.instance.host_ip }}"
+MANAGER_REST_PORT="{{ ctx.instance.rest_port }}"
 
 RABBITMQ_HOST="{{ ctx.instance.runtime_properties.rabbitmq_endpoint_ip }}"
 RABBITMQ_USER="{{ ctx.node.properties.rabbitmq_username }}"

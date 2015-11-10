@@ -42,11 +42,23 @@ inputs:
   ssl_enabled:
     default: false
 
+  verify_certificate:
+    default: true
+
+  local_manager_cert_path:
+    default: /root/cloudify/server.crt
+
   admin_username:
     default: admin
 
   admin_password:
     default: admin
+
+  agent_username:
+    default: cfy_agent
+
+  agent_password:
+    default: cfy_agent
 
   #############################
   # Agent Packages
@@ -60,7 +72,8 @@ inputs:
     default:
       ubuntu_trusty_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/Ubuntu-trusty-agent_3.3.0-rc1-b278.tar.gz
       ubuntu_precise_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/Ubuntu-precise-agent_3.3.0-rc1-b278.tar.gz
-      centos_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/centos-Core-agent_3.3.0-rc1-b278.tar.gz
+      # centos_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/centos-Core-agent_3.3.0-rc1-b278.tar.gz
+      centos_7x_agent: https://www.dropbox.com/s/enheuydvfhd0vht/centos-Core-agent-new.tar.gz
       centos_6x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/centos-Final-agent_3.3.0-rc1-b278.tar.gz
       cloudify_windows_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-windows-agent_3.3.0-rc1-b278.exe
 
@@ -435,6 +448,10 @@ node_templates:
           broker_pass: { get_input: rabbitmq_password }
           broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
           broker_ssl_cert: { get_input: rabbitmq_cert_public }
+          manager_username: { get_input: agent_username }
+          manager_password: { get_input: agent_password }
+          verify_manager_certificate: { get_input: verify_certificate }
+          local_manager_cert_path: { get_input: local_manager_cert_path }
 
         workflows:
           task_retries: -1  # this means forever

@@ -91,6 +91,10 @@ node_types:
                     password: { get_input: admin_password }
                     groups:
                       - cfy_admins
+                  - username: { get_input: agent_username }
+                    password: { get_input: agent_password }
+                    groups:
+                      - cfy_admins
                 groups:
                   - name: cfy_admins
                     roles:
@@ -115,6 +119,7 @@ node_types:
           #########################################################################
           ssl:
             enabled: { get_input: ssl_enabled }
+            verify_certificate: { get_input: verify_certificate }
           #########################################################################
           # Security log file properties (Optional, the default values are as
           # shown below).
