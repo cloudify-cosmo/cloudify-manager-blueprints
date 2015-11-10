@@ -207,17 +207,17 @@
 #################
 # Diamond plugin
 #################
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_diamond_plugin-1.3a7-py26-none-linux_x86_64-centos-Final.tar.gz'
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-win32-none-none.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3a7-py26-none-linux_x86_64-centos-Final.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-win32-none-none.tar.gz'
 #################
 ## Fabric plugin
 #################
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_fabric_plugin-1.3a7-py27-none-linux_x86_64-centos-Core.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_fabric_plugin-1.3a7-py27-none-linux_x86_64-centos-Core.tar.gz'
 ####################
 ## Openstack plugin
 ####################
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_openstack_plugin-1.3a7-py27-none-linux_x86_64-centos-Core.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_openstack_plugin-1.3a7-py27-none-linux_x86_64-centos-Core.tar.gz'
 
 
