@@ -1,0 +1,25 @@
+[Unit]
+Description=Cloudify Management Worker Service
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+EnvironmentFile=-/etc/sysconfig/cloudify-mgmtworker
+WorkingDirectory=/opt/mgmtworker/work
+ExecStart=/opt/mgmtworker/env/bin/celery worker \
+    -Ofair \
+    --include=cloudify_system_workflows.snapshot,cloudify_system_workflows.deployment_environment,cloudify_agent.operations,cloudify_agent.installer.operations,riemann_controller.tasks,cloudify.plugins.workflows \
+    --hostname celery.cloudify.management \
+    --config=cloudify.broker_config \
+    --events \
+    --app=cloudify \
+    --loglevel=debug \
+    --queues=cloudify.management \
+    --logfile=${CELERY_LOG_DIR}/cloudify.management_worker.log \
+    --pidfile=${CELERY_WORK_DIR}/cloudify.management_worker.pid \
+    --autoscale=5,2 \
+    --without-gossip \
+    --without-mingle
+
+[Install]
+WantedBy=multi-user.target

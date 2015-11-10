@@ -1,0 +1,196 @@
+#############################
+# Provider specific Inputs
+#############################
+
+# The public IP of the manager to which the CLI will connect.
+#public_ip: ''
+
+# The manager's private IP address. This is the address which will be used by the
+# application hosts to connect to the Manager's fileserver and message broker.
+#private_ip: ''
+
+# SSH user used to connect to the manager
+#ssh_user: ''
+
+# SSH key path used to connect to the manager
+#ssh_key_filename: ''
+
+# This is the user with which the Manager will try to connect to the application hosts.
+#agents_user: ''
+#resources_prefix: ''
+
+#############################
+# Security Settings
+#############################
+# Cloudify REST security is disabled by default. To disable security, set to true.
+# Note: If security is disabled, the other security inputs are irrelevant.
+#security_enabled: false
+
+# Enabling SSL limits communication with the server to SSL only.
+# NOTE: If enabled, the certificate and private key files must reside in resources/ssl.
+#ssl_enabled: false
+
+# Username and password of the Cloudify administrator.
+# This user will also be included in the simple userstore repostiroty if the
+# simple userstore implementation is used.
+#admin_username: 'admin'
+#admin_password: 'admin'
+
+#############################
+# Agent Packages
+#############################
+
+# The key names must be in the format: distro_release_agent (e.g. ubuntu_trusty_agent)
+# as the key is what's used to name the file, which later allows our
+# agent installer to identify it for your distro and release automatically.
+# Note that the windows agent key name MUST be `cloudify_windows_agent`
+#agent_package_urls:
+#   ubuntu_trusty_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/Ubuntu-trusty-agent_3.3.0-rc1-b278.tar.gz
+#   ubuntu_precise_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/Ubuntu-precise-agent_3.3.0-rc1-b278.tar.gz
+#   centos_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/centos-Core-agent_3.3.0-rc1-b278.tar.gz
+#   centos_6x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/centos-Final-agent_3.3.0-rc1-b278.tar.gz
+#   cloudify_windows_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-windows-agent_3.3.0-rc1-b278.exe
+
+#############################
+# Cloudify Modules
+#############################
+
+# Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
+# That is, as long as they provide the exact same version of that module.
+
+#rest_service_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-rest-service-3.3.0-rc1_b278.x86_64.rpm
+#management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-management-worker-3.3.0-rc1_b278.x86_64.rpm
+#amqpinflux_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-amqp-influx-3.3.0-rc1_b278.x86_64.rpm
+#cloudify_resources_url: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
+#webui_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify-ui-3.3.0-rc1-b278.tgz
+# This is a Cloudify specific redistribution of Grafana.
+#grafana_source_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/grafana-1.9.0.tgz
+
+#############################
+# External Components
+#############################
+
+# Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
+# That is, as long as they provide the exact same version of that module.
+
+#pip_source_rpm_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/python-pip-7.1.0-1.el7.noarch.rpm
+#java_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/jre1.8.0_45-1.8.0_45-fcs.x86_64.rpm
+
+# RabbitMQ Distribution of Erlang
+#erlang_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/erlang-17.4-1.el6.x86_64.rpm
+#rabbitmq_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/rabbitmq-server-3.5.3-1.noarch.rpm
+
+#elasticsearch_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-1.6.0.noarch.rpm
+#elasticsearch_curator_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-curator-3.2.3-1.x86_64.rpm
+
+#logstash_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/logstash-1.5.0-1.noarch.rpm
+#nginx_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/nginx-1.8.0-1.el7.ngx.x86_64.rpm
+#influxdb_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/influxdb-0.8.8-1.x86_64.rpm
+
+#riemann_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/riemann-0.2.6-1.noarch.rpm
+# A RabbitMQ Client for Riemann
+#langohr_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/langohr.jar
+# Riemann's default daemonizer
+#daemonize_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/daemonize-1.7.3-7.el7.x86_64.rpm
+
+#nodejs_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
+
+#############################
+# RabbitMQ Configuration
+#############################
+#rabbitmq_username: 'cloudify'
+#rabbitmq_password: 'c10udify'
+#rabbitmq_ssl_enabled: false
+#rabbitmq_cert_private: ''
+#rabbitmq_cert_public: ''
+
+# Allows defining the message-ttl for the different types of queues (in milliseconds).
+# https://www.rabbitmq.com/ttl.html
+#rabbitmq_events_queue_message_ttl: 60000
+#rabbitmq_logs_queue_message_ttl: 60000
+#rabbitmq_metrics_queue_message_ttl: 60000
+
+# note that for each of the queue length limit properties, new messages
+# will be queued in RabbitMQ and old messages will be deleted once the
+# limit is reached!
+# Note this is NOT the message byte length!
+# https://www.rabbitmq.com/maxlength.html
+#rabbitmq_events_queue_length_limit: 1000000
+#rabbitmq_logs_queue_length_limit: 1000000
+#rabbitmq_metrics_queue_length_limit: 1000000
+
+# RabbitMQ File Descriptors Limit
+#rabbitmq_fd_limit: 102400
+
+#############################
+# Elasticsearch Configuration
+#############################
+# https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
+#elasticsearch_heap_size: 2g
+
+# This allows to provide any JAVA_OPTS to Elasticsearch.
+#elasticsearch_java_opts: ''
+
+# The index for events will be named `logstash-YYYY.mm.dd`.
+# A new index corresponding with today's date will be added each day.
+# Elasticsearch Curator is used to rotate the indices on a daily basis
+# via a cronjob. This allows to determine the number of days to keep.
+#elasticsearch_index_rotation_interval: 7
+
+# You can configure an external endpoint of an Elasticsearch Cluster to use
+# instead of the built in one. The built in Elasticsearch cluster will not run.
+# You need to provide an IP (defaults to localhost) and Port (defaults to 9200) of your Elasticsearch Cluster.
+#elasticsearch_endpoint_ip: ''
+#elasticsearch_endpoint_port: 9200
+
+#############################
+# InfluxDB Configuration
+#############################
+# You can configure an external endpoint of an InfluxDB Cluster to use
+# instead of the built in one.
+# If one is provided, the built in InfluxDB cluster will not run.
+# Note that the port is currently not configurable and must remain 8086.
+# Also note that the database username and password are hardcoded to root:root.
+#influxdb_endpoint_ip: ''
+
+###########################
+# Offline Resources Upload
+###########################
+# You can configure a set of resources to upload at bootstrap. These resources
+# will reside on the manager and enable offline deployment. dsl_resources
+# should contain any resource needed in the parsing process (i.e. plugin.yaml files),
+# and any plugin archive should be compiled through the designated wagon tool,
+# and the path should be passed to plugin_resources. Any resource your
+# blueprint might need, could be upload trough this mechanism.
+#dsl_resources:
+#  - {'source_path': '/cfy/cloudify/plugins/fabric-plugin/plugin.yaml', 'destination_path': '/fabric-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': '/cfy/cloudify/plugins/script-plugin/plugin.yaml', 'destination_path': '/script-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': '/cfy/cloudify/plugins/diamond-plugin/plugin.yaml', 'destination_path': '/diamond-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': '/cfy/cloudify/plugins/openstack-plugin/plugin.yaml', 'destination_path': '/openstack-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': '/cfy/cloudify/plugins/aws-plugin/plugin.yaml', 'destination_path': '/aws-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': '/cfy/cloudify/types/types.yaml', 'destination_path': '/cloudify/3.3rc1/types.yaml'}
+#plugin_resources:
+#################
+# Diamond plugin
+#################
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_diamond_plugin-1.3a7-py26-none-linux_x86_64-centos-Final.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-win32-none-none.tar.gz'
+#################
+## Fabric plugin
+#################
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_fabric_plugin-1.3a7-py27-none-linux_x86_64-centos-Core.tar.gz'
+##############
+## Aws plugin
+##############
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_aws_plugin-1.3a7-py27-none-linux_x86_64-centos-Core.tar.gz'
+####################
+## Softlayer plugin
+####################
+##  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_softlayer_plugin-1.3a7-py27-none-linux_x86_64-centos-Core.tar.gz'
+####################
+## Openstack plugin
+####################
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m7-RELEASE/cloudify_openstack_plugin-1.3a7-py27-none-linux_x86_64-centos-Core.tar.gz'
+

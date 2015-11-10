@@ -1,0 +1,8 @@
+/var/log/cloudify/influxdb/*.txt.* {
+        daily
+        rotate 7
+        compress
+        delaycompress
+        missingok
+        notifempty
+}
