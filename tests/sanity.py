@@ -174,7 +174,7 @@ def run_test(conn, ip_address, key_file_path):
         f.write(inputs)
 
     execute('cfy init')
-    execute('cfy bootstrap -p ../new/simple-manager-blueprint.yaml '
+    execute('cfy bootstrap -p ../simple-manager-blueprint.yaml '
             '-i inputs.json --install-plugins')
 
     generated_key_path = '/root/.ssh/key.pem'
