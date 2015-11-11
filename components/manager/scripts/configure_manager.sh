@@ -35,7 +35,7 @@ function _disable_requiretty() {
             echo 'supported'
         elif grep -i 'ubuntu' /proc/version > /dev/null; then
             echo 'supported'
-        elif grep -i 'redhat' /proc/version > /dev/null; then
+        elif grep -i 'redhatt' /proc/version > /dev/null; then
             echo 'supported'
         elif grep -i 'debian' /proc/version > /dev/null; then
             echo 'supported'
