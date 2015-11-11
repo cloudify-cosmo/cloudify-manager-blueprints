@@ -40,9 +40,11 @@ inputs:
 
   ssh_key_filename:
     type: string
+  default: '~/.ssh/cloudify-manager-kp.pem'
 
   agent_private_key_path:
     type: string
+  default: '~/.ssh/cloudify-agent-kp.pem'
 
   use_existing_manager_group:
     type: boolean
@@ -54,12 +56,15 @@ inputs:
 
   manager_security_group_name:
     type: string
+    default: 'cloudify-manager-security-group'
 
   agent_security_group_name:
     type: string
+    default: 'cloudify-agent-security-group'
 
   manager_server_name:
     type: string
+    default: 'cloudify-manager-server'
 
   ssh_user:
     type: string
@@ -357,12 +362,24 @@ inputs:
   plugin_resources:
     description: >
       Holds any archives that should be uploaded to the manager.
-    default: []
+    default:
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_aws_plugin-1.3rc1-py27-none-linux_x86_64-centos-Core.tar.gz'
+
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_fabric_plugin-1.3rc1-py27-none-linux_x86_64-centos-Core.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-centos-Core.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py26-none-linux_x86_64-centos-Final.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-win32-none-none.tar.gz'
 
   dsl_resources:
     description:
       Holds a set of dsl required resources
-    default: []
+    default:
+      - {'source_path': '/cfy/cloudify/plugins/fabric-plugin/plugin.yaml', 'destination_path': '/fabric-plugin/1.3rc1/plugin.yaml'}
+      - {'source_path': '/cfy/cloudify/plugins/diamond-plugin/plugin.yaml', 'destination_path': '/diamond-plugin/1.3rc1/plugin.yaml'}
+      - {'source_path': '/cfy/cloudify/plugins/aws-plugin/plugin.yaml', 'destination_path': '/aws-plugin/1.3rc1/plugin.yaml'}
 
   #############################
   # Dev Inputs

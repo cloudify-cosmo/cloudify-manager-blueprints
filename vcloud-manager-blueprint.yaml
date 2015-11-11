@@ -440,12 +440,24 @@ inputs:
   plugin_resources:
     description: >
       Holds any archives that should be uploaded to the manager.
-    default: []
+    default:
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_vcloud_plugin-1.3rc1-py27-none-linux_x86_64-centos-Core.tar.gz'
+
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_fabric_plugin-1.3rc1-py27-none-linux_x86_64-centos-Core.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-centos-Core.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py26-none-linux_x86_64-centos-Final.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-win32-none-none.tar.gz'
 
   dsl_resources:
     description:
       Holds a set of dsl required resources
-    default: []
+    default:
+      - {'source_path': '/cfy/cloudify/plugins/tosca-vcloud-plugin/plugin.yaml', 'destination_path': '/tosca-vcloud-plugin/1.3rc1/plugin.yaml'}
+      - {'source_path': '/cfy/cloudify/plugins/fabric-plugin/plugin.yaml', 'destination_path': '/fabric-plugin/1.3rc1/plugin.yaml'}
+      - {'source_path': '/cfy/cloudify/plugins/diamond-plugin/plugin.yaml', 'destination_path': '/diamond-plugin/1.3rc1/plugin.yaml'}
 
   #############################
   # Dev Inputs
@@ -458,7 +470,7 @@ inputs:
   # below modules require compilation.
   install_python_compilers:
     type: string
-    default: 'true'
+    default: ''
 
   cli_source_url:
     type: string
