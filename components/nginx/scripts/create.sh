@@ -8,6 +8,9 @@ SSL_RESOURCES_REL_PATH="resources/ssl"
 export NGINX_SOURCE_URL=$(ctx node properties nginx_rpm_source_url)
 export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)
 
+export SECURITY_ENABLED=$(ctx -j node properties security_enabled)
+export SECURITY_SSL_ENABLED=$(ctx -j node properties security_ssl_enabled)
+
 export NGINX_LOG_PATH="/var/log/cloudify/nginx"
 export MANAGER_RESOURCES_HOME="/opt/manager/resources"
 export MANAGER_AGENTS_PATH="${MANAGER_RESOURCES_HOME}/packages/agents"
@@ -45,9 +48,11 @@ deploy_blueprint_resource "${CONFIG_REL_PATH}/fileserver-location.cloudify" "/et
 
 deploy_logrotate_config "nginx"
 
-ctx logger info "Copying SSL Certs..."
-deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.crt" "${SSL_CERTS_ROOT}/server.crt"
-deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.key" "${SSL_CERTS_ROOT}/server.key"
+if ${SECURITY_ENABLED} == true && ${SECURITY_SSL_ENABLED} == true ; then
+    ctx logger info "Copying SSL Certs..."
+    deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.crt" "${SSL_CERTS_ROOT}/server.crt"
+    deploy_blueprint_resource "${SSL_RESOURCES_REL_PATH}/server.key" "${SSL_CERTS_ROOT}/server.key"
+fi
 
 sudo systemctl enable nginx.service &>/dev/null
 
