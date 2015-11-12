@@ -377,9 +377,11 @@ inputs:
     description:
       Holds a set of dsl required resources
     default:
-      - {'source_path': '/cfy/cloudify/plugins/fabric-plugin/plugin.yaml', 'destination_path': '/fabric-plugin/1.3rc1/plugin.yaml'}
-      - {'source_path': '/cfy/cloudify/plugins/diamond-plugin/plugin.yaml', 'destination_path': '/diamond-plugin/1.3rc1/plugin.yaml'}
-      - {'source_path': '/cfy/cloudify/plugins/aws-plugin/plugin.yaml', 'destination_path': '/aws-plugin/1.3rc1/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/aws-plugin/1.3rc1/plugin.yaml', 'destination_path': '/spec/aws-plugin/1.3rc1/plugin.yaml'}
+
+      - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.3rc1/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.3rc1/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3rc1/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3rc1/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.3rc1/types.yaml', 'destination_path': '/spec/cloudify/3.3rc1/types.yaml'}
 
   #############################
   # Dev Inputs
