@@ -32,6 +32,8 @@ def retrieve(agent_packages):
             agent_name = 'centos-core-agent'
         elif agent_name == 'centos-6x-agent':
             agent_name = 'centos-final-agent'
+        elif agent_name == 'redhat-7x-agent':
+            agent_name = 'redhat-maipo-agent'
 
         if agent_name == 'cloudify-windows-agent':
             filename = '{0}.exe'.format(agent_name)
