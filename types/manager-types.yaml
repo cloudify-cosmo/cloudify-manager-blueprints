@@ -398,6 +398,8 @@ node_types:
             script_path:
               default: components/nginx/scripts/create.sh
             fabric_env: *simple_fabric_env
+            REST_PROTOCOL:
+              default: { get_attribute: [manager_configuration, rest_protocol] }
         configure:
           implementation: fabric.fabric_plugin.tasks.run_task
           inputs:
