@@ -9,9 +9,11 @@ function _set_rest_port() {
     if ${security_enabled} == true && ${ssl_enabled} == true ; then
         ctx logger info "SSL is enabled, setting rest port to 443..."
         ctx instance runtime_properties rest_port 443
+        ctx instance runtime_properties rest_protocol https
     else
         ctx logger info "Security is off or SSL not enabled, setting rest port to 80..."
         ctx instance runtime_properties rest_port 80
+        ctx instance runtime_properties rest_protocol http
     fi
 }
 
