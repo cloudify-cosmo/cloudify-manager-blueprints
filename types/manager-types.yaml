@@ -71,6 +71,7 @@ node_types:
           authorization_provider:
             implementation: flask_securest.authorization_providers.role_based_authorization_provider:RoleBasedAuthorizationProvider
             properties:
+              # this is probably not configurable. why is it here?
               roles_config_file_path: '/opt/manager/roles_config.yaml'
               role_loader:
                 implementation: flask_securest.authorization_providers.role_loaders.simple_role_loader:SimpleRoleLoader
@@ -390,6 +391,12 @@ node_types:
         description: REST Service repo tar URL for resources
         type: string
         default: { get_input: rest_service_source_url }
+      security_enabled:
+        type: boolean
+        default: { get_property: [manager_configuration, security, enabled]}
+      security_ssl_enabled:
+        type: boolean
+        default: { get_property: [manager_configuration, security, ssl, enabled]}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -540,6 +547,15 @@ node_types:
       es_endpoint_port:
         type: integer
         default: { get_input: elasticsearch_endpoint_port }
+      security_enabled:
+        type: boolean
+        default: { get_property: [manager_configuration, security, enabled]}
+      security_auth_provider_config:
+        type: dict
+        default: { get_property: [manager_configuration, security, authorization_provider]}
+      security_roles_config_file:
+        type: string
+        default: { get_property: [manager_configuration, security, authorization_provider, properties, roles_config_file_path]}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

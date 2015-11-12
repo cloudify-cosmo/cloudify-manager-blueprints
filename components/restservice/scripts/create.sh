@@ -24,6 +24,10 @@ ctx instance runtime_properties es_endpoint_ip ${ES_ENDPOINT_IP}
 
 ctx instance runtime_properties rabbitmq_endpoint_ip "$(get_rabbitmq_endpoint_ip)"
 
+export SECURITY_ENABLED=$(ctx -j node properties security_enabled)
+export SECURITY_AUTH_PROVIDER_CONFIG=$(ctx node properties security_auth_provider_config)
+export SECURITY_ROLES_CONFIG_FILE=$(ctx node properties security_roles_config_file)
+
 export RABBITMQ_SSL_ENABLED="$(ctx -j node properties rabbitmq_ssl_enabled)"
 export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
 
@@ -88,8 +92,10 @@ if [ ! -z ${REST_SERVICE_SOURCE_URL} ]; then
     sudo cp -R "/tmp/resources/rest-service/cloudify/" "${MANAGER_RESOURCES_HOME}"
 fi
 
-ctx logger info "Copying role configuration files..."
-deploy_blueprint_resource "${REST_RESOURCES_REL_PATH}/roles_config.yaml" "${REST_SERVICE_HOME}/roles_config.yaml"
+if ${SECURITY_ENABLED} == true; then && [ ! -z ${SECURITY_AUTH_PROVIDER_CONFIG} ] && [ ! -z ${SECURITY_ROLES_CONFIG_FILE}]; then
+  ctx logger info "Copying role configuration files..."
+  deploy_blueprint_resource "${REST_RESOURCES_REL_PATH}/roles_config.yaml" "${REST_SERVICE_HOME}/roles_config.yaml"
+fi
 
 deploy_logrotate_config "restservice"
 
