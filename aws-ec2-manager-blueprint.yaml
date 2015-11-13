@@ -40,11 +40,11 @@ inputs:
 
   ssh_key_filename:
     type: string
-  default: '~/.ssh/cloudify-manager-kp.pem'
+    default: '~/.ssh/cloudify-manager-kp.pem'
 
   agent_private_key_path:
     type: string
-  default: '~/.ssh/cloudify-agent-kp.pem'
+    default: '~/.ssh/cloudify-agent-kp.pem'
 
   use_existing_manager_group:
     type: boolean
