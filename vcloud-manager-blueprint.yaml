@@ -297,6 +297,18 @@ inputs:
   #############################
   # RabbitMQ Inputs
   #############################
+
+  rabbitmq_endpoint_ip:
+    description: >
+      Location of the rabbit server. If blank, the manager IP will be used.
+      Note that if this is set, the external rabbit service must already exist with the appropriate
+      credentials and configuration.
+      If this is set, rabbit will not be installed on the manager. This may have security implications
+      if you are using SSL for rabbit as some normally internal (to the manager) traffic is not currently
+      encrypted.
+    type: string
+    default: ''
+
   rabbitmq_events_queue_message_ttl:
     description: >
       Sets the number of milliseconds to wait before a message expires
@@ -449,10 +461,9 @@ inputs:
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py26-none-linux_x86_64-centos-Final.tar.gz'
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-win32-none-none.tar.gz'
 
   dsl_resources:
-    description:
+    description: >
       Holds a set of dsl required resources
     default:
       - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3rc1/plugin.yaml', 'destination_path': '/spec/tosca-vcloud-plugin/1.3rc1/plugin.yaml'}

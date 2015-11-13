@@ -126,21 +126,40 @@ management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.
 #############################
 # RabbitMQ Configuration
 #############################
+# Sets the username/password to use for clients such as celery
+# to connect to the rabbitmq broker.
+# It is recommended that you set both the username and password
+# to something reasonably secure.
 #rabbitmq_username: 'cloudify'
 #rabbitmq_password: 'c10udify'
+
+# Enable SSL for RabbitMQ. If this is set to true then the public and private
+# certs must be supplied (`rabbitmq_cert_private`, `rabbitmq_cert_public` inputs).
 #rabbitmq_ssl_enabled: false
+
+# The private certificate for RabbitMQ to use for SSL. This must be PEM formatted.
+# It is expected to begin with a line containing 'PRIVATE KEY' in the middle.
 #rabbitmq_cert_private: ''
+
+# The public certificate for RabbitMQ to use for SSL. This does not need to be signed by any CA,
+# as it will be deployed and explicitly used for all other components.
+# It may be self-signed. It must be PEM formatted.
+# It is expected to begin with a line of dashes with 'BEGIN CERTIFICATE' in the middle.
+# If an external endpoint is used, this must be the public certificate associated with the private
+# certificate that has already been configured for use by that rabbit endpoint.
 #rabbitmq_cert_public: ''
 
-# Allows defining the message-ttl for the different types of queues (in milliseconds).
+# Allows to define the message-ttl for the different types of queues (in milliseconds).
+# These are not used if `rabbitmq_endpoint_ip` is provided.
 # https://www.rabbitmq.com/ttl.html
 #rabbitmq_events_queue_message_ttl: 60000
 #rabbitmq_logs_queue_message_ttl: 60000
 #rabbitmq_metrics_queue_message_ttl: 60000
 
-# note that for each of the queue length limit properties, new messages
-# will be queued in RabbitMQ and old messages will be deleted once the
+# This will set the queue length limit. Note that while new messages
+# will be queued in RabbitMQ, old messages will be deleted once the
 # limit is reached!
+# These are not used if `rabbitmq_endpoint_ip` is provided.
 # Note this is NOT the message byte length!
 # https://www.rabbitmq.com/maxlength.html
 #rabbitmq_events_queue_length_limit: 1000000
@@ -150,9 +169,19 @@ management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.
 # RabbitMQ File Descriptors Limit
 #rabbitmq_fd_limit: 102400
 
+# You can configure an external endpoint of a RabbitMQ Cluster to use
+# instead of the built in one.
+# If one is provided, the built in RabbitMQ cluster will not run.
+# Also note that your external cluster must be preconfigured with any
+# user name/pass and SSL certs if you plan on using RabbitMQ's security
+# features.
+#rabbitmq_endpoint_ip: ''
+
 #############################
 # Elasticsearch Configuration
 #############################
+# bootstrap.mlockall is set to true by default.
+# This allows to set the heapsize for your cluster.
 # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
 #elasticsearch_heap_size: 2g
 
@@ -181,33 +210,37 @@ management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.
 # Also note that the database username and password are hardcoded to root:root.
 #influxdb_endpoint_ip: ''
 
-###########################
+#############################
 # Offline Resources Upload
-###########################
+#############################
 # You can configure a set of resources to upload at bootstrap. These resources
-# will reside on the manager and enable offline deployment. dsl_resources
-# should contain any resource needed in the parsing process (i.e. plugin.yaml files),
-# and any plugin archive should be compiled through the designated wagon tool,
-# and the path should be passed to plugin_resources. Any resource your
-# blueprint might need, could be upload trough this mechanism.
+# will reside on the manager and enable offline deployment. `dsl_resources`
+# should contain any resource needed in the parsing process (i.e. plugin.yaml files)
+# and any plugin archive should be compiled using the designated wagon tool
+# which can be found at: http://github.com/cloudify-cosmo/wagon.
+# The path should be passed to plugin_resources. Any resource your
+# blueprint might need, could be uploaded using this mechanism.
+
 #dsl_resources:
-#  - {'source_path': '/cfy/cloudify/plugins/fabric-plugin/plugin.yaml', 'destination_path': '/fabric-plugin/1.3rc1/plugin.yaml'}
-#  - {'source_path': '/cfy/cloudify/plugins/script-plugin/plugin.yaml', 'destination_path': '/script-plugin/1.3rc1/plugin.yaml'}
-#  - {'source_path': '/cfy/cloudify/plugins/diamond-plugin/plugin.yaml', 'destination_path': '/diamond-plugin/1.3rc1/plugin.yaml'}
-#  - {'source_path': '/cfy/cloudify/types/types.yaml', 'destination_path': '/cloudify/3.3rc1/types.yaml'}
-#plugin_resources:
-#################
-# Diamond plugin
-#################
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3a7-py26-none-linux_x86_64-centos-Final.tar.gz'
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3a7-py27-none-win32-none-none.tar.gz'
-#################
-## Fabric plugin
-#################
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_fabric_plugin-1.3a7-py27-none-linux_x86_64-centos-Core.tar.gz'
-################
-## vcloud plugin
-################
-#  - 'path_to_plugin'
+#  - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/plugin.yaml', 'destination_path': '/fabric-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/script-plugin/plugin.yaml', 'destination_path': '/script-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/plugin.yaml', 'destination_path': '/diamond-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/aws-plugin/plugin.yaml', 'destination_path': '/aws-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/openstack-plugin/plugin.yaml', 'destination_path': '/openstack-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/plugin.yaml', 'destination_path': '/tosca-vcloud-plugin/1.3rc1/plugin.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/types.yaml', 'destination_path': '/cloudify/3.3rc1/types.yaml'}
+
+# The plugins you would like to use in your applications should be added here.
+# By default, the Diamond, Fabric and relevant IaaS plugins are provided.
+# Note that you can upload plugins post-bootstrap via the `cfy plugins upload`
+# command.
+plugin_resources:
+ - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
+ - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-centos-Core.tar.gz'
+ - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py26-none-linux_x86_64-centos-Final.tar.gz'
+ - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
+ - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
+ - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_fabric_plugin-1.3rc1-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
+ - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_aws_plugin-1.3rc1-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
+ - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_openstack_plugin-1.3rc1-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
+ - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_vcloud_plugin-1.3rc1-py27-none-linux_x86_64-redhat-Maipo.tar.gz'

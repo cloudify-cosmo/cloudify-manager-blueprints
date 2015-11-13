@@ -371,10 +371,9 @@ inputs:
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py26-none-linux_x86_64-centos-Final.tar.gz'
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-win32-none-none.tar.gz'
 
   dsl_resources:
-    description:
+    description: >
       Holds a set of dsl required resources
     default:
       - {'source_path': 'http://www.getcloudify.org/spec/aws-plugin/1.3rc1/plugin.yaml', 'destination_path': '/spec/aws-plugin/1.3rc1/plugin.yaml'}
