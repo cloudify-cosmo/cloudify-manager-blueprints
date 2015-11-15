@@ -838,11 +838,8 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
-      - type: cloudify.relationships.depends_on
+      - type: nginx_to_manager_configuration
         target: manager_configuration
-        target_interfaces:
-          cloudify.interfaces.relationship_lifecycle:
-            postconfigure: components/manager/scripts/set_manager_private_ip.py
       - type: nginx_to_restservice
         target: rest_service
 
