@@ -297,10 +297,23 @@ inputs:
   #############################
   # RabbitMQ Inputs
   #############################
+
+  rabbitmq_endpoint_ip:
+    description: >
+      Location of the rabbit server. If blank, the manager IP will be used.
+      Note that if this is set, the external rabbit service must already exist with the appropriate
+      credentials and configuration.
+      If this is set, rabbit will not be installed on the manager. This may have security implications
+      if you are using SSL for rabbit as some normally internal (to the manager) traffic is not currently
+      encrypted.
+    type: string
+    default: ''
+
   rabbitmq_events_queue_message_ttl:
     description: >
       Sets the number of milliseconds to wait before a message expires
       in the events queue.
+      Not used if an external endpoint is used.
     type: integer
     default: 60000
 
@@ -308,6 +321,7 @@ inputs:
     description: >
       Sets the number of milliseconds to wait before a message expires
       in the logs queue.
+      Not used if an external endpoint is used.
     type: integer
     default: 60000
 
@@ -315,6 +329,7 @@ inputs:
     description: >
       Sets the number of milliseconds to wait before a message expires
       in the metrics queues.
+      Not used if an external endpoint is used.
     type: integer
     default: 60000
 
@@ -452,7 +467,7 @@ inputs:
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/rc1-RELEASE/cloudify_diamond_plugin-1.3rc1-py27-none-win32-none-none.tar.gz'
 
   dsl_resources:
-    description:
+    description: >
       Holds a set of dsl required resources
     default:
       - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3rc1/plugin.yaml', 'destination_path': '/spec/tosca-vcloud-plugin/1.3rc1/plugin.yaml'}
@@ -714,6 +729,7 @@ node_templates:
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: agents_user }
+          broker_ip: { get_input: rabbitmq_endpoint_ip }
           broker_user: { get_input: rabbitmq_username }
           broker_pass: { get_input: rabbitmq_password }
           broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
