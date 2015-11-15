@@ -45,12 +45,12 @@
 # agent installer to identify it for your distro and release automatically.
 # Note that the windows agent key name MUST be `cloudify_windows_agent`
 #agent_package_urls:
-#   ubuntu_trusty_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/Ubuntu-trusty-agent_3.3.0b300.tar.gz
-#   ubuntu_precise_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/Ubuntu-precise-agent_3.3.0b300.tar.gz
-#   centos_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/centos-Core-agent_3.3.0b300.tar.gz
-#   centos_6x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/centos-Final-agent_3.3.0b300.tar.gz
-#   redhat_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/redhat-Maipo-agent_3.3.0b300.tar.gz
-#   cloudify_windows_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify-windows-agent_3.3.0b300.exe
+#   ubuntu_trusty_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/Ubuntu-trusty-agent_3.3.0b300.tar.gz
+#   ubuntu_precise_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/Ubuntu-precise-agent_3.3.0b300.tar.gz
+#   centos_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/centos-Core-agent_3.3.0b300.tar.gz
+#   centos_6x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/centos-Final-agent_3.3.0b300.tar.gz
+#   redhat_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/redhat-Maipo-agent_3.3.0b300.tar.gz
+#   cloudify_windows_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify-windows-agent_3.3.0b300.exe
 
 #############################
 # Cloudify Modules
@@ -59,11 +59,11 @@
 # Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
 # That is, as long as they provide the exact same version of that module.
 
-rest_service_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/RHEL/cloudify-rest-service-3.3.0_b300.x86_64.rpm
-management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/RHEL/cloudify-management-worker-3.3.0_b300.x86_64.rpm
-#amqpinflux_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify-amqp-influx-3.3.0_b300.x86_64.rpm
+rest_service_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/RHEL/cloudify-rest-service-3.3.0_b300.x86_64.rpm
+management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/RHEL/cloudify-management-worker-3.3.0_b300.x86_64.rpm
+#amqpinflux_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify-amqp-influx-3.3.0_b300.x86_64.rpm
 #cloudify_resources_url: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
-#webui_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify-ui-3.3.0b300.tgz
+#webui_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify-ui-3.3.0b300.tgz
 # This is a Cloudify specific redistribution of Grafana.
 #grafana_source_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/grafana-1.9.0.tgz
 
@@ -174,24 +174,24 @@ management_worker_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.
 #################
 # Diamond plugin
 #################
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify_diamond_plugin-1.3-py26-none-linux_x86_64-centos-Final.tar.gz'
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify_diamond_plugin-1.3-py27-none-win32-none-none.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_diamond_plugin-1.3-py26-none-linux_x86_64-centos-Final.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_diamond_plugin-1.3-py27-none-win32-none-none.tar.gz'
 #################
 ## Fabric plugin
 #################
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
 ##############
 ## Aws plugin
 ##############
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify_aws_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_aws_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
 ####################
 ## Softlayer plugin
 ####################
-##  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify_softlayer_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
+##  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_softlayer_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
 ####################
 ## Openstack plugin
 ####################
-#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/NoneNone-RELEASE/cloudify_openstack_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
+#  - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_openstack_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
 
