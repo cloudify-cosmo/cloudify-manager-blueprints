@@ -1,54 +1,53 @@
 #############################
-# vcloud air specific Inputs
+# Vsphere specific inputs
 #############################
 
 # Credentials:
-#vcloud_username:
-#vcloud_password:
-#vcloud_token:
-#vcloud_url:
-#vcloud_service:
-#vcloud_org:
-#vcloud_vdc:
-#vcloud_instance:
-#vcloud_service_type:
-#edge_gateway:
-#ssl_verify: True
-
-#vcloud_api_version: '5.7'
+#vsphere_username: ""
+#vsphere_password: ""
+#vsphere_host: ""
+#vsphere_port: 443
+#vsphere_datacenter_name: Datacenter
+#vsphere_resource_pool_name: Resources
+#vsphere_auto_placement: true
 
 # Template
-#catalog:
-#template:
+#template: "CentOS7_1406_tmpl"
 
 # Names of components
-#management_network_name:
-#network_use_existing:
-#server_name: cloudify-manager-server
+#management_network_name: "Management"
+#external_network_name: "Application"
+#server_name: "cloudify-manager-server"
+#manager_server_domain: ""
+
+# Network Settings for managment network
+#dns_servers: ['8.8.8.8']
+#management_network_use_dhcp: true
+#management_network_cidr: ""
+#management_network_gateway: ""
+#management_network_ip: ""
+#management_network_switch_distributed: true
+
+# Network Settings for external network
+#external_network_use_dhcp: true
+#external_network_cidr: ""
+#external_network_gateway: ""
+#external_network_ip: ""
+#external_network_switch_distributed: true
 
 #############################
 # Provider specific Inputs
 #############################
 
-# The public IP of the manager to which the CLI will connect.
-#public_ip: ''
-
-# The manager's private IP address. This is the address which will be used by the
-# application hosts to connect to the Manager's fileserver and message broker.
-#private_ip: ''
-
 # SSH user used to connect to the manager
-#ssh_user: ''
+#ssh_user: "root"
 
 # SSH key path used to connect to the manager
-#ssh_key_filename: ''
+#ssh_key_filename: ~/.ssh/centos_key.pem
 #agent_private_key_path: ~/.ssh/cloudify-agent-kp.pem
 
 # SSH port used to connect to the manager
 #ssh_port: 22
-
-# Public part from SSH key
-#user_public_key: ssh-rsa
 
 # This is the user with which the Manager will try to connect to the application hosts.
 #agents_user: ''
