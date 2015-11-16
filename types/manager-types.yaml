@@ -71,6 +71,8 @@ node_types:
           authorization_provider:
             implementation: flask_securest.authorization_providers.role_based_authorization_provider:RoleBasedAuthorizationProvider
             properties:
+              # roles_config.yaml is copied to /opt/manager/ by 'restservice/scripts/create.sh',
+              # therefore changes to the file's path must be reflected in the script as well
               roles_config_file_path: '/opt/manager/roles_config.yaml'
               role_loader:
                 implementation: flask_securest.authorization_providers.role_loaders.simple_role_loader:SimpleRoleLoader
