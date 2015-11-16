@@ -204,27 +204,27 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/Ubuntu-trusty-agent_3.3.0b300.tar.gz
-      ubuntu_precise_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/Ubuntu-precise-agent_3.3.0b300.tar.gz
-      centos_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/centos-Core-agent_3.3.0b300.tar.gz
-      centos_6x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/centos-Final-agent_3.3.0b300.tar.gz
-      redhat_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/redhat-Maipo-agent_3.3.0b300.tar.gz
-      cloudify_windows_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify-windows-agent_3.3.0b300.exe
+      ubuntu_trusty_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/Ubuntu-trusty-agent_3.3.0-ga-b300.tar.gz
+      ubuntu_precise_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/Ubuntu-precise-agent_3.3.0-ga-b300.tar.gz
+      centos_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/centos-Core-agent_3.3.0-ga-b300.tar.gz
+      centos_6x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/centos-Final-agent_3.3.0-ga-b300.tar.gz
+      redhat_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/redhat-Maipo-agent_3.3.0-ga-b300.tar.gz
+      cloudify_windows_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify-windows-agent_3.3.0-ga-b300.exe
 
   #############################
   # Cloudify Modules
   #############################
   rest_service_rpm_source_url:
     type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify-rest-service-3.3.0_b300.x86_64.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify-rest-service-3.3.0-ga_b300.x86_64.rpm
 
   management_worker_rpm_source_url:
     type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify-management-worker-3.3.0_b300.x86_64.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify-management-worker-3.3.0-ga_b300.x86_64.rpm
 
   amqpinflux_rpm_source_url:
     type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify-amqp-influx-3.3.0_b300.x86_64.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify-amqp-influx-3.3.0-ga_b300.x86_64.rpm
 
   cloudify_resources_url:
     type: string
@@ -232,7 +232,7 @@ inputs:
 
   webui_source_url:
     type: string
-    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify-ui-3.3.0b300.tgz
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify-ui-3.3.0-ga-b300.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
@@ -441,15 +441,15 @@ inputs:
     description: >
       Holds any archives that should be uploaded to the manager.
     default:
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_vcloud_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vcloud_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
 
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_diamond_plugin-1.3-py26-none-linux_x86_64-centos-Final.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/None-RELEASE/cloudify_diamond_plugin-1.3-py27-none-win32-none-none.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py26-none-linux_x86_64-centos-Final.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-win32-none-none.tar.gz'
 
   dsl_resources:
     description:
