@@ -4,7 +4,7 @@ imports:
   - http://www.getcloudify.org/spec/cloudify/3.3rc1/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.3rc1/plugin.yaml
   - types/manager-types.yaml
-  - https://raw.githubusercontent.com/cloudify-cosmo/tosca-vcloud-plugin/1.3rc1/plugin.yaml
+  - http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3rc1/plugin.yaml
 
 
 
