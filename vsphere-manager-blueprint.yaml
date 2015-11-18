@@ -4,24 +4,30 @@ imports:
   - http://www.getcloudify.org/spec/cloudify/3.3/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.3/plugin.yaml
   - types/manager-types.yaml
-  - http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3/plugin.yaml
+  - http://www.getcloudify.org/spec/vsphere-plugin/1.3/plugin.yaml
 
 
 
 
 inputs:
 
+  #############################
+  # Provider specific Inputs
+  #############################
+
+  # Network settings Inputs
+  dns_servers:
+    type: string
+    description: >
+        DNS server ip
+    default:
+      - '8.8.8.8'
+
   management_network_name:
     type: string
     description: >
       Name common network that can be used for nodes
-
-  edge_gateway:
-    type: string
-    default: gateway
-    description: >
-      For 'ondemand' service type, the value of edge_gateway
-      is always 'gateway'
+    default: Management
 
   server_name:
     type: string
@@ -29,36 +35,83 @@ inputs:
     description: >
       Human readible name for server
 
-  ssh_port:
-    type: string
-    default: 22
+  management_network_use_dhcp:
     description: >
-      SSH port that can be used for installed node
-
-  network_use_existing:
-    type: boolean
-    default: false
-    description: >
-      Use existed network
-
-  ssl_verify:
-    type: boolean
+      use DHCP to obtain an ip address
     default: true
-    description: >
-        ssl check for connections to private services
-        (disable self-signed certificates)
+    type: boolean
 
-  user_public_key:
-    type: string
+  management_network_cidr:
     description: >
-      Public part of your key
+      network cidr (for example, 10.0.0.0/24). It will be used by the
+      plugin only when `use_dhcp` is false
+    default: ''
+    type: string
 
-  management_port_ip_allocation_mode:
-    type: string
-    default: dhcp
+  management_network_gateway:
     description: >
-      IP allocation type for cases when you don't set a public ip
-      for a node and instead want to auto-allocate it.
+      network gateway ip. It will be used by the plugin only
+      when `use_dhcp` is false
+    default: ''
+    type: string
+
+  management_network_ip:
+    description: >
+      server ip address. It will be used by the plugin only
+      when `use_dhcp` is false
+    default: ''
+    type: string
+
+  management_network_switch_distributed:
+    description: >
+       signifies if network is connected to a distributed switch
+    default: false
+    type: boolean
+
+  manager_server_domain:
+    description: >
+      the fully qualified domain name
+    default: ''
+    type: string
+
+  external_network_name:
+    description: >
+      network name
+    default: DMZ
+    type: string
+
+  external_network_use_dhcp:
+    description: >
+      use DHCP to obtain an ip address
+    default: true
+    type: boolean
+
+  external_network_cidr:
+    description: >
+      network cidr (for example, 10.0.0.0/24).
+      It will be used by the plugin only when `use_dhcp` is false
+    default: ''
+    type: string
+
+  external_network_gateway:
+    description: >
+      network gateway ip. It will be used by the plugin only when
+      `use_dhcp` is false
+    default: ''
+    type: string
+
+  external_network_ip:
+    description: >
+      server ip address. It will be used by the plugin only when
+      `use_dhcp` is false
+    default: ''
+    type: string
+
+  external_network_switch_distributed:
+    description: >
+      signifies if network is connected to a distributed switch
+    default: false
+    type: boolean
 
   manager_server_cpus:
     type: string
@@ -72,94 +125,57 @@ inputs:
     description: >
       Manager host memory allocation
 
-  #############################
-  # vcloud Inputs
-  #############################
+  # vsphere credentials
 
-  vcloud_username:
+  vsphere_username:
     type: string
     description: >
-      User login for vcloud air
+      User login for vsphere
 
-  vcloud_password:
+  vsphere_password:
     type: string
     default: ''
     description: >
-      User password for vcloud air - for login by name + password
+      User password for vsphere
 
-  vcloud_token:
-    type: string
-    default: ''
+  vsphere_host:
     description: >
-      User token for vcloud air - for login by name + token
-
-  vcloud_url:
-      type: string
-      default: 'vca.vmware.com'
-      description: >
-        Vcloud url
-
-  vcloud_service:
+      vSphere host
     type: string
-    default: ''
-    description: >
-      Vcloud service
 
-  vcloud_service_type:
+  vsphere_port:
+    description: >
+      port which vCenter Server system uses to monitor data transfer
+      from SDK clients
+    default: 443
     type: string
-    default: 'subscription'
-    description: >
-      Type of service: subscription, ondemand, vcd, private
 
-  vcloud_api_version:
+  vsphere_datacenter_name:
+    description: >
+      datacenter name
+    default: Datacenter
     type: string
-    default: '5.7'
-    description: >
-      Version of api, for now 5.6
 
-  vcloud_vdc:
+  vsphere_resource_pool_name:
+    description: >
+      Resource pool name. Represents a set of physical resources:
+      a single host, a subset of a host's resources, or resources
+      spanning multiple hosts
+    default: Resources
     type: string
-    description: >
-      Virtual data center name
 
-  vcloud_org:
-    type: string
+  vsphere_auto_placement:
     description: >
-      Organization name
-
-  vcloud_instance:
-    type: string
-    default: ''
-    description: >
-      Only required for ondemand service type, instance uuid
-
-  catalog:
-      type: string
-      default: Public Catalog
-      description: >
-        Name of catalog, can be 'Public Catalog'
+      signifies if server is to be automatically placed on a host
+    default: false
+    type: boolean
 
   template:
     type: string
     default: CentOS-7-x86_64-1406
     description: >
-      Name of template from catalog,
-      can be 'CentOS-7-x86_64-1406'
-
-  #############################
-  # Provider specific Inputs
-  #############################
-  public_ip:
-    type: string
-    default:
-    description: >
-      Public ip, can be empty for auto allocation.
-
-  private_ip:
-    type: string
-    default: ''
-    description: >
-      Port public ip
+      Name of template,
+      can be 'CentOS-7.0-1406-x86_64-tmpl'
 
   ssh_user:
     type: string
@@ -463,8 +479,6 @@ inputs:
     description: >
       Holds any archives that should be uploaded to the manager.
     default:
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vcloud_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
-
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
@@ -474,14 +488,18 @@ inputs:
       - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-win32-none-none.tar.gz'
 
   dsl_resources:
-    description:
+    description: >
       Holds a set of dsl required resources
     default:
+      - {'source_path': 'http://www.getcloudify.org/spec/openstack-plugin/1.3/plugin.yaml', 'destination_path': '/spec/openstack-plugin/1.3/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/aws-plugin/1.3/plugin.yaml', 'destination_path': '/spec/aws-plugin/1.3/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3/plugin.yaml', 'destination_path': '/spec/tosca-vcloud-plugin/1.3/plugin.yaml'}
 
       - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.3/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.3/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.3/types.yaml', 'destination_path': '/spec/cloudify/3.3/types.yaml'}
+
+
 
   #############################
   # Dev Inputs
@@ -533,184 +551,61 @@ inputs:
     default: ''
 
 ######################################################################
-# This is a vcloud blueprint specific node_type to allow us to define
+# This is a vsphere blueprint specific node_type to allow us to define
 # The public_ip of the machine is an accessible property of the host.
 # By default, the `ip` property is the private ip.
 ######################################################################
 node_types:
 
-  vcloud_configuration:
+  connection_configuration:
      derived_from: cloudify.nodes.Root
      properties:
-       vcloud_config: {}
-
-  cloudify.nodes.ManagerHost:
-    derived_from: cloudify.vcloud.nodes.Server
-    properties:
-      public_ip:
-        type: string
-        default: { get_input: public_ip }
-
+       connection_config: {}
 
 ######################################################################
 # These nodes comprise the manager's infrastructure and components
 ######################################################################
 node_templates:
-  vcloud_configuration:
-    type: vcloud_configuration
+  connection_configuration:
+    type: connection_configuration
     properties:
-      vcloud_config:
-        username: { get_input: vcloud_username }
-        password: { get_input: vcloud_password }
-        token: { get_input: vcloud_token }
-        url: { get_input: vcloud_url }
-        instance: { get_input: vcloud_instance }
-        vdc: { get_input: vcloud_vdc }
-        org: { get_input: vcloud_org }
-        service_type: { get_input: vcloud_service_type }
-        service: { get_input: vcloud_service }
-        api_version: { get_input: vcloud_api_version }
-        edge_gateway: { get_input: edge_gateway }
-        ssl_verify: { get_input: ssl_verify }
-
-  management_network_nat:
-    type: cloudify.vcloud.nodes.PublicNAT
-    properties:
-      use_external_resource: { get_input: network_use_existing }
-      nat:
-        edge_gateway: { get_input: edge_gateway }
-        public_ip: { get_input: public_ip }
-      rules:
-        - type: SNAT
-      vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
-
-  management_network:
-    type: cloudify.vcloud.nodes.Network
-    properties:
-      use_external_resource: { get_input: network_use_existing }
-      resource_id: { get_input: management_network_name }
-      network:
-        name: { get_input: management_network_name }
-        edge_gateway: { get_input: edge_gateway }
-        static_range: 10.67.10.129-10.67.10.254
-        netmask: 255.255.255.0
-        gateway_ip: 10.67.10.1
-        dns:
-          - 10.67.10.1
-          - 8.8.8.8
-        dhcp:
-          dhcp_range: 10.67.10.2-10.67.10.128
-      vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
-    relationships:
-      - target: management_network_nat
-        type: cloudify.vcloud.net_connected_to_public_nat
-
-  ssh_keypair:
-    type: cloudify.vcloud.nodes.KeyPair
-    properties:
-      public_key:
-        user: { get_input: ssh_user }
-        key: { get_input: user_public_key }
-      private_key:
-        path: { get_input: ssh_key_filename }
-
-  manager_security_group:
-    type: cloudify.vcloud.nodes.SecurityGroup
-    properties:
-      security_group:
-        name: manager_security_group
-        edge_gateway: { get_input: edge_gateway }
-      rules:
-        - source: external
-          destination: internal
-          destination_port: { get_input: ssh_port }
-          action: allow
-          description: >
-            ssh between external net and manager node
-          protocol: TCP
-        - source: external
-          destination: internal
-          destination_port: 80
-          action: allow
-          description: >
-            http to manager node
-          protocol: TCP
-        - source: external
-          destination: internal
-          destination_port: 443
-          action: allow
-          description: >
-            https to manager node
-          protocol: TCP
-        - source: internal
-          destination: any
-          action: allow
-          description: >
-            backward network connection for host updates
-          protocol: any
-      vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
-
-  manager_public_ip:
-    type: cloudify.vcloud.nodes.PublicNAT
-    properties:
-      nat:
-        edge_gateway: { get_input: edge_gateway }
-        public_ip: { get_input: public_ip }
-      rules:
-        - type: DNAT
-          protocol: tcp
-          original_port:  { get_input: ssh_port }
-          translated_port: 22
-        - type: DNAT
-          protocol: tcp
-          original_port: 80
-          translated_port: 80
-        - type: DNAT
-          protocol: tcp
-          original_port: 443
-          translated_port: 443
-      vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
-
-  management_port:
-    type: cloudify.vcloud.nodes.Port
-    properties:
-      port:
-        network: { get_input: management_network_name }
-        ip_allocation_mode: { get_input: management_port_ip_allocation_mode }
-        ip_address: { get_input: private_ip }
-        primary_interface: true
-      vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
-    relationships:
-      - target: management_network
-        type: cloudify.vcloud.port_connected_to_network
+      connection_config:
+        username: { get_input: vsphere_username }
+        password: { get_input: vsphere_password }
+        host: { get_input: vsphere_host }
+        port: { get_input: vsphere_port }
+        datacenter_name: { get_input: vsphere_datacenter_name }
+        resource_pool_name: { get_input: vsphere_resource_pool_name }
+        auto_placement: { get_input: vsphere_auto_placement }
 
   manager_host:
-    type: cloudify.nodes.ManagerHost
+    type: cloudify.vsphere.nodes.Server
     properties:
       server:
         name: { get_input: server_name }
-        catalog: { get_input: catalog }
         template: { get_input: template }
-        hardware:
-          cpu: { get_input: manager_server_cpus }
-          memory: { get_input: manager_server_memory }
-        guest_customization:
-          computer_name: { get_input: server_name }
+        cpus: { get_input: manager_server_cpus }
+        memory: { get_input: manager_server_memory }
       install_agent: false
-      management_network: { get_input: management_network_name }
-      vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
-      install_agent: false
-      ip: { get_attribute: [management_port, ip] }
-      public_ip: { get_attribute: [manager_public_ip, public_ip] }
-    relationships:
-      - target: manager_public_ip
-        type: cloudify.vcloud.server_connected_to_public_nat
-      - target: ssh_keypair
-        type: cloudify.vcloud.server_connected_to_keypair
-      - target: management_port
-        type: cloudify.vcloud.server_connected_to_port
-      - target: manager_security_group
-        type: cloudify.vcloud.server_connected_to_security_group
+      networking:
+        domain: { get_input: manager_server_domain }
+        dns_servers: { get_input: dns_servers }
+        connect_networks:
+          - management: true
+            switch_distributed: { get_input: management_network_switch_distributed }
+            use_dhcp: { get_input: management_network_use_dhcp }
+            network: { get_input: management_network_cidr }
+            gateway: { get_input: management_network_gateway }
+            ip: { get_input: management_network_ip}
+            name: { get_input: management_network_name }
+          - external: true
+            switch_distributed: { get_input: external_network_switch_distributed }
+            use_dhcp: { get_input: external_network_use_dhcp }
+            network: { get_input: external_network_cidr }
+            gateway: { get_input: external_network_gateway }
+            ip: { get_input: external_network_ip}
+            name: { get_input: external_network_name }
+      connection_config: { get_property: [connection_configuration, connection_config] }
 
   # #####################################################################
   # The manager_configuration node is meant to be read by Cloudify to
@@ -769,27 +664,26 @@ node_templates:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path: components/manager/scripts/vcloud/update-vcloud-vm.sh
-            fabric_env: &vcloud_fabric_env
+            script_path: components/manager/scripts/configure_manager.sh
+            fabric_env: &vsphere_fabric_env
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
-              host_string: { get_attribute: [manager_public_ip, public_ip] }
-              port: { get_input: ssh_port }
+              host_string: { get_attribute: [manager_host, public_ip] }
               disable_known_hosts: True
               always_use_pty: true
         configure:
           implementation: fabric.fabric_plugin.tasks.run_task
           inputs:
-            tasks_file: components/manager/scripts/vcloud/configure.py
+            tasks_file: components/manager/scripts/vsphere/configure.py
             task_name: configure
             task_properties:
-              vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
-            fabric_env: *vcloud_fabric_env
+              vsphere_config: { get_property: [connection_configuration, connection_config] }
+            fabric_env: *vsphere_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path: components/manager/scripts/configure_manager.sh
-            fabric_env: *vcloud_fabric_env
+            script_path: components/manager/scripts/vsphere/update-firewall.sh
+            fabric_env: *vsphere_fabric_env
 
     relationships:
       - type: cloudify.relationships.contained_in
@@ -799,7 +693,7 @@ node_templates:
             postconfigure:
               implementation: components/manager/scripts/set_manager_public_ip.py
               inputs:
-                public_ip: { get_attribute: [manager_public_ip, public_ip] }
+                public_ip: { get_attribute: [manager_host, public_ip] }
 
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
@@ -948,4 +842,4 @@ plugins:
 
 outputs:
   manager_ip:
-    value: { get_attribute: [manager_public_ip, public_ip] }
+    value: { get_attribute: [manager_host, public_ip] }
