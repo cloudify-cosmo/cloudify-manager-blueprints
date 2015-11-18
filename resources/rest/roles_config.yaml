@@ -9,7 +9,7 @@ administrator:
       - '*'
 
 ###############################################################################
-# The deployer role can access any endpoint, and use any method expect DELETE
+# The deployer role can access any endpoint, and use any method except DELETE
 ###############################################################################
 #deployer:
 #  allow:
