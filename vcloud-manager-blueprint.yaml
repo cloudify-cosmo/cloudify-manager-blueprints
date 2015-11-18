@@ -297,6 +297,12 @@ inputs:
   #############################
   # RabbitMQ Inputs
   #############################
+
+  rabbitmq_endpoint_ip:
+    description: Location of the endpoint
+    type: string
+    default: ''
+
   rabbitmq_events_queue_message_ttl:
     description: >
       Sets the number of milliseconds to wait before a message expires
