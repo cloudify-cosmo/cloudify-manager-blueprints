@@ -429,7 +429,7 @@ inputs:
 
   securest_source_url:
     type: string
-    default: ''
+    default: 'https://github.com/cloudify-cosmo/flask-securest/archive/user-role-mapping.tar.gz'
 
   amqpinflux_source_url:
     type: string
