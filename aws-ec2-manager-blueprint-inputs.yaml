@@ -58,6 +58,8 @@ agents_user: ''
 #admin_username: 'admin'
 #admin_password: 'admin'
 
+#insecure_endpoints_disabled: false
+
 #############################
 # Agent Packages
 #############################

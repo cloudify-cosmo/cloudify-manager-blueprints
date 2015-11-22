@@ -542,6 +542,11 @@ node_types:
       es_endpoint_port:
         type: integer
         default: { get_input: elasticsearch_endpoint_port }
+      insecure_endpoints_disabled:
+        description: Disables insecure REST endpoints
+        type: boolean
+        default: { get_input: insecure_endpoints_disabled }
+
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

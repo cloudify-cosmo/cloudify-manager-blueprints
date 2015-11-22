@@ -129,6 +129,11 @@ inputs:
   admin_password:
     default: admin
 
+  insecure_endpoints_disabled:
+    description: Disables insecure REST endpoints
+    type: boolean
+    default: false
+
   #############################
   # Agent Packages
   #############################
