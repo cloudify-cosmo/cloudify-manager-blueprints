@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import urllib2
+import time
 
 import boto.ec2
 from retrying import retry
@@ -204,6 +205,10 @@ def run_test(conn, ip_address, key_file_path):
                 BLUEPRINT_ID))
     execute('cfy deployments create -b {0} -d {1} -i hello-inputs.json'.format(
         BLUEPRINT_ID, DEPLOYMENT_ID))
+
+    # Sleep some time because of CFY-4066
+    lgr.info('Waiting for 15 seconds before executing install workflow...')
+    time.sleep(15)
     execute('cfy executions start -d {0} -w install'.format(DEPLOYMENT_ID))
 
     url = 'http://{0}:{1}'.format(ip_address, webserver_port)
