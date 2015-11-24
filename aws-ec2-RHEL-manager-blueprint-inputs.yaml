@@ -234,13 +234,13 @@ management_worker_rpm_source_url: 'https://gigaspaces-repository-eu.s3.amazonaws
 # Note that you can upload plugins post-bootstrap via the `cfy plugins upload`
 # command.
 plugin_resources:
-  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
-  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
-  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py26-none-linux_x86_64-centos-Final.tar.gz'
-  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
-  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
-  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vcloud_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
-  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_aws_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_openstack_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vsphere_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
+  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.wgn'
+  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
+  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py26-none-linux_x86_64-centos-Final.wgn'
+  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.wgn'
+  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
+  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.wgn'
+#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vcloud_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.wgn'
+  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_aws_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.wgn'
+#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_openstack_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.wgn'
+#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vsphere_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.wgn'
