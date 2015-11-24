@@ -484,14 +484,14 @@ inputs:
     description: >
       Holds any archives that should be uploaded to the manager.
     default:
-      - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vsphere_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
+      - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vsphere_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
 
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-centos-Core.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py26-none-linux_x86_64-centos-Final.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.tar.gz'
-      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.tar.gz'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.wgn'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py26-none-linux_x86_64-centos-Final.wgn'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.wgn'
+      - 'http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
 
   dsl_resources:
     description: >
