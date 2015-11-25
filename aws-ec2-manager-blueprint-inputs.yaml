@@ -5,40 +5,50 @@
 # Credentials and identification in order to connect to ec2
 aws_access_key_id: ''
 aws_secret_access_key: ''
-image_id: ''
-instance_type: ''
+
+# This is the Amazon AMI that you will run and install the manager components on.
+# The default value is matched to the default instance_type and ec2_region_name.
+# This may also vary by account.
+#image_id: 'ami-61bbf104'
+
+# This is the Amazon instance type.
+# The default value is matched to the default image_id and ec2_region_name.
+# This may also vary by account.
+#instance_type: 'm3.medium'
 
 # These are the key names in ec2 that will be created at bootstrap.
 # If existing key pairs are used (see below), bootstrap will use the provided names, and will not create new ones.
-#manager_keypair_name: ''
-#agent_keypair_name: ''
+#manager_keypair_name: 'cloudify-manager-kp'
+#agent_keypair_name: 'cloudify-agent-kp'
 
-#use_existing_manager_group:
-#use_existing_agent_group:
+#use_existing_manager_group: false
+#use_existing_agent_group: false
 
 # The bootstrap process creates 2 key pairs in order to connect to the management machine and application hosts.
 # Set these properties to true (one or both) if you want to use existing key pairs, and not create new ones.
-#use_existing_manager_keypair: ''
-#use_existing_agent_keypair: ''
+#use_existing_manager_keypair: '~/.ssh/cloudify-manager-kp.pem'
+#use_existing_agent_keypair: '~/.ssh/cloudify-agent-kp.pem'
 
 # These are the local paths where the key files will be created at bootstrap.
 # If existing key pairs are used (see above), the key files should be at these paths for cloudify to find.
-ssh_key_filename: ''
-agent_private_key_path: ''
+#ssh_key_filename: ''
+#agent_private_key_path: ''
 
-#manager_security_group_name: ''
-#agent_security_group_name: ''
-#manager_server_name: ''
+#manager_security_group_name: 'cloudify-manager-security-group'
+#agent_security_group_name: 'cloudify-agent-security-group'
+#manager_server_name: 'cloudify-manager-server'
 
 # SSH user used to connect to the manager
-ssh_user: ''
+# This depends on the default user on your AWS AMI.
+#ssh_user: 'centos'
 
 # This is the default user that the manager will use while connecting to an application host.
 # This user can be overriden in different places.
-agents_user: ''
+#agents_user: 'centos'
 
 # If no region is provided, the plugin will fallback to the default region for your user.
-#ec2_region_name: ''
+# The default value is matched to the default image_id and instance_type.
+#ec2_region_name: 'us-east-1'
 
 
 #############################
