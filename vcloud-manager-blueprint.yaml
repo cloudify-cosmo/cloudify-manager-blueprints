@@ -107,7 +107,7 @@ inputs:
 
   vcloud_service_type:
     type: string
-    default: 'subscription'
+    default: 'ondemand'
     description: >
       Type of service: subscription, ondemand, vcd, private
 
@@ -115,7 +115,8 @@ inputs:
     type: string
     default: '5.7'
     description: >
-      Version of api, for now 5.6
+      Version of api. For 'ondemand' service must be 5.6,
+      for 'subscription' must be 5.7
 
   vcloud_vdc:
     type: string
@@ -164,20 +165,31 @@ inputs:
   ssh_user:
     type: string
     default: root
+    description: >
+      SSH user used to connect to the manager
 
   ssh_key_filename:
     type: string
+    description: >
+      SSH key path used to connect to the manager
 
   agent_private_key_path:
     type: string
+    description: >
+      SSH key path used to connect to the application hosts
 
   agents_user:
     default: ubuntu
     type: string
+    description: >
+      This is the user with which the Manager
+      will try to connect to the application hosts
 
   resources_prefix:
     default: ''
     type: string
+    description: >
+       Prefix for all nodes
 
   #############################
   # Security Settings
