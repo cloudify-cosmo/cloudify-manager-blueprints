@@ -92,7 +92,7 @@ def verify_connectivity_to_instance(ip_address, key_filename):
         with fabric_settings(host_string='{0}:{1}'.format(ip_address, port),
                              user=USER,
                              key_filename=key_filename):
-            fabric_run('echo "hello"')
+            fabric_run('echo "hello"', timeout=10)
     except Exception as e:
         lgr.warning('Unable to connect: {0}'.format(str(e)))
         raise
