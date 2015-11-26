@@ -20,7 +20,7 @@ dependencies:
 
 test:
   override:
-    - ./run-test.sh OP=flake8
-    - ./run-test.sh OP=validate-blueprints
-    - ./run-test.sh OP=bootstrap-sanity
+    - ./run_test.sh OP=flake8
+    - ./run_test.sh OP=validate-blueprints
+    - ./run_test.sh OP=bootstrap-sanity
 
