@@ -1,0 +1,23 @@
+machine:
+  python:
+    version: 2.7.9
+
+dependencies:
+  override:
+    - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/3.3.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-openstack-plugin/archive/1.3.zip
+    - pip install nose
+    - pip install mock
+    - pip install flake8
+
+
+test:
+  override:
+    - ./run-test.sh OP=flake8
+    - ./run-test.sh OP=validate-blueprints
+    - ./run-test.sh OP=bootstrap-sanity
+
