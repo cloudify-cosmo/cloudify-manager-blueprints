@@ -1,14 +1,14 @@
 #!/bin/bash -e
 
-if [ "${OP}" == "validate-blueprints" ]; then
+if [ $1 == "validate-blueprints" ]; then
   cfy init
   blueprints=`find . -name "*-manager-blueprint.yaml"`
   for blueprint in $blueprints; do
     cfy blueprints validate -p $blueprint
   done
-elif [ "${OP}" == "flake8" ]; then
+elif [ $1 == "flake8" ]; then
   flake8 .
-elif [ "${OP}" == "bootstrap-sanity" ]; then
+elif [ $1 == "bootstrap-sanity" ]; then
   if [ "${TRAVIS_TAG}" == "bootstrap-sanity" ]; then
     cd tests
     pip install -r bootstrap-sanity-requirements.txt
