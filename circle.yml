@@ -2,8 +2,8 @@ machine:
   python:
     version: 2.7.9
 
-dependencies:
-  override:
+test:
+  pre:
     - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3.zip
@@ -14,9 +14,6 @@ dependencies:
 #    - pip install setuptools
 #    - pip install mock
     - pip install flake8
-
-
-test:
   override:
     - sudo ./run_test.sh flake8
     - sudo ./run_test.sh validate-blueprints
