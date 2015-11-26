@@ -15,7 +15,7 @@ test:
 #    - pip install mock
     - pip install flake8
   override:
-    - sudo ./run_test.sh flake8
-    - sudo ./run_test.sh validate-blueprints
-    - sudo ./run_test.sh bootstrap-sanity
+    - ./run_test.sh flake8
+    - ./run_test.sh validate-blueprints
+    - ./run_test.sh bootstrap-sanity
 
