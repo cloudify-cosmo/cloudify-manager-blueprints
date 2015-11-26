@@ -20,7 +20,7 @@ dependencies:
 
 test:
   override:
-    - ./run_test.sh OP=flake8
-    - ./run_test.sh OP=validate-blueprints
-    - ./run_test.sh OP=bootstrap-sanity
+    - sudo ./run_test.sh OP=flake8
+    - sudo ./run_test.sh OP=validate-blueprints
+    - sudo ./run_test.sh OP=bootstrap-sanity
 
