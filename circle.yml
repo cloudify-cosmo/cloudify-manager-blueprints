@@ -3,6 +3,8 @@ machine:
     version: 2.7.9
 
 dependencies:
+  pre:
+    - pyenv local 2.7.9
   override:
     - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3.zip
@@ -11,7 +13,7 @@ dependencies:
     - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/3.3.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-openstack-plugin/archive/1.3.zip
     - pip install nose
-    - pip install setuptools
+#    - pip install setuptools
     - pip install mock
     - pip install flake8
 
