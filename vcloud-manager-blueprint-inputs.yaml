@@ -1,29 +1,60 @@
 #############################
-# Provider specific Inputs
+# vCloud specific Inputs
 #############################
 
 # Credentials:
-#vcloud_username:
-#vcloud_password:
+# User login for vcloud air
+vcloud_username: ''
+
+# User password for vcloud air - for login by name + password
+vcloud_password: ''
+
+# User token for vcloud air - for login by name + token
 #vcloud_token:
+
+# Vcloud url for 'subscription' - https://vchs.vmware.com
+#            for 'ondemand'     - https://vca.vmware.com
 #vcloud_url:
+
+# Vcloud service. Only required for 'subscription' service type
 #vcloud_service:
-#vcloud_org:
-#vcloud_vdc:
-#vcloud_instance:
+
+# Organization name
+vcloud_org: ''
+
+# Virtual data center name
+vcloud_vdc: ''
+
+# Only required for ondemand service type, instance uuid
+vcloud_instance: ''
+
+# Type of service: subscription, ondemand, vcd, private
 #vcloud_service_type:
-#edge_gateway:
+
+# Edge gateway name
+# For 'ondemand' service type, the value of edge_gateway is always 'gateway'
+#edge_gateway: gateway
+
 #ssl_verify: True
 
+# Version of api. For 'ondemand' service must be 5.6,
+# for 'subscription' must be 5.7
 #vcloud_api_version: '5.7'
 
-# Template
-#catalog:
-#template:
+# Name of catalog, can be 'Public Catalog'
+catalog: ''
+
+# Name of template from catalog
+template: ''
 
 # Names of components
+# Name common network that can be used for nodes
 #management_network_name:
+
+# Use existed network
 #network_use_existing:
+
+#Human readible name for server
 #server_name: cloudify-manager-server
 
 #############################
@@ -41,14 +72,16 @@
 #ssh_user: ''
 
 # SSH key path used to connect to the manager
-#ssh_key_filename: ''
-#agent_private_key_path: ~/.ssh/cloudify-agent-kp.pem
+ssh_key_filename: ''
+
+# SSH key path used to connect to the managed VMs
+agent_private_key_path: ~/.ssh/cloudify-agent-kp.pem
 
 # SSH port used to connect to the manager
 #ssh_port: 22
 
 # Public part from SSH key
-#user_public_key: ssh-rsa
+user_public_key: ssh-rsa...
 
 # This is the user with which the Manager will try to connect to the application hosts.
 #agents_user: ''
@@ -245,7 +278,7 @@
 #  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.wgn'
 #  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
 #  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vcloud_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
 #  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_aws_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
 #  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_openstack_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vcloud_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
 #  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vsphere_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
