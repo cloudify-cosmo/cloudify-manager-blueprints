@@ -8,18 +8,23 @@ EnvironmentFile=-/etc/sysconfig/cloudify-mgmtworker
 WorkingDirectory=/opt/mgmtworker/work
 ExecStart=/opt/mgmtworker/env/bin/celery worker \
     -Ofair \
-    --include=cloudify_system_workflows.snapshot,cloudify_system_workflows.deployment_environment,cloudify_agent.operations,cloudify_agent.installer.operations,riemann_controller.tasks,cloudify.plugins.workflows \
-    --hostname celery.cloudify.management \
+    --include=cloudify.dispatch \
+    --hostname cloudify.management \
     --config=cloudify.broker_config \
     --events \
-    --app=cloudify \
+    --app=cloudify_agent.app.app \
     --loglevel=debug \
     --queues=cloudify.management \
     --logfile=${CELERY_LOG_DIR}/cloudify.management_worker.log \
     --pidfile=${CELERY_WORK_DIR}/cloudify.management_worker.pid \
-    --autoscale=5,2 \
+    --autoscale={{ ctx.node.properties.max_workers }},{{ ctx.node.properties.min_workers }} \
     --without-gossip \
-    --without-mingle
+    --without-mingle \
+    --with-gate-keeper \
+    --gate-keeper-bucket-size={{ ctx.node.properties.gate_keeper_bucket_size }} \
+    --with-logging-server \
+    --logging-server-logdir=${CELERY_LOG_DIR}/logs \
+    --logging-server-handler-cache-size={{ ctx.node.properties.max_workers }}
 
 [Install]
 WantedBy=multi-user.target

@@ -367,6 +367,20 @@ inputs:
     default: ''
 
   #############################
+  # Management Worker Inputs
+  #############################
+  management_worker_max_workers:
+    description: >
+      Max number of celery workers.
+    type: integer
+    default: 100
+  management_worker_min_workers:
+    description: >
+      Min number of celery workers.
+    type: integer
+    default: 2
+
+  #############################
   # Upload Resources Inputs
   #############################
   plugin_resources:
@@ -466,10 +480,6 @@ node_templates:
       cloudify:
         plugins:
           aws_config_path: /etc/cloudify/aws_plugin/boto
-
-        transient_deployment_workers_mode:
-          enabled: true
-          global_parallel_executions_limit: 50
 
         cloudify_agent:
           min_workers: 0

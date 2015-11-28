@@ -23,9 +23,6 @@ node_types:
         description: >
           Configuration for Cloudify Manager
         default:
-          transient_deployment_workers_mode:
-            enabled: true
-            global_parallel_executions_limit: 50  # -1 means no limit
           resources_prefix: ''
           cloudify_agent:
             min_workers: 2
@@ -625,6 +622,21 @@ node_types:
         description: PEM formatted public cert for rabbit SSL.
         type: string
         default: { get_input: rabbitmq_cert_public }
+      max_workers:
+        description: Max number of celery workers.
+        type: integer
+        default: { get_input: management_worker_max_workers }
+      min_workers:
+        description: Min number of celery workers.
+        type: integer
+        default: { get_input: management_worker_min_workers }
+      gate_keeper_bucket_size:
+        description: >
+          Maximum number of concurrent operations/workflows for any deployment. The limit is for concurrent
+          operations and concurrent workflows, separately. It cannot be bigger than the management worker
+          max workers property, as that property sets the global max number of running processes.
+        type: integer
+        default: { get_property: [manager_configuration, cloudify, cloudify_agent, max_workers] }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
