@@ -82,12 +82,12 @@ agents_user: ''
 # agent installer to identify it for your distro and release automatically.
 # Note that the windows agent key name MUST be `cloudify_windows_agent`
 #agent_package_urls:
-#  ubuntu_trusty_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/Ubuntu-trusty-agent_3.3.0-ga-b300.tar.gz
-#  ubuntu_precise_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/Ubuntu-precise-agent_3.3.0-ga-b300.tar.gz
-#  centos_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/centos-Core-agent_3.3.0-ga-b300.tar.gz
-#  centos_6x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/centos-Final-agent_3.3.0-ga-b300.tar.gz
-#  redhat_7x_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/redhat-Maipo-agent_3.3.0-ga-b300.tar.gz
-#  cloudify_windows_agent: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify-windows-agent_3.3.0-ga-b300.exe
+#  ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/Ubuntu-trusty-agent_3.3.0-ga-b300.tar.gz
+#  ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/Ubuntu-precise-agent_3.3.0-ga-b300.tar.gz
+#  centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/centos-Core-agent_3.3.0-ga-b300.tar.gz
+#  centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/centos-Final-agent_3.3.0-ga-b300.tar.gz
+#  redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/redhat-Maipo-agent_3.3.0-ga-b300.tar.gz
+#  cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify-windows-agent_3.3.0-ga-b300.exe
 
 #############################
 # Cloudify Modules
@@ -96,14 +96,14 @@ agents_user: ''
 # Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
 # That is, as long as they provide the exact same version of that module.
 
-#rest_service_rpm_source_url: 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify-rest-service-3.3.0-ga_b300.x86_64.rpm'
-#management_worker_rpm_source_url: 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify-management-worker-3.3.0-ga_b300.x86_64.rpm'
-#amqpinflux_rpm_source_url: 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify-amqp-influx-3.3.0-ga_b300.x86_64.rpm'
+#rest_service_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify-rest-service-3.3.0-ga_b300.x86_64.rpm'
+#management_worker_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify-management-worker-3.3.0-ga_b300.x86_64.rpm'
+#amqpinflux_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify-amqp-influx-3.3.0-ga_b300.x86_64.rpm'
 #cloudify_resources_url: 'https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz'
-#webui_source_url: 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify-ui-3.3.0-ga-b300.tgz'
+#webui_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify-ui-3.3.0-ga-b300.tgz'
 
 # This is a Cloudify specific redistribution of Grafana.
-#grafana_source_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/grafana-1.9.0.tgz
+#grafana_source_url: http://repository.cloudifysource.org/org/cloudify3/components/grafana-1.9.0.tgz
 
 #############################
 # External Components
@@ -112,27 +112,27 @@ agents_user: ''
 # Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
 # That is, as long as they provide the exact same version of that module.
 
-#pip_source_rpm_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/python-pip-7.1.0-1.el7.noarch.rpm
-#java_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/jre1.8.0_45-1.8.0_45-fcs.x86_64.rpm
+#pip_source_rpm_url: http://repository.cloudifysource.org/org/cloudify3/components/python-pip-7.1.0-1.el7.noarch.rpm
+#java_source_url: http://repository.cloudifysource.org/org/cloudify3/components/jre1.8.0_45-1.8.0_45-fcs.x86_64.rpm
 
 # RabbitMQ Distribution of Erlang
-#erlang_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/erlang-17.4-1.el6.x86_64.rpm
-#rabbitmq_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/rabbitmq-server-3.5.3-1.noarch.rpm
+#erlang_source_url: http://repository.cloudifysource.org/org/cloudify3/components/erlang-17.4-1.el6.x86_64.rpm
+#rabbitmq_source_url: http://repository.cloudifysource.org/org/cloudify3/components/rabbitmq-server-3.5.3-1.noarch.rpm
 
-#elasticsearch_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-1.6.0.noarch.rpm
-#elasticsearch_curator_rpm_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/elasticsearch-curator-3.2.3-1.x86_64.rpm
+#elasticsearch_source_url: http://repository.cloudifysource.org/org/cloudify3/components/elasticsearch-1.6.0.noarch.rpm
+#elasticsearch_curator_rpm_source_url: http://repository.cloudifysource.org/org/cloudify3/components/elasticsearch-curator-3.2.3-1.x86_64.rpm
 
-#logstash_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/logstash-1.5.0-1.noarch.rpm
-#nginx_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/nginx-1.8.0-1.el7.ngx.x86_64.rpm
-#influxdb_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/influxdb-0.8.8-1.x86_64.rpm
+#logstash_source_url: http://repository.cloudifysource.org/org/cloudify3/components/logstash-1.5.0-1.noarch.rpm
+#nginx_source_url: http://repository.cloudifysource.org/org/cloudify3/components/nginx-1.8.0-1.el7.ngx.x86_64.rpm
+#influxdb_source_url: http://repository.cloudifysource.org/org/cloudify3/components/influxdb-0.8.8-1.x86_64.rpm
 
-#riemann_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/riemann-0.2.6-1.noarch.rpm
+#riemann_source_url: http://repository.cloudifysource.org/org/cloudify3/components/riemann-0.2.6-1.noarch.rpm
 # A RabbitMQ Client for Riemann
-#langohr_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/langohr.jar
+#langohr_source_url: http://repository.cloudifysource.org/org/cloudify3/components/langohr.jar
 # Riemann's default daemonizer
-#daemonize_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/daemonize-1.7.3-7.el7.x86_64.rpm
+#daemonize_source_url: http://repository.cloudifysource.org/org/cloudify3/components/daemonize-1.7.3-7.el7.x86_64.rpm
 
-#nodejs_source_url: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
+#nodejs_source_url: http://repository.cloudifysource.org/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
 
 #############################
 # RabbitMQ Configuration
@@ -247,13 +247,13 @@ agents_user: ''
 # Note that you can upload plugins post-bootstrap via the `cfy plugins upload`
 # command.
 #plugin_resources:
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.wgn'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py26-none-linux_x86_64-centos-Final.wgn'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.wgn'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_aws_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_openstack_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vcloud_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vsphere_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-redhat-Maipo.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py26-none-linux_x86_64-centos-Final.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-precise.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify_diamond_plugin-1.3-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify_fabric_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify_aws_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify_openstack_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vcloud_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify_vsphere_plugin-1.3-py27-none-linux_x86_64-centos-Core.wgn'
