@@ -10,6 +10,7 @@ elif [ $1 == "flake8" ]; then
   flake8 .
 elif [ $1 == "bootstrap-sanity" ]; then
   TAG='git describe --exact-match --tags HEAD'
+  echo ${TAG}
   if [ "${TAG}" == "bootstrap-sanity" ]; then
     cd tests
     pip install -r bootstrap-sanity-requirements.txt
