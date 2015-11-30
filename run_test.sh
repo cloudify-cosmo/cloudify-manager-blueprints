@@ -9,8 +9,8 @@ if [ $1 == "validate-blueprints" ]; then
 elif [ $1 == "flake8" ]; then
   flake8 .
 elif [ $1 == "bootstrap-sanity" ]; then
-  TAG='git describe --exact-match --tags HEAD'
-  echo ${TAG}
+  #TAG=$(git describe --exact-match --tags HEAD)
+  #if [ "${TAG}" == "bootstrap-sanity" ]; then
   if [ "${TAG}" == "bootstrap-sanity" ]; then
     cd tests
     pip install -r bootstrap-sanity-requirements.txt
