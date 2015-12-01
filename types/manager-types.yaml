@@ -715,6 +715,10 @@ node_types:
         description: NodeJS tgz Source URL
         type: string
         default: { get_input: nodejs_source_url }
+      insecure_endpoints_disabled:
+        description: Disables insecure REST endpoints
+        type: boolean
+        default: { get_input: insecure_endpoints_disabled }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

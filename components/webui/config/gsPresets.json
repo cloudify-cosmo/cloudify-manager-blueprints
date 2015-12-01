@@ -18,6 +18,8 @@
             "user": "root",
             "pass": "root",
             "dbname": "cloudify"
-        }
+        },
+      "autoDetectProtocol": false,
+      "cloudifyManagerEndpoint": "{{ ctx.instance.runtime_properties.rest_endpoint }}"
     }
 }

@@ -8,9 +8,16 @@ CONFIG_REL_PATH="components/webui/config"
 export NODEJS_SOURCE_URL=$(ctx node properties nodejs_tar_source_url)
 export WEBUI_SOURCE_URL=$(ctx node properties webui_tar_source_url)
 export GRAFANA_SOURCE_URL=$(ctx node properties grafana_tar_source_url)
+export INSECURE_REST_DISABLED=$(ctx -j node properties insecure_endpoints_disabled)
 
 # injected as an input to the script
 ctx instance runtime_properties influxdb_endpoint_ip ${INFLUXDB_ENDPOINT_IP}
+
+if [[ ${INSECURE_REST_DISABLED} == 'true' ]]; then
+  ctx instance runtime_properties rest_endpoint "https://localhost/api/v2/"
+else
+  ctx instance runtime_properties rest_endpoint "http://localhost/api/v2/"
+fi
 
 export NODEJS_HOME="/opt/nodejs"
 export WEBUI_HOME="/opt/cloudify-ui"
@@ -48,7 +55,10 @@ grafana=$(download_file ${GRAFANA_SOURCE_URL})
 sudo tar -xzvf ${grafana} -C ${GRAFANA_HOME} --strip-components=1 >/dev/null
 
 ctx logger info "Deploying WebUI Configuration..."
+# Must deploy settings to have settings take effect on first run
+# Must deploy presets to have settings not overwritten with defaults and mangled on first run
 deploy_blueprint_resource "${CONFIG_REL_PATH}/gsPresets.json" "${WEBUI_HOME}/backend/gsPresets.json"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/settings.json" "${WEBUI_HOME}/backend/settings.json"
 ctx logger info "Deploying Grafana Configuration..."
 deploy_blueprint_resource "${CONFIG_REL_PATH}/grafana_config.js" "${GRAFANA_HOME}/config.js"
 
