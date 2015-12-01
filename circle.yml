@@ -2,8 +2,8 @@ cdmachine:
   python:
     version: 2.7.9
 
-test:
-  pre:
+dependencies:
+  override:
     - pip install setuptools --upgrade
     - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3.zip
@@ -14,6 +14,7 @@ test:
     - pip install nose
     - pip install mock
     - pip install flake8
+test:
   override:
     - case $CIRCLE_NODE_INDEX in 0) ./run_test.sh flake8 ;; esac:
 #        parallel: true
