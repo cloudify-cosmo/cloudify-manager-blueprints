@@ -4,6 +4,7 @@
 
 
 CONFIG_REL_PATH="components/logstash/config"
+LOGSTASH_UNIT_OVERRIDE="/etc/systemd/system/logstash.service.d"
 
 export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_rpm_source_url)
 
@@ -38,6 +39,11 @@ yum_install ${LOGSTASH_SOURCE_URL}
 
 create_dir ${LOGSTASH_LOG_PATH}
 sudo chown -R logstash.logstash ${LOGSTASH_LOG_PATH}
+
+
+ctx logger info "Creating systemd unit override..."
+create_dir ${LOGSTASH_UNIT_OVERRIDE}
+deploy_blueprint_resource "${CONFIG_REL_PATH}/restart.conf" "${LOGSTASH_UNIT_OVERRIDE}/restart.conf"
 
 ctx logger info "Deploying Logstash conf..."
 deploy_blueprint_resource "${CONFIG_REL_PATH}/logstash.conf" "${LOGSTASH_CONF_PATH}/logstash.conf"
