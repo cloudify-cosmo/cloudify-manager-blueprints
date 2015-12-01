@@ -22,6 +22,10 @@ vcloud_password: ''
 # Organization name
 vcloud_org: ''
 
+# Vcloud org url, only required if using token based login on a private
+# vcloud director.
+#vcloud_org_url: ''
+
 # Virtual data center name
 vcloud_vdc: ''
 
@@ -281,5 +285,4 @@ user_public_key: ssh-rsa...
 #  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_vcloud_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
 #  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_aws_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
 #  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_openstack_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_vcloud_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
 #  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_vsphere_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'

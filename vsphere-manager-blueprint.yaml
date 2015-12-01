@@ -19,97 +19,99 @@ inputs:
   dns_servers:
     type: string
     description: >
-        DNS server ip
+        DNS servers ip list(used in both networks)
     default:
       - '8.8.8.8'
 
   management_network_name:
     type: string
     description: >
-      Name common network that can be used for nodes
+      Name of common network that will be used for connect nodes and
+      manager node
     default: Management
 
   server_name:
     type: string
-    default: centosmanager
+    default: cloudify-manager-server
     description: >
       Human readible name for server
 
   management_network_use_dhcp:
     description: >
-      use DHCP to obtain an ip address
+      use DHCP to obtain an ip address for managment network
     default: true
     type: boolean
 
   management_network_cidr:
     description: >
-      network cidr (for example, 10.0.0.0/24). It will be used by the
-      plugin only when `use_dhcp` is false
+      managment network cidr (for example, 10.0.0.0/24). It will be used
+      by the plugin only when `use_dhcp` is false
     default: ''
     type: string
 
   management_network_gateway:
     description: >
-      network gateway ip. It will be used by the plugin only
+      management network gateway ip. It will be used by the plugin only
       when `use_dhcp` is false
     default: ''
     type: string
 
   management_network_ip:
     description: >
-      server ip address. It will be used by the plugin only
-      when `use_dhcp` is false
+      server ip address in managment network. It will be used by the
+      plugin only when `use_dhcp` is false
     default: ''
     type: string
 
   management_network_switch_distributed:
     description: >
-       signifies if network is connected to a distributed switch
+       signifies if management network is connected to a distributed
+       switch
     default: false
     type: boolean
 
   manager_server_domain:
     description: >
-      the fully qualified domain name
+      the fully qualified domain name for manager node
     default: ''
     type: string
 
   external_network_name:
     description: >
-      network name
+      external network name that will be used outside connection
     default: DMZ
     type: string
 
   external_network_use_dhcp:
     description: >
-      use DHCP to obtain an ip address
+      use DHCP to obtain an ip address in network with external connectivity
     default: true
     type: boolean
 
   external_network_cidr:
     description: >
-      network cidr (for example, 10.0.0.0/24).
+      external network cidr (for example, 10.0.0.0/24).
       It will be used by the plugin only when `use_dhcp` is false
     default: ''
     type: string
 
   external_network_gateway:
     description: >
-      network gateway ip. It will be used by the plugin only when
+      external network gateway ip. It will be used by the plugin only when
       `use_dhcp` is false
     default: ''
     type: string
 
   external_network_ip:
     description: >
-      server ip address. It will be used by the plugin only when
+      server ip address in external network. It will be used by the plugin only when
       `use_dhcp` is false
     default: ''
     type: string
 
   external_network_switch_distributed:
     description: >
-      signifies if network is connected to a distributed switch
+      signifies if exteranal network is connected to a distributed switch
     default: false
     type: boolean
 
@@ -117,7 +119,7 @@ inputs:
     type: string
     default: 2
     description: >
-      Count cpu on node
+      Count cpu on manager node
 
   manager_server_memory:
     type: string
@@ -140,7 +142,7 @@ inputs:
 
   vsphere_host:
     description: >
-      vSphere host
+      vSphere REST api host
     type: string
 
   vsphere_port:
@@ -152,7 +154,7 @@ inputs:
 
   vsphere_datacenter_name:
     description: >
-      datacenter name
+      datacenter name in vsphere
     default: Datacenter
     type: string
 
@@ -180,20 +182,30 @@ inputs:
   ssh_user:
     type: string
     default: root
+    description: >
+        admin user in vm template
 
   ssh_key_filename:
     type: string
+    description: >
+        SSH key path used to connect to the manager by ssh_user
 
   agent_private_key_path:
     type: string
+    description: >
+        SSH key path used to connect from the manager to nodes
 
   agents_user:
     default: ubuntu
     type: string
+    description: >
+        agent username used with agent_private_key_path
 
   resources_prefix:
     default: ''
     type: string
+    description: >
+        prefix for all nodes
 
   #############################
   # Security Settings
