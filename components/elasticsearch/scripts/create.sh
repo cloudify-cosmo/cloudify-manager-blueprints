@@ -21,6 +21,7 @@ export ES_CURATOR_VERSION="3.2.3"
 export ES_HOME="/opt/elasticsearch"
 export ES_LOGS_PATH="/var/log/cloudify/elasticsearch"
 export ES_CONF_PATH="/etc/elasticsearch"
+ES_UNIT_OVERRIDE="/etc/systemd/system/elasticsearch.service.d"
 
 
 function install_elasticsearch() {
@@ -35,6 +36,10 @@ function install_elasticsearch() {
 
     ctx logger info "Chowning ${ES_LOGS_PATH} by elasticsearch user..."
     sudo chown -R elasticsearch:elasticsearch ${ES_LOGS_PATH}
+
+    ctx logger info "Creating systemd unit override..."
+    create_dir ${ES_UNIT_OVERRIDE}
+    deploy_blueprint_resource "${CONFIG_REL_PATH}/restart.conf" "${ES_UNIT_OVERRIDE}/restart.conf"
 
     ctx logger info "Deploying Elasticsearch Configuration..."
     deploy_blueprint_resource "${CONFIG_REL_PATH}/elasticsearch.yml" "${ES_CONF_PATH}/elasticsearch.yml"
