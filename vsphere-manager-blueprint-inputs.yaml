@@ -3,54 +3,87 @@
 #############################
 
 # Credentials:
+
+# User login for vsphere
 #vsphere_username: ""
+# User password for vsphere
 #vsphere_password: ""
+# vSphere REST api host
 #vsphere_host: ""
+# port which vCenter Server system uses to monitor data transfer
+# from SDK clients
 #vsphere_port: 443
+# datacenter name in vsphere
 #vsphere_datacenter_name: Datacenter
+# Resource pool name. Represents a set of physical resources:
+# a single host, a subset of a host's resources, or resources
+# spanning multiple hosts
 #vsphere_resource_pool_name: Resources
-#vsphere_auto_placement: true
+# signifies if server is to be automatically placed on a host
+#vsphere_auto_placement: false
+# Template used for create vms, e.g: vm template based on CentOs 7.0
+#template: "CentOS-7-x86_64-1406"
 
-# Template
-#template: "CentOS7_1406_tmpl"
+# Names of components:
 
-# Names of components
+# Name of common network that will be used for connect nodes and
+# manager node
 #management_network_name: "Management"
-#external_network_name: "Application"
+# external network name that will be used outside connection
+#external_network_name: "DMZ"
+# Human readible name for server
 #server_name: "cloudify-manager-server"
+# the fully qualified domain name for manager node
 #manager_server_domain: ""
 
-# Network Settings for managment network
+# Network Settings for managment network:
+
+# DNS servers ip list(used in both networks)
 #dns_servers: ['8.8.8.8']
+# use DHCP to obtain an ip address for managment network
 #management_network_use_dhcp: true
+# managment network cidr (for example, 10.0.0.0/24). It will be used
+# by the plugin only when `use_dhcp` is false
 #management_network_cidr: ""
+# management network gateway ip. It will be used by the plugin only
+# when `use_dhcp` is false
 #management_network_gateway: ""
+# server ip address in managment network. It will be used by the
+# plugin only when `use_dhcp` is false
 #management_network_ip: ""
-#management_network_switch_distributed: true
+# signifies if management network is connected to a distributed
+# switch
+#management_network_switch_distributed: false
 
-# Network Settings for external network
+# Network Settings for external network:
+
+# use DHCP to obtain an ip address in network with external connectivity
 #external_network_use_dhcp: true
+#  external network cidr (for example, 10.0.0.0/24).
+# It will be used by the plugin only when `use_dhcp` is false
 #external_network_cidr: ""
+# external network gateway ip. It will be used by the plugin only when
+# `use_dhcp` is false
 #external_network_gateway: ""
+# server ip address in external network. It will be used by the plugin only when
+# `use_dhcp` is false
 #external_network_ip: ""
-#external_network_switch_distributed: true
-
-#############################
-# Provider specific Inputs
-#############################
+# signifies if exteranal network is connected to a distributed switch
+#external_network_switch_distributed: false
 
 # SSH user used to connect to the manager
 #ssh_user: "root"
-
 # SSH key path used to connect to the manager
 #ssh_key_filename: ~/.ssh/centos_key.pem
+
+# SSH key path used to connect from the manager to nodes
 #agent_private_key_path: ~/.ssh/cloudify-agent-kp.pem
-
-# SSH port used to connect to the manager
-#ssh_port: 22
-
-# This is the user with which the Manager will try to connect to the application hosts.
+# This is the user with which the Manager will try to connect to the
+#  application hosts, e.g.: can be ubuntu for ubuntu based vm's or
+#  root for redhat based vm's
 #agents_user: ''
+
+# prefix for all nodes
 #resources_prefix: ''
 
 #############################

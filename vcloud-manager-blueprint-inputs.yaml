@@ -22,6 +22,10 @@ vcloud_password: ''
 # Organization name
 vcloud_org: ''
 
+# Vcloud org url, only required if using token based login on a private
+# vcloud director.
+#vcloud_org_url: ''
+
 # Virtual data center name
 vcloud_vdc: ''
 
