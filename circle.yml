@@ -23,3 +23,4 @@ test:
         parallel: true
     - case $CIRCLE_NODE_INDEX in 2) ./run_test.sh bootstrap-sanity ;; esac:
         parallel: true
+#
