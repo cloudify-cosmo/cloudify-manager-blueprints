@@ -19,6 +19,10 @@ export EXTRA_CLASSPATH="${LANGOHR_HOME}/langohr.jar"
 export RABBITMQ_USERNAME="$(ctx node properties rabbitmq_username)"
 export RABBITMQ_PASSWORD="$(ctx node properties rabbitmq_password)"
 
+export RIEMANN_USER='riemann'
+export RIEMANN_GROUP='riemann'
+export RIEMANN_HOME='/var/lib/riemann'
+
 # Confirm username and password have been supplied for broker before continuing
 # Components other than logstash and riemann have this handled in code already
 # Note that these are not directly used in this script, but are used by the deployed resources, hence the check here.
@@ -28,6 +32,8 @@ if [[ -z "${RABBITMQ_USERNAME}" ]] ||
 fi
 
 ctx instance runtime_properties rabbitmq_endpoint_ip "$(get_rabbitmq_endpoint_ip)"
+ctx instance runtime_properties riemann_user ${RIEMANN_USER}
+ctx instance runtime_properties riemann_group ${RIEMANN_GROUP}
 
 ctx logger info "Installing Riemann..."
 set_selinux_permissive
@@ -37,6 +43,14 @@ create_dir ${RIEMANN_LOG_PATH}
 create_dir ${LANGOHR_HOME}
 create_dir ${RIEMANN_CONFIG_PATH}
 create_dir ${RIEMANN_CONFIG_PATH}/conf.d
+
+create_service_user ${RIEMANN_USER} ${RIEMANN_HOME}
+create_dir ${RIEMANN_HOME}
+
+# Set ownership
+set_directory_tree_ownership ${RIEMANN_USER} ${RIEMANN_GROUP} ${RIEMANN_HOME}
+set_directory_tree_ownership ${RIEMANN_USER} ${RIEMANN_GROUP} ${RIEMANN_LOG_PATH}
+set_directory_tree_ownership root ${RIEMANN_GROUP} ${RIEMANN_CONFIG_PATH}
 
 langohr=$(download_cloudify_resource ${LANGOHR_SOURCE_URL})
 sudo cp ${langohr} ${EXTRA_CLASSPATH}

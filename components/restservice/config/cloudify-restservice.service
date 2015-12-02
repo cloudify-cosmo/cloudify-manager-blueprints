@@ -5,9 +5,11 @@ Description=Cloudify REST Service
 PIDFile=/var/run/gunicorn.pid
 TimeoutStartSec=0
 Restart=on-failure
+User={{ ctx.source.instance.runtime_properties.rest_service_user }}
+Group={{ ctx.source.instance.runtime_properties.rest_service_group }}
 EnvironmentFile=-/etc/sysconfig/cloudify-restservice
 ExecStart=/bin/sh -c '/opt/manager/env/bin/gunicorn \
-    --pid /var/run/gunicorn.pid \
+    --pid {{ ctx.source.instance.runtime_properties.rest_service_pid_dir }}/gunicorn.pid \
     -w $(($(nproc)*2+1)) \
     -b 0.0.0.0:${REST_SERVICE_PORT} \
     --timeout 300 manager_rest.server:app \

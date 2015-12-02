@@ -581,6 +581,14 @@ node_types:
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      agents_user:
+        description: User for agents.
+        type: string
+        default: { get_input: agents_user }
+      ssh_key_filename:
+        description: SSH key file for accessing agents
+        type: string
+        default: { get_input: ssh_key_filename }
       management_worker_rpm_source_url:
         description: Management Worker RPM Source URL
         type: string
