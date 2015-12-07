@@ -99,7 +99,7 @@ agents_user: ''
 #rest_service_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify-rest-service-3.3.0-ga_b300.x86_64.rpm'
 #management_worker_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify-management-worker-3.3.0-ga_b300.x86_64.rpm'
 #amqpinflux_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify-amqp-influx-3.3.0-ga_b300.x86_64.rpm'
-#cloudify_resources_url: 'https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz'
+#cloudify_resources_url: 'https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3.tar.gz'
 #webui_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.0/ga-RELEASE/cloudify-ui-3.3.0-ga-b300.tgz'
 
 # This is a Cloudify specific redistribution of Grafana.
@@ -240,7 +240,7 @@ agents_user: ''
 #  - {'source_path': 'http://www.getcloudify.org/spec/openstack-plugin/plugin.yaml', 'destination_path': '/openstack-plugin/1.3/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/plugin.yaml', 'destination_path': '/tosca-vcloud-plugin/1.3/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/vsphere-plugin/1.3/plugin.yaml', 'destination_path': '/spec/vsphere-plugin/1.3/plugin.yaml'}
-#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/types.yaml', 'destination_path': '/cloudify/3.3rc1/types.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/types.yaml', 'destination_path': '/cloudify/3.3/types.yaml'}
 
 # The plugins you would like to use in your applications should be added here.
 # By default, the Diamond, Fabric and relevant IaaS plugins are provided.
