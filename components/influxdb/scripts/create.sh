@@ -26,7 +26,8 @@ function install_influxdb() {
     create_dir ${INFLUXDB_LOG_PATH}
 
     yum_install ${INFLUXDB_SOURCE_URL}
-
+    sudo rm -f /etc/init.d/influxdb
+    
     # influxdb 0.8 rotates its log files every midnight
     # so that's the files we going to logrotate here (*.txt.*)
     deploy_logrotate_config "influxdb"
