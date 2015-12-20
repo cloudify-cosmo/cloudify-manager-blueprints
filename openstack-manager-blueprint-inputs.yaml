@@ -82,12 +82,12 @@ agents_user: ''
 # agent installer to identify it for your distro and release automatically.
 # Note that the windows agent key name MUST be `cloudify_windows_agent`
 #agent_package_urls:
-#  ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/Ubuntu-trusty-agent_3.3.1-sp-b310.tar.gz
-#  ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/Ubuntu-precise-agent_3.3.1-sp-b310.tar.gz
-#  centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/centos-Core-agent_3.3.1-sp-b310.tar.gz
-#  centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/centos-Final-agent_3.3.1-sp-b310.tar.gz
-#  redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/redhat-Maipo-agent_3.3.1-sp-b310.tar.gz
-#  cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify-windows-agent_3.3.1-sp-b310.exe
+#  ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/Ubuntu-trusty-agent_3.3.1-sp-b310.tar.gz
+#  ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/Ubuntu-precise-agent_3.3.1-sp-b310.tar.gz
+#  centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/centos-Core-agent_3.3.1-sp-b310.tar.gz
+#  centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/centos-Final-agent_3.3.1-sp-b310.tar.gz
+#  redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/redhat-Maipo-agent_3.3.1-sp-b310.tar.gz
+#  cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify-windows-agent_3.3.1-sp-b310.exe
 
 #############################
 # Cloudify Modules
@@ -96,11 +96,11 @@ agents_user: ''
 # Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
 # That is, as long as they provide the exact same version of that module.
 
-#rest_service_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify-rest-service-3.3.1-sp_b310.x86_64.rpm'
-#management_worker_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify-management-worker-3.3.1-sp_b310.x86_64.rpm'
-#amqpinflux_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify-amqp-influx-3.3.1-sp_b310.x86_64.rpm'
+#rest_service_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify-rest-service-3.3.1-sp_b310.x86_64.rpm'
+#management_worker_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify-management-worker-3.3.1-sp_b310.x86_64.rpm'
+#amqpinflux_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify-amqp-influx-3.3.1-sp_b310.x86_64.rpm'
 #cloudify_resources_url: 'https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3.tar.gz'
-#webui_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify-ui-3.3.1-sp-b310.tgz'
+#webui_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify-ui-3.3.1-sp-b310.tgz'
 
 # This is a Cloudify specific redistribution of Grafana.
 #grafana_source_url: http://repository.cloudifysource.org/org/cloudify3/components/grafana-1.9.0.tgz
@@ -247,13 +247,13 @@ agents_user: ''
 # Note that you can upload plugins post-bootstrap via the `cfy plugins upload`
 # command.
 #plugin_resources:
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-redhat-Maipo.wgn'
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify_diamond_plugin-1.3.1-py26-none-linux_x86_64-centos-Final.wgn'
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-Ubuntu-precise.wgn'
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify_fabric_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify_aws_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify_openstack_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify_vcloud_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspsp-RELEASE/cloudify_vsphere_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-redhat-Maipo.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify_diamond_plugin-1.3.1-py26-none-linux_x86_64-centos-Final.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-Ubuntu-precise.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify_fabric_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify_aws_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify_openstack_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify_vcloud_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
+#  - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/spspspspsp-RELEASE/cloudify_vsphere_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
