@@ -4,6 +4,8 @@ Description=Riemann Service
 [Service]
 TimeoutStartSec=0
 Restart=always
+User={{ ctx.instance.runtime_properties.riemann_user }}
+Group={{ ctx.instance.runtime_properties.riemann_group }}
 EnvironmentFile=-/etc/sysconfig/cloudify-riemann
 ExecStart=/usr/bin/riemann -a ${RIEMANN_CONFIG_PATH}/main.clj
 

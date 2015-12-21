@@ -376,6 +376,7 @@ function create_service_user() {
     ###
     user=$1
     home=$2
+    shell=${3:-/sbin/nologin}
 
     ctx logger info "Checking if ${user} exists..."
     ret=false
@@ -385,7 +386,7 @@ function create_service_user() {
         ctx logger info "User ${user} already exists..."
     else
         ctx logger info "Creating user ${user} with home ${home}..."
-        sudo useradd --shell /sbin/nologin --home-dir "${home}" --no-create-home --system "${user}"
+        sudo useradd --shell ${shell} --home-dir "${home}" --no-create-home --system "${user}"
     fi
 }
 
@@ -524,6 +525,26 @@ function get_rabbitmq_endpoint_ip() {
         RABBITMQ_ENDPOINT_IP="$(ctx instance host_ip)"
     fi
     echo "${RABBITMQ_ENDPOINT_IP}"
+}
+
+function allow_sudo_for_user() {
+    ###
+    # Allow a given user passwordless sudo
+    ###
+    username=${1}
+
+    sudo bash -c "echo '${username} ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/${username} && visudo -c -f /etc/sudoers || (rm /etc/sudoers.d/${username} && false)" || sys_error "Failed to allow sudo for ${username}"
+}
+
+function set_directory_tree_ownership() {
+    ###
+    # Set the ownership of a directory tree.
+    ###
+    user=${1}
+    group=${2}
+    directory=${3}
+
+    sudo chown -R ${user}.${group} ${directory}
 }
 
 CLOUDIFY_SOURCES_PATH="/opt/cloudify/sources"

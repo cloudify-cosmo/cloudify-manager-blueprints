@@ -19,16 +19,23 @@ export PLUGINS_COMMON_SOURCE_URL=$(ctx node properties plugins_common_module_sou
 export SCRIPT_PLUGIN_SOURCE_URL=$(ctx node properties script_plugin_module_source_url)
 export AGENT_SOURCE_URL=$(ctx node properties agent_module_source_url)
 
+# TODO: change to /opt/cloudify-rest-service
+export REST_SERVICE_HOME="/opt/manager"
+export REST_SERVICE_USER='cloudifyrest'
+export REST_SERVICE_GROUP='cloudifyrest'
+export REST_SERVICE_PID_DIR='/var/run/rest'
+
 # injected as an input to the script
 ctx instance runtime_properties es_endpoint_ip ${ES_ENDPOINT_IP}
 
 ctx instance runtime_properties rabbitmq_endpoint_ip "$(get_rabbitmq_endpoint_ip)"
+ctx instance runtime_properties rest_service_user ${REST_SERVICE_USER}
+ctx instance runtime_properties rest_service_group ${REST_SERVICE_GROUP}
+ctx instance runtime_properties rest_service_pid_dir ${REST_SERVICE_PID_DIR}
 
 export RABBITMQ_SSL_ENABLED="$(ctx -j node properties rabbitmq_ssl_enabled)"
 export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
 
-# TODO: change to /opt/cloudify-rest-service
-export REST_SERVICE_HOME="/opt/manager"
 export MANAGER_RESOURCES_HOME="/opt/manager/resources"
 export RESTSERVICE_VIRTUALENV="${REST_SERVICE_HOME}/env"
 # guni.conf currently contains localhost for all endpoints. We need to change that.
@@ -45,6 +52,9 @@ copy_notice "restservice"
 create_dir ${REST_SERVICE_HOME}
 create_dir ${REST_SERVICE_LOG_PATH}
 create_dir ${MANAGER_RESOURCES_HOME}
+create_dir ${REST_SERVICE_PID_DIR}
+
+create_service_user ${REST_SERVICE_USER} ${REST_SERVICE_HOME}
 
 # Add certificate and select port, as applicable
 if [[ "${RABBITMQ_SSL_ENABLED}" == 'true' ]]; then
@@ -96,3 +106,13 @@ deploy_logrotate_config "restservice"
 ctx logger info "Deploying REST Service Configuration file..."
 # rest service ports are set as runtime properties in nginx/scripts/create.sh
 deploy_blueprint_resource "${CONFIG_REL_PATH}/cloudify-rest.conf" "${REST_SERVICE_HOME}/cloudify-rest.conf"
+
+# Set ownership
+set_directory_tree_ownership ${REST_SERVICE_USER} ${REST_SERVICE_GROUP} ${REST_SERVICE_HOME}
+set_directory_tree_ownership root ${REST_SERVICE_USER} ${REST_SERVICE_HOME}/env
+set_directory_tree_ownership ${REST_SERVICE_USER} ${REST_SERVICE_GROUP} ${REST_SERVICE_LOG_PATH}
+set_directory_tree_ownership ${REST_SERVICE_USER} ${REST_SERVICE_GROUP} ${REST_SERVICE_PID_DIR}
+
+# Improve permissions
+# Nothing in the env should be writable by the rest service- that's the site code
+sudo find ${REST_SERVICE_HOME}/env -exec chmod g-w {} \;
