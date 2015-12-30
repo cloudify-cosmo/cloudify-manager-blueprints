@@ -84,6 +84,7 @@ aws_secret_access_key: ''
 #  centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m1-RELEASE/centos-Core-agent_3.4.0-m1-b390.tar.gz
 #  centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m1-RELEASE/centos-Final-agent_3.4.0-m1-b390.tar.gz
 #  redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m1-RELEASE/redhat-Maipo-agent_3.4.0-m1-b390.tar.gz
+#  redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m1-RELEASE/redhat-Santiago-agent_3.4.0-m1-b390.tar.gz
 #  cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m1-RELEASE/cloudify-windows-agent_3.4.0-m1-b390.exe
 
 #############################
