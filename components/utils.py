@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import os
 from threading import Thread
 import time
@@ -8,6 +9,8 @@ import sys
 import urllib
 import tempfile
 import socket
+import stat
+import subprocess
 
 
 PROCESS_POLLING_INTERVAL = 0.1
@@ -22,11 +25,18 @@ class CtxLogger(object):
     def info(self, message):
         return self._logger(level='info', message=message)
 
+    def warn(self, message):
+        return self._logger(level='warn', message=message)
+
+    def error(self, message):
+        return self._logger(level='error', message=message)
+
 
 class CtxNode(object):
     def properties(self, property_name):
-        cmd = ['ctx', 'node', 'properties', property_name]
-        return sub.check_output(cmd)
+        # Retrieved and loaded as JSON to avoid empty False issue
+        cmd = ['ctx', '-j', 'node', 'properties', property_name]
+        return json.loads(sub.check_output(cmd))
 
 
 class CtxNodeInstance(object):
@@ -90,7 +100,7 @@ class PipeReader(Thread):
                 time.sleep(PROCESS_POLLING_INTERVAL)
 
 
-def run(command, retries=0):
+def run(command, retries=0, retry_delay=3):
     if isinstance(command, str):
         command = command.split(command)
     stderr = sub.PIPE
@@ -105,9 +115,16 @@ def run(command, retries=0):
     #         proc.aggr_stderr += proc.stderr.readline()
     # THIS NEEDS TO BE TESTED
     if proc.returncode != 0 and retries:
-        logger.info('Failed running command: {0}. Retrying. ({1} left)'.format(
-            command, retries))
-        run(command, retries - 1)
+        logger.info(
+            'Failed running command: {command}. Retrying in {delay}.'
+            '({retries} left)'.format(
+                command=command,
+                delay=retry_delay,
+                retries=retries,
+            )
+        )
+        time.sleep(retry_delay)
+        run(command, retries - 1, retry_delay)
     return proc
 
 
@@ -118,16 +135,17 @@ def sudo(command):
     run(command)
 
 
-def error_exit(message):
-    logger.info(message)
-    sys.exit(1)
+def error_exit(message, returncode=1):
+    logger.error(message)
+    sys.exit(returncode)
 
 
-def create_dir(dir):
-    if os.path.isdir(dir):
+def create_dir(directory):
+    if os.path.isdir(directory):
         return
-    logger.info('Creating Directory: {0}'.format(dir))
-    sudo(['mkdir', '-p', dir])
+    else:
+        logger.info('Creating Directory: {0}'.format(directory))
+        sudo(['mkdir', '-p', directory])
 
 
 def install_python_package(source, venv=None):
@@ -334,12 +352,28 @@ class SystemD(object):
     def stop(service_name):
         sudo(['systemctl', 'stop', service_name])
 
+    @staticmethod
+    def daemon_reload():
+        """
+            This will reload all systemd service configurations when you have
+            changed them on disk.
+        """
+        sudo(['systemctl', 'daemon-reload'])
+
 
 systemd = SystemD()
 
 
 def move(source, destination):
     sudo(['mv', source, destination])
+
+
+def set_permissions_owner_execute_only(path):
+    os.chmod(
+        path,
+        # Set read and execute for owner
+        stat.S_IRUSR | stat.S_IXUSR,
+    )
 
 
 def replace_in_file(this, with_this, in_here):
@@ -407,65 +441,45 @@ def chown(user, group, path):
     sudo(['chown', '-R', '{0}:{1}'.format(user, group), path])
 
 
+def chmod(path, mode, recursive=False):
+    logger.info('chmodding {path} to {mode}{recursively}...'.format(
+        path=path,
+        mode=mode,
+        recursively=' recursively' if recursive else '',
+    ))
+
+    command = ['chmod']
+    if recursive:
+        command.append('-R')
+    command.append(mode)
+    command.append(path)
+
+    sudo(command)
+
+
 def clean_var_log_dir(service):
     pass
 
-    # function clean_var_log_dir() {
-    #     ###
-    #     # Cleans up unused /var/log directory for named application.
-    #     # Directory must be empty or this will fail.
-    #     ###
-    #     service=$1
+# function clean_var_log_dir() {
+#     ###
+#     # Cleans up unused /var/log directory for named application.
+#     # Directory must be empty or this will fail.
+#     ###
+#     service=$1
 
-    #     for log in $(find /var/log/${service} -type f 2> /dev/null); do
-    #         # Copy to timestamped file in case this is run again
-    #         if [ ! -f ${log} ]; then
-    #             break
-    #         fi
-    #         sudo mv ${log} /var/log/cloudify/${service}/${log##/var/log/${service}/}-from_bootstrap-$(date +%Y-%m-%eT%T%z)
-    #     done
-    #     # Remove the directory if it's empty, ignoring failures due to lack of directory
-    #     # This won't remove /var/log if ${service} is empty, unless /var/log is empty.
-    #     # It will, however, error if its target dir is non-empty
-
-    #     ctx logger info "Removing unnecessary logs directory: /var/log/${service}"
-    #     sudo rm -df /var/log/${service}
-    # }
-
-# function run_command_with_retries() {
-#     # Logging should be improved with consideration given to possible command injection accidents or attacks
-#     ctx logger info "Attempting to run ${1} with up to 5 retries"
-#     max_retries=5
-#     retried=0
-#     while ! ${*}; do
-#         # Better logging would be good
-#         ctx logger info "Command ${1} failed, retrying in 1 second."
-#         retried=$(( ${retried} + 1 ))
-#         sleep 1
-#         if [[ ${retried} -eq ${max_retries} ]]; then
-#             # Better logging would be good
-#             ctx logger info "Max retries for command ${1} exceeded, aborting."
+#     for log in $(find /var/log/${service} -type f 2> /dev/null); do
+#         # Copy to timestamped file in case this is run again
+#         if [ ! -f ${log} ]; then
 #             break
 #         fi
+#         sudo mv ${log} /var/log/cloudify/${service}/${log##/var/log/${service}/}-from_bootstrap-$(date +%Y-%m-%eT%T%z)  # noqa
 #     done
-# }
+#     # Remove the directory if it's empty, ignoring failures due to lack of directory  # noqa
+#     # This won't remove /var/log if ${service} is empty, unless /var/log is empty.  # noqa
+#     # It will, however, error if its target dir is non-empty
 
-# function run_noglob_command_with_retries() {
-#     # Logging should be improved with consideration given to possible command injection accidents or attacks
-#     ctx logger info "Attempting to run ${1} with up to 5 retries"
-#     max_retries=5
-#     retried=0
-#     while ! sh -c -f "${*}"; do
-#         # Better logging would be good
-#         ctx logger info "Command ${1} failed, retrying in 1 second."
-#         retried=$(( ${retried} + 1 ))
-#         sleep 1
-#         if [[ ${retried} -eq ${max_retries} ]]; then
-#             # Better logging would be good
-#             ctx logger info "Max retries for command ${1} exceeded, aborting."
-#             break
-#         fi
-#     done
+#     ctx logger info "Removing unnecessary logs directory: /var/log/${service}"  # noqa
+#     sudo rm -df /var/log/${service}
 # }
 
 # function extract_github_archive_to_tmp () {
@@ -473,7 +487,7 @@ def clean_var_log_dir(service):
 #     if [[ "$(file ${repo})" =~ 'Zip archive data' ]]; then
 #         # This is a zip, unzip it, assuming it is a github style zip
 #         unzip ${repo} -d /tmp/github-archive-tmp > /dev/null
-#         # Performing a strip-components equivalent, but the github style zips have
+#         # Performing a strip-components equivalent, but the github style zips have  # noqa
 #         # an extra leading directory
 #         # Using copy+delete to avoid errors when mv finds a target dir exists
 #         cp -r /tmp/github-archive-tmp/*/* /tmp
@@ -484,43 +498,125 @@ def clean_var_log_dir(service):
 #     fi
 # }
 
-# function deploy_ssl_certificate () {
-#   private_or_public=${1}
-#   destination=${2}
-#   group=${3}
-#   cert=${4}
 
-#   # Root owner, with permissions set below, allow anyone to read a public cert, and allow the owner to read a private cert, but not change it, mitigating risk in the event of the associated service being vulnerable.
-#   ownership=root.${group}
+def is_ssl_public_cert(cert):
+    validation = subprocess.Popen(
+        [
+            'openssl',
+            'x509',
+            '-text',
+            '-noout',
+        ],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+    )
 
-#   if [[ ${private_or_public} == "private" ]]; then
-#     # This check should probably be done using an openssl command
-#     if [[ "${cert}" =~ "BEGIN RSA PRIVATE KEY" ]]; then
-#       # Owner read, Group read, Others no access
-#       permissions=440
-#     else
-#       error_exit "Private certificate is expected to begin with a line containing 'BEGIN RSA PRIVATE KEY'."
-#     fi
-#   elif [[ ${private_or_public} == "public" ]]; then
-#     # This check should probably be done using an openssl command
-#     if [[ "${cert}" =~ "BEGIN CERTIFICATE" ]]; then
-#       # Owner read, Group read, Others read
-#       permissions=444
-#     else
-#       # This should probably be done using an openssl command
-#       error_exit "Public certificate is expected to begin with a line containing 'BEGIN CERTIFICATE'."
-#     fi
-#   else
-#     error_exit "Certificates may only be 'private' or 'public', not '${private_or_public}'"
-#   fi
+    validation.communicate(input=cert)
+    if validation.returncode == 0:
+        return True
+    else:
+        return False
 
-#   ctx logger info "Deploying ${private_or_public} SSL certificate in ${destination} for group ${group}"
-#   echo "${cert}" | sudo tee ${destination} >/dev/null
 
-#   ctx logger info "Setting permissions (${permissions}) and ownership (${ownership}) of SSL certificate at ${ddestination}"
-#   # Set permissions first as the tee with sudo should mean its owner and group are root, leaving a negligible window for it to be accessed by an unauthorised user
-#   sudo chmod ${permissions} ${destination}
-#   sudo chown ${ownership} ${destination}
-# }
+def is_ssl_private_cert(cert):
+    validation = subprocess.Popen(
+        [
+            'openssl',
+            'rsa',
+            '-text',
+            '-noout',
+        ],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+    )
 
-# CLOUDIFY_SOURCES_PATH="/opt/cloudify/sources"
+    validation.communicate(input=cert)
+    if validation.returncode == 0:
+        return True
+    else:
+        return False
+
+
+def deploy_ssl_certificate(destination,
+                           cert,
+                           group='',
+                           private=False):
+    # Owner will be set as root, but with appropriate permissions such that
+    # the necessary group can read the certificate.
+    # This is to mitigate some risk where a service might be compromised such
+    # that the certificates can only be changed by the attacker then gaining
+    # root.
+    owner = 'root'
+
+    error_output = (
+        'Certificate to be deployed in {location} is not a valid '
+        '{pub_or_priv} certificate. Certificate provided was: {cert}'
+    )
+    public_or_private = 'private' if private else 'public'
+
+    if private:
+        if not is_ssl_private_cert(cert):
+            error_exit(error_output.format(
+                cert=cert,
+                pub_or_priv=public_or_private,
+                location=destination,
+            ))
+        # Private certs should only be readable by root and the appropriate
+        # group
+        permissions = "440"
+    else:
+        if not is_ssl_public_cert(cert):
+            error_exit(error_output.format(
+                cert=cert,
+                pub_or_priv=public_or_private,
+                location=destination,
+            ))
+        # Public certs can be safely read by anyone
+        permissions = "444"
+
+    logger.info(
+        'Deploying {pub_or_priv} SSL certificate in {location} for group '
+        '{group}'.format(
+            pub_or_priv=public_or_private,
+            location=destination,
+            group=group,
+        ),
+    )
+
+    write_to_file(
+        data=cert,
+        destination=destination,
+    )
+
+    logger.info(
+        'Setting permissions ({permissions}) and group ({group}) of '
+        'SSL certificate at {destination}'.format(
+            permissions=permissions,
+            group=group or 'root',
+            destination=destination,
+        )
+    )
+    # Set permissions first as it should have been written with owner and
+    # group are root, leaving a negligible window for it to be accessed by an
+    #  unauthorised user
+    chmod(
+        mode=permissions,
+        path=destination,
+    )
+    chown(
+        user=owner,
+        group=group,
+        path=destination,
+    )
+
+
+def write_to_file(data, destination):
+    # This should result in a file owned by root
+    writer = subprocess.Popen(
+        ['sudo', 'tee', destination],
+        stdin=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+    )
+
+    writer.communicate(input=data)
