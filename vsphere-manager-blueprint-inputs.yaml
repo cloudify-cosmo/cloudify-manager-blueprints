@@ -132,7 +132,7 @@
 #rest_service_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-rest-service-3.3.1-sp_b310.x86_64.rpm'
 #management_worker_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-management-worker-3.3.1-sp_b310.x86_64.rpm'
 #amqpinflux_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-amqp-influx-3.3.1-sp_b310.x86_64.rpm'
-#cloudify_resources_url: 'https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3.tar.gz'
+#cloudify_resources_url: 'https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3.1.tar.gz'
 #webui_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-ui-3.3.1-sp-b310.tgz'
 
 # This is a Cloudify specific redistribution of Grafana.
