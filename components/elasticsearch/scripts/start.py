@@ -9,8 +9,8 @@ subprocess.check_output([
     os.path.join(os.path.dirname(__file__), 'utils.py')])
 ctx = utils = importlib.import_module('utils')
 
-INFLUXDB_ENDPOINT_IP = ctx.node.properties('influxdb_endpoint_ip')
+ES_ENDPOINT_IP = ctx.node.properties('es_endpoint_ip')
 
-if not INFLUXDB_ENDPOINT_IP:
-    ctx.logger.info('Stopping InfluxDB Service...')
-    utils.systemd.stop('influxdb')
+if not ES_ENDPOINT_IP:
+    ctx.logger.info('Starting Elasticsearch Service...')
+    utils.systemd.start('elasticsearch')

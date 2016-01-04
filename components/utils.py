@@ -118,7 +118,7 @@ def sudo(command):
     run(command)
 
 
-def sys_error(message):
+def error_exit(message):
     logger.info(message)
     sys.exit(1)
 
@@ -227,11 +227,12 @@ def wait_for_port(port, host='localhost'):
             continue
         logger.info('{0}:{1} is open!'.format(host, port))
         return
-    sys_error('Failed to connect to {0}:{1}...'.format(host, port))
+    error_exit('Failed to connect to {0}:{1}...'.format(host, port))
 
 
 def yum_install(source):
     """Installs a package using yum.
+
     yum supports installing from URL, path and the default yum repo
     configured within your image.
     you can specify one of the following:
@@ -322,6 +323,10 @@ class SystemD(object):
         return "/usr/lib/systemd/system/{0}.service".format(sid)
 
     @staticmethod
+    def enable(service_name):
+        sudo(['systemctl', 'enable', service_name])
+
+    @staticmethod
     def start(service_name):
         sudo(['systemctl', 'start', service_name])
 
@@ -331,6 +336,10 @@ class SystemD(object):
 
 
 systemd = SystemD()
+
+
+def move(source, destination):
+    sudo(['mv', source, destination])
 
 
 def replace_in_file(this, with_this, in_here):
@@ -490,7 +499,7 @@ def clean_var_log_dir(service):
 #       # Owner read, Group read, Others no access
 #       permissions=440
 #     else
-#       sys_error "Private certificate is expected to begin with a line containing 'BEGIN RSA PRIVATE KEY'."
+#       error_exit "Private certificate is expected to begin with a line containing 'BEGIN RSA PRIVATE KEY'."
 #     fi
 #   elif [[ ${private_or_public} == "public" ]]; then
 #     # This check should probably be done using an openssl command
@@ -499,10 +508,10 @@ def clean_var_log_dir(service):
 #       permissions=444
 #     else
 #       # This should probably be done using an openssl command
-#       sys_error "Public certificate is expected to begin with a line containing 'BEGIN CERTIFICATE'."
+#       error_exit "Public certificate is expected to begin with a line containing 'BEGIN CERTIFICATE'."
 #     fi
 #   else
-#     sys_error "Certificates may only be 'private' or 'public', not '${private_or_public}'"
+#     error_exit "Certificates may only be 'private' or 'public', not '${private_or_public}'"
 #   fi
 
 #   ctx logger info "Deploying ${private_or_public} SSL certificate in ${destination} for group ${group}"
