@@ -1,27 +1,29 @@
 #!/usr/bin/env python
 
-import importlib
+import subprocess
 import os
-from subprocess import check_output
+import importlib
 import time
+import json
+import sys
 
-utils_path = check_output([
+subprocess.check_output([
     'ctx', 'download-resource', 'components/utils.py',
     os.path.join(os.path.dirname(__file__), 'utils.py')])
-utils = importlib.import_module('utils')
+ctx = utils = importlib.import_module('utils')
 
 
-config_path = "components/influxdb/config"
+CONFIG_PATH = "components/influxdb/config"
 
-influxdb_source_url = utils.ctx.properties('influxdb_rpm_source_url')
-influxdb_endpoint_ip = utils.ctx.properties('influxdb_endpoint_ip')
+INFLUXDB_SOURCE_URL = ctx.node.properties('influxdb_rpm_source_url')
+INFLUXDB_ENDPOINT_IP = ctx.node.properties('influxdb_endpoint_ip')
 # currently, cannot be changed due to the webui not allowing to configure it.
-influxdb_endpoint_port = '8086'
+INFLUXDB_ENDPOINT_PORT = 8086
 
-influxdb_user = 'influxdb'
-influxdb_group = 'influxdb'
-influxdb_home = '/opt/influxdb'
-influxdb_log_path = '/var/log/cloudify/influxdb'
+INFLUXDB_USER = 'influxdb'
+INFLUXDB_GROUP = 'influxdb'
+INFLUXDB_HOME = '/opt/influxdb'
+INFLUXDB_LOG_PATH = '/var/log/cloudify/influxdb'
 
 
 def configure_influxdb(host, port):
@@ -29,53 +31,86 @@ def configure_influxdb(host, port):
     db_pass = "root"
     db_name = "cloudify"
 
-    utils.ctx.logger('Creating InfluxDB Database...')
-    utils.run('sudo curl --show-error --silent --retry 5 '
-              '"http://{0}:{1}/db?u={2}&p={3}" '
-              '-d "{\"name\": \"{4}\"}"'.format(
-                  host, port, db_user, db_pass, db_name))
+    ctx.logger.info('Creating InfluxDB Database...')
+
+    # the below request is equivalent to running:
+    # curl -S -s --retry 5 "http://localhost:8086/db?u=root&p=root" '-d "{\"name\": \"cloudify\"}"  # NOQA
+    import urllib
+    import urllib2
+
+    endpoint = 'http://{0}:{1}/db'.format(host, port)
+    params = urllib.urlencode(dict(u=db_user, p=db_pass))
+    data = {'name': db_name}
+    url = endpoint + '?' + params
+
+    # check if db already exists
+    db_list = eval(urllib2.urlopen(urllib2.Request(url)).read())
+    try:
+        assert not any(d.get('name') == db_name for d in db_list)
+    except AssertionError:
+        ctx.logger.info('Database {0} already exists!'.format(db_name))
+        return
+
+    ctx.logger.info('Request is: {0} \'{1}\''.format(url, data))
+
+    try:
+        urllib2.urlopen(urllib2.Request(url, json.dumps(data)))
+    except Exception as ex:
+        ctx.logger.info('Failed to create: {0} ({1}).'.format(db_name, ex))
+        sys.exit(1)
+
+    # verify db created
+    ctx.logger.info('Verifying database create successfully...')
+    db_list = eval(urllib2.urlopen(urllib2.Request(url)).read())
+    try:
+        assert any(d.get('name') == db_name for d in db_list)
+    except AssertionError:
+        ctx.logger.info('Verification failed!')
+        sys.exit(1)
 
 
 def install_influxdb():
-    utils.ctx.logger('Installing InfluxDB...')
+    ctx.logger.info('Installing InfluxDB...')
     utils.set_selinux_permissive()
 
     utils.copy_notice('influxdb')
-    utils.create_dir(influxdb_home)
-    utils.create_dir(influxdb_log_path)
+    utils.create_dir(INFLUXDB_HOME)
+    utils.create_dir(INFLUXDB_LOG_PATH)
 
-    utils.yum_install(influxdb_source_url)
+    utils.yum_install(INFLUXDB_SOURCE_URL)
 
-    utils.ctx.logger('Deploying InfluxDB config.toml...')
+    ctx.logger.info('Deploying InfluxDB config.toml...')
     utils.deploy_blueprint_resource(
-        '{0}/config.toml'.format(config_path),
-        '{0}/shared/config.toml'.format(influxdb_home))
+        '{0}/config.toml'.format(CONFIG_PATH),
+        '{0}/shared/config.toml'.format(INFLUXDB_HOME))
 
-    utils.ctx.logger('Fixing user permissions...')
-    utils.chown(influxdb_user, influxdb_group, influxdb_home)
-    utils.chown(influxdb_user, influxdb_group, influxdb_log_path)
+    ctx.logger.info('Fixing user permissions...')
+    utils.chown(INFLUXDB_USER, INFLUXDB_GROUP, INFLUXDB_HOME)
+    utils.chown(INFLUXDB_USER, INFLUXDB_GROUP, INFLUXDB_LOG_PATH)
 
-    utils.configure_systemd_service('influxdb')
+    utils.systemd.configure('influxdb')
 
 
-if influxdb_endpoint_ip:
-    utils.ctx.logger('External InfluxDB Endpoint IP provided: {0}'.format(
-        influxdb_endpoint_ip))
+if INFLUXDB_ENDPOINT_IP:
+    influxdb_endpoint_ip = INFLUXDB_ENDPOINT_IP
+    ctx.logger.info('External InfluxDB Endpoint IP provided: {0}'.format(
+        INFLUXDB_ENDPOINT_IP))
     time.sleep(5)
-    utils.wait_for_port(influxdb_endpoint_port, influxdb_endpoint_ip)
-    configure_influxdb(influxdb_endpoint_ip, influxdb_endpoint_port)
+    utils.wait_for_port(INFLUXDB_ENDPOINT_PORT, INFLUXDB_ENDPOINT_IP)
+    configure_influxdb(INFLUXDB_ENDPOINT_IP, INFLUXDB_ENDPOINT_PORT)
 else:
-    influxdb_endpoint_ip = utils.ctx.host_ip()
+
+    influxdb_endpoint_ip = ctx.instance.host_ip()
     install_influxdb()
 
-    utils.ctx.logger('Starting InfluxDB Service...')
-    utils.start_systemd_service('cloudify-influxdb')
+    ctx.logger.info('Starting InfluxDB Service...')
+    utils.systemd.start('cloudify-influxdb')
 
-    utils.wait_for_port(influxdb_endpoint_port, influxdb_endpoint_ip)
-    configure_influxdb(influxdb_endpoint_ip, influxdb_endpoint_port)
+    utils.wait_for_port(INFLUXDB_ENDPOINT_PORT, influxdb_endpoint_ip)
+    configure_influxdb(influxdb_endpoint_ip, INFLUXDB_ENDPOINT_PORT)
 
-    utils.ctx.logger('Stopping InfluxDB Service...')
-    utils.stop_systemd_service('cloudify-influxdb')
+    ctx.logger.info('Stopping InfluxDB Service...')
+    utils.systemd.stop('cloudify-influxdb')
 
 
-utils.ctx.runtime_properties('influxdb_endpoint_ip', influxdb_endpoint_ip)
+ctx.instance.runtime_properties('influxdb_endpoint_ip', influxdb_endpoint_ip)
