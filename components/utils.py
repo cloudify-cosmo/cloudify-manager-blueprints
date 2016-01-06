@@ -377,6 +377,16 @@ def set_rabbitmq_policy(name, q_regex, p_type, value):
          '--apply-to-queues'.format(name, q_regex, p_type, value))
 
 
+def get_rabbitmq_endpoint_ip():
+    """Gets the rabbitmq endpoint IP, using the manager IP if the node
+    property is blank.
+    """
+    rabbitmq_endpoint_ip = node.properties('rabbitmq_endpoint_ip')
+    if not rabbitmq_endpoint_ip:
+        rabbitmq_endpoint_ip = instance.host_ip()
+    return rabbitmq_endpoint_ip
+
+
 def create_service_user(user, home):
     """Creates a user.
     It will not create the home dir for it

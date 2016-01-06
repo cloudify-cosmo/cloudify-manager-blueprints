@@ -235,7 +235,6 @@ else:
             ES_ENDPOINT_IP, ES_ENDPOINT_PORT), method='HEAD'):
         utils.error_exit('\'cloudify_storage\' index already exists on {0}, '
                          'terminating bootstrap...'.format(ES_ENDPOINT_IP))
-    # per a function in configure_es
     configure_elasticsearch()
 
 ctx.instance.runtime_properties('es_endpoint_ip', ES_ENDPOINT_IP)
