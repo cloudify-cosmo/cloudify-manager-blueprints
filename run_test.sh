@@ -11,7 +11,7 @@ elif [ $1 == "flake8" ]; then
 elif [ $1 == "bootstrap-sanity" ]; then
   #TAG=$(git describe --exact-match --tags HEAD)
   #if [ "${TAG}" == "bootstrap-sanity" ]; then
-  if [ "${TAG}" == "bootstrap-sanity" ]; then
+  if [ "${TAG}" == "bootstrap-sanity" ] || [ "${CIRCLE_TAG}" == "bootstrap-sanity" ]; then
     cd tests
     pip install -r bootstrap-sanity-requirements.txt
     python sanity.py
