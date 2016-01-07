@@ -14,11 +14,11 @@ checkout:
 dependencies:
   override:
     - pip install setuptools --upgrade
-    - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3.zip
-    - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3.zip
-    - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.4m1.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.4m1.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.4m1.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3.zip
-    - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/3.3.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/3.4m1.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-openstack-plugin/archive/1.3.zip
     - pip install nose
     - pip install mock
