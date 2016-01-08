@@ -17,6 +17,8 @@ SSL_CERTS_ROOT = '/root/cloudify'
 
 # this is used by nginx's default.conf to select the relevant configuration
 REST_PROTOCOL = ctx.target.instance.runtime_properties('rest_protocol')
+
+# TODO: NEED TO IMPLEMENT THIS IN CTX UTILS
 ctx.source.instance.runtime_properties('rest_protocol', value=REST_PROTOCOL)
 if REST_PROTOCOL == 'https':
     ctx.logger.info('Copying SSL Certs...')

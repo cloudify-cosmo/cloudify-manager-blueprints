@@ -1,29 +1,19 @@
 #!/usr/bin/env python
 
-import subprocess
-import os
-import importlib
+from os.path import (join as jn, dirname as dn)
 import time
 import json
 import sys
 
-subprocess.check_output([
-    'ctx', 'download-resource', 'components/utils.py',
-    os.path.join(os.path.dirname(__file__), 'utils.py')])
-ctx = utils = importlib.import_module('utils')
+from cloudify import ctx
+# if we use download_resource_and_render here instead we might be able
+# to automatically provide some service specific context instead of passing it
+# to a specific invocation of a util
+ctx.download_resource('components/utils.py', jn(dn(__file__), 'utils.py'))
+import utils
 
 
 CONFIG_PATH = "components/influxdb/config"
-
-INFLUXDB_SOURCE_URL = ctx.node.properties('influxdb_rpm_source_url')
-INFLUXDB_ENDPOINT_IP = ctx.node.properties('influxdb_endpoint_ip')
-# currently, cannot be changed due to the webui not allowing to configure it.
-INFLUXDB_ENDPOINT_PORT = 8086
-
-INFLUXDB_USER = 'influxdb'
-INFLUXDB_GROUP = 'influxdb'
-INFLUXDB_HOME = '/opt/influxdb'
-INFLUXDB_LOG_PATH = '/var/log/cloudify/influxdb'
 
 
 def configure_influxdb(host, port):
@@ -70,47 +60,62 @@ def configure_influxdb(host, port):
 
 
 def install_influxdb():
+
+    influxdb_source_url = ctx.node.properties['influxdb_rpm_source_url']
+
+    influxdb_user = 'influxdb'
+    influxdb_group = 'influxdb'
+    influxdb_home = '/opt/influxdb'
+    influxdb_log_path = '/var/log/cloudify/influxdb'
+
     ctx.logger.info('Installing InfluxDB...')
     utils.set_selinux_permissive()
 
     utils.copy_notice('influxdb')
-    utils.create_dir(INFLUXDB_HOME)
-    utils.create_dir(INFLUXDB_LOG_PATH)
+    utils.create_dir(influxdb_home)
+    utils.create_dir(influxdb_log_path)
 
-    utils.yum_install(INFLUXDB_SOURCE_URL)
+    utils.yum_install(influxdb_source_url)
 
     ctx.logger.info('Deploying InfluxDB config.toml...')
     utils.deploy_blueprint_resource(
         '{0}/config.toml'.format(CONFIG_PATH),
-        '{0}/shared/config.toml'.format(INFLUXDB_HOME))
+        '{0}/shared/config.toml'.format(influxdb_home))
 
     ctx.logger.info('Fixing user permissions...')
-    utils.chown(INFLUXDB_USER, INFLUXDB_GROUP, INFLUXDB_HOME)
-    utils.chown(INFLUXDB_USER, INFLUXDB_GROUP, INFLUXDB_LOG_PATH)
+    utils.chown(influxdb_user, influxdb_group, influxdb_home)
+    utils.chown(influxdb_user, influxdb_group, influxdb_log_path)
 
     utils.systemd.configure('influxdb')
 
 
-if INFLUXDB_ENDPOINT_IP:
-    influxdb_endpoint_ip = INFLUXDB_ENDPOINT_IP
-    ctx.logger.info('External InfluxDB Endpoint IP provided: {0}'.format(
-        INFLUXDB_ENDPOINT_IP))
-    time.sleep(5)
-    utils.wait_for_port(INFLUXDB_ENDPOINT_PORT, INFLUXDB_ENDPOINT_IP)
-    configure_influxdb(INFLUXDB_ENDPOINT_IP, INFLUXDB_ENDPOINT_PORT)
-else:
+def main():
 
-    influxdb_endpoint_ip = ctx.instance.host_ip()
-    install_influxdb()
+    influxdb_endpoint_ip = ctx.node.properties['influxdb_endpoint_ip']
+    # currently, cannot be changed due to webui not allowing to configure it.
+    influxdb_endpoint_port = 8086
 
-    ctx.logger.info('Starting InfluxDB Service...')
-    utils.systemd.start('cloudify-influxdb')
+    if influxdb_endpoint_ip:
+        ctx.logger.info('External InfluxDB Endpoint IP provided: {0}'.format(
+            influxdb_endpoint_ip))
+        time.sleep(5)
+        utils.wait_for_port(influxdb_endpoint_port, influxdb_endpoint_ip)
+        configure_influxdb(influxdb_endpoint_ip, influxdb_endpoint_port)
+    else:
+        influxdb_endpoint_ip = ctx.instance.host_ip
+        install_influxdb()
 
-    utils.wait_for_port(INFLUXDB_ENDPOINT_PORT, influxdb_endpoint_ip)
-    configure_influxdb(influxdb_endpoint_ip, INFLUXDB_ENDPOINT_PORT)
+        ctx.logger.info('Starting InfluxDB Service...')
+        utils.systemd.start('cloudify-influxdb')
 
-    ctx.logger.info('Stopping InfluxDB Service...')
-    utils.systemd.stop('cloudify-influxdb')
+        utils.wait_for_port(influxdb_endpoint_port, influxdb_endpoint_ip)
+        configure_influxdb(influxdb_endpoint_ip, influxdb_endpoint_port)
+
+        ctx.logger.info('Stopping InfluxDB Service...')
+        utils.systemd.stop('cloudify-influxdb')
+
+    ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
+        influxdb_endpoint_ip
 
 
-ctx.instance.runtime_properties('influxdb_endpoint_ip', influxdb_endpoint_ip)
+main()

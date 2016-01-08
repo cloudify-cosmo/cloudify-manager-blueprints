@@ -2,7 +2,8 @@ tosca_definitions_version: cloudify_dsl_1_2
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.3/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.3/plugin.yaml
+  # - http://www.getcloudify.org/spec/fabric-plugin/1.3/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-fabric-plugin/CFY-4691-support-ctx-natively-in-python-scripts/plugin.yaml
   - types/manager-types.yaml
 
 
@@ -436,73 +437,73 @@ node_templates:
   # provide runtime configuration and information for the CLI and the
   # Manager.
   # #####################################################################
-  manager_configuration:
-    type: cloudify.nodes.MyCloudifyManager
-    properties:
-      ssh_user: { get_input: ssh_user }
-      ssh_key_filename: { get_input: ssh_key_filename }
-      cloudify:
-        resources_prefix: { get_input: resources_prefix }
+  # manager_configuration:
+  #   type: cloudify.nodes.MyCloudifyManager
+  #   properties:
+  #     ssh_user: { get_input: ssh_user }
+  #     ssh_key_filename: { get_input: ssh_key_filename }
+  #     cloudify:
+  #       resources_prefix: { get_input: resources_prefix }
 
-        transient_deployment_workers_mode:
-          enabled: true
-          global_parallel_executions_limit: 50
+  #       transient_deployment_workers_mode:
+  #         enabled: true
+  #         global_parallel_executions_limit: 50
 
-        cloudify_agent:
-          min_workers: 0
-          max_workers: 5
-          remote_execution_port: 22
-          user: { get_input: agents_user }
-          broker_ip: { get_input: rabbitmq_endpoint_ip }
-          broker_user: { get_input: rabbitmq_username }
-          broker_pass: { get_input: rabbitmq_password }
-          broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
-          broker_ssl_cert: { get_input: rabbitmq_cert_public }
+  #       cloudify_agent:
+  #         min_workers: 0
+  #         max_workers: 5
+  #         remote_execution_port: 22
+  #         user: { get_input: agents_user }
+  #         broker_ip: { get_input: rabbitmq_endpoint_ip }
+  #         broker_user: { get_input: rabbitmq_username }
+  #         broker_pass: { get_input: rabbitmq_password }
+  #         broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
+  #         broker_ssl_cert: { get_input: rabbitmq_cert_public }
 
-        workflows:
-          task_retries: -1  # this means forever
-          task_retry_interval: 30
+  #       workflows:
+  #         task_retries: -1  # this means forever
+  #         task_retry_interval: 30
 
-        policy_engine:
-          start_timeout: 30
+  #       policy_engine:
+  #         start_timeout: 30
 
-        # Declare rules for the default import resolver
-        # which enables using the manager in offline mode.
-        # The resolver replaces an import's http link with the local path
-        # on the manager according to the matching rule's value.
-        # If the resolver cannot read the import from the specified local path
-        # (e.g. when the manager is not in offline mode),
-        # it will fall back to the original http link.
-        import_resolver:
-          parameters:
-            rules:
-            - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
+  #       # Declare rules for the default import resolver
+  #       # which enables using the manager in offline mode.
+  #       # The resolver replaces an import's http link with the local path
+  #       # on the manager according to the matching rule's value.
+  #       # If the resolver cannot read the import from the specified local path
+  #       # (e.g. when the manager is not in offline mode),
+  #       # it will fall back to the original http link.
+  #       import_resolver:
+  #         parameters:
+  #           rules:
+  #           - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
 
-        upload_resources:
-          plugin_resources: { get_input: plugin_resources }
-          dsl_resources: { get_input: dsl_resources }
+  #       upload_resources:
+  #         plugin_resources: { get_input: plugin_resources }
+  #         dsl_resources: { get_input: dsl_resources }
 
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/manager/scripts/configure_manager.sh
-            fabric_env:
-              user: { get_input: ssh_user }
-              key_filename: { get_input: ssh_key_filename }
-              host_string: { get_property: [manager_host, public_ip] }
-              always_use_pty: true
+  #   interfaces:
+  #     cloudify.interfaces.lifecycle:
+  #       create:
+  #         implementation: fabric.fabric_plugin.tasks.run_script
+  #         inputs:
+  #           script_path: components/manager/scripts/configure_manager.sh
+  #           fabric_env:
+  #             user: { get_input: ssh_user }
+  #             key_filename: { get_input: ssh_key_filename }
+  #             host_string: { get_property: [manager_host, public_ip] }
+  #             always_use_pty: true
 
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-        target_interfaces:
-          cloudify.interfaces.relationship_lifecycle:
-            postconfigure:
-              implementation: components/manager/scripts/set_manager_public_ip.py
-              inputs:
-                public_ip: { get_property: [manager_host, public_ip] }
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: manager_host
+  #       target_interfaces:
+  #         cloudify.interfaces.relationship_lifecycle:
+  #           postconfigure:
+  #             implementation: components/manager/scripts/set_manager_public_ip.py
+  #             inputs:
+  #               public_ip: { get_property: [manager_host, public_ip] }
 
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
