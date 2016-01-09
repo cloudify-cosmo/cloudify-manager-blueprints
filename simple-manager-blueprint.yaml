@@ -514,17 +514,17 @@ node_templates:
   # used by multiple nodes, we're not specifying them as independent
   # entities.
   # #####################################################################
-  # python_runtime:
-  #   type: manager.nodes.PythonRuntime
-  #   relationships:
-  #     - type: cloudify.relationships.contained_in
-  #       target: manager_host
+  python_runtime:
+    type: manager.nodes.PythonRuntime
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
 
-  # java_runtime:
-  #   type: manager.nodes.JavaRuntime
-  #   relationships:
-  #     - type: cloudify.relationships.contained_in
-  #       target: manager_host
+  java_runtime:
+    type: manager.nodes.JavaRuntime
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
 
   ######################################################################
   # These are the nodes comprising the Cloudify Manager's components
@@ -535,13 +535,13 @@ node_templates:
   #     - type: cloudify.relationships.contained_in
   #       target: manager_host
 
-  # elasticsearch:
-  #   type: manager.nodes.Elasticsearch
-  #   relationships:
-  #     - type: cloudify.relationships.contained_in
-  #       target: manager_host
-  #     - type: cloudify.relationships.depends_on
-  #       target: java_runtime
+  elasticsearch:
+    type: manager.nodes.Elasticsearch
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: java_runtime
 
   # logstash:
   #   type: manager.nodes.Logstash

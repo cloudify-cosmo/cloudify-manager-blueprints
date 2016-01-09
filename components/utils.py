@@ -14,7 +14,7 @@ from cloudify import ctx
 PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 
-debug = ctx.node.properties.get('debug')
+# debug = ctx.node.properties.get('debug')
 
 
 def deploy_blueprint_resource(source, destination):
@@ -318,7 +318,7 @@ def get_rabbitmq_endpoint_ip():
     """Gets the rabbitmq endpoint IP, using the manager IP if the node
     property is blank.
     """
-    rabbitmq_endpoint_ip = ctx.node.properties('rabbitmq_endpoint_ip')
+    rabbitmq_endpoint_ip = ctx.node.properties['rabbitmq_endpoint_ip']
     if not rabbitmq_endpoint_ip:
         rabbitmq_endpoint_ip = ctx.instance.host_ip
     return rabbitmq_endpoint_ip
@@ -357,27 +357,32 @@ def chown(user, group, path):
 def clean_var_log_dir(service):
     pass
 
-    # function clean_var_log_dir() {
-    #     ###
-    #     # Cleans up unused /var/log directory for named application.
-    #     # Directory must be empty or this will fail.
-    #     ###
-    #     service=$1
 
-    #     for log in $(find /var/log/${service} -type f 2> /dev/null); do
-    #         # Copy to timestamped file in case this is run again
-    #         if [ ! -f ${log} ]; then
-    #             break
-    #         fi
-    #         sudo mv ${log} /var/log/cloudify/${service}/${log##/var/log/${service}/}-from_bootstrap-$(date +%Y-%m-%eT%T%z)
-    #     done
-    #     # Remove the directory if it's empty, ignoring failures due to lack of directory
-    #     # This won't remove /var/log if ${service} is empty, unless /var/log is empty.
-    #     # It will, however, error if its target dir is non-empty
+def untar(source, destination, strip=1):
+    sudo(['tar', '-xzvf', source, '-C', destination,
+          '--strip={0}'.format(strip)])
 
-    #     ctx logger info "Removing unnecessary logs directory: /var/log/${service}"
-    #     sudo rm -df /var/log/${service}
-    # }
+# function clean_var_log_dir() {
+#     ###
+#     # Cleans up unused /var/log directory for named application.
+#     # Directory must be empty or this will fail.
+#     ###
+#     service=$1
+
+#     for log in $(find /var/log/${service} -type f 2> /dev/null); do
+#         # Copy to timestamped file in case this is run again
+#         if [ ! -f ${log} ]; then
+#             break
+#         fi
+#         sudo mv ${log} /var/log/cloudify/${service}/${log##/var/log/${service}/}-from_bootstrap-$(date +%Y-%m-%eT%T%z)
+#     done
+#     # Remove the directory if it's empty, ignoring failures due to lack of directory
+#     # This won't remove /var/log if ${service} is empty, unless /var/log is empty.
+#     # It will, however, error if its target dir is non-empty
+
+#     ctx logger info "Removing unnecessary logs directory: /var/log/${service}"
+#     sudo rm -df /var/log/${service}
+# }
 
 # function run_command_with_retries() {
 #     # Logging should be improved with consideration given to possible command injection accidents or attacks

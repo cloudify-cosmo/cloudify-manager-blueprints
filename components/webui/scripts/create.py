@@ -11,60 +11,70 @@ import utils
 
 CONFIG_PATH = 'components/webui/config'
 
-NODEJS_SOURCE_URL = ctx.node.properties('nodejs_tar_source_url')
-WEBUI_SOURCE_URL = ctx.node.properties('webui_tar_source_url')
-GRAFANA_SOURCE_URL = ctx.node.properties('grafana_tar_source_url')
 
-# injected as an input to the script
-ctx.instance.runtime_properties(
-    'influxdb_endpoint_ip', value=os.environ.get('INFLUXDB_ENDPOINT_IP'))
+def install_webui():
 
-NODEJS_HOME = '/opt/nodejs'
-WEBUI_HOME = '/opt/cloudify-ui'
-WEBUI_LOG_PATH = '/var/log/cloudify/webui'
-GRAFANA_HOME = '{0}/grafana'.format(WEBUI_HOME)
+    nodejs_source_url = ctx.node.properties['nodejs_tar_source_url']
+    webui_source_url = ctx.node.properties['webui_tar_source_url']
+    grafana_source_url = ctx.node.properties['grafana_tar_source_url']
 
-WEBUI_USER = 'webui'
-WEBUI_GROUP = 'webui'
+    # injected as an input to the script
+    ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
+        os.environ.get('INFLUXDB_ENDPOINT_IP')
 
-ctx.logger.info('Installing Cloudify\'s WebUI...')
-utils.set_selinux_permissive()
+    nodejs_home = '/opt/nodejs'
+    webui_home = '/opt/cloudify-ui'
+    webui_log_path = '/var/log/cloudify/webui'
+    grafana_home = '{0}/grafana'.format(webui_home)
 
-utils.copy_notice('webui')
+    webui_user = 'webui'
+    webui_group = 'webui'
 
-utils.create_dir(NODEJS_HOME)
-utils.create_dir(WEBUI_HOME)
-utils.create_dir('{0}/backend'.format(WEBUI_HOME))
-utils.create_dir(WEBUI_LOG_PATH)
-utils.create_dir(GRAFANA_HOME)
+    ctx.logger.info('Installing Cloudify\'s WebUI...')
+    utils.set_selinux_permissive()
 
-utils.create_service_user(WEBUI_USER, WEBUI_HOME)
+    utils.copy_notice('webui')
 
-ctx.logger.info('Installing NodeJS...')
-nodejs = utils.download_file(NODEJS_SOURCE_URL)
-utils.sudo(['tar', '-xzvf', nodejs, '-C', NODEJS_HOME, '--strip=1'])
+    utils.create_dir(nodejs_home)
+    utils.create_dir(webui_home)
+    utils.create_dir('{0}/backend'.format(webui_home))
+    utils.create_dir(webui_log_path)
+    utils.create_dir(grafana_home)
 
-ctx.logger.info('Installing Cloudify\'s WebUI...')
-webui = utils.download_file(WEBUI_SOURCE_URL)
-utils.sudo(['tar', '-xzvf', webui, '-C', WEBUI_HOME, '--strip=1'])
+    utils.create_service_user(webui_user, webui_home)
 
-ctx.logger.info('Installing Grafana...')
-grafana = utils.download_file(GRAFANA_SOURCE_URL)
-utils.sudo(['tar', '-xzvf', grafana, '-C', GRAFANA_HOME, '--strip=1'])
+    ctx.logger.info('Installing NodeJS...')
+    nodejs = utils.download_file(nodejs_source_url)
+    utils.untar(nodejs, nodejs_home)
 
-ctx.logger.info('Deploying WebUI Configuration...')
-utils.deploy_blueprint_resource(
-    '{0}/gsPresets.json'.format(CONFIG_PATH),
-    '{0}/backend/gsPresets.json'.format(WEBUI_HOME))
-ctx.logger.info('Deploying Grafana Configuration...')
-utils.deploy_blueprint_resource(
-    '{0}/grafana_config.js'.format(CONFIG_PATH),
-    '{0}/config.js'.format(GRAFANA_HOME))
+    ctx.logger.info('Installing Cloudify\'s WebUI...')
+    webui = utils.download_file(webui_source_url)
+    utils.untar(webui, webui_home)
 
-ctx.logger.info('Fixing permissions...')
-utils.chown(WEBUI_USER, WEBUI_GROUP, WEBUI_HOME)
-utils.chown(WEBUI_USER, WEBUI_GROUP, NODEJS_HOME)
-utils.chown(WEBUI_USER, WEBUI_GROUP, WEBUI_LOG_PATH)
+    ctx.logger.info('Installing Grafana...')
+    grafana = utils.download_file(grafana_source_url)
+    utils.untar(grafana, grafana_home)
 
-utils.deploy_logrotate_config('webui')
-utils.systemd.configure('webui')
+    ctx.logger.info('Deploying WebUI Configuration...')
+    utils.deploy_blueprint_resource(
+        '{0}/gsPresets.json'.format(CONFIG_PATH),
+        '{0}/backend/gsPresets.json'.format(webui_home))
+    ctx.logger.info('Deploying Grafana Configuration...')
+    utils.deploy_blueprint_resource(
+        '{0}/grafana_config.js'.format(CONFIG_PATH),
+        '{0}/config.js'.format(grafana_home))
+
+    ctx.logger.info('Fixing permissions...')
+    utils.chown(webui_user, webui_group, webui_home)
+    utils.chown(webui_user, webui_group, nodejs_home)
+    utils.chown(webui_user, webui_group, webui_log_path)
+
+    utils.deploy_logrotate_config('webui')
+    utils.systemd.configure('webui')
+
+
+def main():
+    install_webui()
+
+
+main()

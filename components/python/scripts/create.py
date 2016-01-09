@@ -8,18 +8,18 @@ ctx.download_resource('components/utils.py', jn(dn(__file__), 'utils.py'))
 import utils
 
 
-PIP_SOURCE_RPM_URL = ctx.node.properties('pip_source_rpm_url')
-INSTALL_PYTHON_COMPILERS = ctx.node.properties('install_python_compilers')
-
-
 def install_python_requirements():
+
+    pip_source_rpm_url = ctx.node.properties['pip_source_rpm_url']
+    install_python_compilers = ctx.node.properties['install_python_compilers']
+
     ctx.logger.info('Installing Python Requirements...')
     utils.set_selinux_permissive()
     utils.copy_notice('python')
 
-    utils.yum_install(PIP_SOURCE_RPM_URL)
+    utils.yum_install(pip_source_rpm_url)
 
-    if INSTALL_PYTHON_COMPILERS:
+    if install_python_compilers:
         ctx.logger.info('Installing Compilers...')
         utils.yum_install('python-devel')
         utils.yum_install('gcc')
