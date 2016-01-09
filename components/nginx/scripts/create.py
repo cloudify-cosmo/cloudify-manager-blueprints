@@ -10,46 +10,55 @@ import utils
 
 CONFIG_PATH = 'components/nginx/config'
 
-NGINX_SOURCE_URL = ctx.node.properties('nginx_rpm_source_url')
-REST_SERVICE_SOURCE_URL = ctx.node.properties('rest_service_module_source_url')
 
-NGINX_LOG_PATH = '/var/log/cloudify/nginx'
-MANAGER_RESOURCES_HOME = '/opt/manager/resources'
-MANAGER_AGENTS_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
-MANAGER_SCRIPTS_PATH = '{0}/packages/scripts'.format(MANAGER_RESOURCES_HOME)
-MANAGER_TEMPLATES_PATH = '{0}/packages/templates'.format(
-    MANAGER_RESOURCES_HOME)
-NGINX_UNIT_OVERRIDE = '/etc/systemd/system/nginx.service.d'
+def install_nginx():
+    nginx_source_url = ctx.node.properties['nginx_rpm_source_url']
 
-# this is propagated to the agent retrieval script later on so that it's not
-# defined twice.
-ctx.instance.runtime_properties(
-    'agent_packages_path', value=MANAGER_AGENTS_PATH)
+    # unused?
+    # rest_service_source_url = \
+    #     ctx.node.properties['rest_service_module_source_url']
 
-# TODO can we use static (not runtime) attributes for some of these? how to
-# set them?
-ctx.instance.runtime_properties('default_rest_service_port', value='8100')
-ctx.instance.runtime_properties('internal_rest_service_port', value='8101')
+    nginx_log_path = '/var/log/cloudify/nginx'
+    manager_resources_home = '/opt/manager/resources'
+    manager_agents_path = '{0}/packages/agents'.format(manager_resources_home)
+    manager_scripts_path = '{0}/packages/scripts'.format(
+        manager_resources_home)
+    manager_templates_path = '{0}/packages/templates'.format(
+        manager_resources_home)
+    nginx_unit_override = '/etc/systemd/system/nginx.service.d'
 
-ctx.logger.info('Installing Nginx...')
-utils.set_selinux_permissive()
+    # this is propagated to the agent retrieval script later on so that it's
+    # not defined twice.
+    ctx.instance.runtime_properties['agent_packages_path'] = \
+        manager_agents_path
 
-utils.copy_notice('nginx')
-utils.create_dir(NGINX_LOG_PATH)
-utils.create_dir(MANAGER_RESOURCES_HOME)
+    # TODO can we use static (not runtime) attributes for some of these? how to
+    # set them?
+    ctx.instance.runtime_properties['default_rest_service_port'] = '8100'
+    ctx.instance.runtime_properties['internal_rest_service_port'] = '8101'
 
-utils.create_dir(MANAGER_AGENTS_PATH)
-utils.create_dir(MANAGER_SCRIPTS_PATH)
-utils.create_dir(MANAGER_TEMPLATES_PATH)
+    ctx.logger.info('Installing Nginx...')
+    utils.set_selinux_permissive()
 
-utils.create_dir(NGINX_UNIT_OVERRIDE)
+    utils.copy_notice('nginx')
+    utils.create_dir(nginx_log_path)
+    utils.create_dir(manager_resources_home)
 
-utils.yum_install(NGINX_SOURCE_URL)
+    utils.create_dir(manager_agents_path)
+    utils.create_dir(manager_scripts_path)
+    utils.create_dir(manager_templates_path)
 
-ctx.logger.info('Creating systemd unit override...')
-utils.deploy_blueprint_resource(
-    '{0}/restart.conf'.format(CONFIG_PATH),
-    '{0}/restart.conf'.format(NGINX_UNIT_OVERRIDE))
+    utils.create_dir(nginx_unit_override)
 
-utils.deploy_logrotate_config('nginx')
-utils.clean_var_log_dir('nginx')
+    utils.yum_install(nginx_source_url)
+
+    ctx.logger.info('Creating systemd unit override...')
+    utils.deploy_blueprint_resource(
+        '{0}/restart.conf'.format(CONFIG_PATH),
+        '{0}/restart.conf'.format(nginx_unit_override))
+
+    utils.deploy_logrotate_config('nginx')
+    utils.clean_var_log_dir('nginx')
+
+
+install_nginx()

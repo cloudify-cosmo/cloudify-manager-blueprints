@@ -63,7 +63,7 @@ def create_dir(dir):
     sudo(['mkdir', '-p', dir])
 
 
-def install_python_package(source, venv=None):
+def install_python_package(source, venv=''):
     if venv:
         ctx.logger.info('Installing {0} in virtualenv {1}...'.format(
             source, venv))
@@ -87,7 +87,7 @@ def curl_download_with_retries(source, destination):
     run(curl_cmd)
 
 
-def download_file(url, destination=None):
+def download_file(url, destination=''):
     if not destination:
         fd, destination = tempfile.mkstemp()
         os.remove(destination)
@@ -100,6 +100,7 @@ def download_file(url, destination=None):
         ctx.logger.info('File {0} already exists...'.format(destination))
     return destination
 
+    # USE THIS INSTEAD
     ctx.logger.info('Downloading {0} to {1}...'.format(url, destination))
     final_url = urllib.urlopen(url).geturl()
     if final_url != url:
@@ -113,11 +114,12 @@ def get_file_name_from_url(url):
     try:
         return url.split('/')[-1]
     except:
+        # note that urlparse is deprecated in Python 3
         from urlparse import urlparse
 
         url = "http://github.com/x.y"
         disassembled = urlparse(url)
-        return os.pathself.basename(disassembled.path)
+        return os.path.basename(disassembled.path)
 
 
 def download_cloudify_resource(url):
@@ -130,7 +132,7 @@ def download_cloudify_resource(url):
         tmp_path = download_file(url)
         ctx.logger.info('Saving {0} under {1}'.format(tmp_path, destf))
         create_dir(CLOUDIFY_SOURCES_PATH)
-        sudo(['mv', tmp_path, destf])
+        move(tmp_path, destf)
     return destf
 
 
@@ -143,7 +145,7 @@ def copy_notice(service):
         ctx.logger.info('Copying {0} notice file to {1}...'.format(
             service, destn))
         notice_file = ctx.download_resource(source)
-        sudo(['mv', notice_file, destn])
+        move(notice_file, destn)
 
 
 def wait_for_port(port, host='localhost'):
@@ -205,12 +207,13 @@ def yum_install(source):
             create_dir(CLOUDIFY_SOURCES_PATH)
             ctx.logger.info('Saving {0} under {1}...'.format(
                 filename, CLOUDIFY_SOURCES_PATH))
-            sudo(['mv', tmp_path, archive_path])
-        source_name = run(['rpm', '-qp', archive_path]).aggr_stdout
+            move(tmp_path, archive_path)
+        source_name = sub.check_output(['rpm', '-qp', archive_path]).strip()
 
     ctx.logger.info('Checking whether {0} is already installed...'.format(
         archive_path))
-    if run(['rpm', '-q', source_name]).returncode == 0:
+    installed = run(['rpm', '-q', source_name])
+    if installed.returncode == 0:
         ctx.logger.info('Package {0} is already installed.'.format(source))
         return
 
@@ -219,9 +222,16 @@ def yum_install(source):
 
 
 class SystemD(object):
-    @staticmethod
-    def configure(service_name):
-        """This configure systemd for a specific service.
+
+    def systemctl(self, action, service=''):
+        systemctl_cmd = ['systemctl', action]
+        if service:
+            systemctl_cmd.append(service)
+        sudo(systemctl_cmd)
+
+    def configure(self, service_name):
+        """This configures systemd for a specific service.
+
         It requires that two files are present for each service one containing
         the environment variables and one contains the systemd config.
         All env files will be named "cloudify-SERVICENAME".
@@ -239,8 +249,8 @@ class SystemD(object):
         deploy_blueprint_resource(srv_src, srv_dst)
 
         ctx.logger.info('Enabling systemd .service...')
-        sudo(['systemctl', 'enable', '{0}.service'.format(sid)])
-        sudo(['systemctl', 'daemon-reload'])
+        self.systemctl('enable', '{0}.service'.format(sid))
+        self.systemctl('daemon-reload')
 
     @staticmethod
     def get_vars_file_path(service_name):
@@ -259,23 +269,21 @@ class SystemD(object):
         sid = 'cloudify-{0}'.format(service_name)
         return "/usr/lib/systemd/system/{0}.service".format(sid)
 
-    @staticmethod
-    def enable(service_name):
-        sudo(['systemctl', 'enable', service_name])
+    def enable(self, service_name):
+        self.systemctl('enable', service_name)
 
-    @staticmethod
-    def start(service_name):
-        sudo(['systemctl', 'start', service_name])
+    def start(self, service_name):
+        self.systemctl('start', service_name)
 
-    @staticmethod
-    def stop(service_name):
-        sudo(['systemctl', 'stop', service_name])
+    def stop(self, service_name):
+        self.systemctl('stop', service_name)
 
 
 systemd = SystemD()
 
 
 def move(source, destination):
+    # TODO: use shutil.move instead
     sudo(['mv', source, destination])
 
 
@@ -318,10 +326,10 @@ def get_rabbitmq_endpoint_ip():
     """Gets the rabbitmq endpoint IP, using the manager IP if the node
     property is blank.
     """
-    rabbitmq_endpoint_ip = ctx.node.properties['rabbitmq_endpoint_ip']
-    if not rabbitmq_endpoint_ip:
-        rabbitmq_endpoint_ip = ctx.instance.host_ip
-    return rabbitmq_endpoint_ip
+    try:
+        return ctx.node.properties['rabbitmq_endpoint_ip']
+    except:
+        return ctx.instance.host_ip
 
 
 def create_service_user(user, home):
@@ -346,6 +354,7 @@ def deploy_logrotate_config(service):
     config_file_source = 'components/{0}/config/logrotate'.format(service)
     config_file_destination = '/etc/logrotate.d/{0}'.format(service)
     deploy_blueprint_resource(config_file_source, config_file_destination)
+    # TODO: check if can use os.chmod with elevated privileges
     sudo(['chmod', '644', config_file_destination])
 
 
@@ -359,120 +368,6 @@ def clean_var_log_dir(service):
 
 
 def untar(source, destination, strip=1):
+    # TODO: use tarfile instead
     sudo(['tar', '-xzvf', source, '-C', destination,
           '--strip={0}'.format(strip)])
-
-# function clean_var_log_dir() {
-#     ###
-#     # Cleans up unused /var/log directory for named application.
-#     # Directory must be empty or this will fail.
-#     ###
-#     service=$1
-
-#     for log in $(find /var/log/${service} -type f 2> /dev/null); do
-#         # Copy to timestamped file in case this is run again
-#         if [ ! -f ${log} ]; then
-#             break
-#         fi
-#         sudo mv ${log} /var/log/cloudify/${service}/${log##/var/log/${service}/}-from_bootstrap-$(date +%Y-%m-%eT%T%z)
-#     done
-#     # Remove the directory if it's empty, ignoring failures due to lack of directory
-#     # This won't remove /var/log if ${service} is empty, unless /var/log is empty.
-#     # It will, however, error if its target dir is non-empty
-
-#     ctx logger info "Removing unnecessary logs directory: /var/log/${service}"
-#     sudo rm -df /var/log/${service}
-# }
-
-# function run_command_with_retries() {
-#     # Logging should be improved with consideration given to possible command injection accidents or attacks
-#     ctx logger info "Attempting to run ${1} with up to 5 retries"
-#     max_retries=5
-#     retried=0
-#     while ! ${*}; do
-#         # Better logging would be good
-#         ctx logger info "Command ${1} failed, retrying in 1 second."
-#         retried=$(( ${retried} + 1 ))
-#         sleep 1
-#         if [[ ${retried} -eq ${max_retries} ]]; then
-#             # Better logging would be good
-#             ctx logger info "Max retries for command ${1} exceeded, aborting."
-#             break
-#         fi
-#     done
-# }
-
-# function run_noglob_command_with_retries() {
-#     # Logging should be improved with consideration given to possible command injection accidents or attacks
-#     ctx logger info "Attempting to run ${1} with up to 5 retries"
-#     max_retries=5
-#     retried=0
-#     while ! sh -c -f "${*}"; do
-#         # Better logging would be good
-#         ctx logger info "Command ${1} failed, retrying in 1 second."
-#         retried=$(( ${retried} + 1 ))
-#         sleep 1
-#         if [[ ${retried} -eq ${max_retries} ]]; then
-#             # Better logging would be good
-#             ctx logger info "Max retries for command ${1} exceeded, aborting."
-#             break
-#         fi
-#     done
-# }
-
-# function extract_github_archive_to_tmp () {
-#     repo=${1}
-#     if [[ "$(file ${repo})" =~ 'Zip archive data' ]]; then
-#         # This is a zip, unzip it, assuming it is a github style zip
-#         unzip ${repo} -d /tmp/github-archive-tmp > /dev/null
-#         # Performing a strip-components equivalent, but the github style zips have
-#         # an extra leading directory
-#         # Using copy+delete to avoid errors when mv finds a target dir exists
-#         cp -r /tmp/github-archive-tmp/*/* /tmp
-#         rm -rf /tmp/github-archive-tmp
-#     else
-#         # We are expecting a tar.gz, untar it
-#         tar -xzf ${repo} --strip-components=1 -C "/tmp"
-#     fi
-# }
-
-# function deploy_ssl_certificate () {
-#   private_or_public=${1}
-#   destination=${2}
-#   group=${3}
-#   cert=${4}
-
-#   # Root owner, with permissions set below, allow anyone to read a public cert, and allow the owner to read a private cert, but not change it, mitigating risk in the event of the associated service being vulnerable.
-#   ownership=root.${group}
-
-#   if [[ ${private_or_public} == "private" ]]; then
-#     # This check should probably be done using an openssl command
-#     if [[ "${cert}" =~ "BEGIN RSA PRIVATE KEY" ]]; then
-#       # Owner read, Group read, Others no access
-#       permissions=440
-#     else
-#       error_exit "Private certificate is expected to begin with a line containing 'BEGIN RSA PRIVATE KEY'."
-#     fi
-#   elif [[ ${private_or_public} == "public" ]]; then
-#     # This check should probably be done using an openssl command
-#     if [[ "${cert}" =~ "BEGIN CERTIFICATE" ]]; then
-#       # Owner read, Group read, Others read
-#       permissions=444
-#     else
-#       # This should probably be done using an openssl command
-#       error_exit "Public certificate is expected to begin with a line containing 'BEGIN CERTIFICATE'."
-#     fi
-#   else
-#     error_exit "Certificates may only be 'private' or 'public', not '${private_or_public}'"
-#   fi
-
-#   ctx logger info "Deploying ${private_or_public} SSL certificate in ${destination} for group ${group}"
-#   echo "${cert}" | sudo tee ${destination} >/dev/null
-
-#   ctx logger info "Setting permissions (${permissions}) and ownership (${ownership}) of SSL certificate at ${ddestination}"
-#   # Set permissions first as the tee with sudo should mean its owner and group are root, leaving a negligible window for it to be accessed by an unauthorised user
-#   sudo chmod ${permissions} ${destination}
-#   sudo chown ${ownership} ${destination}
-# }
-
-# CLOUDIFY_SOURCES_PATH="/opt/cloudify/sources"

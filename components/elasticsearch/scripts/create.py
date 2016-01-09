@@ -21,13 +21,14 @@ def http_request(url, data=None, method='PUT'):
         urllib2.urlopen(request)
         return True
     except urllib2.URLError as e:
-        ctx.logger.info('Failed {0} to {1} (code: {2}, reason: {3})'.format(
-            method, url + ' ' + data, e.reason[0], e.reason[1]))
+        reqstring = url + (' ' + data if data else '')
+        ctx.logger.info('Failed to {0} {1} (reason: {2})'.format(
+            method, reqstring, e.reason))
 
 
 def configure_elasticsearch(host, port):
 
-    storage_endpoint = 'http://{0}:{1}/cloudify_storage/'
+    storage_endpoint = 'http://{0}:{1}/cloudify_storage/'.format(host, port)
     storage_settings = json.dumps({
         "settings": {
             "analysis": {
@@ -38,7 +39,9 @@ def configure_elasticsearch(host, port):
         }
     })
 
+    ctx.logger.info('Deleting `cloudify_storage` index if exists...')
     http_request(storage_endpoint, method='DELETE')
+    ctx.logger.info('Creating `cloudify_storage` index...')
     http_request(storage_endpoint, storage_settings, 'PUT')
 
     blueprint_mapping_endpoint = storage_endpoint + 'blueprint/_mapping'
@@ -50,6 +53,7 @@ def configure_elasticsearch(host, port):
         }
     })
 
+    ctx.logger.info('Declaring blueprint mapping...')
     http_request(blueprint_mapping_endpoint, blueprint_mapping, 'PUT')
 
     deployment_mapping_endpoint = storage_endpoint + 'deployment/_mapping'
@@ -66,6 +70,7 @@ def configure_elasticsearch(host, port):
         }
     })
 
+    ctx.logger.info('Declaring deployment mapping...')
     http_request(deployment_mapping_endpoint, deployment_mapping, 'PUT')
 
     node_mapping_endpoint = storage_endpoint + 'node/_mapping'
@@ -81,6 +86,7 @@ def configure_elasticsearch(host, port):
         }
     })
 
+    ctx.logger.info('Declaring node mapping...')
     http_request(node_mapping_endpoint, node_mapping, 'PUT')
 
     node_instance_mapping_endpoint = \
@@ -94,6 +100,7 @@ def configure_elasticsearch(host, port):
         }
     })
 
+    ctx.logger.info('Declaring node instance mapping...')
     http_request(node_instance_mapping_endpoint, node_instance_mapping, 'PUT')
 
     deployment_modification_mapping_endpoint = \
@@ -109,6 +116,7 @@ def configure_elasticsearch(host, port):
         }
     })
 
+    ctx.logger.info('Declaring deployment modification mapping...')
     http_request(
         deployment_modification_mapping_endpoint,
         deployment_modification_mapping, 'PUT')
@@ -222,7 +230,7 @@ def main():
         ctx.logger.info('Starting Elasticsearch Service...')
         utils.systemd.start('elasticsearch.service')
         utils.wait_for_port(es_endpoint_port, es_endpoint_ip)
-        configure_elasticsearch(host=es_endpoint_ip)
+        configure_elasticsearch(host=es_endpoint_ip, port=es_endpoint_port)
 
         ctx.logger.info('Stopping Elasticsearch Service...')
         utils.systemd.stop('elasticsearch.service')
@@ -240,7 +248,7 @@ def main():
             utils.error_exit('\'cloudify_storage\' index already exists on '
                              '{0}, terminating bootstrap...'.format(
                                  es_endpoint_ip))
-        configure_elasticsearch()
+        configure_elasticsearch(host=es_endpoint_ip, port=es_endpoint_port)
 
     ctx.instance.runtime_properties['es_endpoint_ip'] = es_endpoint_ip
 
