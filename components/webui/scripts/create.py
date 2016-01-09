@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-import subprocess
 import os
-import importlib
+from os.path import (join as jn, dirname as dn)
 
-subprocess.check_output([
-    'ctx', 'download-resource', 'components/utils.py',
-    os.path.join(os.path.dirname(__file__), 'utils.py')])
-ctx = utils = importlib.import_module('utils')
+from cloudify import ctx
+
+ctx.download_resource('components/utils.py', jn(dn(__file__), 'utils.py'))
+import utils
 
 
 CONFIG_PATH = 'components/webui/config'

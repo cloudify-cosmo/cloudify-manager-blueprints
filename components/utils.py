@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from threading import Thread
+
 import time
 import subprocess as sub
 import sys
@@ -14,30 +14,13 @@ from cloudify import ctx
 PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 
+debug = ctx.node.properties.get('debug')
+
 
 def deploy_blueprint_resource(source, destination):
     ctx.logger.info('Deploying {0} to {1}'.format(source, destination))
     tmp_file = ctx.download_resource_and_render(source)
     move(tmp_file, destination)
-
-
-class PipeReader(Thread):
-    def __init__(self, fd, proc, logger, log_level):
-        Thread.__init__(self)
-        self.fd = fd
-        self.proc = proc
-        self.logger = logger
-        self.log_level = log_level
-        self.aggr = ''
-
-    def run(self):
-        while self.proc.poll() is None:
-            output = self.fd.readline()
-            if len(output) > 0:
-                self.aggr += output
-                self.logger.log(self.log_level, output.strip())
-            else:
-                time.sleep(PROCESS_POLLING_INTERVAL)
 
 
 def run(command, retries=0):
@@ -55,8 +38,8 @@ def run(command, retries=0):
     #         proc.aggr_stderr += proc.stderr.readline()
     # THIS NEEDS TO BE TESTED
     if proc.returncode != 0 and retries:
-        ctx.logger.info('Failed running command: {0}. Retrying. ({1} left)'.format(
-            command, retries))
+        ctx.logger.info('Failed running command: {0}. Retrying. '
+                        '({1} left)'.format(command, retries))
         run(command, retries - 1)
     return proc
 
@@ -141,7 +124,8 @@ def download_cloudify_resource(url):
     destf = os.path.join(CLOUDIFY_SOURCES_PATH, get_file_name_from_url(url))
     ctx.logger.info('Downloading {0}...'.format(url))
     if os.path.isfile(destf):
-        ctx.logger.info('Resource already exists ({0}). Skipping...'.format(destf))
+        ctx.logger.info('Resource already exists ({0}). Skipping...'.format(
+            destf))
     else:
         tmp_path = download_file(url)
         ctx.logger.info('Saving {0} under {1}'.format(tmp_path, destf))
@@ -156,7 +140,8 @@ def copy_notice(service):
         ctx.logger.info('NOTICE {0} already exists. Skipping...'.format(destn))
     else:
         source = 'components/{0}/NOTICE.txt'.format(service)
-        ctx.logger.info('Copying {0} notice file to {1}...'.format(service, destn))
+        ctx.logger.info('Copying {0} notice file to {1}...'.format(
+            service, destn))
         notice_file = ctx.download_resource(source)
         sudo(['mv', notice_file, destn])
 
@@ -174,6 +159,7 @@ def wait_for_port(port, host='localhost'):
             ctx.logger.info('{0}:{1} is not available yet, '
                             'retrying... ({2}/24)'.format(host, port, counter))
             time.sleep(2)
+            counter += 1
             continue
         ctx.logger.info('{0}:{1} is open!'.format(host, port))
         return
@@ -212,7 +198,8 @@ def yum_install(source):
 
     if ext.endswith('rpm'):
         archive_path = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
-        ctx.logger.info('Checking whether .rpm {0} exists...'.format(archive_path))
+        ctx.logger.info('Checking whether .rpm {0} exists...'.format(
+            archive_path))
         if not os.path.isfile(archive_path):
             tmp_path = download_file(source)
             create_dir(CLOUDIFY_SOURCES_PATH)
@@ -321,8 +308,8 @@ def set_selinux_permissive():
 
 
 def set_rabbitmq_policy(name, q_regex, p_type, value):
-    ctx.logger.info('Setting policy {0} on queues {1} of type {2} to {3}'.format(
-        name, q_regex, p_type, value))
+    ctx.logger.info('Setting policy {0} on queues {1} of type {2} to '
+                    '{3}'.format(name, q_regex, p_type, value))
     sudo('rabbitmqctl set_policy {0} {1} "{"\"{2}"\":{3}}" '
          '--apply-to-queues'.format(name, q_regex, p_type, value))
 

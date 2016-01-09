@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from os.path import (join as jn, dirname as dn)
 import time
 import json
 import sys
+from os.path import (join as jn, dirname as dn)
 
 from cloudify import ctx
 # if we use download_resource_and_render here instead we might be able
@@ -24,7 +24,7 @@ def configure_influxdb(host, port):
     ctx.logger.info('Creating InfluxDB Database...')
 
     # the below request is equivalent to running:
-    # curl -S -s --retry 5 "http://localhost:8086/db?u=root&p=root" '-d "{\"name\": \"cloudify\"}"  # NOQA
+    # curl -S -s "http://localhost:8086/db?u=root&p=root" '-d "{\"name\": \"cloudify\"}"  # NOQA
     import urllib
     import urllib2
 
@@ -57,6 +57,7 @@ def configure_influxdb(host, port):
     except AssertionError:
         ctx.logger.info('Verification failed!')
         sys.exit(1)
+    ctx.logger.info('Databased {0} created successfully.'.format(db_name))
 
 
 def install_influxdb():
