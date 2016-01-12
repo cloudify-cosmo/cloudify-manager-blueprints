@@ -14,13 +14,17 @@ CONFIG_PATH = 'components/nginx/config'
 def install_nginx():
     nginx_source_url = ctx.node.properties['nginx_rpm_source_url']
 
-    # unused?
+    # this is a bit tricky. the rest_service_source_url contains files that
+    # should be deployed in the fileserver. the thing is, that since the
+    # rest service and nginx cannot be distributed between vms right now
+    # anyway, these resources are deployed by the rest service node instead.
     # rest_service_source_url = \
     #     ctx.node.properties['rest_service_module_source_url']
 
     nginx_log_path = '/var/log/cloudify/nginx'
     manager_resources_home = '/opt/manager/resources'
     manager_agents_path = '{0}/packages/agents'.format(manager_resources_home)
+    # TODO: check if can remove these two (should come with the agent package)
     manager_scripts_path = '{0}/packages/scripts'.format(
         manager_resources_home)
     manager_templates_path = '{0}/packages/templates'.format(
@@ -32,23 +36,23 @@ def install_nginx():
     ctx.instance.runtime_properties['agent_packages_path'] = \
         manager_agents_path
 
-    # TODO can we use static (not runtime) attributes for some of these? how to
-    # set them?
-    ctx.instance.runtime_properties['default_rest_service_port'] = '8100'
-    ctx.instance.runtime_properties['internal_rest_service_port'] = '8101'
+    # TODO: can we use static (not runtime) attributes for some of these?
+    # how to set them?
+    ctx.instance.runtime_properties['default_rest_service_port'] = 8100
+    ctx.instance.runtime_properties['internal_rest_service_port'] = 8101
 
     ctx.logger.info('Installing Nginx...')
     utils.set_selinux_permissive()
 
     utils.copy_notice('nginx')
-    utils.create_dir(nginx_log_path)
-    utils.create_dir(manager_resources_home)
+    utils.mkdir(nginx_log_path)
+    utils.mkdir(manager_resources_home)
 
-    utils.create_dir(manager_agents_path)
-    utils.create_dir(manager_scripts_path)
-    utils.create_dir(manager_templates_path)
-
-    utils.create_dir(nginx_unit_override)
+    utils.mkdir(manager_agents_path)
+    # TODO: check if can remove these two (should come with the agent package)
+    utils.mkdir(manager_scripts_path)
+    utils.mkdir(manager_templates_path)
+    utils.mkdir(nginx_unit_override)
 
     utils.yum_install(nginx_source_url)
 
@@ -57,7 +61,7 @@ def install_nginx():
         '{0}/restart.conf'.format(CONFIG_PATH),
         '{0}/restart.conf'.format(nginx_unit_override))
 
-    utils.deploy_logrotate_config('nginx')
+    utils.logrotate('nginx')
     utils.clean_var_log_dir('nginx')
 
 

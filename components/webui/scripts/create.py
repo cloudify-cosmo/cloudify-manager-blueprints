@@ -35,11 +35,11 @@ def install_webui():
 
     utils.copy_notice('webui')
 
-    utils.create_dir(nodejs_home)
-    utils.create_dir(webui_home)
-    utils.create_dir('{0}/backend'.format(webui_home))
-    utils.create_dir(webui_log_path)
-    utils.create_dir(grafana_home)
+    utils.mkdir(nodejs_home)
+    utils.mkdir(webui_home)
+    utils.mkdir('{0}/backend'.format(webui_home))
+    utils.mkdir(webui_log_path)
+    utils.mkdir(grafana_home)
 
     utils.create_service_user(webui_user, webui_home)
 
@@ -69,7 +69,7 @@ def install_webui():
     utils.chown(webui_user, webui_group, nodejs_home)
     utils.chown(webui_user, webui_group, webui_log_path)
 
-    utils.deploy_logrotate_config('webui')
+    utils.logrotate('webui')
     utils.systemd.configure('webui')
 
 

@@ -20,7 +20,7 @@ def install_java():
 
     # Make sure the cloudify logs dir exists before we try moving the java log
     # there -p will cause it not to error if the dir already exists
-    utils.create_dir('/var/log/cloudify')
+    utils.mkdir('/var/log/cloudify')
 
     # Java install log is dropped in /var/log.
     # Move it to live with the rest of the cloudify logs

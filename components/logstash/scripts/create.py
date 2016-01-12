@@ -48,11 +48,11 @@ def install_logstash():
 
     utils.yum_install(logstash_source_url)
 
-    utils.create_dir(logstash_log_path)
+    utils.mkdir(logstash_log_path)
     utils.chown('logstash', 'logstash', logstash_log_path)
 
     ctx.logger.info('Creating systemd unit override...')
-    utils.create_dir(logstash_unit_override)
+    utils.mkdir(logstash_unit_override)
     utils.deploy_blueprint_resource(
         '{0}/restart.conf'.format(CONFIG_PATH),
         '{0}/restart.conf'.format(logstash_unit_override))
@@ -66,7 +66,7 @@ def install_logstash():
         '{0}/logstash'.format(CONFIG_PATH),
         '/etc/sysconfig/logstash')
 
-    utils.deploy_logrotate_config('logstash')
+    utils.logrotate('logstash')
     # sudo systemctl enable logstash.service
     utils.sudo(['/sbin/chkconfig', 'logstash', 'on'])
     utils.clean_var_log_dir('logstash')

@@ -143,8 +143,8 @@ def install_elasticsearch():
     utils.set_selinux_permissive()
 
     utils.copy_notice('elasticsearch')
-    utils.create_dir(es_home)
-    utils.create_dir(es_logs_path)
+    utils.mkdir(es_home)
+    utils.mkdir(es_logs_path)
 
     utils.yum_install(es_source_url)
 
@@ -153,7 +153,7 @@ def install_elasticsearch():
     utils.chown('elasticsearch', 'elasticsearch', es_logs_path)
 
     ctx.logger.info('Creating systemd unit override...')
-    utils.create_dir(es_unit_override)
+    utils.mkdir(es_unit_override)
     utils.deploy_blueprint_resource(
         os.path.join(CONFIG_PATH, 'restart.conf'),
         os.path.join(es_unit_override, 'restart.conf'))
@@ -195,7 +195,7 @@ def install_elasticsearch():
         '#ES_GC_LOG_FILE=/var/log/elasticsearch/gc.log',
         'ES_GC_LOG_FILE={0}'.format(os.path.join(es_logs_path, 'gc.log')),
         '/etc/sysconfig/elasticsearch')
-    utils.deploy_logrotate_config('elasticsearch')
+    utils.logrotate('elasticsearch')
 
     ctx.logger.info('Installing Elasticsearch Curator...')
     if not es_curator_rpm_source_url:
@@ -212,6 +212,7 @@ def install_elasticsearch():
     # testable manually by running: sudo run-parts /etc/cron.daily
     utils.move(rotator_script, '/etc/cron.daily/rotate_es_indices')
     utils.chown('root', 'root', '/etc/cron.daily/rotate_es_indices')
+    # VALIDATE!
     utils.sudo('chmod +x /etc/cron.daily/rotate_es_indices')
 
     ctx.logger.info('Enabling Elasticsearch Service...')

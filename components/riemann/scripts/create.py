@@ -42,10 +42,10 @@ def install_riemann():
     utils.set_selinux_permissive()
 
     utils.copy_notice('riemann')
-    utils.create_dir(riemann_log_path)
-    utils.create_dir(langohr_home)
-    utils.create_dir(riemann_config_path)
-    utils.create_dir('{0}/conf.d'.format(riemann_config_path))
+    utils.mkdir(riemann_log_path)
+    utils.mkdir(langohr_home)
+    utils.mkdir(riemann_config_path)
+    utils.mkdir('{0}/conf.d'.format(riemann_config_path))
 
     langohr = utils.download_cloudify_resource(langohr_source_url)
     utils.sudo(['cp', langohr, extra_classpath])
@@ -54,7 +54,7 @@ def install_riemann():
     utils.yum_install(daemonize_source_url)
     utils.yum_install(riemann_source_url)
 
-    utils.deploy_logrotate_config('riemann')
+    utils.logrotate('riemann')
 
     ctx.logger.info('Downloading cloudify-manager Repository...')
     manager_repo = utils.download_cloudify_resource(cloudify_resources_url)

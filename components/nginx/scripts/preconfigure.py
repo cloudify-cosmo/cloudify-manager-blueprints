@@ -22,7 +22,7 @@ def preconfigure_nginx():
     ctx.source.instance.runtime_properties['rest_protocol'] = rest_protocol
     if rest_protocol == 'https':
         ctx.logger.info('Copying SSL Certs...')
-        utils.create_dir(ssl_certs_root)
+        utils.mkdir(ssl_certs_root)
         utils.deploy_blueprint_resource(
             '{0}/server.crt'.format(ssl_resources_rel_path),
             '{0}/server.crt'.format(ssl_certs_root))

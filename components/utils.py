@@ -8,6 +8,7 @@ import sys
 import urllib
 import tempfile
 import socket
+import shlex
 
 from cloudify import ctx
 
@@ -17,15 +18,9 @@ CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 # debug = ctx.node.properties.get('debug')
 
 
-def deploy_blueprint_resource(source, destination):
-    ctx.logger.info('Deploying {0} to {1}'.format(source, destination))
-    tmp_file = ctx.download_resource_and_render(source)
-    move(tmp_file, destination)
-
-
 def run(command, retries=0):
     if isinstance(command, str):
-        command = command.split(command)
+        command = shlex.split(command)
     stderr = sub.PIPE
     stdout = sub.PIPE
     proc = sub.Popen(command, stdout=stdout, stderr=stderr)
@@ -45,8 +40,9 @@ def run(command, retries=0):
 
 
 def sudo(command):
+    # run(shlex.split(' '.join(command).insert(0, sudo)))
     if isinstance(command, str):
-        command = command.split(command)
+        command = shlex.split(command)
     command.insert(0, 'sudo')
     run(command)
 
@@ -56,11 +52,15 @@ def error_exit(message):
     sys.exit(1)
 
 
-def create_dir(dir):
+def mkdir(dir):
     if os.path.isdir(dir):
         return
     ctx.logger.info('Creating Directory: {0}'.format(dir))
     sudo(['mkdir', '-p', dir])
+
+
+def move(source, destination):
+    sudo(['mv', source, destination])
 
 
 def install_python_package(source, venv=''):
@@ -116,13 +116,17 @@ def get_file_name_from_url(url):
     except:
         # note that urlparse is deprecated in Python 3
         from urlparse import urlparse
-
-        url = "http://github.com/x.y"
         disassembled = urlparse(url)
         return os.path.basename(disassembled.path)
 
 
 def download_cloudify_resource(url):
+    """Downloads a resource and saves it as a cloudify resource.
+
+    The resource will be saved under `CLOUDIFY_SOURCES_PATH` and will be
+    used in case of operation execution failure after the resource has
+    already been downloaded.
+    """
     destf = os.path.join(CLOUDIFY_SOURCES_PATH, get_file_name_from_url(url))
     ctx.logger.info('Downloading {0}...'.format(url))
     if os.path.isfile(destf):
@@ -131,13 +135,25 @@ def download_cloudify_resource(url):
     else:
         tmp_path = download_file(url)
         ctx.logger.info('Saving {0} under {1}'.format(tmp_path, destf))
-        create_dir(CLOUDIFY_SOURCES_PATH)
+        mkdir(CLOUDIFY_SOURCES_PATH)
         move(tmp_path, destf)
     return destf
 
 
+def deploy_blueprint_resource(source, destination):
+    """Downloads a resource from the blueprint to a destination.
+
+    This expands `download-resource` as a `sudo mv` is required after
+    having downloaded the resource.
+    """
+    ctx.logger.info('Deploying {0} to {1}'.format(source, destination))
+    tmp_file = ctx.download_resource_and_render(source)
+    move(tmp_file, destination)
+
+
 def copy_notice(service):
-    destn = os.path.join('/', 'opt', service + '_NOTICE.txt')
+    """Deploys a notice file to /opt/SERVICENAME_NOTICE.txt"""
+    destn = os.path.join('/opt', service + '_NOTICE.txt')
     if os.path.isfile(destn):
         ctx.logger.info('NOTICE {0} already exists. Skipping...'.format(destn))
     else:
@@ -149,6 +165,7 @@ def copy_notice(service):
 
 
 def wait_for_port(port, host='localhost'):
+    """Helper function to wait for a port to open before continuing"""
     counter = 1
 
     ctx.logger.info('Waiting for {0}:{1} to become available...'.format(
@@ -176,21 +193,23 @@ def yum_install(source):
     you can specify one of the following:
     [yum install -y] mylocalfile.rpm
     [yum install -y] mypackagename
+
     If the source is a package name, it will check whether it is already
-    installed.
-    If it is, it will do nothing. It not, it will install it.
+    installed. If it is, it will do nothing. It not, it will install it.
+
     If the source is a url to an rpm and the file doesn't already exist
     in a predesignated archives file path (${CLOUDIFY_SOURCES_PATH}/),
     it will download it. It will then use that file to check if the
-    package is already installed.
-    If it is, it will do nothing. It not, it will install it.
+    package is already installed. If it is, it will do nothing. If not,
+    it will install it.
+
     NOTE: This will currently not take into considerations situations
-    in which a file was downloaded partially. If a file is partially
+    in which a file was partially downloaded. If a file is partially
     downloaded, a redownload will not take place and rather an
     installation will be attempted, which will obviously fail since
     the rpm file is incomplete.
-    ALSO NOTE: you cannot run yum_install and provide it with a space
-    separated array of packages as you can with yum install. You must
+    ALSO NOTE: you cannot provide `yum_install` with a space
+    separated array of packages as you can with `yum install`. You must
     provide one package per invocation.
     """
     if source.startswith(('http', 'https', 'ftp')):
@@ -204,7 +223,7 @@ def yum_install(source):
             archive_path))
         if not os.path.isfile(archive_path):
             tmp_path = download_file(source)
-            create_dir(CLOUDIFY_SOURCES_PATH)
+            mkdir(CLOUDIFY_SOURCES_PATH)
             ctx.logger.info('Saving {0} under {1}...'.format(
                 filename, CLOUDIFY_SOURCES_PATH))
             move(tmp_path, archive_path)
@@ -282,11 +301,6 @@ class SystemD(object):
 systemd = SystemD()
 
 
-def move(source, destination):
-    # TODO: use shutil.move instead
-    sudo(['mv', source, destination])
-
-
 def replace_in_file(this, with_this, in_here):
     """Replaces all occurences of the regex in all matches
     from a file with a specific value.
@@ -349,7 +363,7 @@ def create_service_user(user, home):
               '"{0}"'.format(user)])
 
 
-def deploy_logrotate_config(service):
+def logrotate(service):
     ctx.logger.info('Deploying logrotate config...')
     config_file_source = 'components/{0}/config/logrotate'.format(service)
     config_file_destination = '/etc/logrotate.d/{0}'.format(service)
@@ -367,7 +381,7 @@ def clean_var_log_dir(service):
     pass
 
 
-def untar(source, destination, strip=1):
+def untar(source, destination='/tmp', strip=1):
     # TODO: use tarfile instead
     sudo(['tar', '-xzvf', source, '-C', destination,
           '--strip={0}'.format(strip)])

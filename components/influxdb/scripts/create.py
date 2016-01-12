@@ -73,8 +73,8 @@ def install_influxdb():
     utils.set_selinux_permissive()
 
     utils.copy_notice('influxdb')
-    utils.create_dir(influxdb_home)
-    utils.create_dir(influxdb_log_path)
+    utils.mkdir(influxdb_home)
+    utils.mkdir(influxdb_log_path)
 
     utils.yum_install(influxdb_source_url)
 
