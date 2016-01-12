@@ -331,7 +331,7 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/logstash/scripts/create.sh
+              default: components/logstash/scripts/create.py
             fabric_env: *simple_fabric_env
             ES_ENDPOINT_IP:
               default: { get_attribute: [elasticsearch, es_endpoint_ip] }
@@ -339,13 +339,13 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/logstash/scripts/start.sh
+              default: components/logstash/scripts/start.py
             fabric_env: *simple_fabric_env
         stop:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/logstash/scripts/stop.sh
+              default: components/logstash/scripts/stop.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.InfluxDB:
@@ -370,13 +370,13 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/influxdb/scripts/start.sh
+              default: components/influxdb/scripts/start.py
             fabric_env: *simple_fabric_env
         stop:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/influxdb/scripts/stop.sh
+              default: components/influxdb/scripts/stop.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.Nginx:
@@ -396,7 +396,7 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/nginx/scripts/create.sh
+              default: components/nginx/scripts/create.py
             fabric_env: *simple_fabric_env
             REST_PROTOCOL:
               default: { get_attribute: [manager_configuration, rest_protocol] }
@@ -415,13 +415,13 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/nginx/scripts/start.sh
+              default: components/nginx/scripts/start.py
             fabric_env: *simple_fabric_env
         stop:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/nginx/scripts/stop.sh
+              default: components/nginx/scripts/stop.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.Riemann:
@@ -461,19 +461,19 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/riemann/scripts/create.sh
+              default: components/riemann/scripts/create.py
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/riemann/scripts/start.sh
+              default: components/riemann/scripts/start.py
             fabric_env: *simple_fabric_env
         stop:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/riemann/scripts/stop.sh
+              default: components/riemann/scripts/stop.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.RestService:
@@ -553,7 +553,7 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/restservice/scripts/create.sh
+              default: components/restservice/scripts/create.py
             fabric_env: *simple_fabric_env
             ES_ENDPOINT_IP:
               default: { get_attribute: [elasticsearch, es_endpoint_ip] }
@@ -569,13 +569,13 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/restservice/scripts/start.sh
+              default: components/restservice/scripts/start.py
             fabric_env: *simple_fabric_env
         stop:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/restservice/scripts/stop.sh
+              default: components/restservice/scripts/stop.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.ManagementWorker:
@@ -683,7 +683,7 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/amqpinflux/scripts/create.sh
+              default: components/amqpinflux/scripts/create.py
             fabric_env: *simple_fabric_env
             INFLUXDB_ENDPOINT_IP:
               default: { get_attribute: [influxdb, influxdb_endpoint_ip] }
@@ -691,13 +691,13 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/amqpinflux/scripts/start.sh
+              default: components/amqpinflux/scripts/start.py
             fabric_env: *simple_fabric_env
         stop:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/amqpinflux/scripts/stop.sh
+              default: components/amqpinflux/scripts/stop.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.WebUI:

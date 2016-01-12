@@ -9,6 +9,7 @@ import urllib
 import tempfile
 import socket
 import shlex
+import pwd
 
 from cloudify import ctx
 
@@ -18,7 +19,7 @@ CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 # debug = ctx.node.properties.get('debug')
 
 
-def run(command, retries=0):
+def run(command, retries=0, ignore_failures=False):
     if isinstance(command, str):
         command = shlex.split(command)
     stderr = sub.PIPE
@@ -32,10 +33,16 @@ def run(command, retries=0):
     #     if proc.stderr:
     #         proc.aggr_stderr += proc.stderr.readline()
     # THIS NEEDS TO BE TESTED
-    if proc.returncode != 0 and retries:
-        ctx.logger.info('Failed running command: {0}. Retrying. '
-                        '({1} left)'.format(command, retries))
-        run(command, retries - 1)
+    if proc.returncode != 0:
+        command_str = ' '.join(command)
+        if retries:
+            ctx.logger.info('Failed running command: {0}. Retrying. '
+                            '({1} left)'.format(command_str, retries))
+            proc = run(command, retries - 1)
+        elif not ignore_failures:
+            ctx.logger.info('Failed running command: {0} ({1}).'.format(
+                command_str, proc.aggr_stderr))
+            sys.exit(1)
     return proc
 
 
@@ -230,8 +237,8 @@ def yum_install(source):
         source_name = sub.check_output(['rpm', '-qp', archive_path]).strip()
 
     ctx.logger.info('Checking whether {0} is already installed...'.format(
-        archive_path))
-    installed = run(['rpm', '-q', source_name])
+        archive_path.rstrip('\n\r')))
+    installed = run(['rpm', '-q', source_name], ignore_failures=True)
     if installed.returncode == 0:
         ctx.logger.info('Package {0} is already installed.'.format(source))
         return
@@ -348,19 +355,30 @@ def get_rabbitmq_endpoint_ip():
 
 def create_service_user(user, home):
     """Creates a user.
-    It will not create the home dir for it
-    and assume that it already exists.
+
+    It will not create the home dir for it and assume that it already exists.
     This user will only be created if it didn't already exist.
     """
-    ctx.logger.info('Checking whether {0} exists...'.format(user))
-    user_exists = run('getend passwd {0}'.format(user)).returncode
-    if user_exists:
+    ctx.logger.info('Checking whether user {0} exists...'.format(user))
+    try:
+        pwd.getpwnam(user)
         ctx.logger.info('User {0} already exists...'.format(user))
-    else:
-        ctx.logger.info('Creating user {0}, home: {2}...'.format(user, home))
-        sudo(['useradd', '--shell', '/sbin/nologin', '--home-dir',
-              "{0}".format(home), '--no-create-home', '--system',
-              '"{0}"'.format(user)])
+    except KeyError:
+        ctx.logger.info('Creating user {0}, home: {1}...'.format(user, home))
+        result = sudo(['useradd', '--shell', '/sbin/nologin', '--home-dir',
+                       home, '--no-create-home', '--system', user])
+        if result.returncode != 0:
+            ctx.logger.error('Failed to create user: {0} ({1}).'.format(
+                user, result.aggr_stderr))
+
+    # user_exists = run('getent passwd {0}'.format(user)).returncode
+    # if user_exists:
+    #     ctx.logger.info('User {0} already exists...'.format(user))
+    # else:
+    #     ctx.logger.info('Creating user {0}, home: {2}...'.format(user, home))
+    #     sudo(['useradd', '--shell', '/sbin/nologin', '--home-dir',
+    #           "{0}".format(home), '--no-create-home', '--system',
+    #           '"{0}"'.format(user)])
 
 
 def logrotate(service):
