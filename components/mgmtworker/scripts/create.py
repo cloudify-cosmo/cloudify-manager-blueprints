@@ -133,4 +133,4 @@ def install_mgmtworker():
     utils.systemd.configure('mgmtworker')
 
 
-install_mgmtworker()()
+install_mgmtworker()

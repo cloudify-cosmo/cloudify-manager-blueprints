@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-
 import time
 import subprocess as sub
 import sys
@@ -32,7 +31,6 @@ def run(command, retries=0, ignore_failures=False):
     #         proc.aggr_stdout += proc.stdout.readline()
     #     if proc.stderr:
     #         proc.aggr_stderr += proc.stderr.readline()
-    # THIS NEEDS TO BE TESTED
     if proc.returncode != 0:
         command_str = ' '.join(command)
         if retries:
@@ -40,14 +38,13 @@ def run(command, retries=0, ignore_failures=False):
                             '({1} left)'.format(command_str, retries))
             proc = run(command, retries - 1)
         elif not ignore_failures:
-            ctx.logger.info('Failed running command: {0} ({1}).'.format(
+            ctx.logger.info(' **Failed running command: {0} ({1}).'.format(
                 command_str, proc.aggr_stderr))
             sys.exit(1)
     return proc
 
 
 def sudo(command):
-    # run(shlex.split(' '.join(command).insert(0, sudo)))
     if isinstance(command, str):
         command = shlex.split(command)
     command.insert(0, 'sudo')
@@ -108,12 +105,15 @@ def download_file(url, destination=''):
     return destination
 
     # USE THIS INSTEAD
-    ctx.logger.info('Downloading {0} to {1}...'.format(url, destination))
-    final_url = urllib.urlopen(url).geturl()
-    if final_url != url:
-        ctx.logger.info('Redirected to {0}'.format(final_url))
-    f = urllib.URLopener()
-    f.retrieve(final_url, destination)
+    if not os.path.isfile(destination):
+        ctx.logger.info('Downloading {0} to {1}...'.format(url, destination))
+        final_url = urllib.urlopen(url).geturl()
+        if final_url != url:
+            ctx.logger.info('Redirected to {0}'.format(final_url))
+        f = urllib.URLopener()
+        f.retrieve(final_url, destination)
+    else:
+        ctx.logger.info('File {0} already exists...'.format(destination))
     return destination
 
 
@@ -314,7 +314,7 @@ def replace_in_file(this, with_this, in_here):
     """
     ctx.logger.info('Replacing {0} with {1} in {2}...'.format(
         this, with_this, in_here))
-    # TODO: use re.sub instead
+    # TODO: use re.sub instead. write to tmp then use move to put it back.
     sudo(['sed', '-i', "s|{0}|{1}|g".format(this, with_this), in_here])
 
 
@@ -331,7 +331,9 @@ def set_selinux_permissive():
         ctx.logger.info('SELinux is enforcing, setting permissive state...')
         sudo(['setenforce', 'permissive'])
         replace_in_file(
-            'SELINUX=enforcing', 'SELINUX=permissive', '/etc/selinux/config')
+            'SELINUX=enforcing',
+            'SELINUX=permissive',
+            '/etc/selinux/config')
     else:
         ctx.logger.info('SELinux is not enforced.')
 
@@ -349,6 +351,7 @@ def get_rabbitmq_endpoint_ip():
     """
     try:
         return ctx.node.properties['rabbitmq_endpoint_ip']
+    # why?
     except:
         return ctx.instance.host_ip
 
@@ -361,24 +364,14 @@ def create_service_user(user, home):
     """
     ctx.logger.info('Checking whether user {0} exists...'.format(user))
     try:
+        # alternative bash impl
+        # user_exists = run('getent passwd {0}'.format(user)).returncode
         pwd.getpwnam(user)
         ctx.logger.info('User {0} already exists...'.format(user))
     except KeyError:
         ctx.logger.info('Creating user {0}, home: {1}...'.format(user, home))
-        result = sudo(['useradd', '--shell', '/sbin/nologin', '--home-dir',
-                       home, '--no-create-home', '--system', user])
-        if result.returncode != 0:
-            ctx.logger.error('Failed to create user: {0} ({1}).'.format(
-                user, result.aggr_stderr))
-
-    # user_exists = run('getent passwd {0}'.format(user)).returncode
-    # if user_exists:
-    #     ctx.logger.info('User {0} already exists...'.format(user))
-    # else:
-    #     ctx.logger.info('Creating user {0}, home: {2}...'.format(user, home))
-    #     sudo(['useradd', '--shell', '/sbin/nologin', '--home-dir',
-    #           "{0}".format(home), '--no-create-home', '--system',
-    #           '"{0}"'.format(user)])
+        sudo(['useradd', '--shell', '/sbin/nologin', '--home-dir', home,
+              '--no-create-home', '--system', user])
 
 
 def logrotate(service):
