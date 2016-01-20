@@ -625,6 +625,10 @@ node_types:
         description: PEM formatted public cert for rabbit SSL.
         type: string
         default: { get_input: rabbitmq_cert_public }
+      log_level:
+        description: Logging level for Celery worker.
+        type: string
+        default: { get_input: management_worker_log_level }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
