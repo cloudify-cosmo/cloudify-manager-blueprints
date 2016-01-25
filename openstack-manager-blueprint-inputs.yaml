@@ -65,6 +65,11 @@ agents_user: ''
 # NOTE: If enabled, the certificate and private key files must reside in resources/ssl.
 #ssl_enabled: false
 
+# Setting secure internal communication to true forces cloudify internal REST
+# calls to use HTTPS. However, the server's SSL certificate is always trusted.
+# (i.e. the client will not attempt to validate it)
+#secure_internal_communication_enabled: false
+
 # Username and password of the Cloudify administrator.
 # This user will also be included in the simple userstore repostiroty if the
 # simple userstore implementation is used.
@@ -82,13 +87,13 @@ agents_user: ''
 # agent installer to identify it for your distro and release automatically.
 # Note that the windows agent key name MUST be `cloudify_windows_agent`
 #agent_package_urls:
-#  ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/Ubuntu-trusty-agent_3.3.1-sp-b310.tar.gz
-#  ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/Ubuntu-precise-agent_3.3.1-sp-b310.tar.gz
-#  centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/centos-Core-agent_3.3.1-sp-b310.tar.gz
-#  centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/centos-Final-agent_3.3.1-sp-b310.tar.gz
-#  redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/redhat-Maipo-agent_3.3.1-sp-b310.tar.gz
-#  redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/redhat-Santiago-agent_3.3.1-sp-b310.tar.gz
-#  cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-windows-agent_3.3.1-sp-b310.exe
+#  ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/Ubuntu-trusty-agent_3.3.1-sp-b310.tar.gz
+#  ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/Ubuntu-precise-agent_3.3.1-sp-b310.tar.gz
+#  centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/centos-Core-agent_3.3.1-sp-b310.tar.gz
+#  centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/centos-Final-agent_3.3.1-sp-b310.tar.gz
+#  redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/redhat-Maipo-agent_3.3.1-sp-b310.tar.gz
+#  redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/redhat-Santiago-agent_3.3.1-sp-b310.tar.gz
+#  cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/cloudify-windows-agent_3.3.1-sp-b310.exe
 
 #############################
 # Cloudify Modules
@@ -97,8 +102,8 @@ agents_user: ''
 # Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
 # That is, as long as they provide the exact same version of that module.
 
-#rest_service_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-rest-service-3.3.1-sp_b310.x86_64.rpm'
-#management_worker_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-management-worker-3.3.1-sp_b310.x86_64.rpm'
+#rest_service_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/cloudify-rest-service-3.3.1-sp_b310.x86_64.rpm'
+#management_worker_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/cloudify-management-worker-3.3.1-sp_b310.x86_64.rpm'
 #amqpinflux_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-amqp-influx-3.3.1-sp_b310.x86_64.rpm'
 #cloudify_resources_url: 'https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3.1.tar.gz'
 #webui_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-ui-3.3.1-sp-b310.tgz'
