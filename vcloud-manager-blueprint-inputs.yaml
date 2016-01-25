@@ -96,6 +96,12 @@ user_public_key: ssh-rsa...
 #############################
 #security_enabled: false
 #ssl_enabled: false
+
+# Setting secure internal communication to true forces cloudify internal REST
+# calls to use HTTPS. However, the server's SSL certificate is always trusted.
+# (i.e. the client will not attempt to validate it)
+#secure_internal_communication_enabled: false
+
 # Username and password to be used for login, if the simple userstore implementation is used.
 #admin_username: 'admin'
 #admin_password: 'admin'

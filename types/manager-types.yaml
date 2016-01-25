@@ -115,6 +115,7 @@ node_types:
           #########################################################################
           ssl:
             enabled: { get_input: ssl_enabled }
+            secure_internal_communication: { get_input: secure_internal_communication_enabled }
           #########################################################################
           # Security log file properties (Optional, the default values are as
           # shown below).
@@ -398,8 +399,6 @@ node_types:
             script_path:
               default: components/nginx/scripts/create.sh
             fabric_env: *simple_fabric_env
-            REST_PROTOCOL:
-              default: { get_attribute: [manager_configuration, rest_protocol] }
         configure:
           implementation: fabric.fabric_plugin.tasks.run_task
           inputs:
@@ -633,6 +632,12 @@ node_types:
             script_path:
               default: components/mgmtworker/scripts/create.sh
             fabric_env: *simple_fabric_env
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/mgmtworker/scripts/configure.sh
+            fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
@@ -814,6 +819,28 @@ relationships:
     target_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         postconfigure: components/manager/scripts/set_manager_private_ip.py
+
+  mgmtworker_to_manager_configuration:
+    derived_from: cloudify.relationships.depends_on
+    target_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/mgmtworker/scripts/preconfigure.sh
+            fabric_env: *simple_fabric_env
+
+  riemann_to_manager_configuration:
+    derived_from: cloudify.relationships.depends_on
+    target_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/riemann/scripts/preconfigure.sh
+            fabric_env: *simple_fabric_env
 
   nginx_to_manager_configuration:
     derived_from: cloudify.relationships.depends_on

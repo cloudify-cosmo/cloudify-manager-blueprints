@@ -1,6 +1,6 @@
 # REST and UI server.
 server {
-  # server listening
+  # server listening, listens on both 443 and 80, but http will be redirected to https (below)
   listen              *:80;
   listen              443 ssl;
   server_name         _;

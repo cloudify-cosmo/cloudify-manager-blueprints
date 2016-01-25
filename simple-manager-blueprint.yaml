@@ -42,6 +42,9 @@ inputs:
   ssl_enabled:
     default: false
 
+  secure_internal_communication_enabled:
+    default: false
+
   admin_username:
     default: admin
 
@@ -397,15 +400,15 @@ inputs:
   #############################
   # Upload Resources Inputs
   #############################
-  plugin_resources:
-    description: >
-      Holds any archives that should be uploaded to the manager.
-    default: []
-
-  dsl_resources:
-    description:
-      Holds a set of dsl required resources
-    default: []
+#  plugin_resources:
+#    description: >
+#      Holds any archives that should be uploaded to the manager.
+#    default: []
+#
+#  dsl_resources:
+#    description:
+#      Holds a set of dsl required resources
+#    default: []
 
 ######################################################################
 # This is a simple blueprint specific node_type to allow us to define
@@ -575,6 +578,8 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: java_runtime
+      - type: riemann_to_manager_configuration
+        target: manager_configuration
       - type: riemann_to_rabbitmq
         target: rabbitmq
       - type: riemann_to_nginx
@@ -601,6 +606,8 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: python_runtime
+      - type: mgmtworker_to_manager_configuration
+        target: manager_configuration
       - type: mgmtworker_to_rabbitmq
         target: rabbitmq
       - type: mgmtworker_to_nginx
