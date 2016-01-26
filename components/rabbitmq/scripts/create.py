@@ -133,9 +133,11 @@ def install_rabbitmq():
                             retries=5)
     utils.clean_var_log_dir('rabbitmq')
 
+
 ctx.logger.info("Setting Broker IP runtime property.")
 if not ctx.instance.runtime_properties.get('rabbitmq_endpoint_ip'):
     os.putenv('BROKER_IP', ctx.instance.host_ip)
+    ctx.logger.info("BROKER_IP={0}".format(ctx.instance.host_ip))
     install_rabbitmq()
 else:
     os.putenv('BROKER_IP', ctx.instance.runtime_properties.get(
@@ -145,5 +147,4 @@ else:
 
 ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
     os.getenv('BROKER_IP')
-ctx.logger.info("RabbitMQ Endpoint IP is: {0}".format(
-        ctx.instance.runtime_properties.get('rabbitmq_endpoint_ip')))
+ctx.logger.info("RabbitMQ Endpoint IP is: {0}".format(os.getenv('BROKER_IP')))
