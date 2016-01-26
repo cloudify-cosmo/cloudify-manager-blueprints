@@ -3,6 +3,7 @@
 from os.path import (join as jn, dirname as dn)
 import sys
 import os
+from time import sleep
 
 from cloudify import ctx
 
@@ -14,7 +15,7 @@ CONFIG_PATH = 'components/rabbitmq/config'
 
 def check_if_user_exists(username):
     if username in utils.sudo(
-            ['sudo', 'rabbitmqctl', 'list_users'], retries=5).aggr_stdout:
+            ['rabbitmqctl', 'list_users'], retries=5).aggr_stdout:
         return True
     return False
 
@@ -111,6 +112,8 @@ def install_rabbitmq():
 
     ctx.logger.info("Starting RabbitMQ Server in Daemonized mode...")
     utils.systemd.systemctl('start', service='cloudify-rabbitmq.service')
+
+    sleep(30)
 
     ctx.logger.info("Enabling RabbitMQ Plugins...")
     # Occasional timing issues with rabbitmq starting have resulted in
