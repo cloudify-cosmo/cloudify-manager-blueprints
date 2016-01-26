@@ -19,6 +19,7 @@ CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 
 
 def run(command, retries=0, ignore_failures=False):
+    ctx.logger.info("running: {0}".format(command)) # TODO: Remove this
     if isinstance(command, str):
         command = shlex.split(command)
     stderr = sub.PIPE
@@ -44,11 +45,12 @@ def run(command, retries=0, ignore_failures=False):
     return proc
 
 
-def sudo(command):
+def sudo(command, retries=0):
+    # run(shlex.split(' '.join(command).insert(0, sudo)))
     if isinstance(command, str):
         command = shlex.split(command)
     command.insert(0, 'sudo')
-    run(command)
+    return run(command, retries)
 
 
 def error_exit(message):
@@ -249,11 +251,11 @@ def yum_install(source):
 
 class SystemD(object):
 
-    def systemctl(self, action, service=''):
+    def systemctl(self, action, service='', retries=0):
         systemctl_cmd = ['systemctl', action]
         if service:
             systemctl_cmd.append(service)
-        sudo(systemctl_cmd)
+        sudo(systemctl_cmd, retries=retries)
 
     def configure(self, service_name):
         """This configures systemd for a specific service.
@@ -389,8 +391,17 @@ def chown(user, group, path):
 
 
 def clean_var_log_dir(service):
-    pass
-
+    path = "/var/log/{0}".format(service)
+    logfiles = [f for f in os.listdir(path) if os.path.isfile(
+            os.path.join(path, f))]
+    for f in logfiles:
+        os.rename(f, "/var/log/cloudify/{0}/{1}-from_bootstrap-".format(
+                service, time.strftime('%Y-%m-%d %H_%M_%S')))
+    ctx.logger.info(
+            "Removing unnecessary logs directory: /var/log/${0}".format(
+                    service))
+    sudo(['rm', '-rf', path])
+    # os.remove(path)
 
 def untar(source, destination='/tmp', strip=1):
     # TODO: use tarfile instead

@@ -229,19 +229,19 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/rabbitmq/scripts/create.sh
+              default: components/rabbitmq/scripts/create.py
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/rabbitmq/scripts/start.sh
+              default: components/rabbitmq/scripts/start.py
             fabric_env: *simple_fabric_env
         stop:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/rabbitmq/scripts/stop.sh
+              default: components/rabbitmq/scripts/stop.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.Elasticsearch:
