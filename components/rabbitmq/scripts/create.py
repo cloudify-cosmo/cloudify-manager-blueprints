@@ -140,7 +140,8 @@ if not ctx.instance.runtime_properties.get('rabbitmq_endpoint_ip'):
 else:
     os.putenv('BROKER_IP', ctx.instance.runtime_properties.get(
             'rabbitmq_endpoint_ip'))
-    ctx.logger.info("Using external rabbitmq at ${BROKER_IP}")
+    ctx.logger.info("Using external rabbitmq at {0}".format(
+            ctx.instance.runtime_properties.get('rabbitmq_endpoint_ip')))
 
 ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
     os.getenv('BROKER_IP')
