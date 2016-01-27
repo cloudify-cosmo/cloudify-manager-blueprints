@@ -47,6 +47,19 @@ external_network_name: ''
 #agents_security_group_name: cloudify-sg-agents
 #manager_port_name: cloudify-manager-port
 
+# Set to true if you want to use an existing network as the management network.
+#use_existing_management_network: false
+# Set to true if you want to use an existing subnet for the manager
+#use_existing_management_subnet: false
+# Set to the desired CIDR for use with the subnet.
+#management_subnet_cidr: 10.67.79.0/24
+# Set to true if you want to use an existing router
+#use_existing_management_router: false
+# Set to true if you want to use an existing manager security group
+#use_existing_manager_security_group: false
+# Set to true if you want to use an existing agent security group
+#use_existing_agent_security_group: false
+
 # Optional prefix for each openstack component
 #resources_prefix: ''
 
