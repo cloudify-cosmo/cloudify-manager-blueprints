@@ -19,7 +19,6 @@ CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 
 
 def run(command, retries=0, ignore_failures=False):
-    ctx.logger.info("running: {0}".format(command)) # TODO: Remove this
     if isinstance(command, str):
         command = shlex.split(command)
     stderr = sub.PIPE
@@ -397,10 +396,8 @@ def clean_var_log_dir(service):
     # path = "/var/log/{0}".format(service)
     # if os.path.exists(path):
     #     if not os.path.exists("/var/log/cloudify"):
-    #         ctx.logger.info("making /var/log/cloudify") #TODO: remove this
     #         os.mkdir("/var/log/cloudify")
     #     if not os.path.exists("/var/log/cloudify/{0}".format(service)):
-    #         ctx.logger.info("making /var/log/cloudify/{0}".format(service)) #TODO: remove this
     #         os.mkdir("/var/log/cloudify/{0}".format(service))
     #     logfiles = [f for f in os.listdir(path) if os.path.isfile(
     #             os.path.join(path, f))]
