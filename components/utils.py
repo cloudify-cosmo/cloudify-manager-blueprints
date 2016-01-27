@@ -380,8 +380,8 @@ def logrotate(service):
     ctx.logger.info('Deploying logrotate config...')
     config_file_source = 'components/{0}/config/logrotate'.format(service)
     config_file_destination = '/etc/logrotate.d/{0}'.format(service)
-    if not os.path.exists(config_file_destination):
-        os.mkdir(config_file_destination)
+    # if not os.path.exists(config_file_destination):
+    #     os.mkdir(config_file_destination)
     deploy_blueprint_resource(config_file_source, config_file_destination)
     # TODO: check if can use os.chmod with elevated privileges
     sudo(['chmod', '644', config_file_destination])
@@ -393,21 +393,25 @@ def chown(user, group, path):
 
 
 def clean_var_log_dir(service):
-    path = "/var/log/{0}".format(service)
-    if os.path.exists(path):
-        if not os.path.exists("/var/log/cloudify"):
-            os.mkdir("/var/log/cloudify")
-        if not os.path.exists("/var/log/cloudify/{0}".format(service)):
-            os.mkdir("/var/log/cloudify/{0}".format(service))
-        logfiles = [f for f in os.listdir(path) if os.path.isfile(
-                os.path.join(path, f))]
-        for f in logfiles:
-            os.rename(f, "/var/log/cloudify/{0}/{1}-from_bootstrap-".format(
-                    service, time.strftime('%Y_%m_%d_%H_%M_%S')))
-        ctx.logger.info(
-                "Removing unnecessary logs directory: /var/log/${0}".format(
-                        service))
-        sudo(['rm', '-rf', path])
+    pass
+    # path = "/var/log/{0}".format(service)
+    # if os.path.exists(path):
+    #     if not os.path.exists("/var/log/cloudify"):
+    #         ctx.logger.info("making /var/log/cloudify") #TODO: remove this
+    #         os.mkdir("/var/log/cloudify")
+    #     if not os.path.exists("/var/log/cloudify/{0}".format(service)):
+    #         ctx.logger.info("making /var/log/cloudify/{0}".format(service)) #TODO: remove this
+    #         os.mkdir("/var/log/cloudify/{0}".format(service))
+    #     logfiles = [f for f in os.listdir(path) if os.path.isfile(
+    #             os.path.join(path, f))]
+    #     for f in logfiles:
+    #         ctx.logger.info(f)
+    #         os.rename(f, "/var/log/cloudify/{0}/{1}-from_bootstrap-".format(
+    #                 service, time.strftime('%Y_%m_%d_%H_%M_%S')))
+    #     ctx.logger.info(
+    #             "Removing unnecessary logs directory: /var/log/${0}".format(
+    #                     service))
+    #     sudo(['rm', '-rf', path])
 
 def untar(source, destination='/tmp', strip=1):
     # TODO: use tarfile instead

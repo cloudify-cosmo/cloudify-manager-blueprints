@@ -61,6 +61,9 @@ def install_nginx():
         '{0}/restart.conf'.format(CONFIG_PATH),
         '{0}/restart.conf'.format(nginx_unit_override))
 
+    #TODO: remove this
+    ctx.logger.info(utils.run(['ls', '/etc/logrotate.d/']).aggr_stdout)
+
     utils.logrotate('nginx')
     utils.clean_var_log_dir('nginx')
 

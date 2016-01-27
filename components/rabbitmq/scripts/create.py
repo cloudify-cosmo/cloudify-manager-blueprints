@@ -131,10 +131,10 @@ def install_rabbitmq():
                            rabbitmq_cert_private,
                            rabbitmq_cert_public)
 
-    ctx.logger.info("Stopping RabbitMQ Service...")
-    utils.systemd.systemctl('stop', service='cloudify-rabbitmq.service',
-                            retries=5)
-    utils.clean_var_log_dir('rabbitmq')
+    # ctx.logger.info("Stopping RabbitMQ Service...")
+    # utils.systemd.systemctl('stop', service='cloudify-rabbitmq.service',
+    #                         retries=5)
+    # utils.clean_var_log_dir('rabbitmq')
 
 
 ctx.logger.info("Setting Broker IP runtime property.")
