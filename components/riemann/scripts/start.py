@@ -9,4 +9,4 @@ import utils
 
 
 ctx.logger.info('Starting Riemann Service...')
-utils.systemd.start('riemann')
+utils.systemd.start('cloudify-riemann.service')
