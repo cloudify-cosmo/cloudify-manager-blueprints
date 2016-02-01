@@ -142,7 +142,7 @@ node_types:
             script_path:
               # Note that this also sets SELinux to Permissive
               # mode until we find a better position for it.
-              default: components/python/scripts/create.py
+              default: components/python/scripts/create.sh
             fabric_env: &simple_fabric_env
               default:
                 user: { get_input: ssh_user }
@@ -364,13 +364,13 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/influxdb/scripts/create.py
+              default: components/influxdb/scripts/create.sh
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/influxdb/scripts/start.py
+              default: components/influxdb/scripts/start.sh
             fabric_env: *simple_fabric_env
         stop:
           implementation: fabric.fabric_plugin.tasks.run_script
@@ -461,13 +461,13 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/riemann/scripts/create.py
+              default: components/riemann/scripts/create.sh
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/riemann/scripts/start.py
+              default: components/riemann/scripts/start.sh
             fabric_env: *simple_fabric_env
         stop:
           implementation: fabric.fabric_plugin.tasks.run_script
@@ -553,7 +553,7 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/restservice/scripts/create.py
+              default: components/restservice/scripts/create.sh
             fabric_env: *simple_fabric_env
             ES_ENDPOINT_IP:
               default: { get_attribute: [elasticsearch, es_endpoint_ip] }
@@ -631,7 +631,7 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/mgmtworker/scripts/create.py
+              default: components/mgmtworker/scripts/create.sh
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
