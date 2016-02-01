@@ -11,4 +11,4 @@ INFLUXDB_ENDPOINT_IP = ctx.node.properties['influxdb_endpoint_ip']
 
 if not INFLUXDB_ENDPOINT_IP:
     ctx.logger.info('Starting InfluxDB Service...')
-    utils.systemd.start('influxdb')
+    utils.systemd.start('cloudify-influxdb.service')
