@@ -67,7 +67,7 @@ def set_rabbit_mq_security(rabbitmq_ssl_enabled,
             ctx.logger.warn("Broker SSL cert supplied but SSL not enabled "
                             "(broker_ssl_enabled is False).")
 
-
+#TODO: remove all putenv
 def install_rabbitmq():
     erlang_rpm_source_url = ctx.node.properties['erlang_rpm_source_url']
     rabbitmq_rpm_source_url = ctx.node.properties['rabbitmq_rpm_source_url']
@@ -96,7 +96,7 @@ def install_rabbitmq():
     utils.deploy_blueprint_resource(
         '{0}/kill-rabbit'.format(CONFIG_PATH),
         '/usr/local/bin/kill-rabbit')
-
+#TODO: create chmod in utils and convert all
     utils.sudo(['chmod', '500', '/usr/local/bin/kill-rabbit'])
     utils.systemd.configure('rabbitmq')
 
@@ -136,6 +136,8 @@ def install_rabbitmq():
     #                         retries=5)
     # utils.clean_var_log_dir('rabbitmq')
 
+#TODO: put in main
+#TODO: all string formats in single quotes
 
 ctx.logger.info("Setting Broker IP runtime property.")
 if not ctx.instance.runtime_properties.get('rabbitmq_endpoint_ip'):
