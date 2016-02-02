@@ -19,6 +19,7 @@ CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 
 
 def run(command, retries=0, ignore_failures=False):
+    ctx.logger.info('running: {0}'.format(command))
     if isinstance(command, str):
         command = shlex.split(command)
     stderr = sub.PIPE
@@ -386,9 +387,25 @@ def logrotate(service):
     sudo(['chmod', '644', config_file_destination])
 
 
+def chmod(mode, file):
+    ctx.logger.info('chmoding file {0} to {1}'.format(file, mode))
+    sudo(['chmod', mode, file])
+
+
 def chown(user, group, path):
     ctx.logger.info('chowning {0} by {1}:{2}...'.format(path, user, group))
     sudo(['chown', '-R', '{0}:{1}'.format(user, group), path])
+
+
+def ln(source, target, params=None):
+    ctx.logger.info('softlinking {0} to {1} with params {2}'.format(
+            source, target, params))
+    command = ['ln']
+    if params:
+        command.append(params)
+    command.append(source)
+    command.append(target)
+    sudo(command)
 
 
 def clean_var_log_dir(service):

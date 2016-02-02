@@ -95,11 +95,18 @@ def configure_dbus(rest_venv):
     dbus_relative_path = os.path.join(site_packages, 'dbus')
     dbuslib = os.path.join('/usr', dbus_relative_path)
     dbusso = os.path.join('/usr', site_packages, '_dbus_*.so')
+    ctx.logger.info('if os.path.isdir(dbuslib) {0}'.format(os.path.isdir(dbuslib)))
     if os.path.isdir(dbuslib):
-        utils.sudo(['ln', '-sf', dbuslib, os.path.join(
-            rest_venv, dbus_relative_path)])
-        utils.sudo(['ln', '-sf', dbusso, os.path.join(
-            rest_venv, site_packages)])
+        utils.ln(source=dbuslib, target=os.path.join(
+                rest_venv, dbus_relative_path), params='-sf')
+        utils.ln(source=dbusso, target=os.path.join(
+                rest_venv, site_packages), params='-sf')
+        # utils.sudo(['ln', '-sf', dbuslib, os.path.join(
+        #     rest_venv, dbus_relative_path)])
+        # utils.sudo(['ln', '-sf', dbusso, os.path.join(
+        #     rest_venv, site_packages)])
+    else:
+        ctx.logger.warn('Could not find dbus install, cfy status will not work')
 
 
 def install_restservice():
