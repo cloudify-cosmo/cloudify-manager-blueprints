@@ -98,4 +98,7 @@ for python_path in ${MGMTWORKER_VIRTUALENV_DIR}/lib/python*; do
     # The config contains credentials, do not let the world read it
     chmod 440 "${BROKER_CONF_PATH}"
 done
+
+deploy_logrotate_config "mgmtworker"
+
 configure_systemd_service "mgmtworker"
