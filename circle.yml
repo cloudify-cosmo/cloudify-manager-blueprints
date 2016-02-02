@@ -28,3 +28,10 @@ test:
   override:
     - case $CIRCLE_NODE_INDEX in 0) ./run_test.sh flake8 ;; 1) ./run_test.sh validate-blueprints ;; 2) ./run_test.sh bootstrap-sanity ;; esac:
         parallel: true
+
+deployment:
+  release:
+    tag: /[0-9]+(\.[0-9]+)*/
+    owner: circleci
+    commands:
+      - "true"
