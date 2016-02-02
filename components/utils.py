@@ -19,6 +19,7 @@ CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 
 
 def run(command, retries=0, ignore_failures=False):
+    ctx.logger.info('running: {0}'.format(command))
     if isinstance(command, str):
         command = shlex.split(command)
     stderr = sub.PIPE
@@ -44,11 +45,12 @@ def run(command, retries=0, ignore_failures=False):
     return proc
 
 
-def sudo(command):
+def sudo(command, retries=0):
+    # run(shlex.split(' '.join(command).insert(0, sudo)))
     if isinstance(command, str):
         command = shlex.split(command)
     command.insert(0, 'sudo')
-    run(command)
+    return run(command, retries)
 
 
 def error_exit(message):
@@ -249,11 +251,11 @@ def yum_install(source):
 
 class SystemD(object):
 
-    def systemctl(self, action, service=''):
+    def systemctl(self, action, service='', retries=0):
         systemctl_cmd = ['systemctl', action]
         if service:
             systemctl_cmd.append(service)
-        sudo(systemctl_cmd)
+        sudo(systemctl_cmd, retries=retries)
 
     def configure(self, service_name):
         """This configures systemd for a specific service.
@@ -378,9 +380,16 @@ def logrotate(service):
     ctx.logger.info('Deploying logrotate config...')
     config_file_source = 'components/{0}/config/logrotate'.format(service)
     config_file_destination = '/etc/logrotate.d/{0}'.format(service)
+    # if not os.path.exists(config_file_destination):
+    #     os.mkdir(config_file_destination)
     deploy_blueprint_resource(config_file_source, config_file_destination)
     # TODO: check if can use os.chmod with elevated privileges
     sudo(['chmod', '644', config_file_destination])
+
+
+def chmod(mode, file):
+    ctx.logger.info('chmoding file {0} to {1}'.format(file, mode))
+    sudo(['chmod', mode, file])
 
 
 def chown(user, group, path):
@@ -388,9 +397,35 @@ def chown(user, group, path):
     sudo(['chown', '-R', '{0}:{1}'.format(user, group), path])
 
 
+def ln(source, target, params=None):
+    ctx.logger.info('softlinking {0} to {1} with params {2}'.format(
+            source, target, params))
+    command = ['ln']
+    if params:
+        command.append(params)
+    command.append(source)
+    command.append(target)
+    sudo(command)
+
+
 def clean_var_log_dir(service):
     pass
-
+    # path = "/var/log/{0}".format(service)
+    # if os.path.exists(path):
+    #     if not os.path.exists("/var/log/cloudify"):
+    #         os.mkdir("/var/log/cloudify")
+    #     if not os.path.exists("/var/log/cloudify/{0}".format(service)):
+    #         os.mkdir("/var/log/cloudify/{0}".format(service))
+    #     logfiles = [f for f in os.listdir(path) if os.path.isfile(
+    #             os.path.join(path, f))]
+    #     for f in logfiles:
+    #         ctx.logger.info(f)
+    #         os.rename(f, "/var/log/cloudify/{0}/{1}-from_bootstrap-".format(
+    #                 service, time.strftime('%Y_%m_%d_%H_%M_%S')))
+    #     ctx.logger.info(
+    #             "Removing unnecessary logs directory: /var/log/${0}".format(
+    #                     service))
+    #     sudo(['rm', '-rf', path])
 
 def untar(source, destination='/tmp', strip=1):
     # TODO: use tarfile instead
