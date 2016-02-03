@@ -94,19 +94,21 @@ def configure_dbus(rest_venv):
     site_packages = 'lib64/python2.7/site-packages'
     dbus_relative_path = os.path.join(site_packages, 'dbus')
     dbuslib = os.path.join('/usr', dbus_relative_path)
-    dbusso = os.path.join('/usr', site_packages, '_dbus_*.so')
-    ctx.logger.info('if os.path.isdir(dbuslib) {0}'.format(os.path.isdir(dbuslib)))
+    dbus_glib_bindings = os.path.join('/usr', site_packages,
+                                      '_dbus_glib_bindings.so')
+    dbus_bindings = os.path.join('/usr', site_packages, '_dbus_bindings.so')
+    ctx.logger.info('if os.path.isdir(dbuslib) {0}'.format(
+            os.path.isdir(dbuslib)))
     if os.path.isdir(dbuslib):
         utils.ln(source=dbuslib, target=os.path.join(
                 rest_venv, dbus_relative_path), params='-sf')
-        utils.ln(source=dbusso, target=os.path.join(
+        utils.ln(source=dbus_glib_bindings, target=os.path.join(
                 rest_venv, site_packages), params='-sf')
-        # utils.sudo(['ln', '-sf', dbuslib, os.path.join(
-        #     rest_venv, dbus_relative_path)])
-        # utils.sudo(['ln', '-sf', dbusso, os.path.join(
-        #     rest_venv, site_packages)])
+        utils.ln(source=dbus_bindings, target=os.path.join(
+                rest_venv, dbus_relative_path), params='-sf')
     else:
-        ctx.logger.warn('Could not find dbus install, cfy status will not work')
+        ctx.logger.warn(
+                'Could not find dbus install, cfy status will not work')
 
 
 def install_restservice():
@@ -136,7 +138,7 @@ def install_restservice():
     deploy_broker_configuration()
     utils.yum_install(rest_service_rpm_source_url)
     install_optional(rest_venv)
-    configure_dbus(rest_venv)
+    # configure_dbus(rest_venv)
     utils.logrotate('restservice')
 
     ctx.logger.info('Copying role configuration files...')
@@ -151,6 +153,7 @@ def install_restservice():
     utils.deploy_blueprint_resource(
         os.path.join(CONFIG_PATH, 'cloudify-rest.conf'),
         os.path.join(REST_SERVICE_HOME, 'cloudify-rest.conf'))
+    configure_dbus(rest_venv)
 
 
 install_restservice()

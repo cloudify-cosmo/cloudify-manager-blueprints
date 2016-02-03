@@ -9,6 +9,7 @@ import tempfile
 import socket
 import shlex
 import pwd
+import glob
 
 from cloudify import ctx
 
@@ -18,12 +19,18 @@ CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 # debug = ctx.node.properties.get('debug')
 
 
-def run(command, retries=0, ignore_failures=False):
-    ctx.logger.info('running: {0}'.format(command))
+def run(command, retries=0, ignore_failures=False, globx=False):
+    ctx.logger.info('running: {0} with glob {1}'.format(command, globx))
     if isinstance(command, str):
         command = shlex.split(command)
     stderr = sub.PIPE
     stdout = sub.PIPE
+    if globx:
+        glob_command = []
+        for arg in command:
+            glob_command.append(glob.glob(arg))
+        command = glob_command
+    ctx.logger.info('running: {0}'.format(command))
     proc = sub.Popen(command, stdout=stdout, stderr=stderr)
     proc.aggr_stdout, proc.aggr_stderr = proc.communicate()
     # while proc.poll() is None:
@@ -45,12 +52,12 @@ def run(command, retries=0, ignore_failures=False):
     return proc
 
 
-def sudo(command, retries=0):
+def sudo(command, retries=0, globx=False):
     # run(shlex.split(' '.join(command).insert(0, sudo)))
     if isinstance(command, str):
         command = shlex.split(command)
     command.insert(0, 'sudo')
-    return run(command, retries)
+    return run(command=command, globx=globx, retries=retries)
 
 
 def error_exit(message):
@@ -405,7 +412,10 @@ def ln(source, target, params=None):
         command.append(params)
     command.append(source)
     command.append(target)
-    sudo(command)
+    if '*' in source or '*' in target:
+        sudo(command, globx=True)
+    else:
+        sudo(command)
 
 
 def clean_var_log_dir(service):
