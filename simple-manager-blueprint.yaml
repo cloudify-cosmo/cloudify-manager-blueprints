@@ -406,19 +406,6 @@ inputs:
     type: string
     default: ''
 
-  #############################
-  # Upload Resources Inputs
-  #############################
-  plugin_resources:
-    description: >
-      Holds any archives that should be uploaded to the manager.
-    default: []
-
-  dsl_resources:
-    description:
-      Holds a set of dsl required resources
-    default: []
-
 ######################################################################
 # This is a simple blueprint specific node_type to allow us to define
 # The public_ip of the machine is an accessible property of the host.
