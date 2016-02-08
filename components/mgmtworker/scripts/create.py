@@ -67,6 +67,7 @@ def install_mgmtworker():
     broker_port_ssl = '5671'
     broker_port_no_ssl = '5672'
     rabbitmq_ssl_enabled = ctx.node.properties['rabbitmq_ssl_enabled']
+    ctx.logger.info("rabbitmq_ssl_enabled: {0}".format(rabbitmq_ssl_enabled))
     rabbitmq_cert_public = ctx.node.properties['rabbitmq_cert_public']
 
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
@@ -117,6 +118,8 @@ def install_mgmtworker():
             ctx.logger.warn('Broker SSL cert supplied but SSL not enabled '
                             '(broker_ssl_enabled is False).')
 
+    ctx.logger.info("broker_port: {0}".format(
+            ctx.instance.runtime_properties['broker_port']))
     ctx.logger.info('Configuring Management worker...')
     # Deploy the broker configuration
     # TODO: This will break interestingly if mgmtworker_venv is empty.
