@@ -826,15 +826,15 @@ node_templates:
       - type: amqpinflux_to_influxdb
         target: influxdb
 
-  webui:
-    type: manager.nodes.WebUI
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: webui_to_restservice
-        target: rest_service
-      - type: webui_to_influxdb
-        target: influxdb
+#  webui:
+#    type: manager.nodes.WebUI
+#    relationships:
+#      - type: cloudify.relationships.contained_in
+#        target: manager_host
+#      - type: webui_to_restservice
+#        target: rest_service
+#      - type: webui_to_influxdb
+#        target: influxdb
 
   ######################################################################
   # Enable this node if you want to have the CLI installed within
