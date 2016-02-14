@@ -14,6 +14,7 @@ checkout:
 dependencies:
   override:
     - pip install setuptools --upgrade
+    - pip install pytz
     - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.4m2.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.4m2.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.4m2.zip
