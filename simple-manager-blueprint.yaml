@@ -66,24 +66,24 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/Ubuntu-trusty-agent_3.3.1-sp-b310.tar.gz
-      ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/Ubuntu-precise-agent_3.3.1-sp-b310.tar.gz
-      centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/centos-Core-agent_3.3.1-sp-b310.tar.gz
-      centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/centos-Final-agent_3.3.1-sp-b310.tar.gz
-      redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/redhat-Maipo-agent_3.3.1-sp-b310.tar.gz
-      redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/redhat-Santiago-agent_3.3.1-sp-b310.tar.gz
-      cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-windows-agent_3.3.1-sp-b310.exe
+      ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/Ubuntu-trusty-agent_3.3.1-sp-b310.tar.gz
+      ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/Ubuntu-precise-agent_3.3.1-sp-b310.tar.gz
+      centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/centos-Core-agent_3.3.1-sp-b310.tar.gz
+      centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/centos-Final-agent_3.3.1-sp-b310.tar.gz
+      redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/redhat-Maipo-agent_3.3.1-sp-b310.tar.gz
+      redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/redhat-Santiago-agent_3.3.1-sp-b310.tar.gz
+      cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/cloudify-windows-agent_3.3.1-sp-b310.exe
 
   #############################
   # Cloudify Modules
   #############################
   rest_service_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-rest-service-3.3.1-sp_b310.x86_64.rpm
+    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/cloudify-rest-service-3.3.1-sp_b310.x86_64.rpm
 
   management_worker_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-management-worker-3.3.1-sp_b310.x86_64.rpm
+    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/cloudify-management-worker-3.3.1-sp_b310.x86_64.rpm
 
   amqpinflux_rpm_source_url:
     type: string
