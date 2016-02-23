@@ -42,6 +42,9 @@ inputs:
   ssl_enabled:
     default: false
 
+  secure_internal_communication_enabled:
+    default: false
+
   admin_username:
     default: admin
 
@@ -63,24 +66,24 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/Ubuntu-trusty-agent_3.3.1-sp-b310.tar.gz
-      ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/Ubuntu-precise-agent_3.3.1-sp-b310.tar.gz
-      centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/centos-Core-agent_3.3.1-sp-b310.tar.gz
-      centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/centos-Final-agent_3.3.1-sp-b310.tar.gz
-      redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/redhat-Maipo-agent_3.3.1-sp-b310.tar.gz
-      redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/redhat-Santiago-agent_3.3.1-sp-b310.tar.gz
-      cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-windows-agent_3.3.1-sp-b310.exe
+      ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/Ubuntu-trusty-agent_3.3.1-sp-b310.tar.gz
+      ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/Ubuntu-precise-agent_3.3.1-sp-b310.tar.gz
+      centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/centos-Core-agent_3.3.1-sp-b310.tar.gz
+      centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/centos-Final-agent_3.3.1-sp-b310.tar.gz
+      redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/redhat-Maipo-agent_3.3.1-sp-b310.tar.gz
+      redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/redhat-Santiago-agent_3.3.1-sp-b310.tar.gz
+      cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/cloudify-windows-agent_3.3.1-sp-b310.exe
 
   #############################
   # Cloudify Modules
   #############################
   rest_service_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-rest-service-3.3.1-sp_b310.x86_64.rpm
+    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/cloudify-rest-service-3.3.1-sp_b310.x86_64.rpm
 
   management_worker_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-management-worker-3.3.1-sp_b310.x86_64.rpm
+    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/SEC1-PATCH/cloudify-management-worker-3.3.1-sp_b310.x86_64.rpm
 
   amqpinflux_rpm_source_url:
     type: string
@@ -88,7 +91,7 @@ inputs:
 
   cloudify_resources_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3.1.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3.1-sec1.tar.gz
 
   webui_source_url:
     type: string
@@ -397,15 +400,15 @@ inputs:
   #############################
   # Upload Resources Inputs
   #############################
-  plugin_resources:
-    description: >
-      Holds any archives that should be uploaded to the manager.
-    default: []
-
-  dsl_resources:
-    description:
-      Holds a set of dsl required resources
-    default: []
+#  plugin_resources:
+#    description: >
+#      Holds any archives that should be uploaded to the manager.
+#    default: []
+#
+#  dsl_resources:
+#    description:
+#      Holds a set of dsl required resources
+#    default: []
 
 ######################################################################
 # This is a simple blueprint specific node_type to allow us to define
@@ -575,6 +578,8 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: java_runtime
+      - type: riemann_to_manager_configuration
+        target: manager_configuration
       - type: riemann_to_rabbitmq
         target: rabbitmq
       - type: riemann_to_nginx
@@ -601,6 +606,8 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: python_runtime
+      - type: mgmtworker_to_manager_configuration
+        target: manager_configuration
       - type: mgmtworker_to_rabbitmq
         target: rabbitmq
       - type: mgmtworker_to_nginx

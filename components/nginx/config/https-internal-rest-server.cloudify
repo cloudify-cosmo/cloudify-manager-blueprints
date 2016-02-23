@@ -1,0 +1,16 @@
+server {
+
+  listen              8101 ssl;
+  server_name         _;
+
+  ssl_certificate     /root/cloudify/server.crt;
+  ssl_certificate_key /root/cloudify/server.key;
+
+  access_log          /var/log/cloudify/nginx/cloudify-internal.access.log;
+  error_log           /var/log/cloudify/nginx/cloudify-internal.error.log;
+
+  include "/etc/nginx/conf.d/rest-location.cloudify";
+
+  # Serves the File Server (backed by the cloudify-resources upstream).
+  include "/etc/nginx/conf.d/fileserver-location.cloudify";
+}
