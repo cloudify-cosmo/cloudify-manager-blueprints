@@ -47,6 +47,9 @@ external_network_name: ''
 #agents_security_group_name: cloudify-sg-agents
 #manager_port_name: cloudify-manager-port
 
+# DNS entries to add to subnet. Defaults to none.
+#management_subnet_dns_nameservers: []
+
 # Optional prefix for each openstack component
 #resources_prefix: ''
 
