@@ -16,4 +16,5 @@ if [ ! -z "${INSTALL_PYTHON_COMPILERS}" ]; then
     ctx logger info "Installing Compilers..."
     yum_install "python-devel" >/dev/null
     yum_install "gcc" >/dev/null
+    yum_install "gcc-c++" >/dev/null
 fi
