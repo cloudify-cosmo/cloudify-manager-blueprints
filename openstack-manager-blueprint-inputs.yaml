@@ -85,13 +85,13 @@ agents_user: ''
 # agent installer to identify it for your distro and release automatically.
 # Note that the windows agent key name MUST be `cloudify_windows_agent`
 #agent_package_urls:
-#  ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/Ubuntu-trusty-agent_3.4.0-m2-b391.tar.gz
-#  ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/Ubuntu-precise-agent_3.4.0-m2-b391.tar.gz
-#  centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/centos-Core-agent_3.4.0-m2-b391.tar.gz
-#  centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/centos-Final-agent_3.4.0-m2-b391.tar.gz
-#  redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/redhat-Maipo-agent_3.4.0-m2-b391.tar.gz
-#  redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/redhat-Santiago-agent_3.4.0-m2-b391.tar.gz
-#  cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/cloudify-windows-agent_3.4.0-m2-b391.exe
+#  ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/Ubuntu-trusty-agent_3.4.0-m3-b392.tar.gz
+#  ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/Ubuntu-precise-agent_3.4.0-m3-b392.tar.gz
+#  centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/centos-Core-agent_3.4.0-m3-b392.tar.gz
+#  centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/centos-Final-agent_3.4.0-m3-b392.tar.gz
+#  redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/redhat-Maipo-agent_3.4.0-m3-b392.tar.gz
+#  redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/redhat-Santiago-agent_3.4.0-m3-b392.tar.gz
+#  cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/cloudify-windows-agent_3.4.0-m3-b392.exe
 
 #############################
 # Cloudify Modules
@@ -100,11 +100,11 @@ agents_user: ''
 # Note that you can replace rpm urls with names of packages as long as they're available in your default yum repository.
 # That is, as long as they provide the exact same version of that module.
 
-#rest_service_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/cloudify-rest-service-3.4.0-m2_b391.x86_64.rpm'
-#management_worker_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/cloudify-management-worker-3.4.0-m2_b391.x86_64.rpm'
-#amqpinflux_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/cloudify-amqp-influx-3.4.0-m2_b391.x86_64.rpm'
+#rest_service_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/cloudify-rest-service-3.4.0-m3_b392.x86_64.rpm'
+#management_worker_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/cloudify-management-worker-3.4.0-m3_b392.x86_64.rpm'
+#amqpinflux_rpm_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/cloudify-amqp-influx-3.4.0-m3_b392.x86_64.rpm'
 #cloudify_resources_url: 'https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz'
-#webui_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.4.0/m2-RELEASE/cloudify-ui-3.4.0-m2-b391.tgz'
+#webui_source_url: 'http://repository.cloudifysource.org/org/cloudify3/3.4.0/m3-RELEASE/cloudify-ui-3.4.0-m3-b392.tgz'
 
 # This is a Cloudify specific redistribution of Grafana.
 #grafana_source_url: http://repository.cloudifysource.org/org/cloudify3/components/grafana-1.9.0.tgz
@@ -264,7 +264,7 @@ agents_user: ''
 #  - {'source_path': 'http://www.getcloudify.org/spec/openstack-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/openstack-plugin/1.3.1/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/vsphere-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/vsphere-plugin/1.3.1/plugin.yaml'}
-#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4m2/types.yaml', 'destination_path': '/spec/cloudify/3.4m2/types.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4m3/types.yaml', 'destination_path': '/spec/cloudify/3.4m3/types.yaml'}
 
 # The plugins you would like to use in your applications should be added here.
 # By default, the Diamond, Fabric and relevant IaaS plugins are provided.
