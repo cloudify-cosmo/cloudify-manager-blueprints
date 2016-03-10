@@ -328,6 +328,10 @@ node_types:
         description: RabbitMQ password for access to queues.
         type: string
         default: { get_input: rabbitmq_password }
+      events_to_file_enable:
+         description: Enable write logs and events to file
+         default: { get_input: events_to_file_enable }
+
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -350,6 +354,39 @@ node_types:
             script_path:
               default: components/logstash/scripts/stop.py
             fabric_env: *simple_fabric_env
+
+
+  manager.nodes.Liagent:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      liagent_rpm_source_url:
+        type: string
+        default: { get_input: liagent_source_url }
+      liagent_endpoint_ip:
+        type: string
+        default: { get_input: liagent_endpoint_ip }
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/liagent/scripts/create.sh
+            fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/liagent/scripts/start.sh
+            fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/liagent/scripts/stop.sh
+            fabric_env: *simple_fabric_env
+
 
   manager.nodes.InfluxDB:
     derived_from: cloudify.nodes.DBMS

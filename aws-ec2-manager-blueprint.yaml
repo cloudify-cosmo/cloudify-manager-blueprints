@@ -206,6 +206,15 @@ inputs:
     default: http://repository.cloudifysource.org/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
 
   #############################
+  # Logstash Inputs
+  #############################
+
+  events_to_file_enable:
+    description: Enable write logs and events to file
+    type: boolean
+    default: false
+
+  #############################
   # RabbitMQ Inputs
   #############################
   rabbitmq_endpoint_ip:
