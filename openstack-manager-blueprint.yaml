@@ -434,13 +434,13 @@ inputs:
     description: >
       Holds any archives that should be uploaded to the manager.
     default:
-      - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_openstack_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-      - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_fabric_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-      - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-redhat-Maipo.wgn'
-      - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-      - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py26-none-linux_x86_64-centos-Final.wgn'
-      - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-Ubuntu-precise.wgn'
-      - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-openstack-plugin/1.3.1/cloudify_openstack_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-fabric-plugin/1.4/cloudify_fabric_plugin-1.4-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.2/cloudify_diamond_plugin-1.3.2-py27-none-linux_x86_64-redhat-Maipo.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.2/cloudify_diamond_plugin-1.3.2-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.2/cloudify_diamond_plugin-1.3.2-py26-none-linux_x86_64-centos-Final.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.2/cloudify_diamond_plugin-1.3.2-py27-none-linux_x86_64-Ubuntu-precise.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.2/cloudify_diamond_plugin-1.3.2-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
 
   dsl_resources:
     description: >
@@ -449,7 +449,7 @@ inputs:
       - {'source_path': 'http://www.getcloudify.org/spec/openstack-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/openstack-plugin/1.3.1/plugin.yaml'}
 
       - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.4/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.4/plugin.yaml'}
-      - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.1/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.2/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.2/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4m3/types.yaml', 'destination_path': '/spec/cloudify/3.4m3/types.yaml'}
 
   #############################
