@@ -36,7 +36,7 @@
 
 # If certificate verification should use a copy of the public certificate -
 # specify the local path to it on the agent machine
-#manager_private_cert_on_agent: /root/cloudify/server.crt
+#ssl_certificate: /root/cloudify/server.crt
 
 # Username and password of the Cloudify administrator.
 # This user will also be included in the simple userstore repostiroty if the

@@ -212,7 +212,7 @@ inputs:
   verify_certificate:
     default: true
 
-  manager_private_cert_on_agent:
+  ssl_certificate:
     default: /root/cloudify/server.crt
 
   admin_username:
@@ -791,7 +791,7 @@ node_templates:
           rest_username: { get_input: agent_rest_username }
           rest_password: { get_input: agent_rest_password }
           verify_manager_certificate: { get_input: verify_certificate }
-          manager_private_cert_on_agent: { get_input: manager_private_cert_on_agent }
+          manager_ssl_certificate: { get_input: ssl_certificate }
 
         workflows:
           task_retries: -1  # this means forever

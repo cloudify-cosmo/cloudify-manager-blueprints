@@ -37,7 +37,7 @@ node_types:
           rest_username: ''
           rest_password: ''
           verify_manager_certificate: ''
-          manager_private_cert_on_agent: ''
+          ssl_certificate: ''
       #########################################################################
       # Setting 'enabled' to true will activate security on the REST service,
       # according to the below configuration. Each request received by the

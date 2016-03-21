@@ -9,7 +9,7 @@ SSL_ENABLED="{{ ctx.instance.runtime_properties.ssl_enabled }}"
 CLOUDIFY_USERNAME="{{ ctx.instance.runtime_properties.cloudify_username }}"
 CLOUDIFY_PASSWORD="{{ ctx.instance.runtime_properties.cloudify_password }}"
 VERIFY_SSL_CERTIFICATE="{{ ctx.instance.runtime_properties.verify_certificate }}"
-MANAGER_PRIVATE_CERT_ON_AGENT="{{ ctx.instance.runtime_properties.manager_private_cert_on_agent }}"
+SSL_CERTIFICATE="{{ ctx.instance.runtime_properties.ssl_certificate }}"
 
 RABBITMQ_HOST="{{ ctx.instance.host_ip }}"
 MANAGEMENT_IP="{{ ctx.instance.host_ip }}"
