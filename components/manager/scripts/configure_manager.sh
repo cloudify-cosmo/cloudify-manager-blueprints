@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-. $(ctx download-resource "components/utils")
+# . $(ctx download-resource "components/utils")
 
 
 function _set_rest_port() {

@@ -10,7 +10,6 @@ checkout:
         git fetch origin +refs/pull/$PR_ID/merge:
         git checkout -qf FETCH_HEAD
       fi
-
 dependencies:
   override:
     - pip install setuptools --upgrade
