@@ -279,6 +279,12 @@ node_types:
       es_endpoint_port:
         type: integer
         default: { get_input: elasticsearch_endpoint_port }
+      es_clustering_enabled:
+        type: boolean
+        default: { get_input: elasticsearch_clustering_enabled }
+      es_clustering_discovery_port:
+        type: integer
+        default: { get_input: elasticsearch_clustering_discovery_port }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

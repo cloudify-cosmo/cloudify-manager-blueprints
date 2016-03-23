@@ -321,6 +321,21 @@ inputs:
     type: integer
     default: 9200
 
+  elasticsearch_clustering_enabled:
+    description: >
+      Whether to enable automatic clustering of elasticsearch nodes via multicast discovery
+    type: boolean
+    default: false
+
+  elasticsearch_clustering_discovery_port:
+    description: >
+      The port used to discover other elasticsearch nodes on the same network.
+      Note that the default in elasticsearch's configuration is 54328. Here we default to
+      another port to prevent accidental discovery of already installed node within the
+      same network.
+    type: integer
+    default: 54329
+
   #############################
   # InfluxDB Inputs
   #############################
