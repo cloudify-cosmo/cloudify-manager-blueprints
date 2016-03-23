@@ -542,7 +542,7 @@ node_templates:
           rest_username: { get_input: agent_rest_username }
           rest_password: { get_input: agent_rest_password }
           verify_manager_certificate: { get_input: verify_certificate }
-          manager_ss_certificate: { get_input: ssl_certificate }
+          manager_ssl_certificate: { get_input: ssl_certificate }
           env:
             OPENSTACK_CONFIG_PATH: { get_property: [SELF, cloudify, plugins, openstack_config_path] }
 
