@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 . $(ctx download-resource "components/utils")
 
