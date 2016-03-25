@@ -722,6 +722,8 @@ node_templates:
         target: manager_host
       - type: nginx_to_manager_configuration
         target: manager_configuration
+      - type: nginx_to_restservice
+        target: rest_service
 
   riemann:
     type: manager.nodes.Riemann
