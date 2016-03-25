@@ -118,6 +118,38 @@ inputs:
     type: string
 
   #############################
+  # Agents configuration
+  #############################
+
+  agents_min_workers:
+    default: 0
+    type: integer
+
+  agents_max_workers:
+    default: 5
+    type: integer
+
+  #############################
+  # Workflows configuration
+  #############################
+
+  workflows_task_retries:
+    default: -1
+    type: integer
+
+  workflows_task_retry_interval:
+    default: 30
+    type: integer
+
+  #############################
+  # Policy engine configuration
+  #############################
+
+  policy_engine_start_timeout:
+    default: 30
+    type: integer
+
+  #############################
   # Security Settings
   #############################
   security_enabled:
@@ -322,7 +354,7 @@ inputs:
   # https://www.rabbitmq.com/maxlength.html
   rabbitmq_events_queue_length_limit:
     description: >
-      Sets the number of messages the eventss queue can hold.
+      Sets the number of messages the events queue can hold.
       Note this is NOT the message byte length!
       Not used if an external endpoint is used.
     type: integer
@@ -426,6 +458,14 @@ inputs:
       Min number of celery workers.
     type: integer
     default: 2
+
+  #############################
+  # Import resolver inputs
+  #############################
+
+  import_resolver_rules:
+    default:
+      - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
 
   #############################
   # Upload Resources Inputs
@@ -535,8 +575,8 @@ node_templates:
         resources_prefix: { get_input: resources_prefix }
 
         cloudify_agent:
-          min_workers: 0
-          max_workers: 5
+          min_workers: { get_input: agents_min_workers }
+          max_workers: { get_input: agents_max_workers }
           remote_execution_port: 22
           user: { get_input: agents_user }
           broker_ip: { get_input: rabbitmq_endpoint_ip }
@@ -548,11 +588,11 @@ node_templates:
             OPENSTACK_CONFIG_PATH: { get_property: [SELF, cloudify, plugins, openstack_config_path] }
 
         workflows:
-          task_retries: -1  # this means forever
-          task_retry_interval: 30
+          task_retries: { get_input: workflows_task_retries }
+          task_retry_interval: { get_input: workflows_task_retry_interval }
 
         policy_engine:
-          start_timeout: 30
+          start_timeout: { get_input: policy_engine_start_timeout }
 
         # Declare rules for the default import resolver
         # which enables using the manager in offline mode.
@@ -563,8 +603,7 @@ node_templates:
         # it will fall back to the original http link.
         import_resolver:
           parameters:
-            rules:
-            - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
+            rules: { get_input: import_resolver_rules }
 
         upload_resources:
           plugin_resources: { get_input: plugin_resources }
