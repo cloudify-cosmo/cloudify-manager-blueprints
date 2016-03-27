@@ -46,7 +46,7 @@ function install_influxdb() {
 }
 
 if [ -z "${INFLUXDB_ENDPOINT_IP}" ]; then
-    INFLUXDB_ENDPOINT_IP=$(ctx instance host_ip)
+    INFLUXDB_ENDPOINT_IP=$(ctx instance manager_host_ip)
     install_influxdb
 
     ctx logger info "Starting InfluxDB Service..."
