@@ -220,7 +220,7 @@ def _install_elasticsearch():
 
     _configure_index_rotation()
 
-    # elasticsearch provides a systemd init env. we just enable it.
+    ctx.logger.info('Enabling Elasticsearch Service...')
     utils.systemd.enable('elasticsearch')
 
 
