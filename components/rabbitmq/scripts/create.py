@@ -95,11 +95,9 @@ def _install_rabbitmq():
 
     utils.logrotate('rabbitmq')
 
-    # Creating rabbitmq systemd stop script
     utils.deploy_blueprint_resource(
         '{0}/kill-rabbit'.format(CONFIG_PATH),
         '/usr/local/bin/kill-rabbit')
-    # TODO: create chmod in utils and convert all
     utils.chmod('500', '/usr/local/bin/kill-rabbit')
     utils.systemd.configure('rabbitmq')
 
@@ -141,16 +139,18 @@ def _install_rabbitmq():
 
 
 def main():
-    ctx.logger.info('Setting Broker IP runtime property.')
-    if not ctx.instance.runtime_properties.get('rabbitmq_endpoint_ip'):
+
+    rabbitmq_endpoint_ip = ctx.node.properties['rabbitmq_endpoint_ip']
+
+    if not rabbitmq_endpoint_ip:
         broker_ip = ctx.instance.host_ip
         _install_rabbitmq()
     else:
-        broker_ip = ctx.instance.runtime_properties.get('rabbitmq_endpoint_ip')
-        ctx.logger.info('Using external rabbitmq at {0}'.format(broker_ip))
+        ctx.logger.info('External RabbitMQ Endpoint provided: '
+                        '{0}...'.format(rabbitmq_endpoint_ip))
+        broker_ip = rabbitmq_endpoint_ip
 
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = broker_ip
-    ctx.logger.info('RabbitMQ Endpoint IP is: {0}'.format(broker_ip))
 
 
 main()
