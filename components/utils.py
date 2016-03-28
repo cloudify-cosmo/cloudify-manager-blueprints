@@ -97,27 +97,31 @@ def deploy_ssl_certificate(private_or_public, destination, group, cert):
     # mitigating risk in the event of the associated service being vulnerable.
     ownership = 'root.{0}'.format(group)
     if private_or_public == 'private':
-        if cert.startswith("PRIVATE KEY"):
-            permissions = 440
+        private_cert_ok = 'PRIVATE KEY' in cert.split('\n')[0]
+        if private_cert_ok:
+            permissions = '440'
         else:
             error_exit("Private certificate is expected to begin with a line "
                        "containing 'PRIVATE KEY'.")
     elif private_or_public == 'public':
-        if cert.startswith("BEGIN CERTIFICATE"):
-            permissions = 444
+        public_cert_ok = 'BEGIN CERTIFICATE' in cert.split('\n')[0]
+        if public_cert_ok:
+            permissions = '444'
         else:
             error_exit("Public certificate is expected to begin with a line "
                        "containing 'BEGIN CERTIFICATE'.")
     else:
         error_exit("Certificates may only be 'private' or 'public', "
-                   "not ${0}".format(private_or_public))
+                   "not {0}".format(private_or_public))
     ctx.logger.info(
-        "Deploying ${0} SSL certificate in ${1} for group ${2}".format(
+        "Deploying {0} SSL certificate in {1} for group {2}".format(
             private_or_public, destination, group))
     sudo_write_to_file(cert, destination)
-    ctx.logger.info("Setting permissions (${0}) and ownership (${1}) of SSL "
-                    "certificate at ${2}".format(
+    ctx.logger.info("Setting permissions ({0}) and ownership ({1}) of SSL "
+                    "certificate at {2}".format(
                         permissions, ownership, destination))
+    chmod(permissions, destination)
+    sudo('chown {0} {1}'.format(ownership, destination))
 
 
 def error_exit(message):
@@ -362,17 +366,17 @@ class SystemD(object):
         sid = 'cloudify-{0}'.format(service_name)
         return "/usr/lib/systemd/system/{0}.service".format(sid)
 
-    def enable(self, service_name):
+    def enable(self, service_name, retries=0):
         ctx.logger.info('Enabling systemd service {0}...'.format(service_name))
-        self.systemctl('enable', service_name)
+        self.systemctl('enable', service_name, retries)
 
-    def start(self, service_name):
+    def start(self, service_name, retries=0):
         ctx.logger.info('Starting systemd service {0}...'.format(service_name))
-        self.systemctl('start', service_name)
+        self.systemctl('start', service_name, retries)
 
-    def stop(self, service_name):
+    def stop(self, service_name, retries=0):
         ctx.logger.info('Stopping systemd service {0}...'.format(service_name))
-        self.systemctl('stop', service_name)
+        self.systemctl('stop', service_name, retries)
 
 
 systemd = SystemD()
