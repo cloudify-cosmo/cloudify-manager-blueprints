@@ -92,6 +92,31 @@ user_public_key: ssh-rsa...
 #resources_prefix: ''
 
 #############################
+# Agents configuration
+#############################
+# Minimum number of workers. Defaults to zero.
+#agents_min_workers: 0
+
+# Maximum number of workers. Defaults to 5.
+#agents_max_workers: 5
+
+#############################
+# Workflows configuration
+#############################
+# How many times should a task be retried. This can be overridden on a per-operation basis.
+# Defaults to -1, which means - try forever.
+#workflows_task_retries: -1
+
+# How long (in seconds) to wait between subsequent attempts.
+#workflows_task_retry_interval: 30
+
+#############################
+# Policy engine configuration
+#############################
+# How long to wait for the policy engine to start up.
+#policy_engine_start_timeout: 30
+
+#############################
 # Security Settings
 #############################
 #security_enabled: false
@@ -270,6 +295,13 @@ user_public_key: ssh-rsa...
 
 # Minimum number of worker processes maintained by the management worker.
 #management_worker_min_workers: 2
+
+#############################
+# Import resolver inputs
+#############################
+# List of import resolver rules.
+#import_resolver_rules:
+#  - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
 
 #############################
 # Offline Resources Upload
