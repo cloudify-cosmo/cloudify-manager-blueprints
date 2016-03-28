@@ -23,9 +23,6 @@ def install_logstash():
     rabbitmq_username = ctx.node.properties['rabbitmq_username']
     rabbitmq_password = ctx.node.properties['rabbitmq_password']
 
-    # unused?
-    # rabbitmq_endpoint_ip = ctx.node.properties['rabbitmq_endpoint_ip']
-
     logstash_log_path = '/var/log/cloudify/logstash'
     logstash_conf_path = '/etc/logstash/conf.d'
 
@@ -70,7 +67,6 @@ def install_logstash():
         '/etc/sysconfig/logstash')
 
     utils.logrotate('logstash')
-    # sudo systemctl enable logstash.service
     utils.sudo(['/sbin/chkconfig', 'logstash', 'on'])
     utils.clean_var_log_dir('logstash')
 

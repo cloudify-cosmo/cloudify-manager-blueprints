@@ -61,9 +61,9 @@ def install_amqpinflux():
 
     utils.yum_install(amqpinflux_rpm_source_url)
     _install_optional(amqpinflux_venv)
+    utils.create_service_user(amqpinflux_user, AMQPINFLUX_HOME)
     _deploy_broker_configuration(amqpinflux_group)
 
-    utils.create_service_user(amqpinflux_user, AMQPINFLUX_HOME)
     ctx.logger.info('Fixing permissions...')
     utils.chown(amqpinflux_user, amqpinflux_group, AMQPINFLUX_HOME)
 

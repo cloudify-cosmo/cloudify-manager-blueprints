@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import sys
 import os
 from time import sleep
 from os.path import join, dirname
@@ -25,24 +24,26 @@ def check_if_user_exists(username):
 
 def _clear_guest_permissions_if_guest_exists():
     if check_if_user_exists('guest'):
-        ctx.logger.info('Disabling RabbitMQ guest user')
+        ctx.logger.info('Disabling RabbitMQ guest user...')
         utils.sudo(['rabbitmqctl', 'clear_permissions', 'guest'], retries=5)
         utils.sudo(['rabbitmqctl', 'delete_user', 'guest'], retries=5)
 
 
-def _create_rabbit_mq_user_and_set_permissions(rabbitmq_username,
-                                               rabbitmq_password):
+def _create_user_and_set_permissions(rabbitmq_username,
+                                     rabbitmq_password):
     if not check_if_user_exists(rabbitmq_username):
-        ctx.logger.info('Creating new RabbitMQ user and setting permissions')
+        ctx.logger.info('Creating new user {0}:{1} and setting '
+                        'permissions...'.format(
+                            rabbitmq_username, rabbitmq_password))
         utils.sudo(['rabbitmqctl', 'add_user',
                     rabbitmq_username, rabbitmq_password])
         utils.sudo(['rabbitmqctl', 'set_permissions',
                     rabbitmq_username, '.*', '.*', '.*'], retries=5)
 
 
-def _set_rabbit_mq_security(rabbitmq_ssl_enabled,
-                            rabbitmq_cert_private,
-                            rabbitmq_cert_public):
+def _set_security(rabbitmq_ssl_enabled,
+                  rabbitmq_cert_private,
+                  rabbitmq_cert_public):
     # Deploy certificates if both have been provided.
     # Complain loudly if one has been provided and the other hasn't.
     if rabbitmq_ssl_enabled:
@@ -58,10 +59,9 @@ def _set_rabbit_mq_security(rabbitmq_ssl_enabled,
                 '{0}/rabbitmq.config-ssl'.format(CONFIG_PATH),
                 '/etc/rabbitmq/rabbitmq.config')
         else:
-            ctx.logger.error('When providing a certificate for rabbitmq, '
+            utils.error_exit('When providing a certificate for rabbitmq, '
                              'both public and private certificates must be '
                              'supplied.')
-            sys.exit(1)
     else:
         utils.deploy_blueprint_resource(
             '{0}/rabbitmq.config-nossl'.format(CONFIG_PATH),
@@ -99,6 +99,7 @@ def _install_rabbitmq():
         '{0}/kill-rabbit'.format(CONFIG_PATH),
         '/usr/local/bin/kill-rabbit')
     utils.chmod('500', '/usr/local/bin/kill-rabbit')
+
     utils.systemd.configure('rabbitmq')
 
     ctx.logger.info('Configuring File Descriptors Limit...')
@@ -108,10 +109,8 @@ def _install_rabbitmq():
 
     utils.systemd.systemctl('daemon-reload')
 
-    ctx.logger.info('Chowning RabbitMQ logs path...')
     utils.chown('rabbitmq', 'rabbitmq', rabbitmq_log_path)
 
-    ctx.logger.info('Starting RabbitMQ Server in Daemonized mode...')
     utils.systemd.start('cloudify-rabbitmq')
 
     sleep(30)
@@ -124,18 +123,13 @@ def _install_rabbitmq():
     utils.sudo(['rabbitmq-plugins', 'enable', 'rabbitmq_tracing'], retries=5)
 
     _clear_guest_permissions_if_guest_exists()
-
-    _create_rabbit_mq_user_and_set_permissions(
-        rabbitmq_username, rabbitmq_password)
-
-    _set_rabbit_mq_security(
+    _create_user_and_set_permissions(rabbitmq_username, rabbitmq_password)
+    _set_security(
         rabbitmq_ssl_enabled,
         rabbitmq_cert_private,
         rabbitmq_cert_public)
 
-    ctx.logger.info('Stopping RabbitMQ Service...')
-    utils.systemd.systemctl('stop', service='cloudify-rabbitmq.service',
-                            retries=5)
+    utils.systemd.stop('cloudify-rabbitmq', retries=5)
 
 
 def main():

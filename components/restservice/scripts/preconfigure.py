@@ -18,7 +18,6 @@ def preconfigure_restservice():
 
     ctx.logger.info('Deploying REST Security configuration file...')
     sec_config = str(ctx.target.node.properties['security'])
-    ctx.logger.info('security config: {0}'.format(sec_config))
     fd, path = tempfile.mkstemp()
     os.close(fd)
     with open(path, 'w') as f:
