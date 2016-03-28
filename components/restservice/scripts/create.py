@@ -99,8 +99,6 @@ def _configure_dbus(rest_venv):
     dbus_glib_bindings = os.path.join('/usr', site_packages,
                                       '_dbus_glib_bindings.so')
     dbus_bindings = os.path.join('/usr', site_packages, '_dbus_bindings.so')
-    ctx.logger.info('if os.path.isdir(dbuslib) {0}'.format(
-        os.path.isdir(dbuslib)))
     if os.path.isdir(dbuslib):
         utils.ln(source=dbuslib, target=os.path.join(
             rest_venv, dbus_relative_path), params='-sf')
@@ -139,6 +137,7 @@ def install_restservice():
 
     deploy_broker_configuration()
     utils.yum_install(rest_service_rpm_source_url)
+    _configure_dbus(rest_venv)
     install_optional(rest_venv)
     utils.logrotate('restservice')
 
@@ -157,7 +156,6 @@ def install_restservice():
     utils.deploy_blueprint_resource(
         os.path.join(CONFIG_PATH, 'cloudify-rest.conf'),
         os.path.join(REST_SERVICE_HOME, 'cloudify-rest.conf'))
-    _configure_dbus(rest_venv)
 
 
 install_restservice()
