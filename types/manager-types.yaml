@@ -131,6 +131,10 @@ node_types:
       pip_source_rpm_url:
         type: string
         default: { get_input: pip_source_rpm_url }
+      use_existing_on_upgrade:
+        description: Use existing python configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -154,6 +158,10 @@ node_types:
       java_rpm_source_url:
         description: Java RPM Source URL
         default: { get_input: java_source_url }
+      use_existing_on_upgrade:
+        description: Use existing java configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -220,6 +228,10 @@ node_types:
         description: PEM formatted public cert for rabbit SSL.
         type: string
         default: { get_input: rabbitmq_cert_public }
+      use_existing_on_upgrade:
+        description: Use existing rabbit configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -279,6 +291,10 @@ node_types:
       es_endpoint_port:
         type: integer
         default: { get_input: elasticsearch_endpoint_port }
+      use_existing_on_upgrade:
+        description: Use existing elasticsearch configuration
+        type: string
+        default: true
       es_clustering_enabled:
         type: string
         default: { get_input: elasticsearch_clustering_enabled }
@@ -328,6 +344,10 @@ node_types:
         description: RabbitMQ password for access to queues.
         type: string
         default: { get_input: rabbitmq_password }
+      use_existing_on_upgrade:
+        description: Use existing logstash configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -361,6 +381,10 @@ node_types:
       influxdb_endpoint_ip:
         type: string
         default: { get_input: influxdb_endpoint_ip }
+      use_existing_on_upgrade:
+        description: Use existing influxdb configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -393,6 +417,10 @@ node_types:
         description: REST Service repo tar URL for resources
         type: string
         default: { get_input: rest_service_source_url }
+      use_existing_on_upgrade:
+        description: Use existing nginx configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -458,6 +486,10 @@ node_types:
         description: RabbitMQ password for access to queues.
         type: string
         default: { get_input: rabbitmq_password }
+      use_existing_on_upgrade:
+        description: Use existing riemann configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -549,7 +581,10 @@ node_types:
         description: Disables insecure REST endpoints
         type: boolean
         default: { get_input: insecure_endpoints_disabled }
-
+      use_existing_on_upgrade:
+        description: Use existing rest configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -647,6 +682,10 @@ node_types:
           max workers property, as that property sets the global max number of running processes.
         type: integer
         default: { get_property: [manager_configuration, cloudify, cloudify_agent, max_workers] }
+      use_existing_on_upgrade:
+        description: Use existing mgmt worker configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -699,6 +738,10 @@ node_types:
         description: RabbitMQ public certificate for SSL. SSL not used if this is an empty string.
         type: string
         default: { get_input: rabbitmq_cert_public }
+      use_existing_on_upgrade:
+        description: Use existing amqp influx configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -737,6 +780,10 @@ node_types:
         description: NodeJS tgz Source URL
         type: string
         default: { get_input: nodejs_source_url }
+      use_existing_on_upgrade:
+        description: Use existing webui configuration
+        type: string
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

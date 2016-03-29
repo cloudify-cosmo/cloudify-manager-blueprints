@@ -12,6 +12,8 @@ import pwd
 import glob
 from functools import wraps
 import re
+from distutils.version import LooseVersion
+import json
 
 from cloudify import ctx
 
@@ -59,7 +61,7 @@ def run(command, retries=0, ignore_failures=False, globx=False):
         for arg in command:
             glob_command.append(glob.glob(arg))
         command = glob_command
-    ctx.logger.debug('Running: {0}'.format(command))
+    ctx.logger.info('Running: {0}'.format(command))
     proc = subprocess.Popen(command, stdout=stdout, stderr=stderr)
     proc.aggr_stdout, proc.aggr_stderr = proc.communicate()
     if proc.returncode != 0:
@@ -140,6 +142,10 @@ def move(source, destination):
     sudo(['mv', source, destination])
 
 
+def copy(source, destination):
+    sudo(['cp', '-r', source, destination])
+
+
 def install_python_package(source, venv=''):
     if venv:
         ctx.logger.info('Installing {0} in virtualenv {1}...'.format(
@@ -175,7 +181,7 @@ def download_file(url, destination=''):
         try:
             final_url = urllib.urlopen(url).geturl()
             if final_url != url:
-                ctx.logger.debug('Redirected to {0}'.format(final_url))
+                ctx.logger.info('Redirected to {0}'.format(final_url))
             f = urllib.URLopener()
             # TODO: try except with @retry
             f.retrieve(final_url, destination)
@@ -210,13 +216,26 @@ def download_cloudify_resource(url):
             destf))
     else:
         tmp_path = download_file(url)
-        ctx.logger.debug('Saving {0} under {1}'.format(tmp_path, destf))
+        ctx.logger.info('Saving {0} under {1}'.format(tmp_path, destf))
         mkdir(CLOUDIFY_SOURCES_PATH)
         move(tmp_path, destf)
     return destf
 
 
-def deploy_blueprint_resource(source, destination):
+# User resources are resources non related to the cloudify core configuration
+# such as security userstore and security config files and ssl certificates.
+# These files will be handled differently then config files as they will remain
+def deploy_user_resource(source, destination, params):
+    ctx.logger.info('Deploying user resource {0} to {1}'.format(
+            source, destination))
+    resource_file, dest = BlueprintResourceFactory().create(source,
+                                                            destination,
+                                                            params,
+                                                            user_resource=True)
+    copy(resource_file, dest)
+
+
+def deploy_blueprint_resource(source, destination, params):
     """Downloads a resource from the blueprint to a destination.
 
     This expands `download-resource` as a `sudo mv` is required after
@@ -224,8 +243,14 @@ def deploy_blueprint_resource(source, destination):
     """
     ctx.logger.info('Deploying blueprint resource {0} to {1}'.format(
         source, destination))
-    tmp_file = ctx.download_resource_and_render(source)
-    move(tmp_file, destination)
+    resource_file, dest = BlueprintResourceFactory().create(source,
+                                                            destination,
+                                                            params)
+    copy(resource_file, dest)
+
+
+def use_existing_on_upgrade(use_existing):
+    return is_upgrade() and use_existing
 
 
 def copy_notice(service):
@@ -316,8 +341,44 @@ def yum_install(source):
         ctx.logger.info('Package {0} is already installed.'.format(source))
         return
 
+    if is_upgrade():
+        remove_existing_rpm_package(source_name)
+
     ctx.logger.info('yum installing {0}...'.format(source_path))
     sudo(['yum', 'install', '-y', source_path])
+
+
+def remove_existing_rpm_package(source_name):
+    new_package_name, new_version = get_rpm_package_details(source_name)
+    old_rpm_name = get_installed_rpm_name(new_package_name)
+    old_package_name, old_version = get_rpm_package_details(old_rpm_name)
+    if LooseVersion(new_version) > LooseVersion(old_version):
+        ctx.logger.info('Old version installed. Uninstalling {0}...'
+                        .format(old_rpm_name))
+        sudo(['rpm', '--noscripts', '-e', old_rpm_name])
+
+
+def get_installed_rpm_name(new_package_name):
+    older_version_query = run(['rpm', '-q', new_package_name],
+                              ignore_failures=True)
+    old_rpm_name = older_version_query.aggr_stdout.rstrip('\n\r')
+    ctx.logger.info('Found installed package named: {0}'
+                    .format(old_rpm_name))
+    return old_rpm_name
+
+
+def get_rpm_package_details(source_name):
+
+    digit_match = re.search('\d', source_name)
+    first_digit_index = digit_match.start()
+    package_name = source_name[:first_digit_index - 1]
+
+    arc_match = re.search('.x86_64|.noarch', source_name)
+    arc_index = arc_match.start()
+
+    version_rel = source_name[first_digit_index:arc_index - len(source_name)]
+
+    return package_name, version_rel
 
 
 class SystemD(object):
@@ -328,7 +389,7 @@ class SystemD(object):
             systemctl_cmd.append(service)
         sudo(systemctl_cmd, retries=retries)
 
-    def configure(self, service_name):
+    def configure(self, service_name, params):
         """This configures systemd for a specific service.
 
         It requires that two files are present for each service one containing
@@ -343,9 +404,9 @@ class SystemD(object):
         srv_src = "components/{0}/config/{1}.service".format(service_name, sid)
 
         ctx.logger.info('Deploying systemd EnvironmentFile...')
-        deploy_blueprint_resource(env_src, env_dst)
+        deploy_blueprint_resource(env_src, env_dst, params)
         ctx.logger.info('Deploying systemd .service file...')
-        deploy_blueprint_resource(srv_src, srv_dst)
+        deploy_blueprint_resource(srv_src, srv_dst, params)
 
         ctx.logger.info('Enabling systemd .service...')
         self.systemctl('enable', '{0}.service'.format(sid))
@@ -379,6 +440,9 @@ class SystemD(object):
     def stop(self, service_name, retries=0):
         ctx.logger.info('Stopping systemd service {0}...'.format(service_name))
         self.systemctl('stop', service_name, retries)
+
+    def restart(self, service_name, retries=0):
+        self.systemctl('restart', service_name, retries)
 
 
 systemd = SystemD()
@@ -427,12 +491,12 @@ def set_rabbitmq_policy(name, q_regex, p_type, value):
          '--apply-to-queues'.format(name, q_regex, p_type, value))
 
 
-def get_rabbitmq_endpoint_ip():
+def get_rabbitmq_endpoint_ip(ctx_properties):
     """Gets the rabbitmq endpoint IP, using the manager IP if the node
     property is blank.
     """
     try:
-        return ctx.node.properties['rabbitmq_endpoint_ip']
+        return ctx_properties['rabbitmq_endpoint_ip']
     # why?
     except:
         return ctx.instance.host_ip
@@ -454,7 +518,7 @@ def create_service_user(user, home):
               '--no-create-home', '--system', user])
 
 
-def logrotate(service):
+def logrotate(service, params):
     """Deploys a logrotate config for a service.
 
     Note that this is not idempotent in the sense that if a logrotate
@@ -473,7 +537,9 @@ def logrotate(service):
     if not os.path.isdir(logrotated_path):
         os.mkdir(logrotated_path)
         chown('root', 'root', logrotated_path)
-    deploy_blueprint_resource(config_file_source, config_file_destination)
+    deploy_blueprint_resource(config_file_source,
+                              config_file_destination,
+                              params)
     chmod('644', config_file_destination)
     chown('root', 'root', config_file_destination)
 
@@ -489,7 +555,7 @@ def chown(user, group, path):
 
 
 def ln(source, target, params=None):
-    ctx.logger.debug('Softlinking {0} to {1} with params {2}'.format(
+    ctx.logger.info('Softlinking {0} to {1} with params {2}'.format(
         source, target, params))
     command = ['ln']
     if params:
@@ -524,6 +590,255 @@ def clean_var_log_dir(service):
 
 def untar(source, destination='/tmp', strip=1):
     # TODO: use tarfile instead
-    ctx.logger.debug('Extracting {0} to {1}...'.format(source, destination))
+    ctx.logger.info('Extracting {0} to {1}...'.format(source, destination))
     sudo(['tar', '-xzvf', source, '-C', destination,
           '--strip={0}'.format(strip)])
+
+
+def write_file(content, file_path):
+    tmp_file = tempfile.NamedTemporaryFile(delete=False)
+    mkdir(os.path.dirname(os.path.abspath(file_path)))
+    with open(tmp_file.name, 'w') as f:
+        f.write(json.dumps(content))
+    move(tmp_file.name, file_path)
+
+
+class CtxPropertyFactory(object):
+
+    PROPERTIES_FILE_NAME = 'properties.json'
+    PROPERTIES_PATH = '/opt/cloudify/node_properties/'
+    ROLLBACK_PROPERTIES_PATH = '/opt/cloudify/rollback_node_properties/'
+
+    # A list of property suffixes to be included in the upgrade process,
+    # despite having 'use_existing' config from the previous installation
+    UPGRADE_PROPS_SUFFIX = ['source_url', 'cloudify_resources_url']
+
+    def __init__(self):
+        self.is_upgrade = is_upgrade()
+
+    # Create node properties according to the workflow context install/upgrade
+    def create(self, service_name, write_to_file=True):
+
+        ctx_props = self._load_ctx_properties(service_name,
+                                              self.UPGRADE_PROPS_SUFFIX)
+
+        if write_to_file:
+            self._write_props_to_file(ctx_props, service_name)
+
+        return ctx_props
+
+    def _write_props_to_file(self, ctx_props, service_name):
+
+        dest_file_path = self._get_props_file_path(service_name)
+        ctx.logger.info('Saving {service} input configuration to {path}'
+                        .format(service=service_name,
+                                path=dest_file_path))
+        write_file(ctx_props, dest_file_path)
+
+    def archive_properties(self, service_name):
+        service_archive_path = os.path.join(self.ROLLBACK_PROPERTIES_PATH,
+                                            service_name)
+        mkdir(service_archive_path)
+        base_service_dir = os.path.join(self.PROPERTIES_PATH, service_name)
+        properties_file_path = os.path.join(base_service_dir,
+                                            self.PROPERTIES_FILE_NAME)
+        ctx.logger.info('Archiving previous inputs for service {service}'
+                        .format(service=service_name))
+        move(properties_file_path, service_archive_path)
+        ctx.logger.info('Setting new properties for service {service}'
+                        .format(service=service_name))
+        move(self._get_props_file_path(service_name), properties_file_path)
+
+    def _get_props_file_path(self, service_name):
+        base_service_dir = os.path.join(self.PROPERTIES_PATH, service_name)
+        if self.is_upgrade:
+            dest_file_path = os.path.join(
+                    base_service_dir,
+                    'upgrade-{0}'.format(self.PROPERTIES_FILE_NAME))
+        else:
+            dest_file_path = os.path.join(base_service_dir,
+                                          self.PROPERTIES_FILE_NAME)
+        return dest_file_path
+
+    def _load_ctx_properties(self, service_name, upgrade_props_suffix=None):
+        '''
+        :param upgrade_props_suffix: if use_existing is set to true, these
+        props will not be preserved but taken from the current ctx node props
+        :return:
+            the appropriate ctx node properties
+        '''
+
+        node_props = dict(ctx.node.properties.get_all())
+        if self.is_upgrade:
+            # Use existing property configuration during upgrade
+            use_existing = node_props.get('use_existing_on_upgrade')
+            if use_existing:
+                install_props_path = os.path.join(self.PROPERTIES_PATH,
+                                                  service_name,
+                                                  self.PROPERTIES_FILE_NAME)
+                ctx.logger.info('Loading existing {service} input config from '
+                                '{path}'.format(service=service_name,
+                                                path=install_props_path))
+                with open(install_props_path, 'r') as f:
+                    existing_props = json.load(f)
+
+                # Removing properties with suffix matching upgrade properties
+                for key in existing_props.keys():
+                    for suffix in upgrade_props_suffix:
+                        if key.endswith(suffix):
+                            del existing_props[key]
+
+                # Update node properties with existing configuration inputs
+                node_props.update(existing_props)
+
+        node_props['service_name'] = service_name
+
+        return node_props
+
+
+class BlueprintResourceFactory(object):
+
+    RESOURCES_PATH = '/opt/cloudify/resources/'
+    RESOURCES_ROLLBACK_PATH = '/opt/cloudify/resources_rollback/'
+    RESOURCES_JSON_FILE = '__resources.json'
+
+    def __init__(self):
+        self.is_upgrade = is_upgrade()
+        self.is_rollback = is_rollback()
+
+    def create(self, source, destination, params, user_resource=False):
+        service_name = params['service_name']
+        resource_name = os.path.basename(destination)
+        local_resource_path = self._get_resource_file_path(service_name,
+                                                           resource_name,
+                                                           self.is_upgrade)
+
+        if not os.path.isfile(local_resource_path):
+            mkdir(os.path.dirname(local_resource_path))
+            if user_resource:
+                self._download_user_resource(source,
+                                             local_resource_path,
+                                             resource_name,
+                                             params)
+            else:
+                self._dowload_conf_resource(source,
+                                            local_resource_path,
+                                            resource_name,
+                                            params)
+            resources_props = self._get_resources_json(service_name,
+                                                       self.is_upgrade)
+            # update the __resources.json
+            if resource_name not in resources_props.keys():
+                resources_props[resource_name] = destination
+                self._set_resources_json(resources_props, service_name,
+                                         self.is_upgrade)
+        return local_resource_path, destination
+
+    def _download_user_resource(self, source, dest, resource_name, params):
+        service_name = params['service_name']
+        if self.is_upgrade:
+            use_existing = params['use_existing_on_upgrade']
+            if use_existing:
+                install_props = self.get_install_resources_json(service_name)
+                existing_resource_path = install_props.get(resource_name)
+                if os.path.isfile(existing_resource_path):
+                    ctx.logger.info('Using existing resource for {resource}'
+                                    .format(resource=resource_name))
+                    # update the resource file we hold that might have changed
+                    install_resource = self._get_resource_file_path(
+                            service_name, resource_name, False)
+                    copy(existing_resource_path, install_resource)
+                    # copy it to it's destination
+                    copy(existing_resource_path, dest)
+                else:
+                    ctx.logger.info('User resource {resource} not found on'
+                                    ' {path}'.format(resource=resource_name,
+                                                     path=dest))
+
+        if not os.path.isfile(dest):
+            ctx.logger.info('Downloading new user resource {resource} to '
+                            '{dest}'.format(resource=resource_name, dest=dest))
+            ctx.download_resource_and_render(source, dest, params)
+
+    def _dowload_conf_resource(self, source, dest, resource_name, params):
+        ctx.logger.info('Downloading config resource {resource} to '
+                        '{dest}'.format(resource=resource_name, dest=dest))
+        ctx.download_resource_and_render(source, dest, params)
+
+    def _get_resource_file_path(self, service_name, file_name, upgrade):
+        base_service_dir = os.path.join(self.RESOURCES_PATH, service_name)
+        if upgrade:
+            dest_file_path = os.path.join(
+                    base_service_dir,
+                    'upgrade-{0}'.format(file_name))
+        else:
+            dest_file_path = os.path.join(base_service_dir,
+                                          file_name)
+        return dest_file_path
+
+    def get_upgrade_resources_json(self, service_name):
+        return self._get_resources_json(service_name, True)
+
+    def get_install_resources_json(self, service_name):
+        return self._get_resources_json(service_name, False)
+
+    def _get_resources_json(self, service_name, upgrade):
+        resources_json = self._get_resource_file_path(service_name,
+                                                      self.RESOURCES_JSON_FILE,
+                                                      upgrade)
+        if os.path.isfile(resources_json):
+            with open(resources_json, 'r') as f:
+                return json.load(f)
+        else:
+            return {}
+
+    def _set_resources_json(self, resources_dict, service_name, upgrade):
+        resources_json = self._get_resource_file_path(service_name,
+                                                      self.RESOURCES_JSON_FILE,
+                                                      upgrade)
+        write_file(resources_dict, resources_json)
+
+    def archive_resources(self, service_name):
+        rollback_dir = os.path.join(self.RESOURCES_ROLLBACK_PATH, service_name)
+        mkdir(rollback_dir)
+
+        service_archive_path = os.path.join(self.RESOURCES_PATH, service_name)
+        # nodes will not always use blueprint resources i.e. java/python
+        if os.path.isdir(service_archive_path):
+            resource_files = os.listdir(service_archive_path)
+            for filename in resource_files:
+                if not filename.startswith('upgrade-') and self.is_upgrade:
+                    move(os.path.join(service_archive_path, filename),
+                         rollback_dir)
+
+            for filename in resource_files:
+                if filename.startswith('upgrade-'):
+                    move(os.path.join(service_archive_path, filename),
+                         os.path.join(service_archive_path, filename[8:]))
+
+
+def is_upgrade():
+    '''
+    Returns true if manager is in upgrade mode. This function will assume
+    manager is in upgrade state according to the maintenance mode file.
+    :return: True if in upgrade state, false otherwise.
+    '''
+    return True
+    # return os.path.isfile('/opt/manager/status.txt')
+
+
+def is_rollback():
+    '''
+    Returns true if manager is in rollback state.
+    :return: True if in rollback state, false otherwise.
+    '''
+    return False
+
+
+def start_service_and_archive_properties(service_name):
+    if is_upgrade():
+        systemd.restart(service_name)
+        CtxPropertyFactory().archive_properties(service_name)
+        BlueprintResourceFactory().archive_resources(service_name)
+    else:
+        systemd.start(service_name)

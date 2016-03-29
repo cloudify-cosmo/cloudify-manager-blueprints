@@ -387,6 +387,12 @@ inputs:
     type: integer
     default: 54329
 
+  elasticsearch_discovery_port:
+    description: >
+      The Port of your Elasticsearch Cluster.
+    type: integer
+    default: 54329
+
   #############################
   # InfluxDB Inputs
   #############################

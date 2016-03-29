@@ -10,4 +10,5 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-utils.systemd.start('logstash')
+ctx.logger.info('Starting Logstash Service...')
+utils.start_service_and_archive_properties('logstash')

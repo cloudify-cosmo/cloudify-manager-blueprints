@@ -13,15 +13,17 @@ import utils  # NOQA
 
 CONFIG_PATH = 'components/logstash/config'
 
+ctx_properties = utils.CtxPropertyFactory().create('logstash')
+
 
 def install_logstash():
 
     logstash_unit_override = '/etc/systemd/system/logstash.service.d'
 
-    logstash_source_url = ctx.node.properties['logstash_rpm_source_url']
+    logstash_source_url = ctx_properties['logstash_rpm_source_url']
 
-    rabbitmq_username = ctx.node.properties['rabbitmq_username']
-    rabbitmq_password = ctx.node.properties['rabbitmq_password']
+    rabbitmq_username = ctx_properties['rabbitmq_username']
+    rabbitmq_password = ctx_properties['rabbitmq_password']
 
     logstash_log_path = '/var/log/cloudify/logstash'
     logstash_conf_path = '/etc/logstash/conf.d'
@@ -30,7 +32,7 @@ def install_logstash():
     ctx.instance.runtime_properties['es_endpoint_ip'] = \
         os.environ.get('ES_ENDPOINT_IP')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip()
+        utils.get_rabbitmq_endpoint_ip(ctx_properties)
 
     # Confirm username and password have been supplied for broker before
     # continuing.
@@ -55,18 +57,21 @@ def install_logstash():
     utils.mkdir(logstash_unit_override)
     utils.deploy_blueprint_resource(
         '{0}/restart.conf'.format(CONFIG_PATH),
-        '{0}/restart.conf'.format(logstash_unit_override))
+        '{0}/restart.conf'.format(logstash_unit_override),
+        ctx_properties)
     ctx.logger.info('Deploying Logstash conf...')
     utils.deploy_blueprint_resource(
         '{0}/logstash.conf'.format(CONFIG_PATH),
-        '{0}/logstash.conf'.format(logstash_conf_path))
+        '{0}/logstash.conf'.format(logstash_conf_path),
+        ctx_properties)
 
     ctx.logger.info('Deploying Logstash sysconfig...')
     utils.deploy_blueprint_resource(
         '{0}/logstash'.format(CONFIG_PATH),
-        '/etc/sysconfig/logstash')
+        '/etc/sysconfig/logstash',
+        ctx_properties)
 
-    utils.logrotate('logstash')
+    utils.logrotate('logstash', ctx_properties)
     utils.sudo(['/sbin/chkconfig', 'logstash', 'on'])
     utils.clean_var_log_dir('logstash')
 

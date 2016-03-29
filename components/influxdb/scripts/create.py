@@ -14,6 +14,8 @@ import utils  # NOQA
 
 CONFIG_PATH = "components/influxdb/config"
 
+ctx_properties = utils.CtxPropertyFactory().create('cloudify-influxdb.service')
+
 
 def _configure_influxdb(host, port):
     db_user = "root"
@@ -61,7 +63,7 @@ def _configure_influxdb(host, port):
 
 def _install_influxdb():
 
-    influxdb_source_url = ctx.node.properties['influxdb_rpm_source_url']
+    influxdb_source_url = ctx_properties['influxdb_rpm_source_url']
 
     influxdb_user = 'influxdb'
     influxdb_group = 'influxdb'
@@ -81,19 +83,20 @@ def _install_influxdb():
     ctx.logger.info('Deploying InfluxDB config.toml...')
     utils.deploy_blueprint_resource(
         '{0}/config.toml'.format(CONFIG_PATH),
-        '{0}/shared/config.toml'.format(influxdb_home))
+        '{0}/shared/config.toml'.format(influxdb_home),
+        ctx_properties)
 
     ctx.logger.info('Fixing user permissions...')
     utils.chown(influxdb_user, influxdb_group, influxdb_home)
     utils.chown(influxdb_user, influxdb_group, influxdb_log_path)
 
-    utils.logrotate('influxdb')
-    utils.systemd.configure('influxdb')
+    utils.systemd.configure('influxdb', ctx_properties)
+    utils.logrotate('influxdb', ctx_properties)
 
 
 def main():
 
-    influxdb_endpoint_ip = ctx.node.properties['influxdb_endpoint_ip']
+    influxdb_endpoint_ip = ctx_properties['influxdb_endpoint_ip']
     # currently, cannot be changed due to webui not allowing to configure it.
     influxdb_endpoint_port = 8086
 

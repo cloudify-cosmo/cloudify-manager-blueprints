@@ -14,6 +14,8 @@ import utils  # NOQA
 
 CONFIG_PATH = 'components/rabbitmq/config'
 
+ctx_properties = utils.CtxPropertyFactory().create('cloudify-rabbitmq')
+
 
 def check_if_user_exists(username):
     if username in utils.sudo(
@@ -55,34 +57,38 @@ def _set_security(rabbitmq_ssl_enabled,
                 'public', '/etc/rabbitmq/rabbit-pub.pem',
                 'rabbitmq', rabbitmq_cert_public)
             # Configure for SSL
-            utils.deploy_blueprint_resource(
+
+            utils.deploy_user_resource(
                 '{0}/rabbitmq.config-ssl'.format(CONFIG_PATH),
-                '/etc/rabbitmq/rabbitmq.config')
+                '/etc/rabbitmq/rabbitmq.config',
+                ctx_properties)
         else:
             utils.error_exit('When providing a certificate for rabbitmq, '
                              'both public and private certificates must be '
                              'supplied.')
     else:
-        utils.deploy_blueprint_resource(
+
+        utils.deploy_user_resource(
             '{0}/rabbitmq.config-nossl'.format(CONFIG_PATH),
-            '/etc/rabbitmq/rabbitmq.config')
+            '/etc/rabbitmq/rabbitmq.config',
+            ctx_properties)
         if rabbitmq_cert_private or rabbitmq_cert_public:
             ctx.logger.warn('Broker SSL cert supplied but SSL not enabled '
                             '(broker_ssl_enabled is False).')
 
 
 def _install_rabbitmq():
-    erlang_rpm_source_url = ctx.node.properties['erlang_rpm_source_url']
-    rabbitmq_rpm_source_url = ctx.node.properties['rabbitmq_rpm_source_url']
+    erlang_rpm_source_url = ctx_properties['erlang_rpm_source_url']
+    rabbitmq_rpm_source_url = ctx_properties['rabbitmq_rpm_source_url']
     # TODO: maybe we don't need this env var
     os.putenv('RABBITMQ_FD_LIMIT',
-              str(ctx.node.properties['rabbitmq_fd_limit']))
+              str(ctx_properties['rabbitmq_fd_limit']))
     rabbitmq_log_path = '/var/log/cloudify/rabbitmq'
-    rabbitmq_username = ctx.node.properties['rabbitmq_username']
-    rabbitmq_password = ctx.node.properties['rabbitmq_password']
-    rabbitmq_cert_public = ctx.node.properties['rabbitmq_cert_public']
-    rabbitmq_ssl_enabled = ctx.node.properties['rabbitmq_ssl_enabled']
-    rabbitmq_cert_private = ctx.node.properties['rabbitmq_cert_private']
+    rabbitmq_username = ctx_properties['rabbitmq_username']
+    rabbitmq_password = ctx_properties['rabbitmq_password']
+    rabbitmq_cert_public = ctx_properties['rabbitmq_cert_public']
+    rabbitmq_ssl_enabled = ctx_properties['rabbitmq_ssl_enabled']
+    rabbitmq_cert_private = ctx_properties['rabbitmq_cert_private']
 
     ctx.logger.info('Installing RabbitMQ...')
     utils.set_selinux_permissive()
@@ -93,19 +99,20 @@ def _install_rabbitmq():
     utils.yum_install(erlang_rpm_source_url)
     utils.yum_install(rabbitmq_rpm_source_url)
 
-    utils.logrotate('rabbitmq')
+    utils.logrotate('rabbitmq', ctx_properties)
 
     utils.deploy_blueprint_resource(
         '{0}/kill-rabbit'.format(CONFIG_PATH),
-        '/usr/local/bin/kill-rabbit')
+        '/usr/local/bin/kill-rabbit',
+        ctx_properties)
     utils.chmod('500', '/usr/local/bin/kill-rabbit')
-
-    utils.systemd.configure('rabbitmq')
+    utils.systemd.configure('rabbitmq', ctx_properties)
 
     ctx.logger.info('Configuring File Descriptors Limit...')
     utils.deploy_blueprint_resource(
         '{0}/rabbitmq_ulimit.conf'.format(CONFIG_PATH),
-        '/etc/security/limits.d/rabbitmq.conf')
+        '/etc/security/limits.d/rabbitmq.conf',
+        ctx_properties)
 
     utils.systemd.systemctl('daemon-reload')
 
@@ -134,7 +141,7 @@ def _install_rabbitmq():
 
 def main():
 
-    rabbitmq_endpoint_ip = ctx.node.properties['rabbitmq_endpoint_ip']
+    rabbitmq_endpoint_ip = ctx_properties['rabbitmq_endpoint_ip']
 
     if not rabbitmq_endpoint_ip:
         broker_ip = ctx.instance.host_ip

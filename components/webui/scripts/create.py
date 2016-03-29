@@ -13,12 +13,14 @@ import utils  # NOQA
 
 CONFIG_PATH = 'components/webui/config'
 
+ctx_properties = utils.CtxPropertyFactory().create('cloudify-webui')
+
 
 def install_webui():
 
-    nodejs_source_url = ctx.node.properties['nodejs_tar_source_url']
-    webui_source_url = ctx.node.properties['webui_tar_source_url']
-    grafana_source_url = ctx.node.properties['grafana_tar_source_url']
+    nodejs_source_url = ctx_properties['nodejs_tar_source_url']
+    webui_source_url = ctx_properties['webui_tar_source_url']
+    grafana_source_url = ctx_properties['grafana_tar_source_url']
 
     # injected as an input to the script
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
@@ -60,19 +62,21 @@ def install_webui():
     ctx.logger.info('Deploying WebUI Configuration...')
     utils.deploy_blueprint_resource(
         '{0}/gsPresets.json'.format(CONFIG_PATH),
-        '{0}/backend/gsPresets.json'.format(webui_home))
+        '{0}/backend/gsPresets.json'.format(webui_home),
+        ctx_properties)
     ctx.logger.info('Deploying Grafana Configuration...')
     utils.deploy_blueprint_resource(
         '{0}/grafana_config.js'.format(CONFIG_PATH),
-        '{0}/config.js'.format(grafana_home))
+        '{0}/config.js'.format(grafana_home),
+        ctx_properties)
 
     ctx.logger.info('Fixing permissions...')
     utils.chown(webui_user, webui_group, webui_home)
     utils.chown(webui_user, webui_group, nodejs_home)
     utils.chown(webui_user, webui_group, webui_log_path)
 
-    utils.logrotate('webui')
-    utils.systemd.configure('webui')
+    utils.logrotate('webui', ctx_properties)
+    utils.systemd.configure('webui', ctx_properties)
 
 
 def main():

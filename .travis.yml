@@ -1,5 +1,5 @@
 language: python
-sudo: false
+sudo: required
 
 python:
   - 2.7
@@ -19,6 +19,7 @@ env:
     - OP="validate-blueprints"
     - OP="flake8"
     - OP="bootstrap-sanity"
+    - OP="unit-tests"
 
 script:
     - |
@@ -40,6 +41,9 @@ script:
           else
             echo "Not bootstrap-sanity tag, skipping bootstrap sanity test."
           fi;
+        elif [ "${OP}" == "unit-tests" ]; then
+          cd tests/unit-tests
+          nosetests .
         else
           exit 1
         fi;

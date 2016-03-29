@@ -24,7 +24,8 @@ def preconfigure_restservice():
         f.write(sec_config)
     utils.move(path, os.path.join(rest_service_home, 'rest-security.conf'))
 
-    utils.systemd.configure('restservice')
+    utils.systemd.configure('restservice',
+                            {'service_name': 'cloudify-restservice'})
 
 
 preconfigure_restservice()

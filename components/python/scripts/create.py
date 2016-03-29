@@ -9,11 +9,14 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+ctx_factory = utils.CtxPropertyFactory()
+ctx_properties = ctx_factory.create('python')
+
 
 def install_python_requirements():
 
-    pip_source_rpm_url = ctx.node.properties['pip_source_rpm_url']
-    install_python_compilers = ctx.node.properties['install_python_compilers']
+    pip_source_rpm_url = ctx_properties['pip_source_rpm_url']
+    install_python_compilers = ctx_properties['install_python_compilers']
 
     ctx.logger.info('Installing Python Requirements...')
     utils.set_selinux_permissive()
@@ -29,3 +32,5 @@ def install_python_requirements():
 
 
 install_python_requirements()
+ctx_factory.archive_properties('python')
+utils.BlueprintResourceFactory().archive_resources('python')

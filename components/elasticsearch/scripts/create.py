@@ -16,6 +16,8 @@ import utils  # NOQA
 
 CONFIG_PATH = "components/elasticsearch/config"
 
+ctx_properties = utils.CtxPropertyFactory().create('elasticsearch')
+
 
 def http_request(url, data=None, method='PUT'):
     request = urllib2.Request(url, data=data)
@@ -42,8 +44,9 @@ def _configure_elasticsearch(host, port):
         }
     })
 
-    ctx.logger.info('Deleting `cloudify_storage` index if exists...')
-    http_request(storage_endpoint, method='DELETE')
+    if not utils.is_upgrade():
+        ctx.logger.info('Deleting `cloudify_storage` index if exists...')
+        http_request(storage_endpoint, method='DELETE')
     ctx.logger.info('Creating `cloudify_storage` index...')
     http_request(storage_endpoint, storage_settings, 'PUT')
 
@@ -130,19 +133,20 @@ def _configure_index_rotation():
                     'logstash-YYYY.mm.dd index patterns...')
     utils.deploy_blueprint_resource(
         'components/elasticsearch/scripts/rotate_es_indices',
-        '/etc/cron.daily/rotate_es_indices')
+        '/etc/cron.daily/rotate_es_indices',
+        ctx_properties)
     utils.chown('root', 'root', '/etc/cron.daily/rotate_es_indices')
     # VALIDATE!
     utils.sudo('chmod +x /etc/cron.daily/rotate_es_indices')
 
 
 def _install_elasticsearch():
-    es_java_opts = ctx.node.properties['es_java_opts']
-    es_heap_size = ctx.node.properties['es_heap_size']
+    es_java_opts = ctx_properties['es_java_opts']
+    es_heap_size = ctx_properties['es_heap_size']
 
-    es_source_url = ctx.node.properties['es_rpm_source_url']
+    es_source_url = ctx_properties['es_rpm_source_url']
     es_curator_rpm_source_url = \
-        ctx.node.properties['es_curator_rpm_source_url']
+        ctx_properties['es_curator_rpm_source_url']
 
     # this will be used only if elasticsearch-curator is not installed via
     # an rpm and an internet connection is available
@@ -170,19 +174,22 @@ def _install_elasticsearch():
     utils.mkdir(es_unit_override)
     utils.deploy_blueprint_resource(
         os.path.join(CONFIG_PATH, 'restart.conf'),
-        os.path.join(es_unit_override, 'restart.conf'))
+        os.path.join(es_unit_override, 'restart.conf'),
+        ctx_properties)
 
     ctx.logger.info('Deploying Elasticsearch Configuration...')
     utils.deploy_blueprint_resource(
         os.path.join(CONFIG_PATH, 'elasticsearch.yml'),
-        os.path.join(es_conf_path, 'elasticsearch.yml'))
+        os.path.join(es_conf_path, 'elasticsearch.yml'),
+        params=ctx_properties)
     utils.chown('elasticsearch', 'elasticsearch',
                 os.path.join(es_conf_path, 'elasticsearch.yml'))
 
     ctx.logger.info('Deploying elasticsearch logging configuration file...')
     utils.deploy_blueprint_resource(
         os.path.join(CONFIG_PATH, 'logging.yml'),
-        os.path.join(es_conf_path, 'logging.yml'))
+        os.path.join(es_conf_path, 'logging.yml'),
+        ctx_properties)
     utils.chown('elasticsearch', 'elasticsearch',
                 os.path.join(es_conf_path, 'logging.yml'))
 
@@ -209,7 +216,7 @@ def _install_elasticsearch():
         '#ES_GC_LOG_FILE=/var/log/elasticsearch/gc.log',
         'ES_GC_LOG_FILE={0}'.format(os.path.join(es_logs_path, 'gc.log')),
         '/etc/sysconfig/elasticsearch')
-    utils.logrotate('elasticsearch')
+    utils.logrotate('elasticsearch', ctx_properties)
 
     ctx.logger.info('Installing Elasticsearch Curator...')
     if not es_curator_rpm_source_url:
@@ -226,8 +233,8 @@ def _install_elasticsearch():
 
 def main():
 
-    es_endpoint_ip = ctx.node.properties['es_endpoint_ip']
-    es_endpoint_port = ctx.node.properties['es_endpoint_port']
+    es_endpoint_ip = ctx_properties['es_endpoint_ip']
+    es_endpoint_port = ctx_properties['es_endpoint_port']
 
     if not es_endpoint_ip:
         es_endpoint_ip = ctx.instance.host_ip
