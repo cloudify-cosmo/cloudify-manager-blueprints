@@ -1,4 +1,4 @@
-location ~ ^/api/v(1|2|2\.1)/(blueprints|executions|deployments|nodes|events|search|status|provider|node-instances|version|evaluate|deployment-modifications|tokens|plugins|snapshots) {
+location ~ ^/api/v(1|2|2\.1)/(blueprints|executions|deployments|nodes|events|search|status|provider|node-instances|version|evaluate|deployment-modifications|tokens|plugins|snapshots|maintenance) {
     proxy_pass         http://cloudify-rest;
     proxy_redirect     off;
 
