@@ -19,9 +19,9 @@ echo "Installing rest service plugins"
     pushd ${plugin_dir}
         if [[ {{ plugin.source }} == *.wgn ]]; then
             # install wagon plugin
-            sudo $VENV/bin/pip install {{ plugin.install_args }}
+            sudo $VENV/bin/pip install --upgrade {{ plugin.install_args }}
         else
-            sudo $VENV/bin/pip install . {{ plugin.install_args }}
+            sudo $VENV/bin/pip install --upgrade . {{ plugin.install_args }}
         fi
     popd
 

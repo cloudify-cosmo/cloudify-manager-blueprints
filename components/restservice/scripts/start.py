@@ -10,4 +10,5 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-utils.systemd.start('cloudify-restservice')
+ctx.logger.info('Starting Cloudify REST Service...')
+utils.start_service_and_archive_properties('cloudify-restservice')

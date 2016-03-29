@@ -9,4 +9,5 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+ctx.logger.info('Stopping AMQP-Influx Broker Service...')
 utils.systemd.stop('cloudify-amqpinflux')

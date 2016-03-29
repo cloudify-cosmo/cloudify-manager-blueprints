@@ -11,7 +11,11 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-rabbitmq_endpoint_ip = ctx.node.properties.get('rabbitmq_endpoint_ip')
+ctx_properties = utils.CtxPropertyFactory().create('cloudify-rabbitmq',
+                                                   write_to_file=False)
+
+rabbitmq_endpoint_ip = ctx_properties['rabbitmq_endpoint_ip']
+
 
 if not rabbitmq_endpoint_ip:
     ctx.logger.info("Starting RabbitMQ Service...")
@@ -19,17 +23,17 @@ if not rabbitmq_endpoint_ip:
     # This should be done in the create.sh script.
     # For some reason, it fails. Need to check.
 
-    rabbitmq_events_queue_message_ttl = ctx.node.properties[
+    rabbitmq_events_queue_message_ttl = ctx_properties[
         'rabbitmq_events_queue_message_ttl']
-    rabbitmq_logs_queue_message_ttl = ctx.node.properties[
+    rabbitmq_logs_queue_message_ttl = ctx_properties[
         'rabbitmq_logs_queue_message_ttl']
-    rabbitmq_metrics_queue_message_ttl = ctx.node.properties[
+    rabbitmq_metrics_queue_message_ttl = ctx_properties[
         'rabbitmq_metrics_queue_message_ttl']
-    rabbitmq_events_queue_length_limit = ctx.node.properties[
+    rabbitmq_events_queue_length_limit = ctx_properties[
         'rabbitmq_events_queue_length_limit']
-    rabbitmq_logs_queue_length_limit = ctx.node.properties[
+    rabbitmq_logs_queue_length_limit = ctx_properties[
         'rabbitmq_logs_queue_length_limit']
-    rabbitmq_metrics_queue_length_limit = ctx.node.properties[
+    rabbitmq_metrics_queue_length_limit = ctx_properties[
         'rabbitmq_metrics_queue_length_limit']
 
     # Sleep necessary to wait for service to be up to set these policies
@@ -100,3 +104,7 @@ if not rabbitmq_endpoint_ip:
                 '{\"max-length\":' +
                 str(rabbitmq_metrics_queue_length_limit) + "}",
                 '--apply-to', 'queues'])
+
+    # rabbitmq restart exits with 143 status code that is valid in this case.
+    utils.start_service_and_archive_properties('cloudify-rabbitmq',
+                                               ignore_restart_fail=True)

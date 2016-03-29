@@ -13,19 +13,22 @@ import utils  # NOQA
 
 CONFIG_PATH = "components/mgmtworker/config"
 
+ctx_properties = utils.CtxPropertyFactory().create(
+        'cloudify-mgmtworker.service')
+
 
 def _install_optional(mgmtworker_venv):
 
     rest_client_source_url = \
-        ctx.node.properties['rest_client_module_source_url']
+        ctx_properties['rest_client_module_source_url']
     plugins_common_source_url = \
-        ctx.node.properties['plugins_common_module_source_url']
+        ctx_properties['plugins_common_module_source_url']
     script_plugin_source_url = \
-        ctx.node.properties['script_plugin_module_source_url']
+        ctx_properties['script_plugin_module_source_url']
     rest_service_source_url = \
-        ctx.node.properties['rest_service_module_source_url']
+        ctx_properties['rest_service_module_source_url']
     agent_source_url = \
-        ctx.node.properties['agent_module_source_url']
+        ctx_properties['agent_module_source_url']
 
     # this allows to upgrade modules if necessary.
     ctx.logger.info('Installing Optional Packages if supplied...')
@@ -57,7 +60,7 @@ def _install_optional(mgmtworker_venv):
 def install_mgmtworker():
 
     management_worker_rpm_source_url = \
-        ctx.node.properties['management_worker_rpm_source_url']
+        ctx_properties['management_worker_rpm_source_url']
 
     # these must all be exported as part of the start operation.
     # they will not persist, so we should use the new agent
@@ -69,12 +72,12 @@ def install_mgmtworker():
 
     broker_port_ssl = '5671'
     broker_port_no_ssl = '5672'
-    rabbitmq_ssl_enabled = ctx.node.properties['rabbitmq_ssl_enabled']
+    rabbitmq_ssl_enabled = ctx_properties['rabbitmq_ssl_enabled']
     ctx.logger.info("rabbitmq_ssl_enabled: {0}".format(rabbitmq_ssl_enabled))
-    rabbitmq_cert_public = ctx.node.properties['rabbitmq_cert_public']
+    rabbitmq_cert_public = ctx_properties['rabbitmq_cert_public']
 
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip()
+        utils.get_rabbitmq_endpoint_ip(ctx_properties)
 
     # Fix possible injections in json of rabbit credentials
     # See json.org for string spec
@@ -84,7 +87,7 @@ def install_mgmtworker():
         # things noisily, e.g. on newlines and backspaces.
         # TODO: add:
         # sed 's/"/\\"/' | sed 's/\\/\\\\/' | sed s-/-\\/- | sed 's/\t/\\t/'
-        ctx.instance.runtime_properties[key] = ctx.node.properties[key]
+        ctx.instance.runtime_properties[key] = ctx_properties[key]
 
     # Make the ssl enabled flag work with json (boolean in lower case)
     # TODO: check if still needed:
@@ -133,11 +136,12 @@ def install_mgmtworker():
     if os.path.isfile(os.path.join(mgmtworker_venv, 'bin/python')):
         broker_conf_path = os.path.join(celery_work_dir, 'broker_config.json')
         utils.deploy_blueprint_resource(
-            '{0}/broker_config.json'.format(CONFIG_PATH), broker_conf_path)
+            '{0}/broker_config.json'.format(CONFIG_PATH), broker_conf_path,
+            ctx_properties)
         # The config contains credentials, do not let the world read it
         utils.sudo(['chmod', '440', broker_conf_path])
-    utils.logrotate('mgmtworker')
-    utils.systemd.configure('mgmtworker')
+    utils.systemd.configure('mgmtworker', ctx_properties)
+    utils.logrotate('mgmtworker', ctx_properties)
 
 
 install_mgmtworker()
