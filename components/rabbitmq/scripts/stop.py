@@ -9,5 +9,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+RABBITMQ_SERVICE_NAME = 'rabbitmq'
 
-utils.systemd.stop('cloudify-rabbitmq')
+
+ctx.logger.info("Stopping RabbitMQ Service...")
+utils.systemd.stop(RABBITMQ_SERVICE_NAME, ignore_failure=True)

@@ -1,8 +1,8 @@
 ############################ Cloudify Configuration ############################
 
-http.port: {{ ctx.node.properties.es_endpoint_port }}
-discovery.zen.ping.multicast.enabled: {{ ctx.node.properties.es_clustering_enabled }}
-discovery.zen.ping.multicast.port: {{ ctx.node.properties.es_clustering_discovery_port }}
+http.port: {{ node.properties.es_endpoint_port }}
+discovery.zen.ping.multicast.enabled: {{ node.properties.es_clustering_enabled }}
+discovery.zen.ping.multicast.port: {{ node.properties.es_clustering_discovery_port }}
 path.logs: /var/log/cloudify/elasticsearch
 path.conf: /etc/elasticsearch
 bootstrap.mlockall: true

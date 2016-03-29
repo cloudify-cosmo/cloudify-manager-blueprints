@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from os.path import join, dirname
+import os
 
 from cloudify import ctx
 
@@ -9,12 +10,21 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-
+AGENTS_ROLLBACK_PATH = '/opt/cloudify/nginx/rollback_agents'
 CONFIG_PATH = 'components/nginx/config'
+NGINX_SERVICE_NAME = 'nginx'
+
+ctx_properties = utils.ctx_factory.create(NGINX_SERVICE_NAME)
+
+
+def backup_agent_resources(agents_dir):
+    ctx.logger.info('Backing up agents in {0}'.format(agents_dir))
+    utils.mkdir(AGENTS_ROLLBACK_PATH)
+    utils.copy(agents_dir, AGENTS_ROLLBACK_PATH)
 
 
 def install_nginx():
-    nginx_source_url = ctx.node.properties['nginx_rpm_source_url']
+    nginx_source_url = ctx_properties['nginx_rpm_source_url']
 
     # this is a bit tricky. the rest_service_source_url contains files that
     # should be deployed in the fileserver. the thing is, that since the
@@ -43,10 +53,30 @@ def install_nginx():
     ctx.instance.runtime_properties['default_rest_service_port'] = '8100'
     ctx.instance.runtime_properties['internal_rest_service_port'] = '8101'
 
+    if utils.is_upgrade:
+        ctx.logger.info('Nginx is in upgrade state.')
+        if os.path.exists(manager_agents_path):
+            backup_agent_resources(manager_agents_path)
+            ctx.logger.info('Removing existing agents from {0}'
+                            .format(manager_agents_path))
+            utils.remove(manager_agents_path)
+        if os.path.exists(manager_scripts_path):
+            ctx.logger.info('Removing agent scripts from {0}'
+                            .format(manager_scripts_path))
+            utils.remove(manager_scripts_path)
+        if os.path.exists(manager_templates_path):
+            ctx.logger.info('Removing agent templates from {0}'
+                            .format(manager_templates_path))
+            utils.remove(manager_templates_path)
+        if os.path.exists(nginx_unit_override):
+            ctx.logger.info('Removing nginx systemd file from {0}'
+                            .format(nginx_unit_override))
+            utils.remove(nginx_unit_override)
+
     ctx.logger.info('Installing Nginx...')
     utils.set_selinux_permissive()
 
-    utils.copy_notice('nginx')
+    utils.copy_notice(NGINX_SERVICE_NAME)
     utils.mkdir(nginx_log_path)
     utils.mkdir(manager_resources_home)
 
@@ -56,15 +86,16 @@ def install_nginx():
     utils.mkdir(manager_templates_path)
     utils.mkdir(nginx_unit_override)
 
-    utils.yum_install(nginx_source_url)
+    utils.yum_install(nginx_source_url, service_name=NGINX_SERVICE_NAME)
 
     ctx.logger.info('Creating systemd unit override...')
     utils.deploy_blueprint_resource(
         '{0}/restart.conf'.format(CONFIG_PATH),
-        '{0}/restart.conf'.format(nginx_unit_override))
+        '{0}/restart.conf'.format(nginx_unit_override),
+        NGINX_SERVICE_NAME)
 
-    utils.logrotate('nginx')
-    utils.clean_var_log_dir('nginx')
+    utils.logrotate(NGINX_SERVICE_NAME)
+    utils.clean_var_log_dir(NGINX_SERVICE_NAME)
 
 
 install_nginx()

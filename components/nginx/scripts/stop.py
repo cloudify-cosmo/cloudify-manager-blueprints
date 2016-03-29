@@ -9,5 +9,9 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+NGINX_SERVICE_NAME = 'nginx'
 
-utils.systemd.stop('nginx')
+
+ctx.logger.info('Stopping Nginx Service...')
+utils.systemd.stop(NGINX_SERVICE_NAME,
+                   append_prefix=False)

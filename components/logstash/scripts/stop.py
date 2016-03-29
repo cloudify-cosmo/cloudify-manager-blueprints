@@ -9,5 +9,9 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+LOGSTASH_SERVICE_NAME = 'logstash'
 
-utils.systemd.stop('logstash')
+
+ctx.logger.info('Stopping Logstash Service...')
+utils.systemd.stop(LOGSTASH_SERVICE_NAME,
+                   append_prefix=False)

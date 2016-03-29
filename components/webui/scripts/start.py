@@ -9,5 +9,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+WEBUI_SERVICE_NAME = 'webui'
 
-utils.systemd.start('cloudify-webui')
+
+ctx.logger.info('Starting WebUI Service...')
+utils.start_service_and_archive_properties(WEBUI_SERVICE_NAME)

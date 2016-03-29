@@ -9,6 +9,9 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+NGINX_SERVICE_NAME = 'nginx'
+ctx_properties = {'service_name': NGINX_SERVICE_NAME}
+
 
 CONFIG_PATH = 'components/nginx/config'
 
@@ -27,35 +30,45 @@ def preconfigure_nginx():
         utils.mkdir(ssl_certs_root)
         utils.deploy_blueprint_resource(
             '{0}/server.crt'.format(ssl_resources_rel_path),
-            '{0}/server.crt'.format(ssl_certs_root))
+            '{0}/server.crt'.format(ssl_certs_root),
+            NGINX_SERVICE_NAME, user_resource=True)
         utils.deploy_blueprint_resource(
             '{0}/server.key'.format(ssl_resources_rel_path),
-            '{0}/server.key'.format(ssl_certs_root))
+            '{0}/server.key'.format(ssl_certs_root),
+            NGINX_SERVICE_NAME, user_resource=True)
 
     ctx.logger.info('Deploying Nginx configuration files...')
     utils.deploy_blueprint_resource(
         '{0}/{1}-rest-server.cloudify'.format(CONFIG_PATH, rest_protocol),
-        '/etc/nginx/conf.d/{0}-rest-server.cloudify'.format(rest_protocol))
+        '/etc/nginx/conf.d/{0}-rest-server.cloudify'.format(rest_protocol),
+        NGINX_SERVICE_NAME, load_ctx=False)
     utils.deploy_blueprint_resource(
         '{0}/nginx.conf'.format(CONFIG_PATH),
-        '/etc/nginx/nginx.conf')
+        '/etc/nginx/nginx.conf',
+        NGINX_SERVICE_NAME, load_ctx=False)
     utils.deploy_blueprint_resource(
         '{0}/default.conf'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/default.conf')
+        '/etc/nginx/conf.d/default.conf',
+        NGINX_SERVICE_NAME, load_ctx=False)
     utils.deploy_blueprint_resource(
         '{0}/rest-location.cloudify'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/rest-location.cloudify')
+        '/etc/nginx/conf.d/rest-location.cloudify',
+        NGINX_SERVICE_NAME, load_ctx=False)
     utils.deploy_blueprint_resource(
         '{0}/fileserver-location.cloudify'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/fileserver-location.cloudify')
+        '/etc/nginx/conf.d/fileserver-location.cloudify',
+        NGINX_SERVICE_NAME, load_ctx=False)
     utils.deploy_blueprint_resource(
         '{0}/ui-locations.cloudify'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/ui-locations.cloudify')
+        '/etc/nginx/conf.d/ui-locations.cloudify',
+        NGINX_SERVICE_NAME, load_ctx=False)
     utils.deploy_blueprint_resource(
         '{0}/logs-conf.cloudify'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/logs-conf.cloudify')
+        '/etc/nginx/conf.d/logs-conf.cloudify',
+        NGINX_SERVICE_NAME, load_ctx=False)
 
-    utils.systemd.enable('nginx')
+    utils.systemd.enable(NGINX_SERVICE_NAME,
+                         append_prefix=False)
 
 
 preconfigure_nginx()

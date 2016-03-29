@@ -9,23 +9,28 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+ctx_properties = utils.ctx_factory.create('python')
+
 
 def install_python_requirements():
 
-    pip_source_rpm_url = ctx.node.properties['pip_source_rpm_url']
-    install_python_compilers = ctx.node.properties['install_python_compilers']
+    pip_source_rpm_url = ctx_properties['pip_source_rpm_url']
+    install_python_compilers = ctx_properties['install_python_compilers']
 
     ctx.logger.info('Installing Python Requirements...')
     utils.set_selinux_permissive()
     utils.copy_notice('python')
 
-    utils.yum_install(pip_source_rpm_url)
+    utils.yum_install(pip_source_rpm_url, service_name='python')
 
     if install_python_compilers:
         ctx.logger.info('Installing Compilers...')
-        utils.yum_install('python-devel')
-        utils.yum_install('gcc')
-        utils.yum_install('gcc-c++')
+        utils.yum_install('python-devel', service_name='python')
+        utils.yum_install('gcc', service_name='python')
+        utils.yum_install('gcc-c++', service_name='python')
 
 
 install_python_requirements()
+if utils.is_upgrade:
+    utils.ctx_factory.archive_properties('python')
+    utils.BlueprintResourceFactory().archive_resources('python')

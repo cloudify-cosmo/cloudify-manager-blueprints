@@ -12,20 +12,23 @@ import utils  # NOQA
 
 
 CONFIG_PATH = "components/mgmtworker/config"
+MGMT_WORKER_SERVICE_NAME = 'mgmtworker'
+
+ctx_properties = utils.ctx_factory.create(MGMT_WORKER_SERVICE_NAME)
 
 
 def _install_optional(mgmtworker_venv):
 
     rest_client_source_url = \
-        ctx.node.properties['rest_client_module_source_url']
+        ctx_properties['rest_client_module_source_url']
     plugins_common_source_url = \
-        ctx.node.properties['plugins_common_module_source_url']
+        ctx_properties['plugins_common_module_source_url']
     script_plugin_source_url = \
-        ctx.node.properties['script_plugin_module_source_url']
+        ctx_properties['script_plugin_module_source_url']
     rest_service_source_url = \
-        ctx.node.properties['rest_service_module_source_url']
+        ctx_properties['rest_service_module_source_url']
     agent_source_url = \
-        ctx.node.properties['agent_module_source_url']
+        ctx_properties['agent_module_source_url']
 
     # this allows to upgrade modules if necessary.
     ctx.logger.info('Installing Optional Packages if supplied...')
@@ -42,7 +45,8 @@ def _install_optional(mgmtworker_venv):
     if rest_service_source_url:
         ctx.logger.info('Downloading cloudify-manager Repository...')
         manager_repo = \
-            utils.download_cloudify_resource(rest_service_source_url)
+            utils.download_cloudify_resource(rest_service_source_url,
+                                             MGMT_WORKER_SERVICE_NAME)
         ctx.logger.info('Extracting Manager Repository...')
         utils.untar(manager_repo)
 
@@ -57,7 +61,7 @@ def _install_optional(mgmtworker_venv):
 def install_mgmtworker():
 
     management_worker_rpm_source_url = \
-        ctx.node.properties['management_worker_rpm_source_url']
+        ctx_properties['management_worker_rpm_source_url']
 
     # these must all be exported as part of the start operation.
     # they will not persist, so we should use the new agent
@@ -69,12 +73,13 @@ def install_mgmtworker():
 
     broker_port_ssl = '5671'
     broker_port_no_ssl = '5672'
-    rabbitmq_ssl_enabled = ctx.node.properties['rabbitmq_ssl_enabled']
+    rabbitmq_ssl_enabled = ctx_properties['rabbitmq_ssl_enabled']
     ctx.logger.info("rabbitmq_ssl_enabled: {0}".format(rabbitmq_ssl_enabled))
-    rabbitmq_cert_public = ctx.node.properties['rabbitmq_cert_public']
+    rabbitmq_cert_public = ctx_properties['rabbitmq_cert_public']
 
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip()
+        utils.get_rabbitmq_endpoint_ip(
+                ctx_properties.get('rabbitmq_endpoint_ip'))
 
     # Fix possible injections in json of rabbit credentials
     # See json.org for string spec
@@ -84,7 +89,7 @@ def install_mgmtworker():
         # things noisily, e.g. on newlines and backspaces.
         # TODO: add:
         # sed 's/"/\\"/' | sed 's/\\/\\\\/' | sed s-/-\\/- | sed 's/\t/\\t/'
-        ctx.instance.runtime_properties[key] = ctx.node.properties[key]
+        ctx.instance.runtime_properties[key] = ctx_properties[key]
 
     # Make the ssl enabled flag work with json (boolean in lower case)
     # TODO: check if still needed:
@@ -95,7 +100,7 @@ def install_mgmtworker():
     ctx.logger.info('Installing Management Worker...')
     utils.set_selinux_permissive()
 
-    utils.copy_notice('mgmtworker')
+    utils.copy_notice(MGMT_WORKER_SERVICE_NAME)
     utils.mkdir(mgmtworker_home)
     utils.mkdir('{0}/config'.format(mgmtworker_home))
     utils.mkdir(celery_log_dir)
@@ -103,7 +108,8 @@ def install_mgmtworker():
 
     # this create the mgmtworker_venv and installs the relevant
     # modules into it.
-    utils.yum_install(management_worker_rpm_source_url)
+    utils.yum_install(management_worker_rpm_source_url,
+                      service_name=MGMT_WORKER_SERVICE_NAME)
     _install_optional(mgmtworker_venv)
 
     # Add certificate and select port, as applicable
@@ -133,11 +139,12 @@ def install_mgmtworker():
     if os.path.isfile(os.path.join(mgmtworker_venv, 'bin/python')):
         broker_conf_path = os.path.join(celery_work_dir, 'broker_config.json')
         utils.deploy_blueprint_resource(
-            '{0}/broker_config.json'.format(CONFIG_PATH), broker_conf_path)
+            '{0}/broker_config.json'.format(CONFIG_PATH), broker_conf_path,
+            MGMT_WORKER_SERVICE_NAME)
         # The config contains credentials, do not let the world read it
         utils.sudo(['chmod', '440', broker_conf_path])
-    utils.logrotate('mgmtworker')
-    utils.systemd.configure('mgmtworker')
+    utils.systemd.configure(MGMT_WORKER_SERVICE_NAME)
+    utils.logrotate(MGMT_WORKER_SERVICE_NAME)
 
 
 install_mgmtworker()

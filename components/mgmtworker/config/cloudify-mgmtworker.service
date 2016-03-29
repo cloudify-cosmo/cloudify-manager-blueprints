@@ -19,14 +19,14 @@ ExecStart=/opt/mgmtworker/env/bin/celery worker \
     --queues=cloudify.management \
     --logfile=${CELERY_LOG_DIR}/cloudify.management_worker.log \
     --pidfile=${CELERY_WORK_DIR}/cloudify.management_worker.pid \
-    --autoscale={{ ctx.node.properties.max_workers }},{{ ctx.node.properties.min_workers }} \
+    --autoscale={{ node.properties.max_workers }},{{ node.properties.min_workers }} \
     --without-gossip \
     --without-mingle \
     --with-gate-keeper \
-    --gate-keeper-bucket-size={{ ctx.node.properties.gate_keeper_bucket_size }} \
+    --gate-keeper-bucket-size={{ node.properties.gate_keeper_bucket_size }} \
     --with-logging-server \
     --logging-server-logdir=${CELERY_LOG_DIR}/logs \
-    --logging-server-handler-cache-size={{ ctx.node.properties.max_workers }}
+    --logging-server-handler-cache-size={{ node.properties.max_workers }}
 
 [Install]
 WantedBy=multi-user.target

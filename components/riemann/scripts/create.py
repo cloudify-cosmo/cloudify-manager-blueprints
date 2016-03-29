@@ -9,18 +9,22 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+RIEMANN_SERVICE_NAME = 'riemann'
+
 
 CONFIG_PATH = 'components/riemann/config'
 
+ctx_properties = utils.ctx_factory.create(RIEMANN_SERVICE_NAME)
+
 
 def install_riemann():
-    langohr_source_url = ctx.node.properties['langohr_jar_source_url']
-    daemonize_source_url = ctx.node.properties['daemonize_rpm_source_url']
-    riemann_source_url = ctx.node.properties['riemann_rpm_source_url']
+    langohr_source_url = ctx_properties['langohr_jar_source_url']
+    daemonize_source_url = ctx_properties['daemonize_rpm_source_url']
+    riemann_source_url = ctx_properties['riemann_rpm_source_url']
     # Needed for Riemann's config
-    cloudify_resources_url = ctx.node.properties['cloudify_resources_url']
-    rabbitmq_username = ctx.node.properties['rabbitmq_username']
-    rabbitmq_password = ctx.node.properties['rabbitmq_password']
+    cloudify_resources_url = ctx_properties['cloudify_resources_url']
+    rabbitmq_username = ctx_properties['rabbitmq_username']
+    rabbitmq_password = ctx_properties['rabbitmq_password']
 
     riemann_config_path = '/etc/riemann'
     riemann_log_path = '/var/log/cloudify/riemann'
@@ -38,28 +42,31 @@ def install_riemann():
             'and at least 1 character long in the manager blueprint inputs.')
 
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip()
+        utils.get_rabbitmq_endpoint_ip(
+                ctx_properties.get('rabbitmq_endpoint_ip'))
 
     ctx.logger.info('Installing Riemann...')
     utils.set_selinux_permissive()
 
-    utils.copy_notice('riemann')
+    utils.copy_notice(RIEMANN_SERVICE_NAME)
     utils.mkdir(riemann_log_path)
     utils.mkdir(langohr_home)
     utils.mkdir(riemann_config_path)
     utils.mkdir('{0}/conf.d'.format(riemann_config_path))
 
-    langohr = utils.download_cloudify_resource(langohr_source_url)
+    langohr = utils.download_cloudify_resource(langohr_source_url,
+                                               RIEMANN_SERVICE_NAME)
     utils.sudo(['cp', langohr, extra_classpath])
     ctx.logger.info('Applying Langohr permissions...')
     utils.sudo(['chmod', '644', extra_classpath])
-    utils.yum_install(daemonize_source_url)
-    utils.yum_install(riemann_source_url)
+    utils.yum_install(daemonize_source_url, service_name=RIEMANN_SERVICE_NAME)
+    utils.yum_install(riemann_source_url, service_name=RIEMANN_SERVICE_NAME)
 
-    utils.logrotate('riemann')
+    utils.logrotate(RIEMANN_SERVICE_NAME)
 
     ctx.logger.info('Downloading cloudify-manager Repository...')
-    manager_repo = utils.download_cloudify_resource(cloudify_resources_url)
+    manager_repo = utils.download_cloudify_resource(cloudify_resources_url,
+                                                    RIEMANN_SERVICE_NAME)
     ctx.logger.info('Extracting Manager Repository...')
     utils.untar(manager_repo, '/tmp')
     ctx.logger.info('Deploying Riemann manager.config...')
@@ -70,7 +77,8 @@ def install_riemann():
     ctx.logger.info('Deploying Riemann conf...')
     utils.deploy_blueprint_resource(
         '{0}/main.clj'.format(CONFIG_PATH),
-        '{0}/main.clj'.format(riemann_config_path))
+        '{0}/main.clj'.format(riemann_config_path),
+        RIEMANN_SERVICE_NAME)
 
     # our riemann configuration will (by default) try to read these environment
     # variables. If they don't exist, it will assume
@@ -82,7 +90,7 @@ def install_riemann():
     # config.
     # These should be potentially different
     # if the manager and rabbitmq are running on different hosts.
-    utils.systemd.configure('riemann')
-    utils.clean_var_log_dir('riemann')
+    utils.systemd.configure(RIEMANN_SERVICE_NAME)
+    utils.clean_var_log_dir(RIEMANN_SERVICE_NAME)
 
 install_riemann()

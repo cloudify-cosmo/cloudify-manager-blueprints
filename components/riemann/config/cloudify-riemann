@@ -6,5 +6,5 @@ RABBITMQ_HOST="{{ ctx.instance.host_ip }}"
 MANAGEMENT_IP="{{ ctx.instance.host_ip }}"
 
 RABBITMQ_HOST="{{ ctx.instance.runtime_properties.rabbitmq_endpoint_ip }}"
-RABBITMQ_USER="{{ ctx.node.properties.rabbitmq_username }}"
-RABBITMQ_PASS="{{ ctx.node.properties.rabbitmq_password }}"
+RABBITMQ_USER="{{ node.properties.rabbitmq_username }}"
+RABBITMQ_PASS="{{ node.properties.rabbitmq_password }}"

@@ -13,6 +13,9 @@ ctx.download_resource(
 import utils  # NOQA
 
 CONFIG_PATH = "components/influxdb/config"
+INFLUX_SERVICE_NAME = 'influxdb'
+
+ctx_properties = utils.ctx_factory.create(INFLUX_SERVICE_NAME)
 
 
 def _configure_influxdb(host, port):
@@ -61,7 +64,7 @@ def _configure_influxdb(host, port):
 
 def _install_influxdb():
 
-    influxdb_source_url = ctx.node.properties['influxdb_rpm_source_url']
+    influxdb_source_url = ctx_properties['influxdb_rpm_source_url']
 
     influxdb_user = 'influxdb'
     influxdb_group = 'influxdb'
@@ -71,29 +74,30 @@ def _install_influxdb():
     ctx.logger.info('Installing InfluxDB...')
     utils.set_selinux_permissive()
 
-    utils.copy_notice('influxdb')
+    utils.copy_notice(INFLUX_SERVICE_NAME)
     utils.mkdir(influxdb_home)
     utils.mkdir(influxdb_log_path)
 
-    utils.yum_install(influxdb_source_url)
+    utils.yum_install(influxdb_source_url, service_name=INFLUX_SERVICE_NAME)
     utils.sudo(['rm', '-rf', '/etc/init.d/influxdb'])
 
     ctx.logger.info('Deploying InfluxDB config.toml...')
     utils.deploy_blueprint_resource(
         '{0}/config.toml'.format(CONFIG_PATH),
-        '{0}/shared/config.toml'.format(influxdb_home))
+        '{0}/shared/config.toml'.format(influxdb_home),
+        INFLUX_SERVICE_NAME)
 
     ctx.logger.info('Fixing user permissions...')
     utils.chown(influxdb_user, influxdb_group, influxdb_home)
     utils.chown(influxdb_user, influxdb_group, influxdb_log_path)
 
-    utils.logrotate('influxdb')
-    utils.systemd.configure('influxdb')
+    utils.systemd.configure(INFLUX_SERVICE_NAME)
+    utils.logrotate(INFLUX_SERVICE_NAME)
 
 
 def main():
 
-    influxdb_endpoint_ip = ctx.node.properties['influxdb_endpoint_ip']
+    influxdb_endpoint_ip = ctx_properties['influxdb_endpoint_ip']
     # currently, cannot be changed due to webui not allowing to configure it.
     influxdb_endpoint_port = 8086
 
@@ -107,15 +111,15 @@ def main():
         influxdb_endpoint_ip = ctx.instance.host_ip
         _install_influxdb()
 
-        utils.systemd.start('cloudify-influxdb')
+        utils.systemd.start(INFLUX_SERVICE_NAME)
 
         utils.wait_for_port(influxdb_endpoint_port, influxdb_endpoint_ip)
         _configure_influxdb(influxdb_endpoint_ip, influxdb_endpoint_port)
 
-        utils.systemd.stop('cloudify-influxdb')
+        utils.systemd.stop(INFLUX_SERVICE_NAME)
 
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         influxdb_endpoint_ip
 
-
-main()
+if utils.is_install:
+    main()

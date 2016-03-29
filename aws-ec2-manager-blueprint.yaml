@@ -592,7 +592,7 @@ node_templates:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path: components/manager/scripts/configure_manager.sh
+            script_path: components/manager/scripts/create_conf.py
             fabric_env:
               <<: *manager_fabric_env
               always_use_pty: true

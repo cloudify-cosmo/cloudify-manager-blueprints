@@ -747,7 +747,7 @@ node_templates:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path: components/manager/scripts/configure_manager.sh
+            script_path: components/manager/scripts/create_conf.py
             fabric_env: &vsphere_fabric_env
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }

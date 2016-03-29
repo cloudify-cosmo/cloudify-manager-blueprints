@@ -3,21 +3,6 @@
 # . $(ctx download-resource "components/utils")
 
 
-function _set_rest_port() {
-    security_enabled=$(ctx -j node properties security.enabled)
-    ssl_enabled=$(ctx -j node properties security.ssl.enabled)
-    if ${security_enabled} == true && ${ssl_enabled} == true ; then
-        ctx logger info "SSL is enabled, setting rest port to 443..."
-        ctx instance runtime_properties rest_port 443
-        ctx instance runtime_properties rest_protocol https
-    else
-        ctx logger info "Security is off or SSL not enabled, setting rest port to 80..."
-        ctx instance runtime_properties rest_port 80
-        ctx instance runtime_properties rest_protocol http
-    fi
-}
-
-
 function _disable_requiretty() {
     ###
     # disables requiretty for a user or globally
@@ -54,7 +39,7 @@ function _disable_requiretty() {
         whoami=$(whoami)
         requiretty='!requiretty'
 
-        ctx logger info "Creating sudoers user file and setting disable requiretty directive."
+        echo "Creating sudoers user file and setting disable requiretty directive."
         echo "Defaults:${whoami} ${requiretty}" | sudo tee /etc/sudoers.d/${whoami} >/dev/null
         sudo chmod 0440 /etc/sudoers.d/${whoami}
     }
@@ -66,7 +51,7 @@ function _disable_requiretty() {
         if [ ! -f "/etc/sudoers" ]; then
             error_exit 116 "Could not find sudoers file at expected location (/etc/sudoers)"
         fi
-        ctx logger info "Setting directive in /etc/sudoers."
+        echo "Setting directive in /etc/sudoers."
         sudo sed -i 's/^Defaults.*requiretty/#&/g' /etc/sudoers || error_exit_on_level $? 117 "Failed to edit sudoers file to disable requiretty directive" 1
     }
 
@@ -74,16 +59,15 @@ function _disable_requiretty() {
     # Otherwise, it will disable it for all users.
     if sudo grep -q -E '[^!]requiretty' /etc/sudoers; then
         if [ "$(get_distro)" != 'unsupported' ]; then
-            ctx logger info "Distro is supported."
+            echo "Distro is supported."
             disable_for_user
         else
-            ctx logger info "Distro is unsupported."
+            echo "Distro is unsupported."
             disable_for_all_users
         fi
     else
-        ctx logger info "No requiretty directive found, nothing to do."
+        echo "No requiretty directive found, nothing to do."
     fi
 }
 
 _disable_requiretty
-_set_rest_port
