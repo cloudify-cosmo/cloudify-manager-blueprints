@@ -521,7 +521,7 @@ function get_rabbitmq_endpoint_ip() {
     ###
     RABBITMQ_ENDPOINT_IP="$(ctx node properties rabbitmq_endpoint_ip)"
     if [[ -z "${RABBITMQ_ENDPOINT_IP}" ]]; then
-        RABBITMQ_ENDPOINT_IP="$(ctx instance manager_host_ip)"
+        RABBITMQ_ENDPOINT_IP="$(ctx instance host_ip)"
     fi
     echo "${RABBITMQ_ENDPOINT_IP}"
 }

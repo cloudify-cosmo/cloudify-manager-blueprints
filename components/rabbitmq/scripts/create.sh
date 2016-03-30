@@ -98,7 +98,7 @@ function install_rabbitmq() {
 
 ctx logger info "Setting Broker IP runtime property."
 if [ -z "${RABBITMQ_ENDPOINT_IP}" ]; then
-    BROKER_IP=$(ctx instance manager_host_ip)
+    BROKER_IP=$(ctx instance host_ip)
     ctx logger info "Installing rabbitmq on manager"
     install_rabbitmq
 else

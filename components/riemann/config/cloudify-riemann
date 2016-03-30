@@ -11,7 +11,7 @@ CLOUDIFY_PASSWORD="{{ ctx.instance.runtime_properties.cloudify_password }}"
 VERIFY_SSL_CERTIFICATE="{{ ctx.instance.runtime_properties.verify_certificate }}"
 CLOUDIFY_SSL_CERT="{{ ctx.instance.runtime_properties.ssl_certificate }}"
 
-RABBITMQ_HOST="{{ ctx.instance.manager_host_ip }}"
+RABBITMQ_HOST="{{ ctx.instance.host_ip }}"
 MANAGEMENT_IP="{{ ctx.instance.manager_host_ip }}"
 MANAGER_REST_PORT="{{ ctx.instance.runtime_properties.rest_port }}"
 

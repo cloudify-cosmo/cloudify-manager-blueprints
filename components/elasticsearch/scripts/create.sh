@@ -84,7 +84,7 @@ function install_elasticsearch() {
 }
 
 if [ -z "${ES_ENDPOINT_IP}" ]; then
-    ES_ENDPOINT_IP=$(ctx instance manager_host_ip)
+    ES_ENDPOINT_IP=$(ctx instance host_ip)
     install_elasticsearch
 
     ctx logger info "Starting Elasticsearch Service..."
