@@ -287,31 +287,33 @@ def yum_install(source):
     """
     if source.startswith(('http', 'https', 'ftp')):
         filename = get_file_name_from_url(source)
-    source_name, ext = os.path.splitext(filename)
-    archive_path = source_name
+        source_name, ext = os.path.splitext(filename)
+    else:
+        source_name, ext = source, ''
+    source_path = source_name
 
     if ext.endswith('rpm'):
-        archive_path = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
+        source_path = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
         ctx.logger.info('Checking whether .rpm {0} exists...'.format(
-            archive_path))
-        if not os.path.isfile(archive_path):
+            source_path))
+        if not os.path.isfile(source_path):
             tmp_path = download_file(source)
             mkdir(CLOUDIFY_SOURCES_PATH)
             ctx.logger.info('Saving {0} under {1}...'.format(
                 filename, CLOUDIFY_SOURCES_PATH))
-            move(tmp_path, archive_path)
+            move(tmp_path, source_path)
         source_name = subprocess.check_output(
-            ['rpm', '-qp', archive_path]).strip()
+            ['rpm', '-qp', source_path]).strip()
 
     ctx.logger.info('Checking whether {0} is already installed...'.format(
-        archive_path.rstrip('\n\r')))
+        source_path.rstrip('\n\r')))
     installed = run(['rpm', '-q', source_name], ignore_failures=True)
     if installed.returncode == 0:
         ctx.logger.info('Package {0} is already installed.'.format(source))
         return
 
-    ctx.logger.info('yum installing {0}...'.format(archive_path))
-    sudo(['yum', 'install', '-y', archive_path])
+    ctx.logger.info('yum installing {0}...'.format(source_path))
+    sudo(['yum', 'install', '-y', source_path])
 
 
 class SystemD(object):
