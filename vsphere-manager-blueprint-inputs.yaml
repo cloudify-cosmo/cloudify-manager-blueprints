@@ -255,6 +255,13 @@
 #elasticsearch_endpoint_ip: ''
 #elasticsearch_endpoint_port: 9200
 
+# You can enable automatic clustering of elasticsearch nodes and choose the port in which multicast discovery
+# is performed. Note that when bootstrapping two managers on the same network, if enabling clustering, you must
+# use a different port as to prevent clustering. This can be either 'true' or 'false'.
+# Must be quoted to be passed as a string.
+#elasticsearch_clustering_enabled: 'false'
+#elasticsearch_clustering_discovery_port: 54329
+
 #############################
 # InfluxDB Configuration
 #############################
