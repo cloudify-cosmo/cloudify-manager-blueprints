@@ -1,6 +1,7 @@
 /var/log/cloudify/riemann/*.log {
-        daily
+        hourly
         rotate 7
+        size 100M
         copytruncate
         compress
         delaycompress
