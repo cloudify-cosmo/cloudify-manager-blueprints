@@ -1,6 +1,7 @@
-/var/log/cloudify/logstash/*.log {
-        daily
+/var/log/cloudify/logstash/*.log /var/log/cloudify/logstash/*.err /var/log/cloudify/logstash/*.stdout {
+        hourly
         rotate 7
+        size 100M
         copytruncate
         compress
         delaycompress

@@ -455,14 +455,27 @@ def create_service_user(user, home):
 
 
 def logrotate(service):
+    """Deploys a logrotate config for a service.
+
+    Note that this is not idempotent in the sense that if a logrotate
+    file is already copied to /etc/logrotate.d, it will copy it again
+    and override it. This is done as such so that if a service deploys
+    its own logrotate configuration, we will override it.
+    """
+    if not os.path.isfile('/etc/cron.hourly/logrotate'):
+        ctx.logger.info('Deploying logrotate hourly cron job...')
+        move('/etc/cron.daily/logrotate', '/etc/cron.hourly/logrotate')
+
     ctx.logger.info('Deploying logrotate config...')
     config_file_source = 'components/{0}/config/logrotate'.format(service)
-    config_file_destination = '/etc/logrotate.d/{0}'.format(service)
-    # if not os.path.exists(config_file_destination):
-    #     os.mkdir(config_file_destination)
+    logrotated_path = '/etc/logrotate.d'
+    config_file_destination = os.path.join(logrotated_path, service)
+    if not os.path.isdir(logrotated_path):
+        os.mkdir(logrotated_path)
+        chown('root', 'root', logrotated_path)
     deploy_blueprint_resource(config_file_source, config_file_destination)
-    # TODO: check if can use os.chmod with elevated privileges
     chmod('644', config_file_destination)
+    chown('root', 'root', config_file_destination)
 
 
 def chmod(mode, path):
