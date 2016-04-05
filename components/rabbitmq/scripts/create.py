@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from time import sleep
+import time
 from os.path import join, dirname
 
 from cloudify import ctx
@@ -113,7 +113,8 @@ def _install_rabbitmq():
 
     utils.systemd.start('cloudify-rabbitmq')
 
-    sleep(30)
+    time.sleep(10)
+    utils.wait_for_port(5672)
 
     ctx.logger.info('Enabling RabbitMQ Plugins...')
     # Occasional timing issues with rabbitmq starting have resulted in
