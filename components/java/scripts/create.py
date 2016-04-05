@@ -10,9 +10,12 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+ctx_factory = utils.CtxPropertyFactory()
+ctx_properties = ctx_factory.create('java')
+
 
 def install_java():
-    java_source_url = ctx.node.properties['java_rpm_source_url']
+    java_source_url = ctx_properties['java_rpm_source_url']
 
     ctx.logger.info('Installing Java...')
     utils.set_selinux_permissive()
@@ -31,3 +34,5 @@ def install_java():
 
 
 install_java()
+ctx_factory.archive_properties('java')
+utils.BlueprintResourceFactory().archive_resources('java')

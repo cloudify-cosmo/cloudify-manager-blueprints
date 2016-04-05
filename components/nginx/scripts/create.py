@@ -12,9 +12,11 @@ import utils  # NOQA
 
 CONFIG_PATH = 'components/nginx/config'
 
+ctx_properties = utils.CtxPropertyFactory().create('nginx')
+
 
 def install_nginx():
-    nginx_source_url = ctx.node.properties['nginx_rpm_source_url']
+    nginx_source_url = ctx_properties['nginx_rpm_source_url']
 
     # this is a bit tricky. the rest_service_source_url contains files that
     # should be deployed in the fileserver. the thing is, that since the
@@ -61,9 +63,10 @@ def install_nginx():
     ctx.logger.info('Creating systemd unit override...')
     utils.deploy_blueprint_resource(
         '{0}/restart.conf'.format(CONFIG_PATH),
-        '{0}/restart.conf'.format(nginx_unit_override))
+        '{0}/restart.conf'.format(nginx_unit_override),
+        ctx_properties)
 
-    utils.logrotate('nginx')
+    utils.logrotate('nginx', ctx_properties)
     utils.clean_var_log_dir('nginx')
 
 

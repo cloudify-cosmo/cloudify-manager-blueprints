@@ -9,7 +9,9 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-ES_ENDPOINT_IP = ctx.node.properties['es_endpoint_ip']
+ctx_properties = utils.CtxPropertyFactory().create('elasticsearch')
+ES_ENDPOINT_IP = ctx_properties['es_endpoint_ip']
 
 if not ES_ENDPOINT_IP:
-    utils.systemd.start('elasticsearch')
+    ctx.logger.info('Starting Elasticsearch Service...')
+    utils.start_service_and_archive_properties('elasticsearch')

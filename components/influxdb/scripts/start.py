@@ -9,8 +9,11 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+ctx_properties = utils.CtxPropertyFactory().create('cloudify-influxdb.service')
 
-INFLUXDB_ENDPOINT_IP = ctx.node.properties['influxdb_endpoint_ip']
+
+INFLUXDB_ENDPOINT_IP = ctx_properties['influxdb_endpoint_ip']
 
 if not INFLUXDB_ENDPOINT_IP:
-    utils.systemd.start('cloudify-influxdb.service')
+    ctx.logger.info('Starting InfluxDB Service...')
+    utils.start_service_and_archive_properties('cloudify-influxdb.service')

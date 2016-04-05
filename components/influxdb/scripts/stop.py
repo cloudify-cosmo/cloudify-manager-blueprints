@@ -10,7 +10,10 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-INFLUXDB_ENDPOINT_IP = ctx.node.properties['influxdb_endpoint_ip']
+ctx_properties = utils.CtxPropertyFactory().create('influxdb')
+
+INFLUXDB_ENDPOINT_IP = ctx_properties['influxdb_endpoint_ip']
 
 if not INFLUXDB_ENDPOINT_IP:
-    utils.systemd.stop('cloudify-influxdb.service')
+    ctx.logger.info('Stopping InfluxDB Service...')
+    utils.systemd.stop('influxdb')

@@ -12,15 +12,17 @@ import utils  # NOQA
 
 CONFIG_PATH = 'components/riemann/config'
 
+ctx_properties = utils.CtxPropertyFactory().create('cloudify-riemann.service')
+
 
 def install_riemann():
-    langohr_source_url = ctx.node.properties['langohr_jar_source_url']
-    daemonize_source_url = ctx.node.properties['daemonize_rpm_source_url']
-    riemann_source_url = ctx.node.properties['riemann_rpm_source_url']
+    langohr_source_url = ctx_properties['langohr_jar_source_url']
+    daemonize_source_url = ctx_properties['daemonize_rpm_source_url']
+    riemann_source_url = ctx_properties['riemann_rpm_source_url']
     # Needed for Riemann's config
-    cloudify_resources_url = ctx.node.properties['cloudify_resources_url']
-    rabbitmq_username = ctx.node.properties['rabbitmq_username']
-    rabbitmq_password = ctx.node.properties['rabbitmq_password']
+    cloudify_resources_url = ctx_properties['cloudify_resources_url']
+    rabbitmq_username = ctx_properties['rabbitmq_username']
+    rabbitmq_password = ctx_properties['rabbitmq_password']
 
     riemann_config_path = '/etc/riemann'
     riemann_log_path = '/var/log/cloudify/riemann'
@@ -38,7 +40,7 @@ def install_riemann():
             'and at least 1 character long in the manager blueprint inputs.')
 
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip()
+        utils.get_rabbitmq_endpoint_ip(ctx_properties)
 
     ctx.logger.info('Installing Riemann...')
     utils.set_selinux_permissive()
@@ -56,7 +58,7 @@ def install_riemann():
     utils.yum_install(daemonize_source_url)
     utils.yum_install(riemann_source_url)
 
-    utils.logrotate('riemann')
+    utils.logrotate('riemann', ctx_properties)
 
     ctx.logger.info('Downloading cloudify-manager Repository...')
     manager_repo = utils.download_cloudify_resource(cloudify_resources_url)
@@ -70,7 +72,8 @@ def install_riemann():
     ctx.logger.info('Deploying Riemann conf...')
     utils.deploy_blueprint_resource(
         '{0}/main.clj'.format(CONFIG_PATH),
-        '{0}/main.clj'.format(riemann_config_path))
+        '{0}/main.clj'.format(riemann_config_path),
+        ctx_properties)
 
     # our riemann configuration will (by default) try to read these environment
     # variables. If they don't exist, it will assume
@@ -82,7 +85,7 @@ def install_riemann():
     # config.
     # These should be potentially different
     # if the manager and rabbitmq are running on different hosts.
-    utils.systemd.configure('riemann')
+    utils.systemd.configure('riemann', ctx_properties)
     utils.clean_var_log_dir('riemann')
 
 install_riemann()

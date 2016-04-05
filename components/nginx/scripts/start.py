@@ -10,4 +10,5 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-utils.systemd.start('nginx')
+ctx.logger.info('Starting Nginx Service...')
+utils.start_service_and_archive_properties('nginx')

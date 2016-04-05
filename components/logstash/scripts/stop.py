@@ -10,4 +10,5 @@ ctx.download_resource(
 import utils  # NOQA
 
 
+ctx.logger.info('Stopping Logstash Service...')
 utils.systemd.stop('logstash')

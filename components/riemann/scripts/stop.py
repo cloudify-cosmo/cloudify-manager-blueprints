@@ -10,4 +10,5 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-utils.systemd.stop('cloudify-riemann.service')
+ctx.logger.info('Stopping Riemann Service...')
+utils.systemd.stop('riemann')
