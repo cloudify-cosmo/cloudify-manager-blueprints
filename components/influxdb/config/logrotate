@@ -1,6 +1,7 @@
-/var/log/cloudify/influxdb/*.txt.* {
-        daily
+/var/log/cloudify/influxdb/*.txt {
+        hourly
         rotate 7
+        size 100M
         compress
         delaycompress
         missingok

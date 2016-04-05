@@ -136,6 +136,7 @@ def install_mgmtworker():
             '{0}/broker_config.json'.format(CONFIG_PATH), broker_conf_path)
         # The config contains credentials, do not let the world read it
         utils.sudo(['chmod', '440', broker_conf_path])
+    utils.logrotate('mgmtworker')
     utils.systemd.configure('mgmtworker')
 
 

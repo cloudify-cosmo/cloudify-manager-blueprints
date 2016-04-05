@@ -87,6 +87,7 @@ def _install_influxdb():
     utils.chown(influxdb_user, influxdb_group, influxdb_home)
     utils.chown(influxdb_user, influxdb_group, influxdb_log_path)
 
+    utils.logrotate('influxdb')
     utils.systemd.configure('influxdb')
 
 
