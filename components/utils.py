@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 
-import sys
-import os
-import time
-import subprocess
-import urllib
-import tempfile
-import socket
-import shlex
-import pwd
-import glob
-from functools import wraps
 import re
+import os
+import sys
+import pwd
+import time
+import glob
+import shlex
+import urllib
+import socket
+import tempfile
+import subprocess
+from functools import wraps
 
 from cloudify import ctx
+
 
 PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
@@ -420,20 +421,12 @@ def set_selinux_permissive():
         ctx.logger.info('SELinux is not enforced.')
 
 
-def set_rabbitmq_policy(name, q_regex, p_type, value):
-    ctx.logger.info('Setting policy {0} on queues {1} of type {2} to '
-                    '{3}'.format(name, q_regex, p_type, value))
-    sudo('rabbitmqctl set_policy {0} {1} "{"\"{2}"\":{3}}" '
-         '--apply-to-queues'.format(name, q_regex, p_type, value))
-
-
 def get_rabbitmq_endpoint_ip():
     """Gets the rabbitmq endpoint IP, using the manager IP if the node
     property is blank.
     """
     try:
         return ctx.node.properties['rabbitmq_endpoint_ip']
-    # why?
     except:
         return ctx.instance.host_ip
 
