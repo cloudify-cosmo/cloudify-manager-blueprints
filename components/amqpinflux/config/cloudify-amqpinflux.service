@@ -1,5 +1,7 @@
 [Unit]
 Description=Cloudify AMQP InfluxDB Broker Service
+Wants=cloudify-influxdb.service cloudify-rabbitmq.service
+After=cloudify-influxdb.service cloudify-rabbitmq.service
 
 [Service]
 TimeoutStartSec=0
