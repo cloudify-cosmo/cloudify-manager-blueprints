@@ -1,5 +1,7 @@
 [Unit]
 Description=Riemann Service
+Wants=cloudify-rabbitmq.service
+After=cloudify-rabbitmq.service
 
 [Service]
 TimeoutStartSec=0

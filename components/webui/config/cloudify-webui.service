@@ -1,5 +1,7 @@
 [Unit]
 Description=Cloudify WebUI Service
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 TimeoutStartSec=0
