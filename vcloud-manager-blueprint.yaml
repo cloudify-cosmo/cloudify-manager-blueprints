@@ -10,7 +10,6 @@ imports:
 
 
 inputs:
-
   management_network_name:
     type: string
     description: >
@@ -320,6 +319,28 @@ inputs:
   nodejs_source_url:
     type: string
     default: http://repository.cloudifysource.org/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
+
+  liagent_source_url:
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/components/VMware-Log-Insight-Agent-3.3.0-3516686.noarch.rpm
+
+  #############################
+  # Logstash Inputs
+  #############################
+
+  events_to_file_enable:
+    description: Enable write logs and events to file
+    type: boolean
+    default: false
+
+  #############################
+  # Log Insight Inputs
+  #############################
+
+  liagent_endpoint_ip:
+    description: Location of the Log Insight server
+    type: string
+    default: ''
 
   #############################
   # RabbitMQ Inputs
@@ -914,6 +935,12 @@ node_templates:
         target: java_runtime
       - type: logstash_to_elasticsearch
         target: elasticsearch
+
+  liagent:
+    type: manager.nodes.Liagent
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: logstash
 
   influxdb:
     type: manager.nodes.InfluxDB
