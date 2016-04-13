@@ -67,3 +67,5 @@ openstack-docker/.cloudify
 .cloudify
 
 .idea/
+
+.DS_Store

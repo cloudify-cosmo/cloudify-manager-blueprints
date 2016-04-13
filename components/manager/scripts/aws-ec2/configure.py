@@ -75,10 +75,15 @@ def _set_provider_config():
 
     node_id_to_provider_context_field = {
         'agents_security_group': 'agents_security_group',
-        'agent_keypair': 'agents_keypair'
+        'agent_keypair': 'agents_keypair',
+        'vpc_subnet': 'subnet',
+        'managment_vpc': 'vpc'
     }
 
     for node_instance in node_instances:
+        if node_instance.node_id == 'agents_instance_parameters':
+            node_id_to_provider_context_field['agents_instance_parameters'] = \
+                'agents_instance_parameters'
         if node_instance.node_id in node_id_to_provider_context_field:
             run_props = node_instance.runtime_properties
             props = nodes_by_id[node_instance.node_id].properties
