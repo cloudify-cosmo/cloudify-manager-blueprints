@@ -24,8 +24,8 @@ def install_nginx():
     #     ctx.node.properties['rest_service_module_source_url']
 
     nginx_log_path = '/var/log/cloudify/nginx'
-    manager_resources_home = '/opt/manager/resources'
-    manager_agents_path = '{0}/packages/agents'.format(manager_resources_home)
+    manager_resources_home = utils.MANAGER_RESOURCES_HOME
+    manager_agents_path = utils.AGENT_ARCHIVES_PATH
     # TODO: check if can remove these two (should come with the agent package)
     manager_scripts_path = '{0}/packages/scripts'.format(
         manager_resources_home)

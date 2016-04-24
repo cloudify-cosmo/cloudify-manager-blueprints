@@ -6,6 +6,30 @@
 
 node_types:
 
+  cloudify.nodes.ManagerResources:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      manager_resources_package:
+        default: { get_input: manager_resources_package }
+      manager_resources_package_checksum_file:
+        default: { get_input: manager_resources_package_checksum_file }
+      skip_checksum_validation:
+        default: { get_input: skip_checksum_validation }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/manager/scripts/create.py
+            fabric_env: &simple_fabric_env
+              default:
+                user: { get_input: ssh_user }
+                key_filename: { get_input: ssh_key_filename }
+                host_string: { get_attribute: [manager_host, public_ip] }
+                always_use_pty: true
+                hide: running
+
   cloudify.nodes.MyCloudifyManager:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
@@ -140,13 +164,7 @@ node_types:
               # Note that this also sets SELinux to Permissive
               # mode until we find a better position for it.
               default: components/python/scripts/create.py
-            fabric_env: &simple_fabric_env
-              default:
-                user: { get_input: ssh_user }
-                key_filename: { get_input: ssh_key_filename }
-                host_string: { get_attribute: [manager_host, public_ip] }
-                always_use_pty: true
-                hide: running
+            fabric_env: *simple_fabric_env
 
   manager.nodes.JavaRuntime:
     derived_from: cloudify.nodes.SoftwareComponent

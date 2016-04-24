@@ -1,26 +1,13 @@
 #!/bin/python
 
-import platform
-
 import fabric.api
 from fabric.contrib.files import exists as remote_exists
 
 from cloudify import ctx
-from cloudify.exceptions import NonRecoverableError
-
-
-def _get_distro_info():
-    distro, _, release = platform.linux_distribution(
-        full_distribution_name=False)
-    return '{0} {1}'.format(distro, release)
 
 
 def retrieve(agent_packages):
     ctx.logger.info('Downloading Cloudify Agents...')
-    if not agent_packages:
-        raise NonRecoverableError(
-            'Cannot find agent packages. At least one agent package must be '
-            'provided compatible with {0}.'.format(_get_distro_info()))
 
     for agent, source_url in agent_packages.items():
         dest_path = ctx.instance.runtime_properties['agent_packages_path']
