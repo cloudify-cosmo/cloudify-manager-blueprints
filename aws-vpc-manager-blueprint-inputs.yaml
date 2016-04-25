@@ -54,6 +54,16 @@ aws_secret_access_key: ''
 
 #use_existing_route_table: false
 
+# This is the Amazon NAT AMI that you will run and install the NAT components on.
+# The default value is matched to the default instance_type and ec2_region_name.
+# This may also vary by account.
+#NAT_image_id: 'ami-311a1a5b'
+
+# This is the Amazon NAT instance type.
+# The default value is matched to the default image_id and ec2_region_name.
+# This may also vary by account.
+#NAT_instance_type: 't2.micro'
+
 # This is the Amazon AMI that you will run and install the manager components on.
 # The default value is matched to the default instance_type and ec2_region_name.
 # This may also vary by account.

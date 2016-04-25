@@ -20,6 +20,14 @@ inputs:
     type: string
     default: ''
 
+  NAT_image_id:
+    type: string
+    default: ami-311a1a5b
+
+  NAT_instance_type:
+    type: string
+    default: t2.micro
+
   ec2_region_name:
     type: string
     default: 'us-east-1'
@@ -71,6 +79,14 @@ inputs:
   manager_server_name:
     type: string
     default: 'cloudify-vpc-manager-server'
+
+  NAT_security_group_name:
+    type: string
+    default: 'cloudify-vpc-NAT-security-group'
+
+  use_existing_NAT_group:
+    type: boolean
+    default: false
 
   ssh_user:
     type: string
@@ -696,10 +712,16 @@ node_templates:
           from_port: 53229
           to_port: 53229
           src_group_id: { get_property: [agents_security_group, resource_id] }
+        - ip_protocol: tcp
+          from_port: 1
+          to_port: 65535
+          src_group_id: { get_property: [NAT_security_group, resource_id] }
       aws_config: *aws_configuration
     relationships:
       - type: cloudify.relationships.depends_on
         target: agents_security_group
+      - type: cloudify.relationships.depends_on
+        target: NAT_security_group
       - type: cloudify.aws.relationships.security_group_contained_in_vpc
         target: managment_vpc
 
@@ -718,11 +740,16 @@ node_templates:
           from_port: 5985
           to_port: 5985
           cidr_ip: 0.0.0.0/0
+        - ip_protocol: tcp
+          from_port: 1
+          to_port: 65535
+          src_group_id: { get_property: [NAT_security_group, resource_id] }
       aws_config: *aws_configuration
     relationships:
       - type: cloudify.aws.relationships.security_group_contained_in_vpc
         target: managment_vpc
-
+      - type: cloudify.relationships.depends_on
+        target: NAT_security_group
 
   manager_server_ip:
     type: cloudify.aws.nodes.ElasticIP
@@ -740,7 +767,7 @@ node_templates:
       image_id: { get_input: image_id }
       instance_type: { get_input: instance_type }
       parameters:
-        placement: { get_property: [ vpc_subnet, availability_zone ] }
+        placement: { get_property: [ public_subnet, availability_zone ] }
       agent_config:
         install_method: none
       aws_config: *aws_configuration
@@ -758,9 +785,9 @@ node_templates:
       - type: cloudify.aws.relationships.instance_connected_to_security_group
         target: management_security_group
       - type: cloudify.aws.relationships.instance_contained_in_subnet
-        target: vpc_subnet
+        target: public_subnet
 
-  vpc_route_table:
+  custom_route_table:
     type: cloudify.aws.nodes.RouteTable
     properties:
       aws_config: *aws_configuration
@@ -768,9 +795,29 @@ node_templates:
       - type: cloudify.aws.relationships.routetable_contained_in_vpc
         target: managment_vpc
       - type: cloudify.aws.relationships.routetable_associated_with_subnet
-        target: vpc_subnet
+        target: public_subnet
       - type: cloudify.aws.relationships.route_table_to_gateway
         target: vpc_internet_gateway
+
+  main_route_table:
+    type: cloudify.aws.nodes.RouteTable
+    properties:
+      aws_config: *aws_configuration
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: aws.vpc.routetable.create_route_table
+          inputs:
+            routes:
+              - destination_cidr_block: 0.0.0.0/0
+                instance_id: { get_attribute: [ vpc_NAT_instance, aws_resource_id ] }
+    relationships:
+      - type: cloudify.aws.relationships.routetable_contained_in_vpc
+        target: managment_vpc
+      - type: cloudify.relationships.depends_on
+        target: vpc_NAT_instance
+      - type: cloudify.aws.relationships.routetable_associated_with_subnet
+        target: private_subnet
 
   vpc_internet_gateway:
     type: cloudify.aws.nodes.InternetGateway
@@ -780,7 +827,99 @@ node_templates:
       - type: cloudify.aws.relationships.gateway_connected_to_vpc
         target: managment_vpc
 
-  vpc_subnet:
+  vpc_NAT_gateway:
+    type: cloudify.aws.nodes.Gateway
+    properties:
+      image_id: { get_input: NAT_image_id }
+      instance_type: { get_input: NAT_instance_type }
+      parameters:
+        placement: { get_property: [ public_subnet, availability_zone ] }
+      aws_config: *aws_configuration
+    relationships:
+      - type: cloudify.aws.relationships.instance_connected_to_elastic_ip
+        target: NAT_server_ip
+      - type: cloudify.aws.relationships.instance_connected_to_keypair
+        target: agent_keypair
+      - type: cloudify.aws.relationships.instance_connected_to_security_group
+        target: agents_security_group
+      - type: cloudify.aws.relationships.instance_connected_to_security_group
+        target: NAT_security_group
+      - type: cloudify.aws.relationships.instance_contained_in_subnet
+        target: public_subnet
+
+  vpc_NAT_instance:
+    type: cloudify.aws.nodes.Instance
+    properties:
+      image_id: { get_input: NAT_image_id }
+      instance_type: { get_input: NAT_instance_type }
+      parameters:
+        placement: { get_property: [ public_subnet, availability_zone ] }
+      agent_config:
+        install_method: none
+      aws_config: *aws_configuration
+#    interfaces:
+#      cloudify.interfaces.lifecycle:
+#        configure:
+#          implementation: aws.ec2.instance.modify_instance_attributes
+#          inputs:
+#            new_attributes:
+#              sourceDestCheck : false
+    relationships:
+      - type: cloudify.aws.relationships.instance_connected_to_elastic_ip
+        target: NAT_server_ip
+      - type: cloudify.aws.relationships.instance_connected_to_keypair
+        target: agent_keypair
+      - type: cloudify.aws.relationships.instance_connected_to_security_group
+        target: agents_security_group
+      - type: cloudify.aws.relationships.instance_connected_to_security_group
+        target: NAT_security_group
+      - type: cloudify.aws.relationships.instance_contained_in_subnet
+        target: public_subnet
+
+  NAT_security_group:
+    type: cloudify.aws.nodes.SecurityGroup
+    properties:
+      resource_id: { get_input: NAT_security_group_name }
+      use_external_resource: { get_input: use_existing_NAT_group }
+      description: Security group for Cloudify NAT VMs
+      rules:
+        - ip_protocol: tcp
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+        - ip_protocol: tcp
+          from_port: 80
+          to_port: 80
+          cidr_ip: 10.0.1.0/24
+        - ip_protocol: tcp
+          from_port: 443
+          to_port: 443
+          cidr_ip: 10.0.1.0/24
+      aws_config: *aws_configuration
+    relationships:
+      - type: cloudify.aws.relationships.security_group_contained_in_vpc
+        target: managment_vpc
+
+  NAT_server_ip:
+    type: cloudify.aws.nodes.ElasticIP
+    properties:
+      aws_config: *aws_configuration
+      domain: vpc
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: vpc_internet_gateway
+
+  private_subnet:
+    type: cloudify.aws.nodes.Subnet
+    properties:
+      cidr_block: 10.0.1.0/24
+      availability_zone: { get_input: availability_zone }
+      aws_config: *aws_configuration
+    relationships:
+      - type: cloudify.aws.relationships.subnet_contained_in_vpc
+        target: managment_vpc
+
+  public_subnet:
     type: cloudify.aws.nodes.Subnet
     properties:
       cidr_block: 10.0.0.0/24

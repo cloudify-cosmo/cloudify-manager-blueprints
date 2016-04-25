@@ -76,7 +76,7 @@ def _set_provider_config():
     node_id_to_provider_context_field = {
         'agents_security_group': 'agents_security_group',
         'agent_keypair': 'agents_keypair',
-        'vpc_subnet': 'subnet',
+        'private_subnet': 'subnet',
         'managment_vpc': 'vpc'
     }
 
