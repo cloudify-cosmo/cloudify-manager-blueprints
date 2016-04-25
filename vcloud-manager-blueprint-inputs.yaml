@@ -103,6 +103,21 @@ user_public_key: ssh-rsa...
 #insecure_endpoints_disabled: false
 
 #############################
+# Manager Resources Package
+#############################
+#manager_resources_package: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.4.0/m4-RELEASE/cloudify-manager-resources_3.4.0-m4-b393.tar.gz
+
+# Providing a checksum file url will allow validating the resources package.
+# By default, no validation is performed. Providing a checksum file will use
+# the file to validate. Note that not providing a file but changing
+# `skip_checksum_validation` to false means we will try to guess the location
+# of an md5 checksum file and validate against it.
+# You can download our md5 checksum file by appending .md5
+# to the `manager_resources_package` url.
+#manager_resources_package_checksum_file: ''
+#skip_checksum_validation: true
+
+#############################
 # Agent Packages
 #############################
 

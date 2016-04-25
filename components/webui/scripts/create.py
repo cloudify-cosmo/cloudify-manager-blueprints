@@ -46,15 +46,15 @@ def install_webui():
     utils.create_service_user(webui_user, webui_home)
 
     ctx.logger.info('Installing NodeJS...')
-    nodejs = utils.download_file(nodejs_source_url)
+    nodejs = utils.download_cloudify_resource(nodejs_source_url)
     utils.untar(nodejs, nodejs_home)
 
     ctx.logger.info('Installing Cloudify\'s WebUI...')
-    webui = utils.download_file(webui_source_url)
+    webui = utils.download_cloudify_resource(webui_source_url)
     utils.untar(webui, webui_home)
 
     ctx.logger.info('Installing Grafana...')
-    grafana = utils.download_file(grafana_source_url)
+    grafana = utils.download_cloudify_resource(grafana_source_url)
     utils.untar(grafana, grafana_home)
 
     ctx.logger.info('Deploying WebUI Configuration...')

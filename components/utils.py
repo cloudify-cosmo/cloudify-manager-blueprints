@@ -9,6 +9,7 @@ import glob
 import shlex
 import urllib
 import socket
+import hashlib
 import tempfile
 import subprocess
 from functools import wraps
@@ -18,6 +19,8 @@ from cloudify import ctx
 
 PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
+MANAGER_RESOURCES_HOME = '/opt/manager/resources'
+AGENT_ARCHIVES_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
 
 
 def retry(exception, tries=4, delay=3, backoff=2):
@@ -515,8 +518,30 @@ def clean_var_log_dir(service):
     #     sudo(['rm', '-rf', path])
 
 
-def untar(source, destination='/tmp', strip=1):
+def untar(source, destination='/tmp', strip=1, skip_old_files=False):
     # TODO: use tarfile instead
     ctx.logger.debug('Extracting {0} to {1}...'.format(source, destination))
-    sudo(['tar', '-xzvf', source, '-C', destination,
-          '--strip={0}'.format(strip)])
+    tar_command = ['tar', '-xzvf', source, '-C', destination,
+                   '--strip={0}'.format(strip)]
+    if skip_old_files:
+        tar_command.append('--skip-old-files')
+    sudo(tar_command)
+
+
+def validate_md5_checksum(resource_path, md5_checksum_file_path):
+    ctx.logger.info('Validating md5 checksum for {0}'.format(resource_path))
+    with open(md5_checksum_file_path) as checksum_file:
+        original_md5 = checksum_file.read().rstrip('\n\r').split()[0]
+
+    with open(resource_path) as file_to_check:
+        data = file_to_check.read()
+        # pipe contents of the file through
+        md5_returned = hashlib.md5(data).hexdigest()
+
+    if original_md5 == md5_returned:
+        return True
+    else:
+        ctx.logger.error(
+            'md5 checksum validation failed! Original checksum: {0} '
+            'Calculated checksum: {1}.'.format(original_md5, md5_returned))
+        return False
