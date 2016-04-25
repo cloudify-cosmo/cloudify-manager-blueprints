@@ -186,6 +186,13 @@ def _install_elasticsearch():
     utils.chown('elasticsearch', 'elasticsearch',
                 os.path.join(es_conf_path, 'logging.yml'))
 
+    ctx.logger.info('Creating Elasticsearch scripts folder and '
+                    'additional external Elasticsearch scripts...')
+    utils.deploy_blueprint_resource(
+        os.path.join(CONFIG_PATH, 'scripts'),
+        os.path.join(es_conf_path, 'scripts')
+    )
+
     ctx.logger.info('Setting Elasticsearch Heap Size...')
     # we should treat these as templates.
     utils.replace_in_file(
