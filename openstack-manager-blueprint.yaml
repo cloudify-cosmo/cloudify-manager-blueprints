@@ -180,7 +180,8 @@ inputs:
   #############################
   rest_service_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m4-RELEASE/cloudify-rest-service-3.4.0-m4_b393.x86_64.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.4.0/m4/rest-service-3.4.0~m4-393.el7.x86_64.rpm
+#    default: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m4-RELEASE/cloudify-rest-service-3.4.0-m4_b393.x86_64.rpm
 
   management_worker_rpm_source_url:
     type: string
