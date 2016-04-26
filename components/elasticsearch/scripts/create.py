@@ -152,6 +152,7 @@ def _install_elasticsearch():
     es_logs_path = "/var/log/cloudify/elasticsearch"
     es_conf_path = "/etc/elasticsearch"
     es_unit_override = "/etc/systemd/system/elasticsearch.service.d"
+    es_scripts_path = os.path.join(es_conf_path, 'scripts')
 
     ctx.logger.info('Installing Elasticsearch...')
     utils.set_selinux_permissive()
@@ -188,9 +189,10 @@ def _install_elasticsearch():
 
     ctx.logger.info('Creating Elasticsearch scripts folder and '
                     'additional external Elasticsearch scripts...')
+    utils.mkdir(es_scripts_path)
     utils.deploy_blueprint_resource(
-        os.path.join(CONFIG_PATH, 'scripts'),
-        os.path.join(es_conf_path, 'scripts')
+        os.path.join(CONFIG_PATH, 'scripts', 'append.groovy'),
+        os.path.join(es_scripts_path, 'append.groovy')
     )
 
     ctx.logger.info('Setting Elasticsearch Heap Size...')
