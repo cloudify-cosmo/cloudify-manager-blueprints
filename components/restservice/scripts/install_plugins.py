@@ -42,7 +42,7 @@ def install_plugins():
                 with tarfile.open(fileobj=fileobj, mode='w:gz') as tar:
                     tar.add(plugin_path, arcname=name)
                 fileobj.seek(0)
-                tar_remote_path = '{0}/{1}.tar.gz'\
+                tar_remote_path = '{0}/{1}.tar.gz' \
                     .format(cloudify_plugins, name)
                 fabric.api.put(fileobj, '~/{0}'.format(tar_remote_path))
                 plugin['source'] = 'file://$HOME/{0}'.format(tar_remote_path)

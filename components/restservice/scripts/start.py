@@ -9,5 +9,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+REST_SERVICE_NAME = 'restservice'
 
-utils.systemd.start('cloudify-restservice')
+
+ctx.logger.info('Starting Cloudify REST Service...')
+utils.start_service_and_archive_properties(REST_SERVICE_NAME)

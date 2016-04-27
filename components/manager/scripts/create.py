@@ -10,6 +10,12 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+NODE_NAME = 'manager-resources'
+
+ctx_properties = utils.ctx_factory.create(NODE_NAME)
+
+RESOURCES_DIR = '/opt/cloudify/sources'
+
 
 def deploy_manager_sources():
     """Deploys all manager sources from a single archive.
@@ -27,8 +33,13 @@ def deploy_manager_sources():
         # manager. should find a way to clean it after all operations
         # were completed and bootstrap succeeded as it is not longer
         # necessary
+        utils.mkdir(RESOURCES_DIR)
+        res_name = os.path.basename(archive_path)
+        destination = os.path.join(RESOURCES_DIR, res_name)
         resources_archive_path = \
-            utils.download_cloudify_resource(archive_path)
+            utils.download_cloudify_resource(archive_path,
+                                             NODE_NAME,
+                                             destination=destination)
         # This would ideally go under utils.download_cloudify_resource but as
         # of now, we'll only be validating the manager resources package.
 
@@ -37,8 +48,12 @@ def deploy_manager_sources():
             if not archive_checksum_path:
                 skip_if_failed = True
                 archive_checksum_path = archive_path + '.md5'
+            md5_name = os.path.basename(archive_checksum_path)
+            destination = os.path.join(RESOURCES_DIR, md5_name)
             resources_archive_md5_path = \
-                utils.download_cloudify_resource(archive_checksum_path)
+                utils.download_cloudify_resource(archive_checksum_path,
+                                                 NODE_NAME,
+                                                 destination=destination)
             if not utils.validate_md5_checksum(resources_archive_path,
                                                resources_archive_md5_path):
                     if skip_if_failed:

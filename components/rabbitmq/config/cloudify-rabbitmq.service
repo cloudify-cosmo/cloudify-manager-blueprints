@@ -9,7 +9,7 @@ Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-rabbitmq
 ExecStart=/usr/sbin/rabbitmq-server
 ExecStop=/usr/local/bin/kill-rabbit
-LimitNOFILE={{ ctx.node.properties.rabbitmq_fd_limit }}
+LimitNOFILE={{ node.properties.rabbitmq_fd_limit }}
 
 [Install]
 WantedBy=multi-user.target

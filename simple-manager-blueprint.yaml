@@ -538,8 +538,8 @@ node_templates:
         configure:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path: components/manager/scripts/configure_manager.sh
-            fabric_env: &simple_fabric_env
+            script_path: components/manager/scripts/create_conf.py
+            fabric_env:
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
               host_string: { get_property: [manager_host, public_ip] }
@@ -582,9 +582,9 @@ node_templates:
       - type: cloudify.relationships.depends_on
         target: manager_configuration
 
-  ######################################################################
-  # These are the nodes comprising the Cloudify Manager's components
-  ######################################################################
+  # ######################################################################
+  # # These are the nodes comprising the Cloudify Manager's components
+  # ######################################################################
   rabbitmq:
     type: manager.nodes.RabbitMQ
     relationships:

@@ -9,5 +9,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+REST_SERVICE_NAME = 'restservice'
 
-utils.systemd.stop('cloudify-restservice')
+
+ctx.logger.info('Stopping Cloudify REST Service...')
+utils.systemd.stop(REST_SERVICE_NAME)

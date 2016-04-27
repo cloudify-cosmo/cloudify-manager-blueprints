@@ -9,5 +9,9 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+LOGSTASH_SERVICE_NAME = 'logstash'
 
-utils.systemd.start('logstash')
+
+ctx.logger.info('Starting Logstash Service...')
+utils.start_service_and_archive_properties(LOGSTASH_SERVICE_NAME,
+                                           append_prefix=False)

@@ -9,5 +9,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+MGMT_WORKER_SERVICE_NAME = 'mgmtworker'
 
-utils.systemd.start('cloudify-mgmtworker.service')
+
+ctx.logger.info('Starting Management Worker Service...')
+utils.start_service_and_archive_properties(MGMT_WORKER_SERVICE_NAME)

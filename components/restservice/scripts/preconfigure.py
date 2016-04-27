@@ -11,20 +11,22 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+REST_SERVICE_NAME = 'restservice'
+
 
 def preconfigure_restservice():
 
     rest_service_home = '/opt/manager'
 
     ctx.logger.info('Deploying REST Security configuration file...')
-    sec_config = str(ctx.target.node.properties['security'])
+    sec_config = utils.load_manager_config_prop('security')
     fd, path = tempfile.mkstemp()
     os.close(fd)
     with open(path, 'w') as f:
         f.write(sec_config)
     utils.move(path, os.path.join(rest_service_home, 'rest-security.conf'))
 
-    utils.systemd.configure('restservice')
+    utils.systemd.configure(REST_SERVICE_NAME, render=False)
 
 
 preconfigure_restservice()

@@ -9,5 +9,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+RIEMANN_SERVICE_NAME = 'riemann'
 
-utils.systemd.start('cloudify-riemann.service')
+
+ctx.logger.info('Starting Riemann Service...')
+utils.start_service_and_archive_properties(RIEMANN_SERVICE_NAME)

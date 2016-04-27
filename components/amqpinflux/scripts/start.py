@@ -9,4 +9,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-utils.systemd.start('cloudify-amqpinflux')
+AMQPINFLUX_SERVICE_NAME = 'amqpinflux'
+
+
+ctx.logger.info('Starting AMQP-Influx Broker Service...')
+utils.start_service_and_archive_properties(AMQPINFLUX_SERVICE_NAME)

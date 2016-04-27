@@ -11,14 +11,17 @@ ctx.download_resource(
 import utils  # NOQA
 
 
+ctx_properties = utils.ctx_factory.create('java')
+
+
 def install_java():
-    java_source_url = ctx.node.properties['java_rpm_source_url']
+    java_source_url = ctx_properties['java_rpm_source_url']
 
     ctx.logger.info('Installing Java...')
     utils.set_selinux_permissive()
     utils.copy_notice('java')
 
-    utils.yum_install(java_source_url)
+    utils.yum_install(java_source_url, service_name='java')
 
     # Make sure the cloudify logs dir exists before we try moving the java log
     # there -p will cause it not to error if the dir already exists
@@ -31,3 +34,7 @@ def install_java():
 
 
 install_java()
+
+if utils.is_upgrade:
+    utils.resource_factory.archive_resources('java')
+    utils.ctx_factory.archive_properties('java')

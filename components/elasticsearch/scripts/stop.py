@@ -8,8 +8,11 @@ ctx.download_resource(
     join('components', 'utils.py'),
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
+ES_SERVICE_NAME = 'elasticsearch'
 
-ES_ENDPOINT_IP = ctx.node.properties['es_endpoint_ip']
+ctx_properties = utils.CtxPropertyFactory().create(ES_SERVICE_NAME,
+                                                   write_to_file=False)
+ES_ENDPOINT_IP = ctx_properties['es_endpoint_ip']
 
 if not ES_ENDPOINT_IP:
-    utils.systemd.stop('elasticsearch')
+    utils.systemd.stop(ES_SERVICE_NAME, append_prefix=False)

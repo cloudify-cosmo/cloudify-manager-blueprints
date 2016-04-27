@@ -9,5 +9,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+MGMT_WORKER_SERVICE_NAME = 'mgmtworker'
 
-utils.systemd.stop('cloudify-mgmtworker')
+
+ctx.logger.info('Stopping Management Worker Service...')
+utils.systemd.stop(MGMT_WORKER_SERVICE_NAME)
