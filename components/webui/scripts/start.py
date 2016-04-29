@@ -13,4 +13,4 @@ WEBUI_SERVICE_NAME = 'webui'
 
 
 ctx.logger.info('Starting WebUI Service...')
-utils.start_service_and_archive_properties(WEBUI_SERVICE_NAME)
+utils.start_service(WEBUI_SERVICE_NAME)

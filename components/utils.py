@@ -6,14 +6,17 @@ import sys
 import pwd
 import time
 import glob
+import json
 import shlex
 import urllib
 import socket
+import base64
+import urllib2
 import hashlib
 import tempfile
 import subprocess
 from functools import wraps
-import json
+from time import sleep, gmtime, strftime
 
 from cloudify import ctx
 
@@ -22,6 +25,9 @@ PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 MANAGER_RESOURCES_HOME = '/opt/manager/resources'
 AGENT_ARCHIVES_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
+
+# Upgrade specific parameters
+UPGRADE_METADATA_FILE = '/opt/cloudify/upgrade_meta/metadata.json'
 
 
 def retry(exception, tries=4, delay=3, backoff=2):
@@ -135,19 +141,25 @@ def error_exit(message):
     sys.exit(1)
 
 
-def mkdir(dir):
+def mkdir(dir, use_sudo=True):
     if os.path.isdir(dir):
         return
     ctx.logger.info('Creating Directory: {0}'.format(dir))
-    sudo(['mkdir', '-p', dir])
+    cmd = ['mkdir', '-p', dir]
+    if use_sudo:
+        sudo(cmd)
+    else:
+        run(cmd)
 
 
+# idempotent move operation
 def move(source, destination):
-    sudo(['mv', source, destination])
+    copy(source, destination)
+    remove(source)
 
 
 def copy(source, destination):
-    sudo(['cp', '-r', source, destination])
+    sudo(['cp', '-rp', source, destination])
 
 
 def remove(path, ignore_failure=False):
@@ -661,16 +673,15 @@ def write_to_json_file(content, file_path):
 # manager-config node
 def load_manager_config_prop(prop_name):
     ctx.logger.info('Loading {0} configuration'.format(prop_name))
-    manager_props = ctx_factory.get_install_properties('manager-config')
+    manager_props = ctx_factory.get('manager-config', upgrade_props=True)
     return json.dumps(manager_props[prop_name])
 
 
 def _is_upgrade():
-    """
-    Returns true if manager is in upgrade mode. This function will assume
+    """Returns true if manager is in upgrade mode. This function will assume
     manager is in upgrade state according to the maintenance mode file.
     """
-    status_file_path = '/opt/manager/status.txt'
+    status_file_path = '/opt/manager/maintenance/status.json'
     if os.path.isfile(status_file_path):
         ctx.logger.info('Loading upgrade status file: {0}'
                         .format(status_file_path))
@@ -682,8 +693,7 @@ def _is_upgrade():
 
 
 def _is_rollback():
-    """
-    Returns true if manager is in rollback state.
+    """Returns true if manager is in rollback state.
     """
     return False
 
@@ -705,65 +715,74 @@ class CtxPropertyFactory(object):
                             'use_existing_on_upgrade']
 
     # Create node properties according to the workflow context install/upgrade
-    def create(self, service_name, write_to_file=True):
-        """
-        a Factory used to create a local copy of the node properties used
+    def create(self, service_name):
+        """a Factory used to create a local copy of the node properties used
         upon deployment. This copy will allows to later reuse the properties
         for upgrade/rollback purposes. The node ctx properties will be set
         according to the node property named 'use_existing_on_upgrade'.
+
         :param service_name: The service name
-        :param write_to_file: write props to local file path
         :return: The relevant ctx node properties dict.
         """
-        ctx_props = self._load_ctx_properties(service_name)
-
         if is_upgrade:
             # archive path existence will determine whether rollback is even
             # necessary if these scripts run in rollback context.
-            archive_path = self._get_rollback_properties_dir(service_name)
-            mkdir(archive_path)
+            self._archive_properties(service_name)
 
-        if write_to_file:
-            # write properties to a local backup path
-            self._write_props_to_file(ctx_props, service_name)
+        # write properties to a local backup path
+        ctx_props = self._load_ctx_properties(service_name)
+
+        self._write_props_to_file(ctx_props, service_name)
 
         return ctx_props
 
-    def _write_props_to_file(self, ctx_props, service_name):
+    def get(self, service_name, upgrade_props=True):
+        """Get node properties by service name.
 
-        dest_file_path = self._get_props_file_path(service_name)
-        ctx.logger.info('Saving {service} input configuration to {path}'
-                        .format(service=service_name,
-                                path=dest_file_path))
-        write_to_json_file(ctx_props, dest_file_path)
-
-    def archive_properties(self, service_name):
+        :param service_name: The service name.
+        :param upgrade_props: Get install or upgrade properties.
+        :return: The relevant ctx node properties dict.
         """
-        Archive previously used node properties. These properties will be used
+        if upgrade_props:
+            props = self._get_upgrade_properties(service_name)
+        else:
+            props = self._get_install_properties(service_name)
+        return props
+
+    def _write_props_to_file(self, ctx_props, service_name):
+        dest_file_path = self._get_props_file_path(service_name)
+        if not os.path.isfile(dest_file_path):
+            ctx.logger.info('Saving {0} input configuration to {1}'
+                            .format(service_name, dest_file_path))
+            write_to_json_file(ctx_props, dest_file_path)
+
+    def _archive_properties(self, service_name):
+        """Archive previously used node properties. These properties will be used
         for rollback purposes. This method should be called ONLY once it's been
         determined that the node installation has ended and the service is up.
+
         :param service_name: The service/node name.
         """
-        service_archive_path = self._get_rollback_properties_dir(service_name)
-        base_service_dir = self._get_properties_dir(service_name)
-        properties_file_path = os.path.join(base_service_dir,
-                                            self.PROPERTIES_FILE_NAME)
+        service_archive_path = self._get_rollback_props_file_path(service_name)
+        if os.path.isfile(service_archive_path):
+            return
+
+        properties_file_path = self._get_props_file_path(service_name)
         ctx.logger.info('Archiving previous inputs for service {0}'
                         .format(service_name))
+        mkdir(os.path.dirname(service_archive_path))
         move(properties_file_path, service_archive_path)
-        ctx.logger.info('Setting new properties for service {0}'
-                        .format(service_name))
-        move(self._get_props_file_path(service_name), properties_file_path)
 
     def _get_props_file_path(self, service_name):
         base_service_dir = self._get_properties_dir(service_name)
-        if is_upgrade:
-            dest_file_path = os.path.join(
-                    base_service_dir,
-                    'upgrade-{0}'.format(self.PROPERTIES_FILE_NAME))
-        else:
-            dest_file_path = os.path.join(base_service_dir,
-                                          self.PROPERTIES_FILE_NAME)
+        dest_file_path = os.path.join(base_service_dir,
+                                      self.PROPERTIES_FILE_NAME)
+        return dest_file_path
+
+    def _get_rollback_props_file_path(self, service_name):
+        base_service_dir = self._get_rollback_properties_dir(service_name)
+        dest_file_path = os.path.join(base_service_dir,
+                                      self.PROPERTIES_FILE_NAME)
         return dest_file_path
 
     def _load_ctx_properties(self, service_name):
@@ -772,14 +791,7 @@ class CtxPropertyFactory(object):
             # Use existing property configuration during upgrade
             use_existing = node_props.get('use_existing_on_upgrade')
             if use_existing:
-                install_props_path = \
-                    os.path.join(self._get_properties_dir(service_name),
-                                 self.PROPERTIES_FILE_NAME)
-                ctx.logger.info('Loading existing {0} input config from '
-                                '{1}'.format(service_name, install_props_path))
-                with open(install_props_path) as f:
-                    existing_props = json.load(f)
-
+                existing_props = self.get(service_name, upgrade_props=False)
                 # Removing properties with suffix matching upgrade properties
                 for key in existing_props.keys():
                     for suffix in self.UPGRADE_PROPS_SUFFIX:
@@ -790,7 +802,6 @@ class CtxPropertyFactory(object):
                 node_props.update(existing_props)
 
         node_props['service_name'] = service_name
-
         return node_props
 
     def _get_properties_dir(self, service_name):
@@ -803,10 +814,14 @@ class CtxPropertyFactory(object):
                             service_name,
                             self.ROLLBACK_NODE_PROPS_DIR_NAME)
 
-    def get_install_properties(self, service_name):
-        props_dir = self._get_properties_dir(service_name)
-        install_props_file = os.path.join(props_dir, self.PROPERTIES_FILE_NAME)
+    def _get_install_properties(self, service_name):
+        install_props_file = self._get_rollback_props_file_path(service_name)
         with open(install_props_file) as f:
+            return json.load(f)
+
+    def _get_upgrade_properties(self, service_name):
+        upgrade_props_file = self._get_props_file_path(service_name)
+        with open(upgrade_props_file) as f:
             return json.load(f)
 
 
@@ -817,14 +832,12 @@ class BlueprintResourceFactory(object):
     RESOURCES_ROLLBACK_DIR_NAME = 'resources_rollback'
     RESOURCES_JSON_FILE = '__resources.json'
 
-    UPGRADE_RESOURCE_PREFIX = 'upgrade-'
-
     def create(self, source, destination, service_name, user_resource=False,
                source_resource=False, render=True, load_ctx=True):
-        """
-        a Factory used to create a local copy of a resource upon deployment.
+        """a Factory used to create a local copy of a resource upon deployment.
         This copy allows to later reuse the resource for upgrade/rollback
         purposes.
+
         :param source: The resource source url
         :param destination: Resource destination path
         :param service_name: used to retrieve node properties to be rendered
@@ -840,11 +853,13 @@ class BlueprintResourceFactory(object):
         context of the script.
         :return: The local resource file path and destination.
         """
+        if is_upgrade:
+            self._archive_resources(service_name)
+
         resource_name = os.path.basename(destination)
         # The local path is decided according to whether we are in upgrade
         local_resource_path = self._get_resource_file_path(service_name,
-                                                           resource_name,
-                                                           is_upgrade)
+                                                           resource_name)
 
         if not os.path.isfile(local_resource_path):
             mkdir(os.path.dirname(local_resource_path))
@@ -865,32 +880,28 @@ class BlueprintResourceFactory(object):
                                                    load_ctx)
             else:
                 self._download_resource(source, local_resource_path)
-            resources_props = self._get_resources_json(service_name,
-                                                       is_upgrade)
+            resources_props = self._get_resources_json(service_name)
             # update the resources.json
             if resource_name not in resources_props.keys():
                 resources_props[resource_name] = destination
-                self._set_resources_json(resources_props, service_name,
-                                         is_upgrade)
+                self._set_resources_json(resources_props, service_name)
         return local_resource_path, destination
 
     def _download_user_resource(self, source, dest, resource_name,
                                 service_name, render=True, load_ctx=True):
         if is_upgrade:
-            install_props = self._get_install_resources_json(service_name)
+            install_props = self._get_rollback_resources_json(service_name)
             existing_resource_path = install_props.get(resource_name, '')
             if os.path.isfile(existing_resource_path):
                 ctx.logger.info('Using existing resource for {0}'
                                 .format(resource_name))
                 # update the resource file we hold that might have changed
                 install_resource = self._get_resource_file_path(
-                        service_name, resource_name, upgrade=False)
+                        service_name, resource_name)
                 copy(existing_resource_path, install_resource)
-                # copy it to upgrade-resource_name
-                copy(existing_resource_path, dest)
             else:
                 ctx.logger.info('User resource {0} not found on {1}'
-                                .format(resource_name, path=dest))
+                                .format(resource_name, dest))
 
         if not os.path.isfile(dest):
             if render:
@@ -936,46 +947,34 @@ class BlueprintResourceFactory(object):
 
     @staticmethod
     def _load_node_props(service_name):
-        node_props = ctx_factory.create(service_name, write_to_file=False)
+        node_props = ctx_factory.get(service_name)
         return {'node': {'properties': node_props}}
 
-    def _get_resource_file_path(self, service_name, resource_name, upgrade):
+    def _get_resource_file_path(self, service_name, resource_name):
         base_service_res_dir = self._get_resources_dir(service_name)
-        if upgrade:
-            upgrade_resource_name = self.UPGRADE_RESOURCE_PREFIX + \
-                                    resource_name
-
-            dest_file_path = os.path.join(base_service_res_dir,
-                                          upgrade_resource_name)
-        else:
-            dest_file_path = os.path.join(base_service_res_dir, resource_name)
+        dest_file_path = os.path.join(base_service_res_dir, resource_name)
         return dest_file_path
 
-    def _get_upgrade_resources_json(self, service_name):
-        return self._get_resources_json(service_name, True)
-
-    def _get_install_resources_json(self, service_name):
-        return self._get_resources_json(service_name, False)
-
-    def _get_resources_json(self, service_name, upgrade):
+    def _get_resources_json(self, service_name):
         resources_json = self._get_resource_file_path(service_name,
-                                                      self.RESOURCES_JSON_FILE,
-                                                      upgrade=upgrade)
+                                                      self.RESOURCES_JSON_FILE)
         if os.path.isfile(resources_json):
             with open(resources_json) as f:
                 return json.load(f)
         return {}
 
-    def _set_resources_json(self, resources_dict, service_name, upgrade):
+    def _set_resources_json(self, resources_dict, service_name):
         resources_json = self._get_resource_file_path(service_name,
-                                                      self.RESOURCES_JSON_FILE,
-                                                      upgrade=upgrade)
+                                                      self.RESOURCES_JSON_FILE)
         write_to_json_file(resources_dict, resources_json)
 
-    def archive_resources(self, service_name):
+    def _archive_resources(self, service_name):
         rollback_dir = self._get_rollback_resources_dir(service_name)
-        mkdir(rollback_dir)
+        if os.path.exists(rollback_dir):
+            # resources have already been archived.
+            return
 
+        mkdir(rollback_dir)
         service_archive_path = self._get_resources_dir(service_name)
         # nodes will not always use blueprint resources i.e. java/python
         if is_upgrade and os.path.isdir(service_archive_path):
@@ -983,16 +982,8 @@ class BlueprintResourceFactory(object):
                             .format(service_name))
             resource_files = os.listdir(service_archive_path)
             for filename in resource_files:
-                if not filename.startswith(self.UPGRADE_RESOURCE_PREFIX):
-                    move(os.path.join(service_archive_path, filename),
-                         rollback_dir)
-
-            prefix_len = len(self.UPGRADE_RESOURCE_PREFIX)
-            for filename in resource_files:
-                if filename.startswith(self.UPGRADE_RESOURCE_PREFIX):
-                    move(os.path.join(service_archive_path, filename),
-                         os.path.join(service_archive_path,
-                                      filename[prefix_len:]))
+                move(os.path.join(service_archive_path, filename),
+                     rollback_dir)
 
     def _get_resources_dir(self, service_name):
         return os.path.join(self.BASE_RESOURCES_PATH,
@@ -1004,20 +995,165 @@ class BlueprintResourceFactory(object):
                             service_name,
                             self.RESOURCES_ROLLBACK_DIR_NAME)
 
+    def _get_rollback_resources_json(self, service_name):
+        rollback_dir = self._get_rollback_resources_dir(service_name)
+        rollback_json = os.path.join(rollback_dir, self.RESOURCES_JSON_FILE)
+        with open(rollback_json) as f:
+            return json.load(f)
+
 
 resource_factory = BlueprintResourceFactory()
 ctx_factory = CtxPropertyFactory()
 
 
-def start_service_and_archive_properties(service_name,
-                                         append_prefix=True,
-                                         ignore_restart_fail=False):
-
+def start_service(service_name, append_prefix=True, ignore_restart_fail=False):
     if is_upgrade:
         systemd.restart(service_name,
                         ignore_failure=ignore_restart_fail,
                         append_prefix=append_prefix)
-        ctx_factory.archive_properties(service_name)
-        resource_factory.archive_resources(service_name)
     else:
         systemd.start(service_name, append_prefix=append_prefix)
+
+
+def http_request(url, data=None, method='PUT', headers={}):
+    request = urllib2.Request(url, data=data, headers=headers)
+    request.get_method = lambda: method
+    try:
+        return urllib2.urlopen(request)
+    except urllib2.URLError as e:
+        reqstring = url + (' ' + data if data else '')
+        ctx.logger.error('Failed to {0} {1} (reason: {2})'.format(
+                method, reqstring, e.reason))
+
+
+def _wait_for_execution(execution_id, headers):
+    poll_interval = 2
+    while True:
+        res = _list_executions_with_retries(headers, execution_id)
+        content = json.loads(res.readlines()[0])
+        execution_item = content['items'][0]
+        execution_status = execution_item['status']
+        if execution_status == 'terminated':
+            return True
+        elif execution_status == 'failed':
+            ctx.abort_operation('Execution with id {0} failed'.
+                                format(execution_id))
+        sleep(poll_interval)
+
+
+def _list_executions_with_retries(headers, execution_id, retries=6):
+    count = 0
+    err = 'Failed listing existing executions.'
+    url = 'http://localhost/api/v2.1/executions?' \
+          '_include_system_workflows=true&id={0}'.format(execution_id)
+    while count != retries:
+        res = http_request(url, method='GET', headers=headers)
+        if res.code != 200:
+            err = 'Failed listing existing executions. Message: {0}' \
+                .format(res.readlines())
+            ctx.logger.error(err)
+            sleep(2)
+        else:
+            return res
+    ctx.abort_operation(err)
+
+
+def _create_maintenance_headers(upgrade_props=True):
+    headers = {'X-BYPASS-MAINTENANCE': 'True'}
+    auth_props = _get_auth_headers(upgrade_props)
+    headers.update(auth_props)
+    return headers
+
+
+def _get_auth_headers(upgrade_props):
+    headers = {}
+    config = ctx_factory.get('manager-config', upgrade_props=upgrade_props)
+    security = config['security']
+    security_enabled = security['enabled']
+    if security_enabled:
+        username = security.get('admin_username')
+        password = security.get('admin_password')
+        headers.update({'Authorization':
+                        'Basic ' + base64.b64encode('{0}:{1}'.format(
+                                    username, password))})
+    return headers
+
+
+def create_upgrade_snapshot():
+    snapshot_id = _generate_upgrade_snapshot_id()
+    url = 'http://localhost/api/v2.1/snapshots/{0}'.format(snapshot_id)
+    data = json.dumps({'include_metrics': 'true',
+                       'include_credentials': 'true'})
+    headers = _create_maintenance_headers(upgrade_props=False)
+    req_headers = headers.copy()
+    req_headers.update({'Content-Type': 'application/json'})
+    ctx.logger.info('Creating snapshot with ID {0}'
+                    .format(snapshot_id))
+    res = http_request(url, data=data, method='PUT', headers=req_headers)
+    if res.code != 201:
+        err = 'Failed creating snapshot {0}. Message: {1}'\
+              .format(snapshot_id, res.readlines())
+        ctx.logger.error(err)
+        ctx.abort_operation(err)
+    execution_id = json.loads(res.readlines()[0])['id']
+    _wait_for_execution(execution_id, headers)
+    ctx.logger.info('Snapshot with ID {0} created successfully'
+                    .format(snapshot_id))
+    ctx.logger.info('Setting snapshot info to upgrade metadata in {0}'.
+                    format(UPGRADE_METADATA_FILE))
+    _set_upgrade_data(snapshot_id=snapshot_id)
+
+
+def restore_upgrade_snapshot():
+    snapshot_id = _get_upgrade_data()['snapshot_id']
+    url = 'http://localhost/api/v2.1/snapshots/{0}/restore'.format(snapshot_id)
+    data = json.dumps({'recreate_deployments_envs': 'false',
+                       'force': 'true'})
+    headers = _create_maintenance_headers(upgrade_props=True)
+    req_headers = headers.copy()
+    req_headers.update({'Content-Type': 'application/json'})
+    ctx.logger.info('Restoring snapshot with ID {0}'.format(snapshot_id))
+    res = http_request(url, data=data, method='POST', headers=req_headers)
+    if res.code != 200:
+        err = 'Failed restoring snapshot {0}. Message: {1}' \
+              .format(snapshot_id, res.readlines())
+        ctx.logger.error(err)
+        ctx.abort_operation(err)
+    execution_id = json.loads(res.readlines()[0])['id']
+    _wait_for_execution(execution_id, headers)
+    ctx.logger.info('Snapshot with ID {0} restored successfully'
+                    .format(snapshot_id))
+
+
+def _generate_upgrade_snapshot_id():
+    url = 'http://localhost/api/v2.1/version'
+    auth_headers = _get_auth_headers(upgrade_props=False)
+    res = http_request(url, method='GET', headers=auth_headers)
+    if res.code != 200:
+        err = 'Failed extracting current manager version. Message: {0}'\
+              .format(res.readlines())
+        ctx.logger.error(err)
+        ctx.abort_operation(err)
+    curr_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
+    version_data = json.loads(res.read())
+    snapshot_upgrade_name = 'upgrade_snapshot_{0}_build_{1}_{2}'\
+        .format(version_data['version'],
+                version_data['build'],
+                curr_time)
+
+    return snapshot_upgrade_name
+
+
+def _set_upgrade_data(**kwargs):
+    mkdir(os.path.dirname(UPGRADE_METADATA_FILE))
+    upgrade_data = {}
+    if os.path.exists(UPGRADE_METADATA_FILE):
+        upgrade_data = _get_upgrade_data()
+    upgrade_data.update(**kwargs)
+    write_to_json_file(upgrade_data, UPGRADE_METADATA_FILE)
+
+
+# upgrade data contains info related to the upgrade process e.g  'snapshot_id'
+def _get_upgrade_data():
+    with open(UPGRADE_METADATA_FILE) as f:
+        return json.load(f)

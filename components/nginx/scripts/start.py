@@ -12,5 +12,4 @@ NGINX_SERVICE_NAME = 'nginx'
 
 
 ctx.logger.info('Starting Nginx Service...')
-utils.start_service_and_archive_properties(NGINX_SERVICE_NAME,
-                                           append_prefix=False)
+utils.start_service(NGINX_SERVICE_NAME, append_prefix=False)

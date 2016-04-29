@@ -94,3 +94,5 @@ def install_riemann():
     utils.clean_var_log_dir(RIEMANN_SERVICE_NAME)
 
 install_riemann()
+if utils.is_upgrade:
+    utils.restore_upgrade_snapshot()

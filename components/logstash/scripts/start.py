@@ -13,5 +13,4 @@ LOGSTASH_SERVICE_NAME = 'logstash'
 
 
 ctx.logger.info('Starting Logstash Service...')
-utils.start_service_and_archive_properties(LOGSTASH_SERVICE_NAME,
-                                           append_prefix=False)
+utils.start_service(LOGSTASH_SERVICE_NAME, append_prefix=False)

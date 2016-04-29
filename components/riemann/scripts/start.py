@@ -13,4 +13,4 @@ RIEMANN_SERVICE_NAME = 'riemann'
 
 
 ctx.logger.info('Starting Riemann Service...')
-utils.start_service_and_archive_properties(RIEMANN_SERVICE_NAME)
+utils.start_service(RIEMANN_SERVICE_NAME)

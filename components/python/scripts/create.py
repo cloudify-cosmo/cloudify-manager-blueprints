@@ -31,6 +31,3 @@ def install_python_requirements():
 
 
 install_python_requirements()
-if utils.is_upgrade:
-    utils.ctx_factory.archive_properties('python')
-    utils.BlueprintResourceFactory().archive_resources('python')

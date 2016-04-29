@@ -12,8 +12,7 @@ import utils  # NOQA
 INFLUX_SERVICE_NAME = 'influxdb'
 
 
-ctx_properties = utils.ctx_factory.create(INFLUX_SERVICE_NAME,
-                                          write_to_file=False)
+ctx_properties = utils.ctx_factory.get(INFLUX_SERVICE_NAME)
 
 INFLUXDB_ENDPOINT_IP = ctx_properties['influxdb_endpoint_ip']
 

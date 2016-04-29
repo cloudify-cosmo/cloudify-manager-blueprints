@@ -17,15 +17,18 @@ import utils  # NOQA
 CONFIG_PATH = "components/elasticsearch/config"
 ES_SERVICE_NAME = 'elasticsearch'
 
-ctx_properties = utils.ctx_factory.create('elasticsearch')
+UPGRADE_DUMP_PATH = '/tmp/es_upgrade_dump/'
+DUMP_FILE_PATH = os.path.join(UPGRADE_DUMP_PATH, 'es_dump')
+DUMP_SUCCESS_FLAG = os.path.join(UPGRADE_DUMP_PATH, 'es_dump_success')
+
+ctx_properties = utils.ctx_factory.create(ES_SERVICE_NAME)
 
 
 def http_request(url, data=None, method='PUT'):
     request = urllib2.Request(url, data=data)
     request.get_method = lambda: method
     try:
-        urllib2.urlopen(request)
-        return True
+        return urllib2.urlopen(request)
     except urllib2.URLError as e:
         reqstring = url + (' ' + data if data else '')
         ctx.logger.info('Failed to {0} {1} (reason: {2})'.format(
@@ -202,24 +205,24 @@ def _install_elasticsearch():
     ctx.logger.info('Setting Elasticsearch Heap Size...')
     # we should treat these as templates.
     utils.replace_in_file(
-        '#ES_HEAP_SIZE=2g',
+        '(?:#|)ES_HEAP_SIZE=(.*)',
         'ES_HEAP_SIZE={0}'.format(es_heap_size),
         '/etc/sysconfig/elasticsearch')
 
     if es_java_opts:
         ctx.logger.info('Setting additional JAVA_OPTS...')
         utils.replace_in_file(
-            '#ES_JAVA_OPTS',
+            '(?:#|)ES_JAVA_OPTS=(.*)',
             'ES_JAVA_OPTS={0}'.format(es_java_opts),
             '/etc/sysconfig/elasticsearch')
 
     ctx.logger.info('Setting Elasticsearch logs path...')
     utils.replace_in_file(
-        '#LOG_DIR=/var/log/elasticsearch',
+        '(?:#|)LOG_DIR=(.*)',
         'LOG_DIR={0}'.format(es_logs_path),
         '/etc/sysconfig/elasticsearch')
     utils.replace_in_file(
-        '#ES_GC_LOG_FILE=/var/log/elasticsearch/gc.log',
+        '(?:#|)ES_GC_LOG_FILE=(.*)',
         'ES_GC_LOG_FILE={0}'.format(os.path.join(es_logs_path, 'gc.log')),
         '/etc/sysconfig/elasticsearch')
     utils.logrotate(ES_SERVICE_NAME)
@@ -243,6 +246,9 @@ def main():
     es_endpoint_ip = ctx_properties['es_endpoint_ip']
     es_endpoint_port = ctx_properties['es_endpoint_port']
 
+    if utils.is_upgrade:
+        dump_upgrade_data()
+
     if not es_endpoint_ip:
         es_endpoint_ip = ctx.instance.host_ip
         _install_elasticsearch()
@@ -251,7 +257,6 @@ def main():
         utils.wait_for_port(es_endpoint_port, es_endpoint_ip)
         _configure_elasticsearch(host=es_endpoint_ip, port=es_endpoint_port)
 
-        utils.systemd.stop(ES_SERVICE_NAME, append_prefix=False)
         utils.clean_var_log_dir('elasticsearch')
     else:
         ctx.logger.info('External Elasticsearch Endpoint provided: '
@@ -262,14 +267,96 @@ def main():
                         'index already exists...')
 
         if http_request('http://{0}:{1}/cloudify_storage'.format(
-                es_endpoint_ip, es_endpoint_port), method='HEAD'):
+                es_endpoint_ip, es_endpoint_port), method='HEAD').code == 200:
             utils.error_exit('\'cloudify_storage\' index already exists on '
                              '{0}, terminating bootstrap...'.format(
                                  es_endpoint_ip))
         _configure_elasticsearch(host=es_endpoint_ip, port=es_endpoint_port)
 
+    if utils.is_upgrade:
+        restore_upgrade_data(es_endpoint_ip, es_endpoint_port)
+
+    if not es_endpoint_port:
+        utils.systemd.stop(ES_SERVICE_NAME, append_prefix=False)
+
     ctx.instance.runtime_properties['es_endpoint_ip'] = es_endpoint_ip
 
 
-if utils.is_install:
-    main()
+def _get_es_install_port():
+    es_props = utils.ctx_factory.get(ES_SERVICE_NAME, upgrade_props=False)
+    return es_props['es_endpoint_port']
+
+
+def _get_es_install_endpoint():
+    es_props = utils.ctx_factory.get(ES_SERVICE_NAME, upgrade_props=False)
+    if es_props['es_endpoint_ip']:
+        es_endpoint = es_props['es_endpoint_ip']
+    else:
+        es_endpoint = ctx.instance.host_ip
+    return es_endpoint
+
+
+def dump_upgrade_data():
+
+    if os.path.exists(DUMP_SUCCESS_FLAG):
+        return
+
+    endpoint = _get_es_install_endpoint()
+    port = _get_es_install_port()
+    storage_endpoint = 'http://{0}:{1}/cloudify_storage'.format(endpoint,
+                                                                port)
+    types = ['provider_context', 'snapshot']
+    ctx.logger.info('Dumping upgrade data: {0}'.format(types))
+    type_values = []
+    for _type in types:
+        res = http_request('{0}/_search?q=_type:{1}&size=10000'
+                           .format(storage_endpoint, _type),
+                           method='GET')
+        if not res.code == 200:
+            ctx.abort_operation('Failed fetching type {0} from '
+                                'cloudify_storage index'.format(_type))
+
+        body = res.read()
+        hits = json.loads(body)['hits']['hits']
+        for hit in hits:
+            type_values.append(hit)
+
+    utils.mkdir(UPGRADE_DUMP_PATH, use_sudo=False)
+    with open(DUMP_FILE_PATH, 'w') as f:
+        for item in type_values:
+            f.write(json.dumps(item) + os.linesep)
+
+    # marker file to indicate dump has succeeded
+    with open(DUMP_SUCCESS_FLAG, 'w') as f:
+        f.write('success')
+
+
+def restore_upgrade_data(es_endpoint_ip, es_endpoint_port):
+    bulk_endpoint = 'http://{0}:{1}/_bulk'.format(es_endpoint_ip,
+                                                  es_endpoint_port)
+    with open(DUMP_FILE_PATH) as f:
+        all_data = ''
+        for line in f.readlines():
+            all_data += _create_index_request(line)
+    ctx.logger.info('Restoring elasticsearch data')
+    res = http_request(url=bulk_endpoint, data=all_data, method='POST')
+    if res.code != 200:
+        ctx.abort_operation('Failed restoring elasticsearch data.')
+    ctx.logger.info('Elasticsearch data was successfully restored')
+    # Delete marker file
+    os.remove(DUMP_SUCCESS_FLAG)
+
+
+def _create_index_request(line):
+    item = json.loads(line)
+    source = json.dumps(item['_source'])
+    metadata = _only_types(item, ['_type', '_id', '_index'])
+    action_and_meta_data = json.dumps({'index': metadata})
+    return action_and_meta_data + os.linesep + source + os.linesep
+
+
+def _only_types(d, args):
+    return {key: d[key] for key in d.keys() if key in args}
+
+
+main()

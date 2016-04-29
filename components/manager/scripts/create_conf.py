@@ -42,10 +42,10 @@ def _set_ports():
 
 
 def main():
+    if utils.is_upgrade:
+        # TODO: should be on top.
+        utils.create_upgrade_snapshot()
     _disable_requiretty()
     _set_ports()
-    if utils.is_upgrade:
-        utils.resource_factory.archive_resources(NODE_NAME)
-        utils.ctx_factory.archive_properties(NODE_NAME)
 
 main()

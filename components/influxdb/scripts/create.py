@@ -121,5 +121,5 @@ def main():
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         influxdb_endpoint_ip
 
-if utils.is_install:
-    main()
+
+main()
