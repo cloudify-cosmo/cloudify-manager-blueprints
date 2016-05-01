@@ -20,10 +20,12 @@ from time import sleep, gmtime, strftime
 from cloudify import ctx
 
 
+REST_VERSION = 'v2.1'
 PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 MANAGER_RESOURCES_HOME = '/opt/manager/resources'
 AGENT_ARCHIVES_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
+DEFAULT_BUFFER_SIZE = 8192
 
 # Upgrade specific parameters
 UPGRADE_METADATA_FILE = '/opt/cloudify/upgrade_meta/metadata.json'
@@ -701,6 +703,22 @@ is_upgrade = _is_upgrade()
 is_rollback = is_upgrade is False
 
 
+def repetitive(condition_func,
+               timeout=15,
+               interval=3,
+               timeout_msg='timed out',
+               *args,
+               **kwargs):
+
+    deadline = time.time() + timeout
+    while True:
+        if time.time() > deadline:
+            ctx.abort_operation(timeout_msg)
+        if condition_func(*args, **kwargs):
+            return
+        time.sleep(interval)
+
+
 class CtxPropertyFactory(object):
     PROPERTIES_FILE_NAME = 'properties.json'
     BASE_PROPERTIES_PATH = '/opt/cloudify'
@@ -1058,15 +1076,45 @@ def start_service(service_name, append_prefix=True, ignore_restart_fail=False):
         systemd.start(service_name, append_prefix=append_prefix)
 
 
-def http_request(url, data=None, method='PUT', headers={}):
+def http_request(url, data=None, method='PUT',
+                 headers=None, timeout=None, should_fail=False):
+    headers = headers or {}
     request = urllib2.Request(url, data=data, headers=headers)
     request.get_method = lambda: method
     try:
+        if timeout:
+            return urllib2.urlopen(request, timeout=timeout)
         return urllib2.urlopen(request)
     except urllib2.URLError as e:
-        reqstring = url + (' ' + data if data else '')
-        ctx.logger.error('Failed to {0} {1} (reason: {2})'.format(
-            method, reqstring, e.reason))
+        if not should_fail:
+            reqstring = url + (' ' + data if data else '')
+            ctx.logger.error('Failed to {0} {1} (reason: {2})'.format(
+                method, reqstring, e.reason))
+
+
+def wait_for_workflow(
+        deployment_id,
+        workflow_id,
+        url_prefix='http://localhost/api/{0}'.format(REST_VERSION)):
+    headers = create_maintenance_headers()
+    params = urllib.urlencode(dict(deployment_id=deployment_id))
+    endpoint = '{0}/executions'.format(url_prefix)
+    url = endpoint + '?' + params
+    res = http_request(
+            url,
+            method='GET',
+            headers=headers)
+    res_content = res.readlines()
+    json_res = json.loads(res_content[0])
+    for execution in json_res['items']:
+        if execution['workflow_id'] == workflow_id:
+            execution_status = execution['status']
+            if execution_status == 'terminated':
+                return True
+            elif execution_status == 'failed':
+                ctx.abort_operation('Execution with id {0} failed'.
+                                    format(execution['id']))
+    return False
 
 
 def _wait_for_execution(execution_id, headers):
@@ -1087,8 +1135,9 @@ def _wait_for_execution(execution_id, headers):
 def _list_executions_with_retries(headers, execution_id, retries=6):
     count = 0
     err = 'Failed listing existing executions.'
-    url = 'http://localhost/api/v2.1/executions?' \
-          '_include_system_workflows=true&id={0}'.format(execution_id)
+    url = 'http://localhost/api/{0}/executions?' \
+          '_include_system_workflows=true&id={1}'.format(REST_VERSION,
+                                                         execution_id)
     while count != retries:
         res = http_request(url, method='GET', headers=headers)
         if res.code != 200:
@@ -1101,7 +1150,7 @@ def _list_executions_with_retries(headers, execution_id, retries=6):
     ctx.abort_operation(err)
 
 
-def _create_maintenance_headers(upgrade_props=True):
+def create_maintenance_headers(upgrade_props=True):
     headers = {'X-BYPASS-MAINTENANCE': 'True'}
     auth_props = get_auth_headers(upgrade_props)
     headers.update(auth_props)
@@ -1130,10 +1179,11 @@ def create_upgrade_snapshot():
         ctx.logger.debug('Upgrade snapshot already created.')
         return
     snapshot_id = _generate_upgrade_snapshot_id()
-    url = 'http://localhost/api/v2.1/snapshots/{0}'.format(snapshot_id)
+    url = 'http://localhost/api/{0}/snapshots/{1}'.format(REST_VERSION,
+                                                          snapshot_id)
     data = json.dumps({'include_metrics': 'true',
                        'include_credentials': 'true'})
-    headers = _create_maintenance_headers(upgrade_props=False)
+    headers = create_maintenance_headers(upgrade_props=False)
     req_headers = headers.copy()
     req_headers.update({'Content-Type': 'application/json'})
     ctx.logger.info('Creating snapshot with ID {0}'
@@ -1155,10 +1205,11 @@ def create_upgrade_snapshot():
 
 def restore_upgrade_snapshot():
     snapshot_id = _get_upgrade_data()['snapshot_id']
-    url = 'http://localhost/api/v2.1/snapshots/{0}/restore'.format(snapshot_id)
+    url = 'http://localhost/api/{0}/snapshots/{1}/restore'.format(REST_VERSION,
+                                                                  snapshot_id)
     data = json.dumps({'recreate_deployments_envs': 'false',
                        'force': 'true'})
-    headers = _create_maintenance_headers(upgrade_props=True)
+    headers = create_maintenance_headers(upgrade_props=True)
     req_headers = headers.copy()
     req_headers.update({'Content-Type': 'application/json'})
     ctx.logger.info('Restoring snapshot with ID {0}'.format(snapshot_id))
@@ -1175,7 +1226,7 @@ def restore_upgrade_snapshot():
 
 
 def _generate_upgrade_snapshot_id():
-    url = 'http://localhost/api/v2.1/version'
+    url = 'http://localhost/api/{0}/version'.format(REST_VERSION)
     auth_headers = get_auth_headers(upgrade_props=False)
     res = http_request(url, method='GET', headers=auth_headers)
     if res.code != 200:
