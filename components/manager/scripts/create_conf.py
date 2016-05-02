@@ -5,8 +5,9 @@ from os.path import join, dirname
 from cloudify import ctx
 
 ctx.download_resource(
-        join('components', 'utils.py'),
-        join(dirname(__file__), 'utils.py'))
+    join('components', 'utils.py'),
+    join(dirname(__file__), 'utils.py')
+)
 import utils  # NOQA
 
 NODE_NAME = 'manager-config'
@@ -31,7 +32,7 @@ def _set_ports():
     sec_enabled = security['enabled']
     ssl_enabled = security['ssl']['enabled']
 
-    if sec_enabled == 'true' and ssl_enabled == 'true':
+    if sec_enabled and ssl_enabled:
         ctx.logger.info('SSL is enabled, setting rest port to 443...')
         ctx.instance.runtime_properties['rest_port'] = 443
         ctx.instance.runtime_properties['rest_protocol'] = 'https'
