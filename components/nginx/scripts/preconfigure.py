@@ -31,11 +31,15 @@ def preconfigure_nginx():
         utils.deploy_blueprint_resource(
             '{0}/server.crt'.format(ssl_resources_rel_path),
             '{0}/server.crt'.format(ssl_certs_root),
-            NGINX_SERVICE_NAME, user_resource=True)
+            NGINX_SERVICE_NAME,
+            user_resource=True,
+            load_ctx=False)
         utils.deploy_blueprint_resource(
             '{0}/server.key'.format(ssl_resources_rel_path),
             '{0}/server.key'.format(ssl_certs_root),
-            NGINX_SERVICE_NAME, user_resource=True)
+            NGINX_SERVICE_NAME,
+            user_resource=True,
+            load_ctx=False)
 
     ctx.logger.info('Deploying Nginx configuration files...')
     utils.deploy_blueprint_resource(
