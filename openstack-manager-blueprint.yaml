@@ -117,6 +117,11 @@ inputs:
     default: cloudify-manager-port
     type: string
 
+  openstack_insecure:
+    default: false
+    type: boolean
+    description: Whether (true) or not (false) to allow a non-trusted SSL certificate presented by OpenStack.
+
   #############################
   # Security Settings
   #############################
@@ -547,6 +552,15 @@ dsl_definitions:
     region: { get_input: region }
     nova_url: { get_input: nova_url }
     neutron_url: { get_input: neutron_url }
+    custom_configuration:
+      keystone_client:
+        insecure: { get_input: openstack_insecure }
+      nova_client:
+        insecure: { get_input: openstack_insecure }
+      neutron_client:
+        insecure: { get_input: openstack_insecure }
+      cinder_client:
+        insecure: { get_input: openstack_insecure }
 
 ######################################################################
 # These nodes comprise the manager's infrastructure and components

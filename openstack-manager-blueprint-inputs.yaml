@@ -8,6 +8,8 @@ keystone_password: ''
 keystone_tenant_name: ''
 keystone_url: ''
 region: ''
+# Whether (true) or not (false) to allow a non-trusted SSL certificate presented by OpenStack.
+#openstack_insecure: false
 
 # Optional. Use this in order to override the default URLs provided by the keystone_url
 #nova_url: ''
