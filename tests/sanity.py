@@ -54,9 +54,13 @@ def delete_security_group(conn):
     try:
         sgs = conn.get_all_security_groups(groupnames=[RESOURCE_NAME])
     except boto_exception.EC2ResponseError as e:
-        if e.error_code != 400:
+        lgr.warning('Cannot find Security group {0} [e.status={1}]'.format(
+            RESOURCE_NAME,
+            e.status))
+        if e.status != 400:
             raise
-
+        lgr.warning('Security group {0} not found, ignoring...'.format(
+            RESOURCE_NAME))
     lgr.info('Found security groups: {0}'.format(sgs))
     for sg in sgs:
         lgr.info('Deleting security group: {0}'.format(sg))
