@@ -53,6 +53,10 @@ ssh_private_key = os.environ['SSH_PRIVATE_KEY']
 def delete_security_group(conn):
     try:
         sgs = conn.get_all_security_groups(groupnames=[RESOURCE_NAME])
+        lgr.info('Found security groups: {0}'.format(sgs))
+        for sg in sgs:
+            lgr.info('Deleting security group: {0}'.format(sg))
+            sg.delete()
     except boto_exception.EC2ResponseError as e:
         lgr.warning('Cannot find Security group {0} [e.status={1}]'.format(
             RESOURCE_NAME,
@@ -61,10 +65,6 @@ def delete_security_group(conn):
             raise
         lgr.warning('Security group {0} not found, ignoring...'.format(
             RESOURCE_NAME))
-    lgr.info('Found security groups: {0}'.format(sgs))
-    for sg in sgs:
-        lgr.info('Deleting security group: {0}'.format(sg))
-        sg.delete()
 
 
 def create_security_group(conn):
