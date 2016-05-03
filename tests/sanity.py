@@ -20,6 +20,8 @@ import urllib2
 import time
 
 import boto.ec2
+from boto import exception as boto_exception
+
 from retrying import retry
 from fabric.api import settings as fabric_settings
 from fabric.api import run as fabric_run
@@ -49,7 +51,12 @@ ssh_private_key = os.environ['SSH_PRIVATE_KEY']
 
 
 def delete_security_group(conn):
-    sgs = conn.get_all_security_groups(groupnames=[RESOURCE_NAME])
+    try:
+        sgs = conn.get_all_security_groups(groupnames=[RESOURCE_NAME])
+    except boto_exception.EC2ResponseError as e:
+        if e.error_code != 400:
+            raise
+
     lgr.info('Found security groups: {0}'.format(sgs))
     for sg in sgs:
         lgr.info('Deleting security group: {0}'.format(sg))
