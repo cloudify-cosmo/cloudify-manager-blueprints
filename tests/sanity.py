@@ -193,8 +193,9 @@ def run_test(conn, ip_address, key_file_path):
     lgr.info('Generating SSH keys for hello-world deployment...')
     with fabric_settings(host_string='{0}:{1}'.format(ip_address, 22),
                          user=USER,
-                         key_filename=key_file_path):
-        fabric_run('sudo ssh-keygen -f {0} -t rsa -N "" > /dev/null'.format(
+                         key_filename=key_file_path,
+                         timeout=30):
+        fabric_run('sudo ssh-keygen -f {0} -q -t rsa -N ""'.format(
             generated_key_path))
         fabric_run('sudo cat {0}.pub >> ~/.ssh/authorized_keys'.format(
             generated_key_path))
