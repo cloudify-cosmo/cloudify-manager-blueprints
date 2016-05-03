@@ -25,6 +25,7 @@ from boto import exception as boto_exception
 from retrying import retry
 from fabric.api import settings as fabric_settings
 from fabric.api import run as fabric_run
+from fabric.api import sudo as fabric_sudo
 
 
 REGION = 'us-east-1'
@@ -195,9 +196,9 @@ def run_test(conn, ip_address, key_file_path):
                          user=USER,
                          key_filename=key_file_path,
                          timeout=30):
-        fabric_run('sudo ssh-keygen -f {0} -q -t rsa -N ""'.format(
+        fabric_sudo('ssh-keygen -f {0} -t rsa -N ""'.format(
             generated_key_path))
-        fabric_run('sudo cat {0}.pub >> ~/.ssh/authorized_keys'.format(
+        fabric_sudo('sudo cat {0}.pub >> ~/.ssh/authorized_keys'.format(
             generated_key_path))
 
     execute('git clone {0}'.format(HELLO_WORLD_URL))
