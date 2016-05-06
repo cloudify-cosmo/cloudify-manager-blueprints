@@ -10,7 +10,31 @@ ctx.download_resource(
 import utils  # NOQA
 
 MGMT_WORKER_SERVICE_NAME = 'mgmtworker'
+CELERY_PATH = '/opt/mgmtworker/env/bin/celery'  # also hardcoded in create
+
+
+@utils.retry(ValueError)
+def check_worker_running(amqp_url):
+    """Use `celery status` to check if the worker is running."""
+    result = utils.sudo([
+        CELERY_PATH,
+        '-b', celery_amqp_url,
+        '--app=cloudify_agent.app.app',
+        'status'
+    ], ignore_failures=True)
+    if result.returncode != 0:
+        raise ValueError('celery status: worker not running')
 
 
 ctx.logger.info('Starting Management Worker Service...')
 utils.start_service(MGMT_WORKER_SERVICE_NAME)
+
+utils.systemd.verify_alive(MGMT_WORKER_SERVICE_NAME)
+celery_amqp_url = ('amqp://{rabbitmq_username}:{rabbitmq_password}@'
+                   '{rabbitmq_endpoint_ip}:{broker_port}//').format(
+    **ctx.instance.runtime_properties)
+
+try:
+    check_worker_running(celery_amqp_url)
+except ValueError:
+    ctx.abort_operation('Celery worker failed to start')

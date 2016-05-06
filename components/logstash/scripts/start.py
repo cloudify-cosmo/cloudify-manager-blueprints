@@ -11,6 +11,7 @@ import utils  # NOQA
 
 LOGSTASH_SERVICE_NAME = 'logstash'
 
-
 ctx.logger.info('Starting Logstash Service...')
 utils.start_service(LOGSTASH_SERVICE_NAME, append_prefix=False)
+
+utils.systemd.verify_alive(LOGSTASH_SERVICE_NAME, append_prefix=False)

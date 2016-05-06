@@ -8,9 +8,9 @@ import time
 import glob
 import json
 import shlex
-import urllib
-import socket
 import base64
+import socket
+import urllib
 import urllib2
 import hashlib
 import tempfile
@@ -287,6 +287,12 @@ def copy_notice(service):
     copy(resource_file, dest)
 
 
+def is_port_open(port, host='localhost'):
+    """Try to connect to (host, port), return if the port was listening."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    return sock.connect_ex((host, port)) == 0
+
+
 def wait_for_port(port, host='localhost'):
     """Helper function to wait for a port to open before continuing"""
     counter = 1
@@ -295,9 +301,7 @@ def wait_for_port(port, host='localhost'):
         host, port))
 
     for tries in range(24):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex((host, port))
-        if not result == 0:
+        if not is_port_open(port, host=host):
             ctx.logger.info('{0}:{1} is not available yet, '
                             'retrying... ({2}/24)'.format(host, port, counter))
             time.sleep(2)
@@ -419,7 +423,8 @@ class SystemD(object):
         systemctl_cmd = ['systemctl', action]
         if service:
             systemctl_cmd.append(service)
-        sudo(systemctl_cmd, retries=retries, ignore_failures=ignore_failure)
+        return sudo(systemctl_cmd, retries=retries,
+                    ignore_failures=ignore_failure)
 
     def configure(self, service_name, render=True):
         """This configures systemd for a specific service.
@@ -492,6 +497,17 @@ class SystemD(object):
                                                         append_prefix)
         self.systemctl('restart', full_service_name, retries,
                        ignore_failure=ignore_failure)
+
+    def is_alive(self, service_name, append_prefix=True):
+        service_name = self._get_full_service_name(service_name, append_prefix)
+        result = self.systemctl('status', service_name, ignore_failure=True)
+        return result.returncode == 0
+
+    def verify_alive(self, service_name, append_prefix=True):
+        if self.is_alive(service_name, append_prefix):
+            ctx.logger.info('{0} is running'.format(service_name))
+        else:
+            ctx.abort_operation('{0} is not running'.format(service_name))
 
     @staticmethod
     def _get_full_service_name(service_name, append_prefix):
@@ -1052,12 +1068,12 @@ def _list_executions_with_retries(headers, execution_id, retries=6):
 
 def _create_maintenance_headers(upgrade_props=True):
     headers = {'X-BYPASS-MAINTENANCE': 'True'}
-    auth_props = _get_auth_headers(upgrade_props)
+    auth_props = get_auth_headers(upgrade_props)
     headers.update(auth_props)
     return headers
 
 
-def _get_auth_headers(upgrade_props):
+def get_auth_headers(upgrade_props):
     headers = {}
     config = ctx_factory.get('manager-config', upgrade_props=upgrade_props)
     security = config['security']
@@ -1119,7 +1135,7 @@ def restore_upgrade_snapshot():
 
 def _generate_upgrade_snapshot_id():
     url = 'http://localhost/api/v2.1/version'
-    auth_headers = _get_auth_headers(upgrade_props=False)
+    auth_headers = get_auth_headers(upgrade_props=False)
     res = http_request(url, method='GET', headers=auth_headers)
     if res.code != 200:
         err = 'Failed extracting current manager version. Message: {0}'\
@@ -1149,3 +1165,24 @@ def _set_upgrade_data(**kwargs):
 def _get_upgrade_data():
     with open(UPGRADE_METADATA_FILE) as f:
         return json.load(f)
+
+
+@retry((IOError, ValueError))
+def check_http_response(url, predicate):
+    response = urllib.urlopen(url)
+    if predicate is not None and not predicate(response):
+        raise ValueError(response)
+    return response
+
+
+def verify_service_http(service_name, url, predicate=None):
+    try:
+        return check_http_response(url, predicate)
+    except (IOError, ValueError) as e:
+        ctx.abort_operation('{0} error: {1}: {2}'.format(service_name, url, e))
+
+
+def verify_port_open(service_name, port, host='localhost'):
+    if not is_port_open(port, host):
+        ctx.abort_operation('{0} error: port {1}:{2} was not open'
+                            .format(service_name, host, port))

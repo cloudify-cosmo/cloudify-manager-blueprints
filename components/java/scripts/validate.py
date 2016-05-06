@@ -9,8 +9,7 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-RIEMANN_SERVICE_NAME = 'riemann'
 
-ctx.logger.info('Starting Riemann Service...')
-utils.start_service(RIEMANN_SERVICE_NAME)
-utils.systemd.verify_alive(RIEMANN_SERVICE_NAME)
+java_result = utils.sudo(['java', '-version'], ignore_failures=True)
+if java_result.returncode != 0:
+    ctx.abort_operation('Java runtime error: java was not installed')

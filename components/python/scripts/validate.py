@@ -9,8 +9,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-RIEMANN_SERVICE_NAME = 'riemann'
 
-ctx.logger.info('Starting Riemann Service...')
-utils.start_service(RIEMANN_SERVICE_NAME)
-utils.systemd.verify_alive(RIEMANN_SERVICE_NAME)
+pip_result = utils.sudo(['pip'], ignore_failures=True)
+if pip_result.returncode != 0:
+    ctx.abort_operation('Python runtime installation error: '
+                        'pip was not installed')

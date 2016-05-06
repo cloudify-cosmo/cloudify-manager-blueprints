@@ -12,11 +12,22 @@ ctx.download_resource(
 import utils  # NOQA
 
 RABBITMQ_SERVICE_NAME = 'rabbitmq'
-
-
 ctx_properties = utils.ctx_factory.get(RABBITMQ_SERVICE_NAME)
-
 rabbitmq_endpoint_ip = ctx_properties['rabbitmq_endpoint_ip']
+PORT = 5671 if ctx_properties['rabbitmq_ssl_enabled'] else 5672
+
+
+@utils.retry(ValueError)
+def check_rabbit_running():
+    """Use rabbitmqctl status to check if RabbitMQ is working.
+
+    Sometimes rabbit takes a while to start, so this is retried several times.
+    Note that this is currently impossible to do on a remote host, so
+    this check only runs when rabbitmq is installed locally.
+    """
+    result = utils.sudo(['rabbitmqctl', 'status'], ignore_failures=True)
+    if result.returncode != 0:
+        raise ValueError('rabbitmqctl status: rabbitmq not running')
 
 
 def set_rabbitmq_policy(name, expression, policy):
@@ -92,3 +103,12 @@ if not rabbitmq_endpoint_ip:
 
     # rabbitmq restart exits with 143 status code that is valid in this case.
     utils.start_service(RABBITMQ_SERVICE_NAME, ignore_restart_fail=True)
+    rabbitmq_endpoint_ip = '127.0.0.1'
+
+    utils.systemd.verify_alive(RABBITMQ_SERVICE_NAME)
+    try:
+        check_rabbit_running()
+    except ValueError:
+        ctx.abort_operation('Rabbitmq failed to start')
+
+utils.verify_port_open(RABBITMQ_SERVICE_NAME, PORT, host=rabbitmq_endpoint_ip)
