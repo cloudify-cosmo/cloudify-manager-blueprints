@@ -40,9 +40,11 @@ def mock_install_ctx():
     return _create_mock_context(install_node_props)
 
 
-def _create_mock_context(install_node_props):
+def _create_mock_context(install_node_props,
+                         node_id='es_node',
+                         service=TEST_SERVICE_NAME):
     mock_node_props = MockNodeProperties(properties=install_node_props)
-    return MockCloudifyContext(node_id='es_node',
+    return MockCloudifyContext(node_id=node_id,
                                node_name=TEST_SERVICE_NAME,
                                properties=mock_node_props)
 
@@ -102,7 +104,7 @@ class TestUpgrade(unittest.TestCase):
 
     def test_ctx_prop_install_file_create(self):
         ctx_props, props_file_path = create_install_props_file(
-                TEST_SERVICE_NAME)
+            TEST_SERVICE_NAME)
         self.assertTrue(os.path.isfile(props_file_path))
         with open(props_file_path, 'r') as f:
             file_props = json.load(f)
@@ -111,7 +113,7 @@ class TestUpgrade(unittest.TestCase):
     @patch('utils.ctx', mock_upgrade_ctx())
     def test_ctx_prop_upgrade_file_create(self):
         ctx_props, upgrade_props_path = create_upgrade_props_file(
-                TEST_SERVICE_NAME)
+            TEST_SERVICE_NAME)
         self.assertTrue(os.path.isfile(upgrade_props_path))
         with open(upgrade_props_path, 'r') as f:
             file_props = json.load(f)
@@ -145,12 +147,12 @@ class TestUpgrade(unittest.TestCase):
 
         factory = utils.CtxPropertyFactory()
         factory.BASE_PROPERTIES_PATH = os.path.join(
-                os.path.dirname(install_path), '../../')
+            os.path.dirname(install_path), '../../')
         factory.archive_properties(TEST_SERVICE_NAME)
 
         archived_properties_path = os.path.join(
-                factory._get_rollback_properties_dir(TEST_SERVICE_NAME),
-                utils.CtxPropertyFactory.PROPERTIES_FILE_NAME)
+            factory._get_rollback_properties_dir(TEST_SERVICE_NAME),
+            utils.CtxPropertyFactory.PROPERTIES_FILE_NAME)
         # assert props file was archived
         self.assertTrue(os.path.isfile(archived_properties_path))
         # assert upgrade file was renamed
@@ -164,14 +166,14 @@ class TestUpgrade(unittest.TestCase):
         _create_install_resource_file(resource_file_dest)
         resource_factory = utils.BlueprintResourceFactory()
         resource_json = resource_factory._get_install_resources_json(
-                TEST_SERVICE_NAME)
+            TEST_SERVICE_NAME)
 
         # assert resource json contains mapping to the new resource dest
         self.assertEqual(resource_json.get(TEST_RESOURCE_NAME),
                          resource_file_dest)
         resource_local_path = os.path.join(
-                resource_factory._get_resources_dir(TEST_SERVICE_NAME),
-                TEST_RESOURCE_NAME)
+            resource_factory._get_resources_dir(TEST_SERVICE_NAME),
+            TEST_RESOURCE_NAME)
         self.assertTrue(os.path.isfile(resource_local_path))
 
     @patch('utils.BlueprintResourceFactory.BASE_RESOURCES_PATH',
@@ -181,7 +183,7 @@ class TestUpgrade(unittest.TestCase):
         _create_upgrade_resource_file(resource_file_dest)
         resource_factory = utils.BlueprintResourceFactory()
         resource_json = resource_factory._get_upgrade_resources_json(
-                TEST_SERVICE_NAME)
+            TEST_SERVICE_NAME)
 
         # assert the upgrade json contains the new resource and its dest
         self.assertEqual(resource_json.get(TEST_RESOURCE_NAME),
@@ -189,8 +191,8 @@ class TestUpgrade(unittest.TestCase):
 
         upgrade_file_name = 'upgrade-{0}'.format(TEST_RESOURCE_NAME)
         resource_local_path = os.path.join(
-                resource_factory._get_resources_dir(TEST_SERVICE_NAME),
-                upgrade_file_name)
+            resource_factory._get_resources_dir(TEST_SERVICE_NAME),
+            upgrade_file_name)
         self.assertTrue(os.path.isfile(resource_local_path))
 
     @patch('utils.is_upgrade', True)
@@ -205,22 +207,22 @@ class TestUpgrade(unittest.TestCase):
         res_factory = utils.BlueprintResourceFactory()
         res_factory.archive_resources(TEST_SERVICE_NAME)
         archived_resource_file = os.path.join(
-                res_factory._get_rollback_resources_dir(TEST_SERVICE_NAME),
-                'install.conf')
+            res_factory._get_rollback_resources_dir(TEST_SERVICE_NAME),
+            'install.conf')
         archived_resources_json = os.path.join(
-                res_factory._get_rollback_resources_dir(TEST_SERVICE_NAME),
-                utils.BlueprintResourceFactory.RESOURCES_JSON_FILE)
+            res_factory._get_rollback_resources_dir(TEST_SERVICE_NAME),
+            utils.BlueprintResourceFactory.RESOURCES_JSON_FILE)
 
         # assert resource file and resource json were archived
         self.assertTrue(os.path.isfile(archived_resource_file))
         self.assertTrue(os.path.isfile(archived_resources_json))
 
         curr_resource_file = os.path.join(
-                res_factory._get_resources_dir(TEST_SERVICE_NAME),
-                'upgrade.conf')
+            res_factory._get_resources_dir(TEST_SERVICE_NAME),
+            'upgrade.conf')
         curr_resources_json = os.path.join(
-                res_factory._get_resources_dir(TEST_SERVICE_NAME),
-                utils.BlueprintResourceFactory.RESOURCES_JSON_FILE)
+            res_factory._get_resources_dir(TEST_SERVICE_NAME),
+            utils.BlueprintResourceFactory.RESOURCES_JSON_FILE)
 
         # assert resource file and resource json were replaced
         self.assertTrue(os.path.isfile(curr_resource_file))
