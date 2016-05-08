@@ -143,6 +143,15 @@ inputs:
     default: false
 
   #############################
+  # Bootstrap Validations
+  #############################
+  ignore_bootstrap_validations:
+    description: >
+      While validations will be performed, they will be ignored.
+    type: string
+    default: false
+
+  #############################
   # Manager Resources Package
   #############################
   manager_resources_package:

@@ -15,13 +15,17 @@ node_types:
         default: { get_input: manager_resources_package_checksum_file }
       skip_checksum_validation:
         default: { get_input: skip_checksum_validation }
+      ignore_bootstrap_validations:
+        default: { get_input: ignore_bootstrap_validations }
+      es_heap_size:
+        default: { get_input: elasticsearch_heap_size }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/manager/scripts/create.py
+              default: components/manager/scripts/validate.py
             fabric_env: &simple_fabric_env
               default:
                 user: { get_input: ssh_user }
@@ -29,6 +33,12 @@ node_types:
                 host_string: { get_attribute: [manager_host, public_ip] }
                 always_use_pty: true
                 hide: running
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/manager/scripts/create.py
+            fabric_env: *simple_fabric_env
 
   cloudify.nodes.MyCloudifyManager:
     derived_from: cloudify.nodes.SoftwareComponent
