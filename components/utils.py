@@ -923,7 +923,8 @@ class BlueprintResourceFactory(object):
     @staticmethod
     def _download_source_resource(source, local_resource_path):
         filename = get_file_name_from_url(source)
-        if filename in os.listdir(CLOUDIFY_SOURCES_PATH):
+        if os.path.isdir(CLOUDIFY_SOURCES_PATH) and \
+                filename in os.listdir(CLOUDIFY_SOURCES_PATH):
             tmp_path = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
             ctx.logger.info(
                 'Source found at: {0}, will use it instead.'.format(tmp_path))
