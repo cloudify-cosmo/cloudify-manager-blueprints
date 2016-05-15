@@ -10,8 +10,7 @@ ctx.download_resource(
 import utils  # NOQA
 ES_SERVICE_NAME = 'elasticsearch'
 
-ctx_properties = utils.CtxPropertyFactory().create(ES_SERVICE_NAME,
-                                                   write_to_file=False)
+ctx_properties = utils.CtxPropertyFactory().get(ES_SERVICE_NAME)
 ES_ENDPOINT_IP = ctx_properties['es_endpoint_ip']
 
 if not ES_ENDPOINT_IP:

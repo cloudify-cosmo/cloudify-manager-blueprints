@@ -13,4 +13,4 @@ AMQPINFLUX_SERVICE_NAME = 'amqpinflux'
 
 
 ctx.logger.info('Starting AMQP-Influx Broker Service...')
-utils.start_service_and_archive_properties(AMQPINFLUX_SERVICE_NAME)
+utils.start_service(AMQPINFLUX_SERVICE_NAME)

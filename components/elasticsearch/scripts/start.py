@@ -10,10 +10,9 @@ ctx.download_resource(
 import utils  # NOQA
 ES_SERVICE_NAME = 'elasticsearch'
 
-ctx_properties = utils.ctx_factory.create(ES_SERVICE_NAME, write_to_file=False)
-ES_ENDPOINT_IP = ctx_properties['es_endpoint_ip']
+ctx_properties = utils.ctx_factory.get(ES_SERVICE_NAME)
+ES_ENDPOINT_IP = ctx_properties.get('es_endpoint_ip')
 
 if not ES_ENDPOINT_IP:
     ctx.logger.info('Starting Elasticsearch Service...')
-    utils.start_service_and_archive_properties(ES_SERVICE_NAME,
-                                               append_prefix=False)
+    utils.start_service(ES_SERVICE_NAME, append_prefix=False)

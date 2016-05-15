@@ -14,8 +14,7 @@ import utils  # NOQA
 RABBITMQ_SERVICE_NAME = 'rabbitmq'
 
 
-ctx_properties = utils.ctx_factory.create(RABBITMQ_SERVICE_NAME,
-                                          write_to_file=False)
+ctx_properties = utils.ctx_factory.get(RABBITMQ_SERVICE_NAME)
 
 rabbitmq_endpoint_ip = ctx_properties['rabbitmq_endpoint_ip']
 
@@ -92,5 +91,4 @@ if not rabbitmq_endpoint_ip:
     )
 
     # rabbitmq restart exits with 143 status code that is valid in this case.
-    utils.start_service_and_archive_properties(RABBITMQ_SERVICE_NAME,
-                                               ignore_restart_fail=True)
+    utils.start_service(RABBITMQ_SERVICE_NAME, ignore_restart_fail=True)

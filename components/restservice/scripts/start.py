@@ -13,4 +13,4 @@ REST_SERVICE_NAME = 'restservice'
 
 
 ctx.logger.info('Starting Cloudify REST Service...')
-utils.start_service_and_archive_properties(REST_SERVICE_NAME)
+utils.start_service(REST_SERVICE_NAME)

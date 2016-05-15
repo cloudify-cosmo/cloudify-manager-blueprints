@@ -13,4 +13,4 @@ MGMT_WORKER_SERVICE_NAME = 'mgmtworker'
 
 
 ctx.logger.info('Starting Management Worker Service...')
-utils.start_service_and_archive_properties(MGMT_WORKER_SERVICE_NAME)
+utils.start_service(MGMT_WORKER_SERVICE_NAME)

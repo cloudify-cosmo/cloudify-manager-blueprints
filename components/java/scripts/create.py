@@ -34,7 +34,3 @@ def install_java():
 
 
 install_java()
-
-if utils.is_upgrade:
-    utils.resource_factory.archive_resources('java')
-    utils.ctx_factory.archive_properties('java')

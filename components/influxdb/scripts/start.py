@@ -12,12 +12,11 @@ import utils  # NOQA
 INFLUX_SERVICE_NAME = 'influxdb'
 
 
-ctx_properties = utils.ctx_factory.create(INFLUX_SERVICE_NAME,
-                                          write_to_file=False)
+ctx_properties = utils.ctx_factory.get(INFLUX_SERVICE_NAME)
 
 
-INFLUXDB_ENDPOINT_IP = ctx_properties['influxdb_endpoint_ip']
+INFLUXDB_ENDPOINT_IP = ctx_properties.get('influxdb_endpoint_ip')
 
 if not INFLUXDB_ENDPOINT_IP:
     ctx.logger.info('Starting InfluxDB Service...')
-    utils.start_service_and_archive_properties(INFLUX_SERVICE_NAME)
+    utils.start_service(INFLUX_SERVICE_NAME)
