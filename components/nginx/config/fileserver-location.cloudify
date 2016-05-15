@@ -1,4 +1,5 @@
   location ~ ^/resources {
+    internal;
     rewrite            /resources/(.*) /$1 break;
     proxy_pass         http://cloudify-resources;
     proxy_redirect     off;
