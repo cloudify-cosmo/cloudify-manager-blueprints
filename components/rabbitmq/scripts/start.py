@@ -42,7 +42,8 @@ def set_rabbitmq_policy(name, expression, policy):
 
 if not rabbitmq_endpoint_ip:
     ctx.logger.info("Starting RabbitMQ Service...")
-    utils.systemd.start(RABBITMQ_SERVICE_NAME)
+    # rabbitmq restart exits with 143 status code that is valid in this case.
+    utils.systemd.restart(RABBITMQ_SERVICE_NAME, ignore_failure=True)
     # This should be done in the create script.
     # For some reason, it fails. Need to check.
 

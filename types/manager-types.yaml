@@ -632,7 +632,7 @@ node_types:
         type: boolean
         default: { get_input: insecure_endpoints_disabled }
       use_existing_on_upgrade:
-        description: Use existing rest configuration
+        description: Use existing elasticsearch configuration
         type: string
         default: true
     interfaces:

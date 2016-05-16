@@ -2,8 +2,8 @@ import os
 import sys
 import unittest
 import tempfile
-import json
 from mock import patch
+
 from cloudify.mocks import MockCloudifyContext
 sys.path.append(os.path.join(os.path.dirname(__file__),
                              '../../components'))
@@ -59,33 +59,61 @@ def mock_upgrade_ctx(use_existing_on_upgrade=False):
 
 
 @patch('utils.ctx.download_resource', mock_resource_download())
-@patch('utils.ctx', mock_install_ctx())
 def _create_resource_file(resource_dest):
-    utils.resource_factory.create(resource_dest,
-                                  resource_dest,
-                                  TEST_SERVICE_NAME,
-                                  user_resource=False,
-                                  render=False)
+    return utils.resource_factory.create(resource_dest,
+                                         resource_dest,
+                                         TEST_SERVICE_NAME,
+                                         user_resource=False,
+                                         render=False)
 
 
 @patch('utils.is_upgrade', False)
-def _create_install_resource_file(dest):
-    _create_resource_file(dest)
+@patch('utils.is_rollback', False)
+@patch('utils.ctx', mock_install_ctx())
+def create_install_resource_file(dest):
+    return _create_resource_file(dest)
 
 
 @patch('utils.is_upgrade', True)
-def _create_upgrade_resource_file(dest):
-    _create_resource_file(dest)
+@patch('utils.is_rollback', False)
+@patch('utils.ctx', mock_upgrade_ctx())
+def create_upgrade_resource_file(dest):
+    return _create_resource_file(dest)
 
 
-@patch('utils.ctx', mock_install_ctx())
 @patch('utils.is_upgrade', False)
+@patch('utils.is_rollback', True)
+@patch('utils.ctx', mock_install_ctx())
+def rollback_resource_files(dest):
+    return _create_resource_file(dest)
+
+
+@patch('utils.is_upgrade', False)
+@patch('utils.is_rollback', False)
+@patch('utils.ctx', mock_install_ctx())
 def create_install_props_file(service_name):
     return _create_ctx_props_file(service_name)
 
 
+@patch('utils.is_upgrade', False)
+@patch('utils.is_rollback', True)
+@patch('utils.ctx', mock_install_ctx())
+def create_rollback_props_file(service_name):
+    return _create_ctx_props_file(service_name)
+
+
 @patch('utils.is_upgrade', True)
+@patch('utils.is_rollback', False)
+@patch('utils.ctx', mock_upgrade_ctx())
 def create_upgrade_props_file(service_name):
+    create_install_props_file(service_name)
+    return _create_ctx_props_file(service_name)
+
+
+@patch('utils.is_upgrade', True)
+@patch('utils.is_rollback', False)
+@patch('utils.ctx', mock_upgrade_ctx(use_existing_on_upgrade=True))
+def create_upgrade_props_file_use_existing(service_name):
     create_install_props_file(service_name)
     return _create_ctx_props_file(service_name)
 
@@ -98,90 +126,88 @@ def _create_ctx_props_file(service_name):
 
 class TestUpgrade(unittest.TestCase):
 
-    @patch('utils.ctx_factory.BASE_PROPERTIES_PATH', tempfile.mkdtemp())
+    def setUp(self):
+        super(TestUpgrade, self).setUp()
+        self.props_patcher = patch('utils.ctx_factory.BASE_PROPERTIES_PATH',
+                                   tempfile.mkdtemp())
+        self.res_patcher = patch('utils.BlueprintResourceFactory.'
+                                 'BASE_RESOURCES_PATH', tempfile.mkdtemp())
+        self.mock_props_path = self.props_patcher.start()
+        self.mock_res_path = self.res_patcher.start()
+
     def test_ctx_prop_install_file_create(self):
         ctx_props, props_file_path = create_install_props_file(
                 TEST_SERVICE_NAME)
         self.assertTrue(os.path.isfile(props_file_path))
-        with open(props_file_path, 'r') as f:
-            file_props = json.load(f)
-        self.assertDictEqual(file_props, ctx_props)
+        props = utils.ctx_factory.get(TEST_SERVICE_NAME)
+        self.assertEquals(props.get('test_property'), 'test')
+        self.assertDictEqual(props, ctx_props)
 
-    @patch('utils.ctx', mock_upgrade_ctx())
-    @patch('utils.ctx_factory.BASE_PROPERTIES_PATH', tempfile.mkdtemp())
     def test_ctx_prop_upgrade_file_create(self):
         ctx_props, upgrade_props_path = create_upgrade_props_file(
                 TEST_SERVICE_NAME)
+        self.assertIn('new_property', ctx_props.keys())
         self.assertTrue(os.path.isfile(upgrade_props_path))
-        with open(upgrade_props_path, 'r') as f:
-            file_props = json.load(f)
-        self.assertDictEqual(file_props, ctx_props)
+        props = utils.ctx_factory.get(TEST_SERVICE_NAME)
+        self.assertIn('new_property', props.keys())
+        self.assertDictEqual(props, ctx_props)
 
-    @patch('utils.ctx', mock_upgrade_ctx(use_existing_on_upgrade=True))
-    @patch('utils.ctx_factory.BASE_PROPERTIES_PATH', tempfile.mkdtemp())
     def test_use_existing_on_upgrade(self):
-        ctx_props, _ = create_upgrade_props_file(TEST_SERVICE_NAME)
+        ctx_props, _ = create_upgrade_props_file_use_existing(
+                TEST_SERVICE_NAME)
         # Assert same value used for upgrade
         self.assertEqual(ctx_props['test_property'], 'test')
         # Assert new property merged with old properties
         self.assertEqual(ctx_props['new_property'], 'value')
-        self.assert_rpm_url_overridden(ctx_props)
+        self._assert_rpm_url_overridden(ctx_props)
 
-    @patch('utils.ctx', mock_upgrade_ctx())
-    @patch('utils.ctx_factory.BASE_PROPERTIES_PATH', tempfile.mkdtemp())
     def test_new_props_on_upgrade(self):
         ctx_props, _ = create_upgrade_props_file(TEST_SERVICE_NAME)
         self.assertEqual(ctx_props['test_property'], 'new_value')
-        self.assert_rpm_url_overridden(ctx_props)
+        self._assert_rpm_url_overridden(ctx_props)
 
-    def assert_rpm_url_overridden(self, ctx_properties):
+    def _assert_rpm_url_overridden(self, ctx_properties):
         self.assertEqual(ctx_properties['es_rpm_source_url'],
                          'http://www.mock.com/new-es.tar.gz')
 
-    @patch('utils.ctx', mock_upgrade_ctx())
-    @patch('utils.is_upgrade', True)
-    @patch('utils.ctx_factory.BASE_PROPERTIES_PATH', tempfile.mkdtemp())
     def test_archive_properties(self):
         _, install_path = create_install_props_file(TEST_SERVICE_NAME)
         _, upgrade_path = create_upgrade_props_file(TEST_SERVICE_NAME)
 
-        utils.ctx_factory.BASE_PROPERTIES_PATH = os.path.join(
-                os.path.dirname(install_path), '../../')
+        install_props = \
+            utils.ctx_factory.load_rollback_props(TEST_SERVICE_NAME)
 
-        archived_properties_path = \
-            utils.ctx_factory._get_rollback_props_file_path(TEST_SERVICE_NAME)
-        # assert props file was archived
-        self.assertTrue(os.path.isfile(archived_properties_path))
-
-        install_props = utils.ctx_factory.get(TEST_SERVICE_NAME,
-                                              upgrade_props=False)
-        upgrade_props = utils.ctx_factory.get(TEST_SERVICE_NAME,
-                                              upgrade_props=True)
+        upgrade_props = utils.ctx_factory.get(TEST_SERVICE_NAME)
         self.assertNotEqual(upgrade_props['es_rpm_source_url'],
                             install_props['es_rpm_source_url'])
 
-    @patch('utils.BlueprintResourceFactory.BASE_RESOURCES_PATH',
-           tempfile.mkdtemp())
-    @patch('utils.is_upgrade', False)
+    def test_restore_properties(self):
+        _, install_path = create_install_props_file(TEST_SERVICE_NAME)
+        install_props = utils.ctx_factory.get(TEST_SERVICE_NAME)
+        _, upgrade_path = create_upgrade_props_file(TEST_SERVICE_NAME)
+        upgrade_props = utils.ctx_factory.get(TEST_SERVICE_NAME)
+        _, rollback_path = create_rollback_props_file(TEST_SERVICE_NAME)
+        rollback_props = utils.ctx_factory.get(TEST_SERVICE_NAME)
+
+        self.assertNotEqual(upgrade_props['es_rpm_source_url'],
+                            install_props['es_rpm_source_url'])
+        self.assertEqual(install_props['es_rpm_source_url'],
+                         rollback_props['es_rpm_source_url'])
+
     def test_resource_file_create_on_install(self):
         resource_file_dest = '/opt/manager/{0}'.format(TEST_RESOURCE_NAME)
-        _create_install_resource_file(resource_file_dest)
+        install_res_file, _ = create_install_resource_file(resource_file_dest)
         resource_json = utils.resource_factory._get_resources_json(
                 TEST_SERVICE_NAME)
 
         # assert resource json contains mapping to the new resource dest
         self.assertEqual(resource_json.get(TEST_RESOURCE_NAME),
                          resource_file_dest)
-        resource_local_path = os.path.join(
-                utils.resource_factory.BASE_RESOURCES_PATH, TEST_SERVICE_NAME,
-                utils.resource_factory.RESOURCES_DIR_NAME, TEST_RESOURCE_NAME)
-        self.assertTrue(os.path.isfile(resource_local_path))
+        self.assertTrue(os.path.isfile(install_res_file))
 
-    @patch('utils.BlueprintResourceFactory.BASE_RESOURCES_PATH',
-           tempfile.mkdtemp())
     def test_resource_file_create_on_update(self):
         resource_file_dest = '/opt/manager/{0}'.format(TEST_RESOURCE_NAME)
-        _create_upgrade_resource_file(resource_file_dest)
+        create_upgrade_resource_file(resource_file_dest)
         resource_json = utils.resource_factory._get_resources_json(
                 TEST_SERVICE_NAME)
 
@@ -189,34 +215,60 @@ class TestUpgrade(unittest.TestCase):
         self.assertEqual(resource_json.get(TEST_RESOURCE_NAME),
                          resource_file_dest)
 
-    @patch('utils.is_upgrade', True)
-    @patch('utils.ctx', mock_upgrade_ctx())
-    @patch('utils.BlueprintResourceFactory.BASE_RESOURCES_PATH',
-           tempfile.mkdtemp())
     def test_archive_resources(self):
         install_resource_dest = '/opt/manager/{0}'.format('install.conf')
-        _create_install_resource_file(install_resource_dest)
+        old_resource_path, _ = \
+            create_install_resource_file(install_resource_dest)
+        # assert install resource created
+        self.assertTrue(os.path.isfile(old_resource_path))
+
         upgrade_resource_dest = '/opt/manager/{0}'.format('upgrade.conf')
-        _create_upgrade_resource_file(upgrade_resource_dest)
+        new_resource_path, _ = \
+            create_upgrade_resource_file(upgrade_resource_dest)
+        # assert upgrade resource created
+        self.assertTrue(os.path.isfile(new_resource_path))
+        # assert install resource removed
+        self.assertFalse(os.path.isfile(old_resource_path))
+
+        # assert resource json was archived
         archived_resource_file = os.path.join(
                 utils.resource_factory._get_rollback_resources_dir(
                         TEST_SERVICE_NAME), 'install.conf')
-        archived_resources_json = os.path.join(
-                utils.resource_factory._get_rollback_resources_dir(
-                        TEST_SERVICE_NAME),
-                utils.resource_factory.RESOURCES_JSON_FILE)
-
-        # assert resource file and resource json were archived
+        # assert install resource was archived
         self.assertTrue(os.path.isfile(archived_resource_file))
-        self.assertTrue(os.path.isfile(archived_resources_json))
 
-        curr_resource_file = os.path.join(
-                utils.resource_factory._get_resources_dir(TEST_SERVICE_NAME),
-                'upgrade.conf')
+        # assert resource json values are valid
+        rollback_res_json = utils.resource_factory.\
+            _get_rollback_resources_json(TEST_SERVICE_NAME)
+        self.assertIn('install.conf', rollback_res_json.keys())
+        self.assertEqual(install_resource_dest,
+                         rollback_res_json.get('install.conf'))
+
+        # assert new resource json exists
         curr_resources_json = os.path.join(
                 utils.resource_factory._get_resources_dir(TEST_SERVICE_NAME),
                 utils.resource_factory.RESOURCES_JSON_FILE)
-
-        # assert resource file and resource json were replaced
-        self.assertTrue(os.path.isfile(curr_resource_file))
         self.assertTrue(os.path.isfile(curr_resources_json))
+
+    @patch('utils.resource_factory._restore_service_configuration',
+           lambda x, y: None)
+    def test_restore_resources(self):
+        install_resource_dest = '/opt/manager/{0}'.format('install.conf')
+        install_resource_file, _ = \
+            create_install_resource_file(install_resource_dest)
+        # assert install file created
+        self.assertTrue(os.path.isfile(install_resource_file))
+        upgrade_resource_dest = '/opt/manager/{0}'.format('upgrade.conf')
+        upgrade_resource_file, _ = \
+            create_upgrade_resource_file(upgrade_resource_dest)
+        # assert install file moved
+        self.assertFalse(os.path.isfile(install_resource_file))
+        # assert upgrade file created
+        self.assertTrue(os.path.isfile(upgrade_resource_file))
+        # rollback resources
+        rollback_resource_files(install_resource_dest)
+
+        # assert upgrade resource was removed
+        self.assertFalse(os.path.isfile(upgrade_resource_file))
+        # assert install resource has been rolled back
+        self.assertTrue(os.path.isfile(install_resource_file))

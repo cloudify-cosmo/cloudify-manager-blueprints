@@ -41,9 +41,14 @@ def install_riemann():
             'Both rabbitmq_username and rabbitmq_password must be supplied '
             'and at least 1 character long in the manager blueprint inputs.')
 
+    rabbit_props = utils.ctx_factory.get('rabbitmq')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip(
-            ctx_properties.get('rabbitmq_endpoint_ip'))
+                rabbit_props.get('rabbitmq_endpoint_ip'))
+    ctx.instance.runtime_properties['rabbitmq_username'] = \
+        rabbit_props.get('rabbitmq_username')
+    ctx.instance.runtime_properties['rabbitmq_password'] = \
+        rabbit_props.get('rabbitmq_password')
 
     ctx.logger.info('Installing Riemann...')
     utils.set_selinux_permissive()
@@ -94,5 +99,5 @@ def install_riemann():
     utils.clean_var_log_dir(RIEMANN_SERVICE_NAME)
 
 install_riemann()
-if utils.is_upgrade:
+if utils.is_upgrade or utils.is_rollback:
     utils.restore_upgrade_snapshot()

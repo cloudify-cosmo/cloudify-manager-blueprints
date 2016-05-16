@@ -26,9 +26,9 @@ def _install_optional(amqpinflux_venv):
 
 
 def _deploy_broker_configuration(amqpinflux_group):
-
-    rabbitmq_cert_enabled = ctx_properties['rabbitmq_ssl_enabled']
-    rabbitmq_cert_public = ctx_properties['rabbitmq_cert_public']
+    rabbit_props = utils.ctx_factory.get('rabbitmq')
+    rabbitmq_cert_enabled = rabbit_props['rabbitmq_ssl_enabled']
+    rabbitmq_cert_public = rabbit_props['rabbitmq_cert_public']
 
     if rabbitmq_cert_enabled:
         broker_cert_path = os.path.join(AMQPINFLUX_HOME, 'amqp_pub.pem')
@@ -50,9 +50,16 @@ def install_amqpinflux():
     # injected as an input to the script
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         os.environ['INFLUXDB_ENDPOINT_IP']
+    rabbit_props = utils.ctx_factory.get('rabbitmq')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip(
-                ctx_properties.get('rabbitmq_endpoint_ip'))
+                rabbit_props.get('rabbitmq_endpoint_ip'))
+    ctx.instance.runtime_properties['rabbitmq_username'] = \
+        rabbit_props.get('rabbitmq_username')
+    ctx.instance.runtime_properties['rabbitmq_password'] = \
+        rabbit_props.get('rabbitmq_password')
+    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = \
+        rabbit_props.get('rabbitmq_ssl_enabled')
 
     amqpinflux_user = 'amqpinflux'
     amqpinflux_group = 'amqpinflux'

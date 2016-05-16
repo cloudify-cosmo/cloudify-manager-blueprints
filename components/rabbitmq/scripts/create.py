@@ -121,7 +121,8 @@ def _install_rabbitmq():
 
     utils.chown('rabbitmq', 'rabbitmq', rabbitmq_log_path)
 
-    utils.systemd.start(RABBITMQ_SERVICE_NAME)
+    # rabbitmq restart exits with 143 status code that is valid in this case.
+    utils.systemd.restart(RABBITMQ_SERVICE_NAME, ignore_failure=True)
 
     time.sleep(10)
     utils.wait_for_port(5672)

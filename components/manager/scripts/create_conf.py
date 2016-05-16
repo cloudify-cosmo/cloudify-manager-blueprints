@@ -43,7 +43,6 @@ def _set_ports():
 
 def main():
     if utils.is_upgrade:
-        # TODO: should be on top.
         utils.create_upgrade_snapshot()
     _disable_requiretty()
     _set_ports()
