@@ -857,13 +857,13 @@ node_templates:
       agent_config:
         install_method: none
       aws_config: *aws_configuration
-#    interfaces:
-#      cloudify.interfaces.lifecycle:
-#        configure:
-#          implementation: aws.ec2.instance.modify_instance_attributes
-#          inputs:
-#            new_attributes:
-#              sourceDestCheck : false
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure:
+          implementation: aws.ec2.instance.modify_instance_attributes
+          inputs:
+            new_attributes:
+              sourceDestCheck : false
     relationships:
       - type: cloudify.aws.relationships.instance_connected_to_elastic_ip
         target: NAT_server_ip

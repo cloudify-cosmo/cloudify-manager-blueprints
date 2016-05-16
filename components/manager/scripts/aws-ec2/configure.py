@@ -74,10 +74,10 @@ def _set_provider_config():
         {node.id: node for node in ctx._endpoint.storage.get_nodes()}
 
     node_id_to_provider_context_field = {
-        'agents_security_group': 'agents_security_group',
-        'agent_keypair': 'agents_keypair',
-        'private_subnet': 'subnet',
-        'managment_vpc': 'vpc'
+        # 'agents_security_group': 'agents_security_group',
+        # 'agent_keypair': 'agents_keypair',
+        # 'private_subnet': 'subnet',
+        # 'managment_vpc': 'vpc'
     }
 
     for node_instance in node_instances:
