@@ -153,7 +153,8 @@ inputs:
 
   elasticsearch_curator_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/elasticsearch-curator-3.2.3-1.x86_64.rpm
+#    default: http://repository.cloudifysource.org/org/cloudify3/components/elasticsearch-curator-3.2.3-1.x86_64.rpm
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.4.0/m5/elasticsearch-curator-3.2.3-2.el7.x86_64.rpm
 
   logstash_source_url:
     type: string
