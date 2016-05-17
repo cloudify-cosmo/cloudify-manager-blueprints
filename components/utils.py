@@ -335,14 +335,19 @@ def yum_install(source, service_name):
     separated array of packages as you can with `yum install`. You must
     provide one package per invocation.
     """
+    # source is a url
     if source.startswith(('http', 'https', 'ftp')):
         filename = get_file_name_from_url(source)
         source_name, ext = os.path.splitext(filename)
+    # source is just the name of the file
+    elif source.endswith('.rpm'):
+        source_name, ext = os.path.splitext(source)
+    # source is the name of a yum-repo based package name
     else:
         source_name, ext = source, ''
     source_path = source_name
 
-    if ext.endswith('rpm'):
+    if ext.endswith('.rpm'):
         source_path = download_cloudify_resource(source, service_name)
 
     rpm_handler = RpmPackageHandler(source_path)
@@ -366,8 +371,7 @@ class RpmPackageHandler(object):
         self.source_path = source_path
 
     def remove_existing_rpm_package(self):
-        """
-        removes any version that satisfies the package name of the given
+        """Removes any version that satisfies the package name of the given
         source path.
         """
         package_name = self.get_rpm_package_name()
@@ -384,8 +388,7 @@ class RpmPackageHandler(object):
         return False
 
     def is_rpm_installed(self):
-        """
-        returns true if provided rpm is already installed.
+        """Returns true if provided rpm is already installed.
         """
         src_query = run(['rpm', '-qp', self.source_path])
         source_name = src_query.aggr_stdout.rstrip('\n\r')
@@ -393,8 +396,7 @@ class RpmPackageHandler(object):
         return self._is_package_installed(source_name)
 
     def get_rpm_package_name(self):
-        """
-        returns the package name according to the info provided in the source
+        """Returns the package name according to the info provided in the source
         file.
         """
         split_index = ' : '
@@ -614,22 +616,6 @@ def ln(source, target, params=None):
 
 def clean_var_log_dir(service):
     pass
-    # path = "/var/log/{0}".format(service)
-    # if os.path.exists(path):
-    #     if not os.path.exists("/var/log/cloudify"):
-    #         os.mkdir("/var/log/cloudify")
-    #     if not os.path.exists("/var/log/cloudify/{0}".format(service)):
-    #         os.mkdir("/var/log/cloudify/{0}".format(service))
-    #     logfiles = [f for f in os.listdir(path) if os.path.isfile(
-    #             os.path.join(path, f))]
-    #     for f in logfiles:
-    #         ctx.logger.info(f)
-    #         os.rename(f, "/var/log/cloudify/{0}/{1}-from_bootstrap-".format(
-    #                 service, time.strftime('%Y_%m_%d_%H_%M_%S')))
-    #     ctx.logger.info(
-    #             "Removing unnecessary logs directory: /var/log/${0}".format(
-    #                     service))
-    #     sudo(['rm', '-rf', path])
 
 
 def untar(source, destination='/tmp', strip=1, skip_old_files=False):
@@ -716,7 +702,7 @@ class CtxPropertyFactory(object):
 
     # Create node properties according to the workflow context install/upgrade
     def create(self, service_name):
-        """a Factory used to create a local copy of the node properties used
+        """A Factory used to create a local copy of the node properties used
         upon deployment. This copy will allows to later reuse the properties
         for upgrade/rollback purposes. The node ctx properties will be set
         according to the node property named 'use_existing_on_upgrade'.
@@ -834,7 +820,7 @@ class BlueprintResourceFactory(object):
 
     def create(self, source, destination, service_name, user_resource=False,
                source_resource=False, render=True, load_ctx=True):
-        """a Factory used to create a local copy of a resource upon deployment.
+        """A Factory used to create a local copy of a resource upon deployment.
         This copy allows to later reuse the resource for upgrade/rollback
         purposes.
 
@@ -897,7 +883,7 @@ class BlueprintResourceFactory(object):
                                 .format(resource_name))
                 # update the resource file we hold that might have changed
                 install_resource = self._get_resource_file_path(
-                        service_name, resource_name)
+                    service_name, resource_name)
                 copy(existing_resource_path, install_resource)
             else:
                 ctx.logger.info('User resource {0} not found on {1}'
@@ -933,7 +919,13 @@ class BlueprintResourceFactory(object):
 
     @staticmethod
     def _download_source_resource(source, local_resource_path):
-        filename = get_file_name_from_url(source)
+        # source is a url
+        if source.startswith(('http', 'https', 'ftp')):
+            filename = get_file_name_from_url(source)
+        # source is just the name of the file, to be retrieved from
+        # the manager resources package
+        else:
+            filename = source
         if os.path.isdir(CLOUDIFY_SOURCES_PATH) and \
                 filename in os.listdir(CLOUDIFY_SOURCES_PATH):
             tmp_path = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
@@ -1023,7 +1015,7 @@ def http_request(url, data=None, method='PUT', headers={}):
     except urllib2.URLError as e:
         reqstring = url + (' ' + data if data else '')
         ctx.logger.error('Failed to {0} {1} (reason: {2})'.format(
-                method, reqstring, e.reason))
+            method, reqstring, e.reason))
 
 
 def _wait_for_execution(execution_id, headers):
@@ -1075,7 +1067,7 @@ def _get_auth_headers(upgrade_props):
         password = security.get('admin_password')
         headers.update({'Authorization':
                         'Basic ' + base64.b64encode('{0}:{1}'.format(
-                                    username, password))})
+                            username, password))})
     return headers
 
 

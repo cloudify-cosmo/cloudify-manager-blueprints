@@ -9,7 +9,11 @@ from cloudify import ctx
 def retrieve(agent_packages):
     ctx.logger.info('Downloading Cloudify Agents...')
 
-    for agent, source_url in agent_packages.items():
+    for agent, source in agent_packages.items():
+        # if source is not a downloadable link, it will not be downloaded
+        if not source.startswith(('http', 'https', 'ftp')):
+            continue
+
         dest_path = ctx.instance.runtime_properties['agent_packages_path']
         agent_name = agent.replace('_', '-')
 
@@ -31,7 +35,7 @@ def retrieve(agent_packages):
         dest_file = '{0}/{1}'.format(dest_path, filename)
 
         ctx.logger.info('Downloading Agent Package {0} to {1} if it does not '
-                        'already exist...'.format(source_url, dest_file))
+                        'already exist...'.format(source, dest_file))
         if not remote_exists(dest_file):
             dl_cmd = 'curl --retry 10 -f -s -S -L {0} --create-dirs -o {1}'
-            fabric.api.sudo(dl_cmd.format(source_url, dest_file))
+            fabric.api.sudo(dl_cmd.format(source, dest_file))

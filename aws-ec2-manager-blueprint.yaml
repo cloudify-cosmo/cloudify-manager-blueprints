@@ -143,96 +143,96 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/Ubuntu-trusty-agent_3.4.0-m5-b394.tar.gz
-      ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/Ubuntu-precise-agent_3.4.0-m5-b394.tar.gz
-      centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/centos-Core-agent_3.4.0-m5-b394.tar.gz
-      centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/centos-Final-agent_3.4.0-m5-b394.tar.gz
-      redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/redhat-Maipo-agent_3.4.0-m5-b394.tar.gz
-      redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/redhat-Santiago-agent_3.4.0-m5-b394.tar.gz
-      cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/cloudify-windows-agent_3.4.0-m5-b394.exe
+      ubuntu_trusty_agent: Ubuntu-trusty-agent_3.4.0-m5-b394.tar.gz
+      ubuntu_precise_agent: Ubuntu-precise-agent_3.4.0-m5-b394.tar.gz
+      centos_7x_agent: centos-Core-agent_3.4.0-m5-b394.tar.gz
+      centos_6x_agent: centos-Final-agent_3.4.0-m5-b394.tar.gz
+      redhat_7x_agent: redhat-Maipo-agent_3.4.0-m5-b394.tar.gz
+      redhat_6x_agent: redhat-Santiago-agent_3.4.0-m5-b394.tar.gz
+      cloudify_windows_agent: cloudify-windows-agent_3.4.0-m5-b394.exe
 
   #############################
   # Cloudify Modules
   #############################
   rest_service_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/cloudify-rest-service-3.4.0-m5_b394.x86_64.rpm
+    default: cloudify-rest-service-3.4.0-m5_b394.x86_64.rpm
 
   management_worker_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/cloudify-management-worker-3.4.0-m5_b394.x86_64.rpm
+    default: cloudify-management-worker-3.4.0-m5_b394.x86_64.rpm
 
   amqpinflux_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/cloudify-amqp-influx-3.4.0-m5_b394.x86_64.rpm
+    default: cloudify-amqp-influx-3.4.0-m5_b394.x86_64.rpm
 
   cloudify_resources_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
+    default: master.tar.gz
 
   webui_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.4.0/m5-RELEASE/cloudify-ui-3.4.0-m5-b394.tgz
+    default: cloudify-ui-3.4.0-m5-b394.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/grafana-1.9.0.tgz
+    default: grafana-1.9.0.tgz
 
   #############################
   # External Components
   #############################
   pip_source_rpm_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/python-pip-7.1.0-1.el7.noarch.rpm
+    default: python-pip-7.1.0-1.el7.noarch.rpm
 
   java_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/jre1.8.0_45-1.8.0_45-fcs.x86_64.rpm
+    default: jre1.8.0_45-1.8.0_45-fcs.x86_64.rpm
 
   erlang_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/erlang-17.4-1.el6.x86_64.rpm
+    default: erlang-17.4-1.el6.x86_64.rpm
 
   rabbitmq_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/rabbitmq-server-3.5.3-1.noarch.rpm
+    default: rabbitmq-server-3.5.3-1.noarch.rpm
 
   elasticsearch_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/elasticsearch-1.6.0.noarch.rpm
+    default: elasticsearch-1.6.0.noarch.rpm
 
   elasticsearch_curator_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/elasticsearch-curator-3.2.3-1.x86_64.rpm
+    default: elasticsearch-curator-3.2.3-1.x86_64.rpm
 
   logstash_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/logstash-1.5.0-1.noarch.rpm
+    default: logstash-1.5.0-1.noarch.rpm
 
   nginx_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/nginx-1.8.0-1.el7.ngx.x86_64.rpm
+    default: nginx-1.8.0-1.el7.ngx.x86_64.rpm
 
   influxdb_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/influxdb-0.8.8-1.x86_64.rpm
+    default: influxdb-0.8.8-1.x86_64.rpm
 
   langohr_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/langohr.jar
+    default: langohr.jar
 
   daemonize_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/daemonize-1.7.3-7.el7.x86_64.rpm
+    default: daemonize-1.7.3-7.el7.x86_64.rpm
 
   riemann_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/riemann-0.2.6-1.noarch.rpm
+    default: riemann-0.2.6-1.noarch.rpm
 
   nodejs_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
+    default: node-v0.10.35-linux-x64.tar.gz
 
   #############################
   # RabbitMQ Inputs
