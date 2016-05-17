@@ -1,10 +1,10 @@
 tosca_definitions_version: cloudify_dsl_1_2
 
 imports:
-- http://www.getcloudify.org/spec/cloudify/3.3.1/types.yaml
-- http://www.getcloudify.org/spec/fabric-plugin/1.3.1/plugin.yaml
-- https://raw.githubusercontent.com/cloudify-cosmo/cloudify-azure-plugin/CFY-5203-v1.4/plugin.yaml
-- types/manager-types.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.4m5/types.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-azure-plugin/CFY-5203-v1.4/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.4/plugin.yaml
+  - types/manager-types.yaml
 
 inputs:
   resource_prefix:
@@ -134,19 +134,59 @@ inputs:
     default: false
 
   admin_username:
-    description: >
-      The Manager REST interface authentication username
     default: admin
 
   admin_password:
-    description: >
-      The Manager REST interface authentication password
     default: admin
 
   insecure_endpoints_disabled:
     description: Disables insecure REST endpoints
     type: boolean
     default: false
+
+  #############################
+  # Bootstrap Validations
+  #############################
+  ignore_bootstrap_validations:
+    description: >
+      While validations will be performed, they will be ignored.
+    type: string
+    default: false
+
+  minimum_required_total_physical_memory_in_mb:
+    description: Minimum required physical memory on Manager host in MB.
+    type: integer
+    default: 3792
+
+  minimum_required_available_disk_space_in_gb:
+    description: Minimum required disk space on Manager host in GB.
+    type: integer
+    default: 5
+
+  allowed_heap_size_gap_in_mb:
+    description: Gap between heap size and total Manager host's memory in MB.
+    type: integer
+    default: 1000
+
+  #############################
+  # Manager Resources Package
+  #############################
+  manager_resources_package:
+    description: A URL to a tar files containing all of the manager's resources
+    type: string
+    default: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.4.0/m5-RELEASE/cloudify-manager-resources_3.4.0-m5-b394.tar.gz
+
+  manager_resources_package_checksum_file:
+    description: >
+      A URL to the Manager Resources Package md5 checksum file.
+      This defaults to an empty string, meaning that
+    type: string
+    default: ''
+
+  skip_checksum_validation:
+    description: Whether to skip md5 checksum validation or not
+    type: boolean
+    default: true
 
   #############################
   # Agent Packages
@@ -158,124 +198,96 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/Ubuntu-trusty-agent_3.3.1-sp-b310.tar.gz
-      ubuntu_precise_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/Ubuntu-precise-agent_3.3.1-sp-b310.tar.gz
-      centos_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/centos-Core-agent_3.3.1-sp-b310.tar.gz
-      centos_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/centos-Final-agent_3.3.1-sp-b310.tar.gz
-      redhat_7x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/redhat-Maipo-agent_3.3.1-sp-b310.tar.gz
-      redhat_6x_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/redhat-Santiago-agent_3.3.1-sp-b310.tar.gz
-      cloudify_windows_agent: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-windows-agent_3.3.1-sp-b310.exe
+      ubuntu_trusty_agent: Ubuntu-trusty-agent_3.4.0-m5-b394.tar.gz
+      ubuntu_precise_agent: Ubuntu-precise-agent_3.4.0-m5-b394.tar.gz
+      centos_7x_agent: centos-Core-agent_3.4.0-m5-b394.tar.gz
+      centos_6x_agent: centos-Final-agent_3.4.0-m5-b394.tar.gz
+      redhat_7x_agent: redhat-Maipo-agent_3.4.0-m5-b394.tar.gz
+      redhat_6x_agent: redhat-Santiago-agent_3.4.0-m5-b394.tar.gz
+      cloudify_windows_agent: cloudify-windows-agent_3.4.0-m5-b394.exe
 
   #############################
   # Cloudify Modules
   #############################
   rest_service_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-rest-service-3.3.1-sp_b310.x86_64.rpm
+    default: cloudify-rest-service-3.4.0-m5_b394.x86_64.rpm
 
   management_worker_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-management-worker-3.3.1-sp_b310.x86_64.rpm
+    default: cloudify-management-worker-3.4.0-m5_b394.x86_64.rpm
 
   amqpinflux_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-amqp-influx-3.3.1-sp_b310.x86_64.rpm
+    default: cloudify-amqp-influx-3.4.0-m5_b394.x86_64.rpm
 
   cloudify_resources_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3.1.tar.gz
+    default: master.tar.gz
 
   webui_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify-ui-3.3.1-sp-b310.tgz
+    default: cloudify-ui-3.4.0-m5-b394.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/grafana-1.9.0.tgz
-
-  #############################
-  # Management Workers Inputs
-  #############################
-
-  management_worker_log_level:
-    description: >
-      Logging level for the management workers.
-    type: string
-    default: info
-
-  management_worker_max_tasks_per_child:
-    description: >
-      Maximum number of tasks to run in a worker process before recycling it.
-    type: integer
-    default: 5
-
-  management_worker_autoscale_min:
-    description: >
-      Minimum number of management worker processes.
-    type: integer
-    default: 2
-
-  management_worker_autoscale_max:
-    description: >
-      Maximum number of management worker processes.
-    type: integer
-    default: 5
+    default: grafana-1.9.0.tgz
 
   #############################
   # External Components
   #############################
   pip_source_rpm_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/python-pip-7.1.0-1.el7.noarch.rpm
+    default: python-pip-7.1.0-1.el7.noarch.rpm
 
   java_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/jre1.8.0_45-1.8.0_45-fcs.x86_64.rpm
+    default: jre1.8.0_45-1.8.0_45-fcs.x86_64.rpm
 
   erlang_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/erlang-17.4-1.el6.x86_64.rpm
+    default: erlang-17.4-1.el6.x86_64.rpm
 
   rabbitmq_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/rabbitmq-server-3.5.3-1.noarch.rpm
+    default: rabbitmq-server-3.5.3-1.noarch.rpm
 
   elasticsearch_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/elasticsearch-1.6.0.noarch.rpm
+    default: elasticsearch-1.6.0.noarch.rpm
 
   elasticsearch_curator_rpm_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/elasticsearch-curator-3.2.3-1.x86_64.rpm
+    default: elasticsearch-curator-3.2.3-1.x86_64.rpm
 
   logstash_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/logstash-1.5.0-1.noarch.rpm
+    default: logstash-1.5.0-1.noarch.rpm
 
   nginx_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/nginx-1.8.0-1.el7.ngx.x86_64.rpm
+    default: nginx-1.8.0-1.el7.ngx.x86_64.rpm
 
   influxdb_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/influxdb-0.8.8-1.x86_64.rpm
+    default: influxdb-0.8.8-1.x86_64.rpm
 
   langohr_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/langohr.jar
+    default: langohr.jar
 
   daemonize_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/daemonize-1.7.3-7.el7.x86_64.rpm
+    default: daemonize-1.7.3-7.el7.x86_64.rpm
 
   riemann_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/riemann-0.2.6-1.noarch.rpm
+    default: riemann-0.2.6-1.noarch.rpm
 
   nodejs_source_url:
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/components/node-v0.10.35-linux-x64.tar.gz
+    default: node-v0.10.35-linux-x64.tar.gz
 
   #############################
   # RabbitMQ Inputs
@@ -361,7 +373,7 @@ inputs:
   # https://www.rabbitmq.com/maxlength.html
   rabbitmq_events_queue_length_limit:
     description: >
-      Sets the number of messages the eventss queue can hold.
+      Sets the number of messages the events queue can hold.
       Note this is NOT the message byte length!
       Not used if an external endpoint is used.
     type: integer
@@ -391,6 +403,20 @@ inputs:
       Not used if an external endpoint is used.
     type: integer
     default: 102400
+
+  #############################
+  # Management Workers Inputs
+  #############################
+
+  management_worker_log_level:
+    description: >
+      Sets the logging level to use for the management workers. This affects the logging performed
+      by the manager during the execution of management tasks, such as deployment creation
+      and deployment deletion.
+      NOTE: specifying "debug" will result in considerable amount of logging activity. Consider
+      using "info" (or a more restrictive level) for production environments.
+    type: string
+    default: debug
 
   #############################
   # Elasticsearch Inputs
@@ -472,24 +498,27 @@ inputs:
   # Upload Resources Inputs
   #############################
   plugin_resources:
-      description: >
-        Holds any archives that should be uploaded to the manager.
-      default:
-        - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_fabric_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-        - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-redhat-Maipo.wgn'
-        - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-centos-Core.wgn'
-        - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py26-none-linux_x86_64-centos-Final.wgn'
-        - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-Ubuntu-precise.wgn'
-        - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
+    description: >
+      Holds any archives that should be uploaded to the manager.
+    default:
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-aws-plugin/1.4/cloudify_aws_plugin-1.4-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-aws-plugin/1.4/cloudify_aws_plugin-1.4-py27-none-linux_x86_64-redhat-Maipo.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-fabric-plugin/1.4/cloudify_fabric_plugin-1.4-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.2/cloudify_diamond_plugin-1.3.2-py27-none-linux_x86_64-redhat-Maipo.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.2/cloudify_diamond_plugin-1.3.2-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.2/cloudify_diamond_plugin-1.3.2-py26-none-linux_x86_64-centos-Final.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.2/cloudify_diamond_plugin-1.3.2-py27-none-linux_x86_64-Ubuntu-precise.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.2/cloudify_diamond_plugin-1.3.2-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
 
   dsl_resources:
     description: >
       Holds a set of dsl required resources
     default:
-      - {'source_path': 'https://raw.githubusercontent.com/01000101/cloudify-azure-plugin/rebuild/plugin.yaml', 'destination_path': '/spec/azure-plugin/1.3.1/plugin.yaml'}
-      - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.3.1/plugin.yaml'}
-      - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.1/plugin.yaml'}
-      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.3.1/types.yaml', 'destination_path': '/spec/cloudify/3.3.1/types.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/aws-plugin/1.4/plugin.yaml', 'destination_path': '/spec/aws-plugin/1.4/plugin.yaml'}
+
+      - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.4/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.4/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.2/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.2/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4m5/types.yaml', 'destination_path': '/spec/cloudify/3.4m5/types.yaml'}
 
   #############################
   # Dev Inputs
@@ -551,6 +580,18 @@ dsl_definitions:
     ssh_username: { get_input: ssh_user }
 
 node_templates:
+
+  # #####################################################################
+  # The manager_configuration node is meant to be read by Cloudify to
+  # provide runtime configuration and information for the CLI and the
+  # Manager.
+  # #####################################################################
+  manager_resources:
+    type: cloudify.nodes.ManagerResources
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+
   manager_configuration:
     type: cloudify.nodes.MyCloudifyManager
     properties:
@@ -562,10 +603,6 @@ node_templates:
         plugins:
           # Absolute paths only
           azure_config_path: /opt/cloudify_azure_provider.conf
-
-        transient_deployment_workers_mode:
-          enabled: true
-          global_parallel_executions_limit: 50
 
         cloudify_agent:
           min_workers: 0
@@ -840,10 +877,15 @@ node_templates:
     - type: cloudify.azure.relationships.connected_to_ip_configuration
       target: vm_nic_ip_cfg
 
-
-  ######################################################################
-  # These are the nodes comprising the Cloudify Manager's components
-  ######################################################################
+  # #####################################################################
+  # The Python and Java nodes are used to provide runtime environments
+  # on specific hosts. It allows us to define the runtime environment
+  # and install it only once per host and then have a node depend on it.
+  # Note that Erlang and NodeJS are also installed as runtime envs as
+  # part of the RabbitMQ and WebUI nodes respectively but as they're not
+  # used by multiple nodes, we're not specifying them as independent
+  # entities.
+  # #####################################################################
   python_runtime:
     type: manager.nodes.PythonRuntime
     relationships:
@@ -856,11 +898,16 @@ node_templates:
       - type: cloudify.relationships.contained_in
         target: manager_host
 
+  ######################################################################
+  # These are the nodes comprising the Cloudify Manager's components
+  ######################################################################
   rabbitmq:
     type: manager.nodes.RabbitMQ
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
 
   elasticsearch:
     type: manager.nodes.Elasticsearch
@@ -869,6 +916,8 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: java_runtime
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
 
   logstash:
     type: manager.nodes.Logstash
@@ -879,12 +928,16 @@ node_templates:
         target: java_runtime
       - type: logstash_to_elasticsearch
         target: elasticsearch
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
 
   influxdb:
     type: manager.nodes.InfluxDB
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
 
   nginx:
     type: manager.nodes.Nginx
@@ -893,6 +946,8 @@ node_templates:
         target: manager_host
       - type: nginx_to_manager_configuration
         target: manager_configuration
+      - type: nginx_to_restservice
+        target: rest_service
 
   riemann:
     type: manager.nodes.Riemann
@@ -905,6 +960,8 @@ node_templates:
         target: rabbitmq
       - type: riemann_to_nginx
         target: nginx
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
 
   rest_service:
     type: manager.nodes.RestService
@@ -931,6 +988,8 @@ node_templates:
         target: rabbitmq
       - type: mgmtworker_to_nginx
         target: nginx
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
 
   amqp_influx:
     type: manager.nodes.AmqpInfluxBroker
@@ -943,6 +1002,8 @@ node_templates:
         target: rabbitmq
       - type: amqpinflux_to_influxdb
         target: influxdb
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
 
   webui:
     type: manager.nodes.WebUI
@@ -953,13 +1014,28 @@ node_templates:
         target: rest_service
       - type: webui_to_influxdb
         target: influxdb
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
 
+  ######################################################################
+  # Enable this node if you want to have the CLI installed within
+  # the manager. This might aid in debugging problems or just
+  # controlling the manager from within itself.
+  ######################################################################
+  # cli:
+  #   type: manager.nodes.CLI
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: manager_host
+  #     - type: cloudify.relationships.depends_on
+  #       target: nginx
+  #     - type: cloudify.relationships.depends_on
+  #       target: restservice
 
 plugins:
   cli:
     install: false
     executor: central_deployment_agent
-
 
 outputs:
   manager_ip:
