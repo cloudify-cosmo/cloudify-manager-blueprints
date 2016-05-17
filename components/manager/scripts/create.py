@@ -134,4 +134,29 @@ def deploy_manager_sources():
                 os.path.join(agent_archives_path, agent_id + agent_extension))
 
 
+# def deploy_yamls():
+#     def deploy_plugin_yaml(plugin, version):
+#         plugin_dir = '{0}/spec/{1}-plugin/{2}/'.format(
+#             utils.MANAGER_RESOURCES_HOME, plugin, version)
+#         utils.mkdir(plugin_dir)
+#         utils.deploy_blueprint_resource(
+#             'resources/plugins/{0}-{1}-plugin.yaml',
+#             os.path.join(plugin_dir, 'plugin.yaml'))
+
+#     deploy_plugin_yaml('fabric', '1.4')
+#     deploy_plugin_yaml('script', '1.4')
+#     deploy_plugin_yaml('diamond', '1.3.2')
+#     deploy_plugin_yaml('aws', '1.4')
+#     deploy_plugin_yaml('openstack', '1.3.1')
+#     deploy_plugin_yaml('tosca-vcloud', '1.3.1')
+#     deploy_plugin_yaml('vsphere', '2.0')
+
+#     types_yaml_dir = '{0}/spec/cloudify/3.4m4'.format(
+#         utils.MANAGER_RESOURCES_HOME)
+#     utils.mkdir()
+#     utils.deploy_blueprint_resource(
+#         'resources/types-3.4m4.yaml',
+#         os.path.join(types_yaml_dir, 'types.yaml'))
+
+
 deploy_manager_sources()
