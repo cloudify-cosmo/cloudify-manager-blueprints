@@ -111,6 +111,13 @@ user_public_key: ssh-rsa...
 # Setting to `true` will allow to ignore those validations.
 #ignore_bootstrap_validations: false
 
+# These allow to override specific validation values
+# NOTE: We do not recommend changing these values unless you know exactly
+# what you're doing.
+#minimum_required_total_physical_memory_in_mb: 3792
+#minimum_required_available_disk_space_in_gb: 5
+#allowed_heap_size_gap_in_mb: 1000
+
 #############################
 # Manager Resources Package
 #############################

@@ -151,6 +151,21 @@ inputs:
     type: string
     default: false
 
+  minimum_required_total_physical_memory_in_mb:
+    description: Minimum required physical memory on Manager host in MB.
+    type: integer
+    default: 3792
+
+  minimum_required_available_disk_space_in_gb:
+    description: Minimum required disk space on Manager host in GB.
+    type: integer
+    default: 5
+
+  allowed_heap_size_gap_in_mb:
+    description: Gap between heap size and total Manager host's memory in MB.
+    type: integer
+    default: 1000
+
   #############################
   # Manager Resources Package
   #############################

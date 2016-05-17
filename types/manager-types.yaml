@@ -19,6 +19,12 @@ node_types:
         default: { get_input: ignore_bootstrap_validations }
       es_heap_size:
         default: { get_input: elasticsearch_heap_size }
+      minimum_required_total_physical_memory_in_mb:
+        default: { get_input: minimum_required_total_physical_memory_in_mb }
+      minimum_required_available_disk_space_in_gb:
+        default: { get_input: minimum_required_available_disk_space_in_gb }
+      allowed_heap_size_gap_in_mb:
+        default: { get_input: allowed_heap_size_gap_in_mb }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -155,7 +161,7 @@ node_types:
           audit_log_level: INFO # values: CRITICAL, ERROR, WARNING, INFO, DEBUG
           audit_log_file_size_MB: 100
           audit_log_files_backup_count: 20
-      use_existing_on_upgrade: 
+      use_existing_on_upgrade:
         description: Use existing manager configuration on upgrade
         type: string
         default: true
