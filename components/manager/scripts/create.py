@@ -35,9 +35,8 @@ def deploy_manager_sources():
         res_name = os.path.basename(archive_path)
         destination = os.path.join(utils.CLOUDIFY_SOURCES_PATH, res_name)
         resources_archive_path = \
-            utils.download_cloudify_resource(archive_path,
-                                             NODE_NAME,
-                                             destination=destination)
+            utils.download_cloudify_resource(
+                archive_path, NODE_NAME, destination=destination)
         # This would ideally go under utils.download_cloudify_resource but as
         # of now, we'll only be validating the manager resources package.
 
@@ -48,10 +47,8 @@ def deploy_manager_sources():
                 archive_checksum_path = archive_path + '.md5'
             md5_name = os.path.basename(archive_checksum_path)
             destination = os.path.join(utils.CLOUDIFY_SOURCES_PATH, md5_name)
-            resources_archive_md5_path = \
-                utils.download_cloudify_resource(archive_checksum_path,
-                                                 NODE_NAME,
-                                                 destination=destination)
+            resources_archive_md5_path = utils.download_cloudify_resource(
+                archive_checksum_path, NODE_NAME, destination=destination)
             if not utils.validate_md5_checksum(resources_archive_path,
                                                resources_archive_md5_path):
                     if skip_if_failed:
@@ -59,7 +56,7 @@ def deploy_manager_sources():
                                         'Continuing as no checksum file was '
                                         'explicitly provided.')
                     else:
-                        utils.error_exit(
+                        ctx.abort_operation(
                             'Failed to validate checksum for {0}'.format(
                                 resources_archive_path))
             else:
@@ -81,7 +78,7 @@ def deploy_manager_sources():
             elif filename.endswith('.exe'):
                 return '.exe'
             else:
-                utils.exit_error(
+                ctx.abort_operation(
                     'Unknown agent format for {0}. '
                     'Must be either tar.gz or exe'.format(filename))
 
