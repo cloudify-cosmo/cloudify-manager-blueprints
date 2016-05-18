@@ -19,6 +19,6 @@ agent_remote_key_path: /home/centos/.ssh/agent_kp.pem
 agent_local_key_path: ~/.ssh/id_rsa
 ssh_key_filename: ~/.ssh/id_rsa
 ssh_user: centos
-resource_prefix: ''
+resource_prefix: lwr
 resource_suffix: 00
 retry_after: 30
