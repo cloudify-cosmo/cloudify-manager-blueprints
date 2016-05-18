@@ -14,6 +14,8 @@ NODE_NAME = 'manager-resources'
 
 ctx_properties = utils.ctx_factory.create(NODE_NAME)
 
+AGENTS_ROLLBACK_PATH = '/opt/cloudify/manager-resources/agents_rollback'
+
 
 def deploy_manager_sources():
     """Deploys all manager sources from a single archive.
@@ -22,11 +24,11 @@ def deploy_manager_sources():
     archive_checksum_path = \
         ctx.node.properties['manager_resources_package_checksum_file']
     skip_checksum_validation = ctx.node.properties['skip_checksum_validation']
+    agent_archives_path = utils.AGENT_ARCHIVES_PATH
+    utils.mkdir(agent_archives_path)
     if archive_path:
         sources_agents_path = os.path.join(
-            utils.CLOUDIFY_SOURCES_PATH, 'agents')
-        agent_archives_path = utils.AGENT_ARCHIVES_PATH
-        utils.mkdir(agent_archives_path)
+                utils.CLOUDIFY_SOURCES_PATH, 'agents')
         # this will leave this several hundreds of MBs archive on the
         # manager. should find a way to clean it after all operations
         # were completed and bootstrap succeeded as it is not longer
@@ -88,6 +90,40 @@ def deploy_manager_sources():
             # e.g. Ubuntu-trusty-agent_3.4.0-m3-b392.tar.gz returns
             # ubuntu-trusty-agent
             return filename.split('_', 1)[0].lower()
+
+        def backup_agent_resources(agents_dir):
+            ctx.logger.info('Backing up agents in {0}...'.format(agents_dir))
+            if not os.path.exists(AGENTS_ROLLBACK_PATH):
+                utils.mkdir(AGENTS_ROLLBACK_PATH)
+                utils.copy(agents_dir, AGENTS_ROLLBACK_PATH)
+
+        def restore_agent_resources(agents_dir):
+            ctx.logger.info('Restoring agents in {0}'
+                            .format(AGENTS_ROLLBACK_PATH))
+            utils.remove(agents_dir)
+            utils.mkdir(agents_dir)
+            utils.copy(os.path.join(AGENTS_ROLLBACK_PATH, 'agents', '.'),
+                       agents_dir)
+
+        manager_resources_home = utils.MANAGER_RESOURCES_HOME
+
+        manager_scripts_path = '{0}/packages/scripts'.format(
+                manager_resources_home)
+        manager_templates_path = '{0}/packages/templates'.format(
+                manager_resources_home)
+        if utils.is_upgrade:
+            backup_agent_resources(agent_archives_path)
+            if os.path.exists(agent_archives_path):
+                utils.remove(agent_archives_path)
+                utils.mkdir(agent_archives_path)
+            if os.path.exists(manager_scripts_path):
+                utils.remove(manager_scripts_path)
+            ctx.logger.info('Upgrading agents...')
+            if os.path.exists(manager_templates_path):
+                utils.remove(manager_templates_path)
+        elif utils.is_rollback:
+            ctx.logger.info('Restoring agents...')
+            restore_agent_resources(agent_archives_path)
 
         for agent_file in os.listdir(sources_agents_path):
 
