@@ -149,7 +149,7 @@ inputs:
     description: >
       While validations will be performed, they will be ignored.
     type: string
-    default: false
+    default: true
 
   minimum_required_total_physical_memory_in_mb:
     description: Minimum required physical memory on Manager host in MB.
