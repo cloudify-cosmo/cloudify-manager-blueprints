@@ -47,7 +47,7 @@ def _get_os_distro():
 def _validate_sufficient_memory(min_memory_required_in_mb):
     current_memory = _get_host_total_memory()
     ctx.logger.info('Validating memory requirement...')
-    if int(min_memory_required_in_mb) >= int(current_memory):
+    if int(min_memory_required_in_mb) > int(current_memory):
         return _error(
             'The provided host does not have enough memory to run '
             'Cloudify Manager (Current: {0}MB, Required: {1}MB).'.format(

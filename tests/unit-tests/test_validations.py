@@ -112,6 +112,12 @@ class TestValidations(testtools.TestCase):
         self.assertIn(desired_error, error)
 
     @patch('validate.ctx', CTX)
+    @patch('validate._get_host_total_memory', return_value=1024)
+    def test_validate_edgy_physical_memory(self, _):
+        error = validate._validate_sufficient_memory(1024)
+        self.assertIsNone(error)
+
+    @patch('validate.ctx', CTX)
     def test_validate_physical_memory(self):
         error = validate._validate_sufficient_memory(1)
         self.assertIsNone(error)
