@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from os.path import join, dirname
-import os
 
 from cloudify import ctx
 
@@ -15,12 +14,6 @@ CONFIG_PATH = 'components/nginx/config'
 NGINX_SERVICE_NAME = 'nginx'
 
 ctx_properties = utils.ctx_factory.create(NGINX_SERVICE_NAME)
-
-
-def backup_agent_resources(agents_dir):
-    ctx.logger.info('Backing up agents in {0}'.format(agents_dir))
-    utils.mkdir(AGENTS_ROLLBACK_PATH)
-    utils.copy(agents_dir, AGENTS_ROLLBACK_PATH)
 
 
 def install_nginx():
@@ -52,26 +45,6 @@ def install_nginx():
     # how to set them?
     ctx.instance.runtime_properties['default_rest_service_port'] = '8100'
     ctx.instance.runtime_properties['internal_rest_service_port'] = '8101'
-
-    if utils.is_upgrade:
-        ctx.logger.info('Nginx is in upgrade state.')
-        if os.path.exists(manager_agents_path):
-            backup_agent_resources(manager_agents_path)
-            ctx.logger.info('Removing existing agents from {0}'
-                            .format(manager_agents_path))
-            utils.remove(manager_agents_path)
-        if os.path.exists(manager_scripts_path):
-            ctx.logger.info('Removing agent scripts from {0}'
-                            .format(manager_scripts_path))
-            utils.remove(manager_scripts_path)
-        if os.path.exists(manager_templates_path):
-            ctx.logger.info('Removing agent templates from {0}'
-                            .format(manager_templates_path))
-            utils.remove(manager_templates_path)
-        if os.path.exists(nginx_unit_override):
-            ctx.logger.info('Removing nginx systemd file from {0}'
-                            .format(nginx_unit_override))
-            utils.remove(nginx_unit_override)
 
     ctx.logger.info('Installing Nginx...')
     utils.set_selinux_permissive()
