@@ -34,7 +34,7 @@ def install_logstash():
         os.environ.get('ES_ENDPOINT_IP')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip(
-                ctx_properties.get('rabbitmq_endpoint_ip'))
+            ctx_properties.get('rabbitmq_endpoint_ip'))
 
     # Confirm username and password have been supplied for broker before
     # continuing.
@@ -42,7 +42,7 @@ def install_logstash():
     # Note that these are not directly used in this script, but are used by the
     # deployed resources, hence the check here.
     if not rabbitmq_username or not rabbitmq_password:
-        utils.error_exit(
+        ctx.abort_operation(
             'Both rabbitmq_username and rabbitmq_password must be supplied '
             'and at least 1 character long in the manager blueprint inputs.')
 

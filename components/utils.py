@@ -2,7 +2,6 @@
 
 import re
 import os
-import sys
 import pwd
 import time
 import glob
@@ -80,9 +79,9 @@ def run(command, retries=0, ignore_failures=False, globx=False):
                             '({1} left)'.format(command_str, retries))
             proc = run(command, retries - 1)
         elif not ignore_failures:
-            ctx.logger.error('Failed running command: {0} ({1}).'.format(
-                command_str, proc.aggr_stderr))
-            sys.exit(1)
+            msg = 'Failed running command: {0} ({1}).'.format(
+                command_str, proc.aggr_stderr)
+            ctx.abort_operation(msg)
     return proc
 
 
@@ -113,18 +112,18 @@ def deploy_ssl_certificate(private_or_public, destination, group, cert):
         if private_cert_ok:
             permissions = '440'
         else:
-            error_exit("Private certificate is expected to begin with a line "
-                       "containing 'PRIVATE KEY'.")
+            ctx.abort_operation("Private certificate is expected to begin "
+                                "with a line containing 'PRIVATE KEY'.")
     elif private_or_public == 'public':
         public_cert_ok = 'BEGIN CERTIFICATE' in cert.split('\n')[0]
         if public_cert_ok:
             permissions = '444'
         else:
-            error_exit("Public certificate is expected to begin with a line "
-                       "containing 'BEGIN CERTIFICATE'.")
+            ctx.abort_operation("Public certificate is expected to begin with "
+                                "a line containing 'BEGIN CERTIFICATE'.")
     else:
-        error_exit("Certificates may only be 'private' or 'public', "
-                   "not {0}".format(private_or_public))
+        ctx.abort_operation("Certificates may only be 'private' or 'public', "
+                            "not {0}".format(private_or_public))
     ctx.logger.info(
         "Deploying {0} SSL certificate in {1} for group {2}".format(
             private_or_public, destination, group))
@@ -134,11 +133,6 @@ def deploy_ssl_certificate(private_or_public, destination, group, cert):
                         permissions, ownership, destination))
     chmod(permissions, destination)
     sudo('chown {0} {1}'.format(ownership, destination))
-
-
-def error_exit(message):
-    ctx.logger.error(message)
-    sys.exit(1)
 
 
 def mkdir(dir, use_sudo=True):
@@ -305,7 +299,7 @@ def wait_for_port(port, host='localhost'):
             continue
         ctx.logger.info('{0}:{1} is open!'.format(host, port))
         return
-    error_exit('Failed to connect to {0}:{1}...'.format(host, port))
+    ctx.abort_operation('Failed to connect to {0}:{1}...'.format(host, port))
 
 
 def yum_install(source, service_name):
@@ -1085,7 +1079,6 @@ def create_upgrade_snapshot():
     if res.code != 201:
         err = 'Failed creating snapshot {0}. Message: {1}'\
               .format(snapshot_id, res.readlines())
-        ctx.logger.error(err)
         ctx.abort_operation(err)
     execution_id = json.loads(res.readlines()[0])['id']
     _wait_for_execution(execution_id, headers)
@@ -1109,7 +1102,6 @@ def restore_upgrade_snapshot():
     if res.code != 200:
         err = 'Failed restoring snapshot {0}. Message: {1}' \
               .format(snapshot_id, res.readlines())
-        ctx.logger.error(err)
         ctx.abort_operation(err)
     execution_id = json.loads(res.readlines()[0])['id']
     _wait_for_execution(execution_id, headers)
@@ -1124,7 +1116,6 @@ def _generate_upgrade_snapshot_id():
     if res.code != 200:
         err = 'Failed extracting current manager version. Message: {0}'\
               .format(res.readlines())
-        ctx.logger.error(err)
         ctx.abort_operation(err)
     curr_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     version_data = json.loads(res.read())
