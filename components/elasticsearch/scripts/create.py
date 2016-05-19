@@ -241,6 +241,44 @@ def _install_elasticsearch():
     utils.systemd.enable(ES_SERVICE_NAME, append_prefix=False)
 
 
+def _wait_for_shards(port, ip):
+    """Wait for activation of all available shards in Elasticsearch.
+
+    After Elasticsearch is installed and first time started there is short time
+    when shards, if created, are not started. If someone would access ES during
+    that time (e.g. by creating snapshot) he will get error
+    'SearchPhaseExecutionException[Failed to execute phase [init_scan], all
+    shards failed]'.
+
+    :param port: Elasticsearch port
+    :param ip: Ip to Elasticsearch
+    """
+    ctx.logger.info('Waiting for shards to be active...')
+    shards_check_timeout = 60
+    start = time.time()
+
+    url = 'http://{ip}:{port}/*/_search_shards'.format(ip=ip, port=port)
+    while True:
+        all_shards_started = True
+        try:
+            out = urllib2.urlopen(url)
+            shards = json.load(out)['shards']
+            for shard in shards:
+                all_shards_started = all_shards_started and \
+                    (shard[0]['state'] == 'STARTED')
+        except urllib2.URLError as e:
+            ctx.abort_operation('Failed to retrieve information about '
+                                'Elasticsearch shards: {0}'.format(e.reason))
+
+        if all_shards_started:
+            return
+        time.sleep(1)
+        if time.time() - start > shards_check_timeout:
+            inactive = [s[0] for s in shards if s[0]['state'] != 'STARTED']
+            ctx.abort_operation('Elasticsearch shards check timed out. '
+                                'Inactive shards: {0}'.format(inactive))
+
+
 def main():
 
     es_endpoint_ip = ctx_properties['es_endpoint_ip']
@@ -256,6 +294,7 @@ def main():
         utils.systemd.start(ES_SERVICE_NAME, append_prefix=False)
         utils.wait_for_port(es_endpoint_port, es_endpoint_ip)
         _configure_elasticsearch(host=es_endpoint_ip, port=es_endpoint_port)
+        _wait_for_shards(es_endpoint_port, es_endpoint_ip)
 
         utils.clean_var_log_dir('elasticsearch')
     else:
