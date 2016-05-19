@@ -748,4 +748,6 @@ plugins:
 
 outputs:
   manager_ip:
-    value: { get_property: [manager_host, public_ip] }
+    value: { get_input: public_ip }
+  private_ip:
+    value: { get_input: private_ip }
