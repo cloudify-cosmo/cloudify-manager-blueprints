@@ -164,10 +164,10 @@ def copy(source, destination):
 
 def remove(path, ignore_failure=False):
     if os.path.exists(path):
-        ctx.logger.info('Deleting {0}'.format(path))
+        ctx.logger.info('Removing {0}...'.format(path))
         sudo(['rm', '-rf', path], ignore_failures=ignore_failure)
     else:
-        ctx.logger.info('Path does not exist: {0}. Skipping delete'
+        ctx.logger.info('Path does not exist: {0}. Skipping...'
                         .format(path))
 
 
