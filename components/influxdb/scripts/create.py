@@ -91,6 +91,8 @@ def _install_influxdb():
     utils.chown(influxdb_user, influxdb_group, influxdb_log_path)
 
     utils.systemd.configure(INFLUX_SERVICE_NAME)
+    # Provided with InfluxDB's package. Will be removed if it exists.
+    utils.remove('/etc/init.d/influxdb')
     utils.logrotate(INFLUX_SERVICE_NAME)
 
 
