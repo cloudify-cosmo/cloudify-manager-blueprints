@@ -9,69 +9,88 @@ imports:
 inputs:
   resource_prefix:
     default: cfymgr
+
   resource_suffix:
     default: 10
+
   subscription_id:
     type: string
     required: true
+
   tenant_id:
     type: string
     required: true
+
   client_id:
     type: string
     required: true
+
   client_secret:
     type: string
     required: true
+
   location:
     type: string
     required: true
     default: eastus
+
   retry_after:
     type: integer
     default: 60
+
   # Networking
   subnet_private_cidr:
     type: string
     required: true
     default: 10.10.0.0/16
+
   # VM inputs
   vm_size:
     type: string
     required: true
+
   vm_os_family:
     type: string
     required: true
+
   vm_image_publisher:
     type: string
     default: OpenLogic
     required: true
+
   vm_image_offer:
     type: string
     default: CentOS
     required: true
+
   vm_image_sku:
     type: string
     default: '7.0'
     required: true
+
   vm_image_version:
     type: string
     default: latest
     required: true
+
   vm_os_username:
     type: string
     default: cloudify
     required: true
+
   vm_os_password:
     type: string
     default: Cl0ud1fy!
     required: true
+
   vm_os_pubkeys:
     required: true
+
   vm_os_pubkey_auth_only:
     type: boolean
     required: true
     default: true
+
   # Manager voodoo
   plugin_resources:
     description: >
@@ -83,6 +102,7 @@ inputs:
     - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py26-none-linux_x86_64-centos-Final.wgn'
     - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-Ubuntu-precise.wgn'
     - 'http://repository.cloudifysource.org/org/cloudify3/3.3.1/sp-RELEASE/cloudify_diamond_plugin-1.3.1-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
+
   dsl_resources:
     description: >
       Holds a set of dsl required resources
@@ -95,12 +115,15 @@ inputs:
   ssh_user:
     type: string
     default: { get_input: vm_os_username }
+
   ssh_key_filename:
     type: string
     required: true
+
   agent_local_key_path:
     type: string
     required: true
+
   azure_config:
     default:
       subscription_id: { get_input: subscription_id }
@@ -586,6 +609,7 @@ node_templates:
   # provide runtime configuration and information for the CLI and the
   # Manager.
   # #####################################################################
+
   manager_resources:
     type: cloudify.nodes.ManagerResources
     relationships:
@@ -655,13 +679,19 @@ node_templates:
               key_filename: { get_input: ssh_key_filename }
               host_string: { get_attribute: [manager_host, public_ip] }
               always_use_pty: true
+#        create:
+#          implementation: fabric.fabric_plugin.tasks.run_script
+#          inputs:
+#            script_path: components/manager/scripts/configure_manager.sh
+#            fabric_env:
+#              <<: *manager_fabric_env
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path: components/manager/scripts/configure_manager.sh
+            script_path: components/manager/scripts/create_conf.py
             fabric_env:
               <<: *manager_fabric_env
-
+              always_use_pty: true
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host

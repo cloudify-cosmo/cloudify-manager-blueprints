@@ -534,6 +534,7 @@ node_templates:
   # provide runtime configuration and information for the CLI and the
   # Manager.
   # #####################################################################
+
   manager_resources:
     type: cloudify.nodes.ManagerResources
     relationships:
@@ -609,7 +610,6 @@ node_templates:
             fabric_env:
               <<: *manager_fabric_env
               always_use_pty: true
-
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
