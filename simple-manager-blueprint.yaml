@@ -124,15 +124,15 @@ inputs:
   #############################
   rest_service_rpm_source_url:
     type: string
-    default: cloudify-rest-service-3.5.0-m1_b460.x86_64.rpm
-
-  management_worker_rpm_source_url:
-    type: string
-    default: cloudify-management-worker-3.5.0-m1_b460.x86_64.rpm
+    default: cloudify-rest-service-3.5.0~m1-460.el7.x86_64.rpm
 
   amqpinflux_rpm_source_url:
     type: string
-    default: cloudify-amqp-influx-3.5.0-m1_b460.x86_64.rpm
+    default: cloudify-amqp-influxdb-3.5.0~m1-460.el7.x86_64.rpm
+
+  management_worker_rpm_source_url:
+    type: string
+    default: cloudify-mgmt-worker-3.5.0~m1-460.el6.x86_64.rpm
 
   cloudify_resources_url:
     type: string
@@ -172,7 +172,7 @@ inputs:
 
   elasticsearch_curator_rpm_source_url:
     type: string
-    default: elasticsearch-curator-3.2.3-1.x86_64.rpm
+    default: elasticsearch-curator-3.2.3-2.el7.x86_64.rpm
 
   logstash_source_url:
     type: string

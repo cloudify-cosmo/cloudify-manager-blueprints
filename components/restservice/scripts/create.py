@@ -107,28 +107,6 @@ def deploy_broker_configuration():
                             '(broker_ssl_enabled is False).')
 
 
-def _configure_dbus(rest_venv):
-    # link dbus-python-1.1.1-9.el7.x86_64 to the venv for `cfy status`
-    # (module in pypi is very old)
-    site_packages = 'lib64/python2.7/site-packages'
-    dbus_relative_path = os.path.join(site_packages, 'dbus')
-    dbuslib = os.path.join('/usr', dbus_relative_path)
-    dbus_glib_bindings = os.path.join('/usr', site_packages,
-                                      '_dbus_glib_bindings.so')
-    dbus_bindings = os.path.join('/usr', site_packages, '_dbus_bindings.so')
-    if os.path.isdir(dbuslib):
-        dbus_venv_path = os.path.join(rest_venv, dbus_relative_path)
-        if not os.path.islink(dbus_venv_path):
-            utils.ln(source=dbuslib, target=dbus_venv_path, params='-sf')
-            utils.ln(source=dbus_bindings, target=dbus_venv_path, params='-sf')
-        if not os.path.islink(os.path.join(rest_venv, site_packages)):
-            utils.ln(source=dbus_glib_bindings, target=os.path.join(
-                    rest_venv, site_packages), params='-sf')
-    else:
-        ctx.logger.warn(
-                'Could not find dbus install, cfy status will not work')
-
-
 def install_restservice():
 
     rest_service_rpm_source_url = \
@@ -156,7 +134,6 @@ def install_restservice():
     deploy_broker_configuration()
     utils.yum_install(rest_service_rpm_source_url,
                       service_name=REST_SERVICE_NAME)
-    _configure_dbus(rest_venv)
     install_optional(rest_venv)
     utils.logrotate(REST_SERVICE_NAME)
 
