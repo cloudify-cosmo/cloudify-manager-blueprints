@@ -37,13 +37,13 @@ def install_riemann():
     # Note that these are not directly used in this script, but are used by the
     # deployed resources, hence the check here.
     if not rabbitmq_username or not rabbitmq_password:
-        utils.error_exit(
+        ctx.abort_operation(
             'Both rabbitmq_username and rabbitmq_password must be supplied '
             'and at least 1 character long in the manager blueprint inputs.')
 
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip(
-                ctx_properties.get('rabbitmq_endpoint_ip'))
+            ctx_properties.get('rabbitmq_endpoint_ip'))
 
     ctx.logger.info('Installing Riemann...')
     utils.set_selinux_permissive()

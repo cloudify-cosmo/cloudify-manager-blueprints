@@ -2,7 +2,6 @@
 
 import time
 import json
-import sys
 from os.path import join, dirname
 
 from cloudify import ctx
@@ -48,8 +47,8 @@ def _configure_influxdb(host, port):
     try:
         urllib2.urlopen(urllib2.Request(url, json.dumps(data)))
     except Exception as ex:
-        ctx.logger.info('Failed to create: {0} ({1}).'.format(db_name, ex))
-        sys.exit(1)
+        msg = 'Failed to create: {0} ({1}).'.format(db_name, ex)
+        ctx.abort_operation(msg)
 
     # verify db created
     ctx.logger.info('Verifying database create successfully...')
@@ -57,8 +56,8 @@ def _configure_influxdb(host, port):
     try:
         assert any(d.get('name') == db_name for d in db_list)
     except AssertionError:
-        ctx.logger.info('Verification failed!')
-        sys.exit(1)
+        msg = 'Verification failed!'
+        ctx.abort_operation(msg)
     ctx.logger.info('Databased {0} created successfully.'.format(db_name))
 
 

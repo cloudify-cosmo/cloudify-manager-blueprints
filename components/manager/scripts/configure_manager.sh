@@ -1,8 +1,5 @@
 #!/bin/bash -e
 
-# . $(ctx download-resource "components/utils")
-
-
 function _disable_requiretty() {
     ###
     # disables requiretty for a user or globally
@@ -49,10 +46,10 @@ function _disable_requiretty() {
         # Disables requiretty for all users by modifying the /etc/sudoers file.
         ###
         if [ ! -f "/etc/sudoers" ]; then
-            error_exit 116 "Could not find sudoers file at expected location (/etc/sudoers)"
+            ctx abort-operation "Could not find sudoers file at expected location (/etc/sudoers)"
         fi
         echo "Setting directive in /etc/sudoers."
-        sudo sed -i 's/^Defaults.*requiretty/#&/g' /etc/sudoers || error_exit_on_level $? 117 "Failed to edit sudoers file to disable requiretty directive" 1
+        sudo sed -i 's/^Defaults.*requiretty/#&/g' /etc/sudoers || ctx abort-operation "Failed to edit sudoers file to disable requiretty directive" 1
     }
 
     # for supported distros, this will disable requiretty for a specific user.

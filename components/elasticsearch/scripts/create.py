@@ -307,9 +307,9 @@ def main():
 
         if http_request('http://{0}:{1}/cloudify_storage'.format(
                 es_endpoint_ip, es_endpoint_port), method='HEAD').code == 200:
-            utils.error_exit('\'cloudify_storage\' index already exists on '
-                             '{0}, terminating bootstrap...'.format(
-                                 es_endpoint_ip))
+            ctx.abort_operation('\'cloudify_storage\' index already exists on '
+                                '{0}, terminating bootstrap...'.format(
+                                    es_endpoint_ip))
         _configure_elasticsearch(host=es_endpoint_ip, port=es_endpoint_port)
 
     if utils.is_upgrade:

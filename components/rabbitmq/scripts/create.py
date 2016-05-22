@@ -64,9 +64,9 @@ def _set_security(rabbitmq_ssl_enabled,
                 '/etc/rabbitmq/rabbitmq.config',
                 RABBITMQ_SERVICE_NAME, user_resource=True)
         else:
-            utils.error_exit('When providing a certificate for rabbitmq, '
-                             'both public and private certificates must be '
-                             'supplied.')
+            ctx.abort_operation('When providing a certificate for rabbitmq, '
+                                'both public and private certificates must be '
+                                'supplied.')
     else:
 
         utils.deploy_blueprint_resource(
