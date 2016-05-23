@@ -189,6 +189,12 @@ node_types:
               # mode until we find a better position for it.
               default: components/python/scripts/create.py
             fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/python/scripts/validate.py
+            fabric_env: *simple_fabric_env
 
   manager.nodes.JavaRuntime:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -207,6 +213,12 @@ node_types:
           inputs:
             script_path:
               default: components/java/scripts/create.py
+            fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/java/scripts/validate.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.RabbitMQ:
