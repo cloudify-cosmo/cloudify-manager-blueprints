@@ -30,7 +30,7 @@ from fabric.api import run as fabric_run
 REGION = 'us-east-1'
 CENTOS_7_AMI_ID = 'ami-96a818fe'
 USER = 'centos'
-INSTANCE_TYPE = 'm3.medium'
+INSTANCE_TYPE = 'm3.large'
 RESOURCE_NAME = 'cloudify-bootstrap-sanity-travis'
 
 HELLO_WORLD_URL = 'https://github.com/cloudify-cosmo/' \
