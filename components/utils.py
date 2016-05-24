@@ -81,7 +81,7 @@ def run(command, retries=0, ignore_failures=False, globx=False):
         elif not ignore_failures:
             msg = 'Failed running command: {0} ({1}).'.format(
                 command_str, proc.aggr_stderr)
-            ctx.abort_operation(msg)
+            ctx.retry_operation(msg)
     return proc
 
 
@@ -138,7 +138,7 @@ def deploy_ssl_certificate(private_or_public, destination, group, cert):
 def mkdir(dir, use_sudo=True):
     if os.path.isdir(dir):
         return
-    ctx.logger.info('Creating Directory: {0}'.format(dir))
+    ctx.logger.debug('Creating Directory: {0}'.format(dir))
     cmd = ['mkdir', '-p', dir]
     if use_sudo:
         sudo(cmd)
@@ -161,7 +161,7 @@ def copy(source, destination):
 
 def remove(path, ignore_failure=False):
     if os.path.exists(path):
-        ctx.logger.info('Removing {0}...'.format(path))
+        ctx.logger.debug('Removing {0}...'.format(path))
         sudo(['rm', '-rf', path], ignore_failures=ignore_failure)
     else:
         ctx.logger.info('Path does not exist: {0}. Skipping...'
@@ -952,22 +952,19 @@ class BlueprintResourceFactory(object):
 
     @staticmethod
     def _download_source_resource(source, local_resource_path):
-        # source is a url
-        if source.startswith(('http', 'https', 'ftp')):
-            filename = get_file_name_from_url(source)
+        is_url = source.startswith(('http', 'https', 'ftp'))
+        filename = get_file_name_from_url(source) if is_url else source
+        local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
+        if is_url:
+            if os.path.isfile(local_filepath):
+                remove(local_filepath)
+            tmp_path = download_file(source)
         # source is just the name of the file, to be retrieved from
         # the manager resources package
         else:
-            filename = source
-        if os.path.isdir(CLOUDIFY_SOURCES_PATH) and \
-                filename in os.listdir(CLOUDIFY_SOURCES_PATH):
             tmp_path = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
-            ctx.logger.info(
-                'Source found at: {0}, will use it instead.'.format(tmp_path))
-        else:
-            tmp_path = download_file(source)
-        ctx.logger.debug('Saving {0} under {1}'
-                         .format(tmp_path, local_resource_path))
+        ctx.logger.debug('Saving {0} under {1}'.format(
+            tmp_path, local_resource_path))
         move(tmp_path, local_resource_path)
 
     @staticmethod

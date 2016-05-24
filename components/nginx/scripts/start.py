@@ -22,7 +22,6 @@ def check_response(response):
     return response.code in {200, 401}
 
 
-ctx.logger.info('Starting Nginx Service...')
 utils.start_service(NGINX_SERVICE_NAME, append_prefix=False)
 utils.systemd.verify_alive(NGINX_SERVICE_NAME, append_prefix=False)
 
