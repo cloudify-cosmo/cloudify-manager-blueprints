@@ -19,16 +19,17 @@ ctx_properties = utils.ctx_factory.create(MGMT_WORKER_SERVICE_NAME)
 
 def _install_optional(mgmtworker_venv):
 
+    rest_props = utils.ctx_factory.get('restservice')
     rest_client_source_url = \
-        ctx_properties['rest_client_module_source_url']
+        rest_props['rest_client_module_source_url']
     plugins_common_source_url = \
-        ctx_properties['plugins_common_module_source_url']
+        rest_props['plugins_common_module_source_url']
     script_plugin_source_url = \
-        ctx_properties['script_plugin_module_source_url']
+        rest_props['script_plugin_module_source_url']
     rest_service_source_url = \
-        ctx_properties['rest_service_module_source_url']
+        rest_props['rest_service_module_source_url']
     agent_source_url = \
-        ctx_properties['agent_module_source_url']
+        rest_props['agent_module_source_url']
 
     # this allows to upgrade modules if necessary.
     ctx.logger.info('Installing Optional Packages if supplied...')
@@ -73,13 +74,14 @@ def install_mgmtworker():
 
     broker_port_ssl = '5671'
     broker_port_no_ssl = '5672'
-    rabbitmq_ssl_enabled = ctx_properties['rabbitmq_ssl_enabled']
+    rabbit_props = utils.ctx_factory.get('rabbitmq')
+    rabbitmq_ssl_enabled = rabbit_props['rabbitmq_ssl_enabled']
     ctx.logger.info("rabbitmq_ssl_enabled: {0}".format(rabbitmq_ssl_enabled))
-    rabbitmq_cert_public = ctx_properties['rabbitmq_cert_public']
+    rabbitmq_cert_public = rabbit_props['rabbitmq_cert_public']
 
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip(
-                ctx_properties.get('rabbitmq_endpoint_ip'))
+                rabbit_props.get('rabbitmq_endpoint_ip'))
 
     # Fix possible injections in json of rabbit credentials
     # See json.org for string spec

@@ -112,7 +112,7 @@ def main():
         influxdb_endpoint_ip = ctx.instance.host_ip
         _install_influxdb()
 
-        utils.systemd.start(INFLUX_SERVICE_NAME)
+        utils.systemd.restart(INFLUX_SERVICE_NAME)
 
         utils.wait_for_port(influxdb_endpoint_port, influxdb_endpoint_ip)
         _configure_influxdb(influxdb_endpoint_ip, influxdb_endpoint_port)

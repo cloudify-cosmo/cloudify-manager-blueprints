@@ -72,12 +72,24 @@ def deploy_broker_configuration():
     # injected as an input to the script
     ctx.instance.runtime_properties['es_endpoint_ip'] = \
         os.environ['ES_ENDPOINT_IP']
+
+    es_props = utils.ctx_factory.get('elasticsearch')
+    ctx.instance.runtime_properties['es_endpoint_port'] = \
+        es_props['es_endpoint_port']
+    rabbit_props = utils.ctx_factory.get('rabbitmq')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip(
-                ctx_properties.get('rabbitmq_endpoint_ip'))
+                rabbit_props.get('rabbitmq_endpoint_ip'))
 
-    rabbitmq_ssl_enabled = ctx_properties['rabbitmq_ssl_enabled']
-    rabbitmq_cert_public = ctx_properties['rabbitmq_cert_public']
+    rabbitmq_ssl_enabled = rabbit_props['rabbitmq_ssl_enabled']
+    rabbitmq_cert_public = rabbit_props['rabbitmq_cert_public']
+
+    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = \
+        rabbitmq_ssl_enabled
+    ctx.instance.runtime_properties['rabbitmq_username'] = \
+        rabbit_props.get('rabbitmq_username')
+    ctx.instance.runtime_properties['rabbitmq_password'] = \
+        rabbit_props.get('rabbitmq_password')
 
     # Add certificate and select port, as applicable
     if rabbitmq_ssl_enabled:

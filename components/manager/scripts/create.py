@@ -20,10 +20,10 @@ AGENTS_ROLLBACK_PATH = '/opt/cloudify/manager-resources/agents_rollback'
 def deploy_manager_sources():
     """Deploys all manager sources from a single archive.
     """
-    archive_path = ctx.node.properties['manager_resources_package']
+    archive_path = ctx_properties['manager_resources_package']
     archive_checksum_path = \
-        ctx.node.properties['manager_resources_package_checksum_file']
-    skip_checksum_validation = ctx.node.properties['skip_checksum_validation']
+        ctx_properties['manager_resources_package_checksum_file']
+    skip_checksum_validation = ctx_properties['skip_checksum_validation']
     agent_archives_path = utils.AGENT_ARCHIVES_PATH
     utils.mkdir(agent_archives_path)
     if archive_path:

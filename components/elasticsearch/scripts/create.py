@@ -290,8 +290,7 @@ def main():
     if not es_endpoint_ip:
         es_endpoint_ip = ctx.instance.host_ip
         _install_elasticsearch()
-
-        utils.systemd.start(ES_SERVICE_NAME, append_prefix=False)
+        utils.systemd.restart(ES_SERVICE_NAME, append_prefix=False)
         utils.wait_for_port(es_endpoint_port, es_endpoint_ip)
         _configure_elasticsearch(host=es_endpoint_ip, port=es_endpoint_port)
         _wait_for_shards(es_endpoint_port, es_endpoint_ip)
@@ -312,7 +311,7 @@ def main():
                                     es_endpoint_ip))
         _configure_elasticsearch(host=es_endpoint_ip, port=es_endpoint_port)
 
-    if utils.is_upgrade:
+    if utils.is_upgrade or utils.is_rollback:
         restore_upgrade_data(es_endpoint_ip, es_endpoint_port)
 
     if not es_endpoint_port:
@@ -322,12 +321,12 @@ def main():
 
 
 def _get_es_install_port():
-    es_props = utils.ctx_factory.get(ES_SERVICE_NAME, upgrade_props=False)
+    es_props = utils.ctx_factory.load_rollback_props(ES_SERVICE_NAME)
     return es_props['es_endpoint_port']
 
 
 def _get_es_install_endpoint():
-    es_props = utils.ctx_factory.get(ES_SERVICE_NAME, upgrade_props=False)
+    es_props = utils.ctx_factory.load_rollback_props(ES_SERVICE_NAME)
     if es_props['es_endpoint_ip']:
         es_endpoint = es_props['es_endpoint_ip']
     else:
@@ -382,8 +381,9 @@ def restore_upgrade_data(es_endpoint_ip, es_endpoint_port):
     if res.code != 200:
         ctx.abort_operation('Failed restoring elasticsearch data.')
     ctx.logger.info('Elasticsearch data was successfully restored')
-    # Delete marker file
-    os.remove(DUMP_SUCCESS_FLAG)
+    if os.path.isfile(DUMP_SUCCESS_FLAG):
+        # Delete marker file
+        os.remove(DUMP_SUCCESS_FLAG)
 
 
 def _create_index_request(line):
