@@ -30,6 +30,13 @@ def check_rabbit_running():
         raise ValueError('rabbitmqctl status: rabbitmq not running')
 
 
+@utils.retry(ValueError)
+def check_port_accessible(host, port):
+    if not utils.is_port_open(port, host=host):
+        raise ValueError('RabbitMQ is not listening at {0}:{1}'.format(
+            host, port))
+
+
 def set_rabbitmq_policy(name, expression, policy):
     policy = json.dumps(policy)
     ctx.logger.info('Setting policy {0} on queues {1} to {2}'.format(
@@ -112,4 +119,8 @@ if not rabbitmq_endpoint_ip:
     except ValueError:
         ctx.abort_operation('Rabbitmq failed to start')
 
-utils.verify_port_open(RABBITMQ_SERVICE_NAME, PORT, host=rabbitmq_endpoint_ip)
+try:
+    check_port_accessible(rabbitmq_endpoint_ip, PORT)
+except ValueError:
+    ctx.abort_operation('{0} error: port {1}:{2} was not open'.format(
+        RABBITMQ_SERVICE_NAME, rabbitmq_endpoint_ip, PORT))

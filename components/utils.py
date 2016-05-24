@@ -1226,9 +1226,3 @@ def verify_service_http(service_name, url, predicate=None):
         return check_http_response(url, predicate)
     except (IOError, ValueError) as e:
         ctx.abort_operation('{0} error: {1}: {2}'.format(service_name, url, e))
-
-
-def verify_port_open(service_name, port, host='localhost'):
-    if not is_port_open(port, host):
-        ctx.abort_operation('{0} error: port {1}:{2} was not open'
-                            .format(service_name, host, port))
