@@ -896,3 +896,5 @@ plugins:
 outputs:
   manager_ip:
     value: { get_attribute: [ manager_server_ip, aws_resource_id ] }
+  private_ip:
+    value: { get_attribute: [ manager_host, ip ]}

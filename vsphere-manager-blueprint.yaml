@@ -972,3 +972,5 @@ plugins:
 outputs:
   manager_ip:
     value: { get_attribute: [manager_host, public_ip] }
+  private_ip:
+    value: { get_attribute: [ manager_host, ip ]}

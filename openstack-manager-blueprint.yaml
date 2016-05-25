@@ -981,3 +981,5 @@ plugins:
 outputs:
   manager_ip:
     value: { get_attribute: [manager_server_ip, floating_ip_address] }
+  private_ip:
+    value: { get_attribute: [ manager_host, ip ]}
