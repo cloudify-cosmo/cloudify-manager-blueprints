@@ -894,7 +894,7 @@ class BlueprintResourceFactory(object):
         local_resource_path = self._get_local_file_path(service_name,
                                                         resource_name)
 
-        if not os.path.isfile(local_resource_path):
+        if not render and not os.path.isfile(local_resource_path):
             mkdir(os.path.dirname(local_resource_path))
             if user_resource:
                 self._download_user_resource(source,
