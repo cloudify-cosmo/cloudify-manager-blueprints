@@ -895,6 +895,36 @@ node_types:
               default: components/cli/scripts/start.sh
             fabric_env: *simple_fabric_env
 
+  manager.nodes.Sanity:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      sanity_app_source_url:
+        description: Sanity app Source URL
+        type: string
+        default: { get_input: sanity_app_source_url }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file:
+              default: components/manager/scripts/sanity/create_sanity.py
+            task_name:
+              default: upload_keypair
+            task_properties:
+              default:
+                local_key_path: { get_input: ssh_key_filename }
+            fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/manager/scripts/sanity/sanity.py
+            manager_user:
+              default: { get_input: ssh_user }
+            manager_ip:
+              default: { get_attribute: [manager_host, public_ip] }
+            fabric_env: *simple_fabric_env
 
 ######################################################################
 # most relationship declarations here do not provide any functionality
@@ -958,6 +988,13 @@ relationships:
               script_path:
                 default: components/restservice/scripts/preconfigure.py
               fabric_env: *simple_fabric_env
+
+  sanity_to_mgr_config:
+    derived_from: cloudify.relationships.depends_on
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        postconfigure:
+         implementation: components/manager/scripts/sanity/get_rest_protocol.py
 
   amqpinflux_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to

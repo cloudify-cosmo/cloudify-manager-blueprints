@@ -36,6 +36,8 @@ def retrieve(agent_packages):
 
         ctx.logger.info('Downloading Agent Package {0} to {1} if it does not '
                         'already exist...'.format(source, dest_file))
-        if not remote_exists(dest_file):
-            dl_cmd = 'curl --retry 10 -f -s -S -L {0} --create-dirs -o {1}'
-            fabric.api.sudo(dl_cmd.format(source, dest_file))
+        if remote_exists(dest_file):
+            ctx.logger.info('agent package file will be '
+                            'overridden: {0}'.format(dest_file))
+        dl_cmd = 'curl --retry 10 -f -s -S -L {0} --create-dirs -o {1}'
+        fabric.api.sudo(dl_cmd.format(source, dest_file))
