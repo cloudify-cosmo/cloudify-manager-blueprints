@@ -12,9 +12,10 @@ import utils  # NOQA
 
 NODE_NAME = 'manager-resources'
 
-ctx_properties = utils.ctx_factory.create(NODE_NAME)
+# This MUST be invoked by the first node, before upgrade snapshot is created.
+utils.clean_rollback_resources_if_necessary()
 
-AGENTS_ROLLBACK_PATH = '/opt/cloudify/manager-resources/agents_rollback'
+ctx_properties = utils.ctx_factory.create(NODE_NAME)
 
 
 def deploy_manager_sources():
@@ -93,16 +94,17 @@ def deploy_manager_sources():
 
         def backup_agent_resources(agents_dir):
             ctx.logger.info('Backing up agents in {0}...'.format(agents_dir))
-            if not os.path.exists(AGENTS_ROLLBACK_PATH):
-                utils.mkdir(AGENTS_ROLLBACK_PATH)
-                utils.copy(agents_dir, AGENTS_ROLLBACK_PATH)
+            if not os.path.isdir(utils.AGENTS_ROLLBACK_PATH):
+                utils.mkdir(utils.AGENTS_ROLLBACK_PATH)
+                utils.copy(agents_dir, utils.AGENTS_ROLLBACK_PATH)
 
         def restore_agent_resources(agents_dir):
             ctx.logger.info('Restoring agents in {0}'
-                            .format(AGENTS_ROLLBACK_PATH))
-            utils.remove(agents_dir)
+                            .format(utils.AGENTS_ROLLBACK_PATH))
+            if os.path.isdir(agents_dir):
+                utils.remove(agents_dir)
             utils.mkdir(agents_dir)
-            utils.copy(os.path.join(AGENTS_ROLLBACK_PATH, 'agents', '.'),
+            utils.copy(os.path.join(utils.AGENTS_ROLLBACK_PATH, 'agents', '.'),
                        agents_dir)
 
         manager_resources_home = utils.MANAGER_RESOURCES_HOME
@@ -113,13 +115,13 @@ def deploy_manager_sources():
                 manager_resources_home)
         if utils.is_upgrade:
             backup_agent_resources(agent_archives_path)
-            if os.path.exists(agent_archives_path):
+            if os.path.isdir(agent_archives_path):
                 utils.remove(agent_archives_path)
-                utils.mkdir(agent_archives_path)
-            if os.path.exists(manager_scripts_path):
+            utils.mkdir(agent_archives_path)
+            if os.path.isdir(manager_scripts_path):
                 utils.remove(manager_scripts_path)
             ctx.logger.info('Upgrading agents...')
-            if os.path.exists(manager_templates_path):
+            if os.path.isdir(manager_templates_path):
                 utils.remove(manager_templates_path)
         elif utils.is_rollback:
             ctx.logger.info('Restoring agents...')

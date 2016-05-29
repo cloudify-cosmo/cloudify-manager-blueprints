@@ -310,3 +310,6 @@ if os.environ.get('run_sanity') == 'true' or \
 
 if utils.is_upgrade or utils.is_rollback:
     utils.restore_upgrade_snapshot()
+
+if utils.is_upgrade:
+    utils.set_upgrade_success_in_upgrade_meta()

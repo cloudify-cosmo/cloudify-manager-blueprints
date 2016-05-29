@@ -16,6 +16,7 @@ import tempfile
 import subprocess
 from functools import wraps
 from time import sleep, gmtime, strftime
+from distutils.version import LooseVersion
 
 from cloudify import ctx
 
@@ -29,6 +30,7 @@ DEFAULT_BUFFER_SIZE = 8192
 
 # Upgrade specific parameters
 UPGRADE_METADATA_FILE = '/opt/cloudify/upgrade_meta/metadata.json'
+AGENTS_ROLLBACK_PATH = '/opt/cloudify/manager-resources/agents_rollback'
 
 
 def retry(exception, tries=4, delay=3, backoff=2):
@@ -1291,21 +1293,8 @@ def validate_upgrade_directories(service_name):
         ctx.abort_operation('Service {0} has no properties file'.format(
             service_name))
 
-    if os.path.exists(
-            ctx_factory.get_rollback_properties_dir(service_name)):
-        ctx.abort_operation('Rollback properties directory exists for '
-                            'service {0}'.format(service_name))
-
-    if not os.path.exists(
-            resource_factory.get_resources_dir(
-                service_name)):
+    if not os.path.exists(resource_factory.get_resources_dir(service_name)):
         ctx.abort_operation('Resources directory does not exist for '
-                            'service {0}'.format(service_name))
-
-    if os.path.exists(
-            resource_factory.get_rollback_resources_dir(
-                service_name)):
-        ctx.abort_operation('Rollback resources directory exists for '
                             'service {0}'.format(service_name))
 
 
@@ -1360,3 +1349,53 @@ def verify_immutable_properties(service_name, properties):
         ctx.abort_operation('{0} properties must not change during a manager '
                             'upgrade! Changed properties: {1}'.format(
                                 service_name, ','.join(descr_parts)))
+
+
+def _is_version_greater_than_curr(new_version):
+    version_url = 'http://localhost/api/{0}/version'.format(REST_VERSION)
+    version_res = http_request(version_url, method='GET')
+    if version_res.code != 200:
+        ctx.abort_operation('Failed retrieving manager version')
+    curr_version = json.loads(version_res.readlines()[0])['version']
+    ctx.logger.info('Current manager version is {0}.'.format(curr_version))
+    return LooseVersion(new_version) > LooseVersion(curr_version)
+
+
+# rollback resources will be removed only if the last upgrade passed
+# successfully and the 'upgrade to' version is greater than the current version
+# # This function MUST be invoked by the first node and before upgrade snapshot
+# is created.
+def clean_rollback_resources_if_necessary():
+    if not is_upgrade:
+        return
+    new_version = ctx.node.properties['manager_version']
+    is_upgrade_version = _is_version_greater_than_curr(new_version)
+    # The 'upgrade_success' flag will only be set if the previous upgrade
+    # execution ended successfully
+    latest_workflow_result = _get_upgrade_data().get('upgrade_success')
+    if latest_workflow_result and is_upgrade_version:
+        ctx.logger.info('Preparing manager for upgrade...')
+        # Clean manager rollback resources to make room for the new upgrade.
+        _clean_rollback_data()
+
+
+def _clean_rollback_data():
+    walk_dir_info = os.walk('/opt/cloudify')
+    ctx.logger.info('Removing any existing rollback resources...')
+    for details in walk_dir_info:
+        dir_path = details[0]
+        dir_name = os.path.basename(dir_path)
+        if dir_name in ('node_properties_rollback', 'resources_rollback'):
+            ctx.logger.debug('Removing existing rollback resources from {0}...'
+                             .format(dir_path))
+            remove(dir_path)
+    if os.path.isdir(AGENTS_ROLLBACK_PATH):
+        ctx.logger.info('Removing rollback agents..')
+        remove(AGENTS_ROLLBACK_PATH)
+    if os.path.isfile(UPGRADE_METADATA_FILE):
+        ctx.logger.info('Removing upgrade metadata..')
+        remove(UPGRADE_METADATA_FILE)
+
+
+def set_upgrade_success_in_upgrade_meta():
+    _set_upgrade_data(upgrade_success=True)
