@@ -83,7 +83,7 @@ def run(command, retries=0, ignore_failures=False, globx=False):
         elif not ignore_failures:
             msg = 'Failed running command: {0} ({1}).'.format(
                 command_str, proc.aggr_stderr)
-            ctx.retry_operation(msg)
+            raise RuntimeError(msg)
     return proc
 
 
@@ -772,7 +772,7 @@ class CtxPropertyFactory(object):
         """Restore previously used node properties.
         """
         rollback_props_path = self._get_rollback_props_file_path(
-                service_name)
+            service_name)
         if os.path.isfile(rollback_props_path):
             ctx.logger.info('Restoring service input properties for service '
                             '{0}'.format(service_name))
@@ -784,10 +784,10 @@ class CtxPropertyFactory(object):
 
     def _archive_properties(self, service_name):
         """Archive previously used node properties. These properties will be
-         used for rollback purposes.
+        used for rollback purposes.
         """
         rollback_props_path = self._get_rollback_props_file_path(
-                service_name)
+            service_name)
         if not os.path.isfile(rollback_props_path):
             ctx.logger.info('Archiving previous input properties for service '
                             '{0}'.format(service_name))
@@ -934,7 +934,7 @@ class BlueprintResourceFactory(object):
                                 .format(resource_name))
                 # update the resource file we hold that might have changed
                 install_resource = self._get_local_file_path(
-                        service_name, resource_name)
+                    service_name, resource_name)
                 copy(existing_resource_path, install_resource)
             else:
                 ctx.logger.info('User resource {0} not found on {1}'
@@ -1101,9 +1101,9 @@ def wait_for_workflow(
     endpoint = '{0}/executions'.format(url_prefix)
     url = endpoint + '?' + params
     res = http_request(
-            url,
-            method='GET',
-            headers=headers)
+        url,
+        method='GET',
+        headers=headers)
     res_content = res.readlines()
     json_res = json.loads(res_content[0])
     for execution in json_res['items']:
