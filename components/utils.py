@@ -776,7 +776,7 @@ class CtxPropertyFactory(object):
         if os.path.isfile(rollback_props_path):
             ctx.logger.info('Restoring service input properties for service '
                             '{0}'.format(service_name))
-            rollback_dir = self._get_rollback_properties_dir(service_name)
+            rollback_dir = self.get_rollback_properties_dir(service_name)
             install_dir = self._get_properties_dir(service_name)
             if os.path.isdir(install_dir):
                 remove(install_dir)
@@ -802,7 +802,7 @@ class CtxPropertyFactory(object):
         return dest_file_path
 
     def _get_rollback_props_file_path(self, service_name):
-        base_service_dir = self._get_rollback_properties_dir(service_name)
+        base_service_dir = self.get_rollback_properties_dir(service_name)
         dest_file_path = os.path.join(base_service_dir,
                                       self.PROPERTIES_FILE_NAME)
         return dest_file_path
@@ -830,7 +830,7 @@ class CtxPropertyFactory(object):
                             service_name,
                             self.NODE_PROPS_DIR_NAME)
 
-    def _get_rollback_properties_dir(self, service_name):
+    def get_rollback_properties_dir(self, service_name):
         return os.path.join(self.BASE_PROPERTIES_PATH,
                             service_name,
                             self.ROLLBACK_NODE_PROPS_DIR_NAME)
@@ -991,7 +991,7 @@ class BlueprintResourceFactory(object):
         return {'node': {'properties': node_props}}
 
     def _get_local_file_path(self, service_name, resource_name):
-        base_service_res_dir = self._get_resources_dir(service_name)
+        base_service_res_dir = self.get_resources_dir(service_name)
         dest_file_path = os.path.join(base_service_res_dir, resource_name)
         return dest_file_path
 
@@ -1009,7 +1009,7 @@ class BlueprintResourceFactory(object):
         write_to_json_file(resources_dict, resources_json)
 
     def _restore_resources(self, service_name):
-        rollback_dir = self._get_rollback_resources_dir(service_name)
+        rollback_dir = self.get_rollback_resources_dir(service_name)
         if not os.path.isdir(rollback_dir):
             # node resources have already been moved.
             return
@@ -1018,7 +1018,7 @@ class BlueprintResourceFactory(object):
                         .format(service_name))
         self._restore_service_configuration(rollback_dir, service_name)
 
-        resources_dir = self._get_resources_dir(service_name)
+        resources_dir = self.get_resources_dir(service_name)
         if os.path.isdir(resources_dir):
             remove(resources_dir)
         move(rollback_dir, resources_dir, rename_only=True)
@@ -1034,30 +1034,30 @@ class BlueprintResourceFactory(object):
                 copy(resource_local_path, destination)
 
     def _archive_resources(self, service_name):
-        rollback_dir = self._get_rollback_resources_dir(service_name)
+        rollback_dir = self.get_rollback_resources_dir(service_name)
         if os.path.isdir(rollback_dir):
             if os.listdir(rollback_dir):
                 # resources have already been archived.
                 return
 
-        resources_dir = self._get_resources_dir(service_name)
+        resources_dir = self.get_resources_dir(service_name)
         if os.path.isdir(resources_dir):
             ctx.logger.info('Archiving service {0} node resources...'
                             .format(service_name))
             move(resources_dir, rollback_dir, rename_only=True)
 
-    def _get_resources_dir(self, service_name):
+    def get_resources_dir(self, service_name):
         return os.path.join(self.BASE_RESOURCES_PATH,
                             service_name,
                             self.RESOURCES_DIR_NAME)
 
-    def _get_rollback_resources_dir(self, service_name):
+    def get_rollback_resources_dir(self, service_name):
         return os.path.join(self.BASE_RESOURCES_PATH,
                             service_name,
                             self.RESOURCES_ROLLBACK_DIR_NAME)
 
     def _get_rollback_resources_json(self, service_name):
-        rollback_dir = self._get_rollback_resources_dir(service_name)
+        rollback_dir = self.get_rollback_resources_dir(service_name)
         rollback_json = os.path.join(rollback_dir, self.RESOURCES_JSON_FILE)
         with open(rollback_json) as f:
             return json.load(f)
@@ -1274,3 +1274,81 @@ def verify_service_http(service_name, url, predicate=None):
         return check_http_response(url, predicate)
     except (IOError, ValueError) as e:
         ctx.abort_operation('{0} error: {1}: {2}'.format(service_name, url, e))
+
+
+def validate_upgrade_directories(service_name):
+    try:
+        ctx_factory.get(service_name)
+    except IOError:
+        ctx.abort_operation('Service {0} has no properties file'.format(
+            service_name))
+
+    if os.path.exists(
+            ctx_factory.get_rollback_properties_dir(service_name)):
+        ctx.abort_operation('Rollback properties directory exists for '
+                            'service {0}'.format(service_name))
+
+    if not os.path.exists(
+            resource_factory.get_resources_dir(
+                service_name)):
+        ctx.abort_operation('Resources directory does not exist for '
+                            'service {0}'.format(service_name))
+
+    if os.path.exists(
+            resource_factory.get_rollback_resources_dir(
+                service_name)):
+        ctx.abort_operation('Rollback resources directory exists for '
+                            'service {0}'.format(service_name))
+
+
+def parse_jvm_heap_size(heap_size):
+    if heap_size.endswith('g'):
+        multiplier = 10**3
+    elif heap_size.endswith('m'):
+        multiplier = 1
+    else:
+        raise ValueError(heap_size)
+    return int(heap_size[:-1]) * multiplier
+
+
+def changed_upgrade_properties(service_name):
+    """Delta of the service's upgrade and install properties.
+
+    Look up the upgrade and install properties for the service, return a dict
+    of {property_name: (original_value, upgrade_value)}
+    """
+    install_properties = ctx_factory.get(service_name)
+    upgrade_properties = ctx.node.properties.get_all()
+    if upgrade_properties.get('use_existing_on_upgrade'):
+        return {}
+    changed = {}
+    for property_name, original_value in install_properties.items():
+        changed_value = upgrade_properties.get(property_name)
+        if original_value != changed_value:
+            changed[property_name] = (original_value, changed_value)
+    return changed
+
+
+def verify_immutable_properties(service_name, properties):
+    """Check that the given properties didn't change in service upgrade.
+
+    Some properties must not change during a manager upgrade. Verify that
+    properties named by the given list didn't change between the install
+    and upgrade inputs.
+    """
+    all_changed_properties = changed_upgrade_properties(service_name)
+    changed_properties = set(properties) & set(all_changed_properties)
+
+    if changed_properties:
+        # format the error: include the changed property name, the value before
+        # and the value after
+        descr_parts = []
+        for changed_property_name in changed_properties:
+            part = '{0} (original: {1}, changed: {2})'.format(
+                changed_property_name,
+                *all_changed_properties[changed_property_name])
+            descr_parts.append(part)
+
+        ctx.abort_operation('{0} properties must not change during a manager '
+                            'upgrade! Changed properties: {1}'.format(
+                                service_name, ','.join(descr_parts)))

@@ -25,7 +25,7 @@ class MockNodeProperties(dict):
 
 def mock_resource_download():
     def download(source):
-        resource_base_dir = utils.resource_factory._get_resources_dir(
+        resource_base_dir = utils.resource_factory.get_resources_dir(
                 TEST_SERVICE_NAME)
         resource_path = os.path.join(resource_base_dir, 'tmp-res-name')
         utils.mkdir(resource_base_dir)
@@ -232,7 +232,7 @@ class TestUpgrade(unittest.TestCase):
 
         # assert resource json was archived
         archived_resource_file = os.path.join(
-                utils.resource_factory._get_rollback_resources_dir(
+                utils.resource_factory.get_rollback_resources_dir(
                         TEST_SERVICE_NAME), 'install.conf')
         # assert install resource was archived
         self.assertTrue(os.path.isfile(archived_resource_file))
@@ -246,7 +246,7 @@ class TestUpgrade(unittest.TestCase):
 
         # assert new resource json exists
         curr_resources_json = os.path.join(
-                utils.resource_factory._get_resources_dir(TEST_SERVICE_NAME),
+                utils.resource_factory.get_resources_dir(TEST_SERVICE_NAME),
                 utils.resource_factory.RESOURCES_JSON_FILE)
         self.assertTrue(os.path.isfile(curr_resources_json))
 
