@@ -1262,16 +1262,24 @@ def _get_upgrade_data():
 
 
 @retry((IOError, ValueError))
-def check_http_response(url, predicate):
-    response = urllib.urlopen(url)
+def check_http_response(url, predicate=None, **request_kwargs):
+    req = urllib2.Request(url, **request_kwargs)
+    try:
+        response = urllib2.urlopen(req)
+    except urllib2.HTTPError as e:
+        # HTTPError can also be used as a non-200 response. Pass this
+        # through to the predicate function, so it can decide if a
+        # non-200 response is fine or not.
+        response = e
+
     if predicate is not None and not predicate(response):
         raise ValueError(response)
     return response
 
 
-def verify_service_http(service_name, url, predicate=None):
+def verify_service_http(service_name, url, *args, **kwargs):
     try:
-        return check_http_response(url, predicate)
+        return check_http_response(url, *args, **kwargs)
     except (IOError, ValueError) as e:
         ctx.abort_operation('{0} error: {1}: {2}'.format(service_name, url, e))
 
