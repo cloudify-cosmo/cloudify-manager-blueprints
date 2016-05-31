@@ -132,7 +132,7 @@ inputs:
 
   cloudify_resources_url:
     type: string
-    default: manager-resources-3.4m5.tar.gz
+    default: cloudify-manager-3.4m5.tar.gz
 
   webui_source_url:
     type: string
@@ -200,7 +200,7 @@ inputs:
 
   sanity_app_source_url:
     type: string
-    default: hello-world-3.4m5.tar.gz
+    default: cloudify-hello-world-example-3.4m5.tar.gz
 
   #############################
   # RabbitMQ Inputs
