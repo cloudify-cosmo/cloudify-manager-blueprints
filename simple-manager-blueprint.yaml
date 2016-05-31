@@ -567,11 +567,17 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/manager/scripts/create_conf.py
-            fabric_env:
+            fabric_env: &simple_fabric_env
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
               host_string: { get_property: [manager_host, public_ip] }
               always_use_pty: true
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/manager/scripts/creation_validation.py
+            fabric_env: *simple_fabric_env
 
     relationships:
       - type: cloudify.relationships.contained_in
@@ -620,6 +626,13 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: manager_configuration
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/rabbitmq/scripts/creation_validation.py
+            fabric_env: *simple_fabric_env
 
   elasticsearch:
     type: manager.nodes.Elasticsearch
@@ -630,6 +643,13 @@ node_templates:
         target: java_runtime
       - type: cloudify.relationships.depends_on
         target: manager_configuration
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/elasticsearch/scripts/creation_validation.py
+            fabric_env: *simple_fabric_env
 
   logstash:
     type: manager.nodes.Logstash
@@ -642,6 +662,13 @@ node_templates:
         target: elasticsearch
       - type: cloudify.relationships.depends_on
         target: manager_configuration
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/logstash/scripts/creation_validation.py
+            fabric_env: *simple_fabric_env
 
   influxdb:
     type: manager.nodes.InfluxDB
@@ -650,6 +677,13 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: manager_configuration
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/influxdb/scripts/creation_validation.py
+            fabric_env: *simple_fabric_env
 
   nginx:
     type: manager.nodes.Nginx
@@ -660,6 +694,13 @@ node_templates:
         target: manager_configuration
       - type: nginx_to_restservice
         target: rest_service
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/nginx/scripts/creation_validation.py
+            fabric_env: *simple_fabric_env
 
   riemann:
     type: manager.nodes.Riemann
@@ -674,6 +715,13 @@ node_templates:
         target: nginx
       - type: cloudify.relationships.depends_on
         target: manager_configuration
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/riemann/scripts/creation_validation.py
+            fabric_env: *simple_fabric_env
 
   rest_service:
     type: manager.nodes.RestService
@@ -688,6 +736,13 @@ node_templates:
         target: elasticsearch
       - type: restservice_to_rabbitmq
         target: rabbitmq
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/restservice/scripts/creation_validation.py
+            fabric_env: *simple_fabric_env
 
   mgmt_worker:
     type: manager.nodes.ManagementWorker
@@ -702,6 +757,13 @@ node_templates:
         target: nginx
       - type: cloudify.relationships.depends_on
         target: manager_configuration
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/mgmtworker/scripts/creation_validation.py
+            fabric_env: *simple_fabric_env
 
   amqp_influx:
     type: manager.nodes.AmqpInfluxBroker
@@ -716,6 +778,13 @@ node_templates:
         target: influxdb
       - type: cloudify.relationships.depends_on
         target: manager_configuration
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/amqpinflux/scripts/creation_validation.py
+            fabric_env: *simple_fabric_env
 
   webui:
     type: manager.nodes.WebUI
