@@ -130,6 +130,25 @@ def _configure_elasticsearch(host, port):
         deployment_modification_mapping_endpoint,
         deployment_modification_mapping, 'PUT')
 
+    deployment_update_mapping_endpoint = \
+        storage_endpoint + 'deployment_update/_mapping'
+    deployment_update_mapping = json.dumps({
+        "deployment_update": {
+            "_id": {"path": "id"},
+            "properties": {
+                "deployment_update_nodes": {"enabled": False},
+                "deployment_update_node_instances": {"enabled": False},
+                "deployment_update_deploymentcontext": {"enabled": False},
+                "deployment_plan": {"enabled": False}
+            }
+        }
+    })
+
+    ctx.logger.info('Declaring deployment update mapping...')
+    http_request(
+        deployment_update_mapping_endpoint,
+        deployment_update_mapping, 'PUT')
+
 
 def _configure_index_rotation():
     ctx.logger.info('Configuring Elasticsearch Index Rotation cronjob for '
