@@ -25,6 +25,8 @@ node_types:
         default: { get_input: minimum_required_available_disk_space_in_gb }
       allowed_heap_size_gap_in_mb:
         default: { get_input: allowed_heap_size_gap_in_mb }
+      manager_version:
+        default: 3.4.0-m5
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
