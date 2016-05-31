@@ -183,7 +183,7 @@ inputs:
 
   cloudify_resources_url:
     type: string
-    default: master.tar.gz
+    default: manager-resources-3.4m5.tar.gz
 
   webui_source_url:
     type: string
@@ -251,7 +251,7 @@ inputs:
 
   sanity_app_source_url:
     type: string
-    default: 3.4m5.tar.gz
+    default: hello-world-3.4m5.tar.gz
 
   #############################
   # RabbitMQ Inputs
