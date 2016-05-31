@@ -165,14 +165,6 @@ node_types:
         description: Use existing manager configuration on upgrade
         type: string
         default: true
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/manager/scripts/creation_validation.py
-            fabric_env: *simple_fabric_env
 
   manager.nodes.PythonRuntime:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -310,13 +302,6 @@ node_types:
             script_path:
               default: components/rabbitmq/scripts/stop.py
             fabric_env: *simple_fabric_env
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/rabbitmq/scripts/creation_validation.py
-            fabric_env: *simple_fabric_env
 
   manager.nodes.Elasticsearch:
     derived_from: cloudify.nodes.DBMS
@@ -386,13 +371,6 @@ node_types:
             script_path:
               default: components/elasticsearch/scripts/stop.py
             fabric_env: *simple_fabric_env
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/elasticsearch/scripts/creation_validation.py
-            fabric_env: *simple_fabric_env
 
   manager.nodes.Logstash:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -442,13 +420,6 @@ node_types:
             script_path:
               default: components/logstash/scripts/stop.py
             fabric_env: *simple_fabric_env
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/logstash/scripts/creation_validation.py
-            fabric_env: *simple_fabric_env
 
   manager.nodes.InfluxDB:
     derived_from: cloudify.nodes.DBMS
@@ -483,13 +454,6 @@ node_types:
           inputs:
             script_path:
               default: components/influxdb/scripts/stop.py
-            fabric_env: *simple_fabric_env
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/influxdb/scripts/creation_validation.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.Nginx:
@@ -539,13 +503,6 @@ node_types:
           inputs:
             script_path:
               default: components/nginx/scripts/stop.py
-            fabric_env: *simple_fabric_env
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/nginx/scripts/creation_validation.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.Riemann:
@@ -602,13 +559,6 @@ node_types:
           inputs:
             script_path:
               default: components/riemann/scripts/stop.py
-            fabric_env: *simple_fabric_env
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/riemann/scripts/creation_validation.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.RestService:
@@ -715,13 +665,6 @@ node_types:
             script_path:
               default: components/restservice/scripts/stop.py
             fabric_env: *simple_fabric_env
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/restservice/scripts/creation_validation.py
-            fabric_env: *simple_fabric_env
 
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -813,13 +756,6 @@ node_types:
             script_path:
               default: components/mgmtworker/scripts/stop.py
             fabric_env: *simple_fabric_env
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/mgmtworker/scripts/creation_validation.py
-            fabric_env: *simple_fabric_env
 
   manager.nodes.AmqpInfluxBroker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -877,13 +813,6 @@ node_types:
           inputs:
             script_path:
               default: components/amqpinflux/scripts/stop.py
-            fabric_env: *simple_fabric_env
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/amqpinflux/scripts/creation_validation.py
             fabric_env: *simple_fabric_env
 
   manager.nodes.WebUI:
