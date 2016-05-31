@@ -138,7 +138,7 @@ def _configure_elasticsearch(host, port):
             "properties": {
                 "deployment_update_nodes": {"enabled": False},
                 "deployment_update_node_instances": {"enabled": False},
-                "deployment_update_deploymentcontext": {"enabled": False},
+                "deployment_update_deployment": {"enabled": False},
                 "deployment_plan": {"enabled": False}
             }
         }
