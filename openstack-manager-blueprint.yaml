@@ -2,7 +2,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4m5/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.4/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml
   - http://www.getcloudify.org/spec/openstack-plugin/1.4/plugin.yaml
   - types/manager-types.yaml
 
@@ -649,6 +649,8 @@ node_templates:
             task_name: configure
             task_properties:
               openstack_config: *openstack_configuration
+            hide_output: &hide_output
+              - running
             fabric_env: &manager_fabric_env
               user: { get_input: ssh_user }
               key_filename: { get_property: [management_keypair, private_key_path] }
@@ -657,6 +659,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/manager/scripts/create_conf.py
+            hide_output: *hide_output
             fabric_env:
               <<: *manager_fabric_env
               always_use_pty: true

@@ -2,9 +2,9 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4m5/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.4/plugin.yaml
-  - types/manager-types.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml
   - http://www.getcloudify.org/spec/vsphere-plugin/2.0/plugin.yaml
+  - types/manager-types.yaml
 
 
 
@@ -759,6 +759,8 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/manager/scripts/create_conf.py
+            hide_output: &hide_output
+              - running
             fabric_env: &vsphere_fabric_env
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
@@ -772,11 +774,13 @@ node_templates:
             task_name: configure
             task_properties:
               vsphere_config: { get_property: [connection_configuration, connection_config] }
+            hide_output: *hide_output
             fabric_env: *vsphere_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/manager/scripts/vsphere/update-firewall.sh
+            hide_output: *hide_output
             fabric_env: *vsphere_fabric_env
 
     relationships:
