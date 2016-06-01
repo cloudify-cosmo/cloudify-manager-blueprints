@@ -745,13 +745,13 @@ class CtxPropertyFactory(object):
         if is_upgrade:
             self._archive_properties(service_name)
             ctx_props = self._load_ctx_properties(service_name)
+            self._write_props_to_file(ctx_props, service_name)
         elif is_rollback:
             self._restore_properties(service_name)
             ctx_props = self.get(service_name)
         else:
             ctx_props = ctx.node.properties.get_all()
-
-        self._write_props_to_file(ctx_props, service_name)
+            self._write_props_to_file(ctx_props, service_name)
 
         return ctx_props
 
@@ -765,10 +765,9 @@ class CtxPropertyFactory(object):
 
     def _write_props_to_file(self, ctx_props, service_name):
         dest_file_path = self._get_props_file_path(service_name)
-        if not os.path.isfile(dest_file_path):
-            ctx.logger.info('Saving {0} input configuration to {1}'
-                            .format(service_name, dest_file_path))
-            write_to_json_file(ctx_props, dest_file_path)
+        ctx.logger.info('Saving {0} input configuration to {1}'
+                        .format(service_name, dest_file_path))
+        write_to_json_file(ctx_props, dest_file_path)
 
     def _restore_properties(self, service_name):
         """Restore previously used node properties.
