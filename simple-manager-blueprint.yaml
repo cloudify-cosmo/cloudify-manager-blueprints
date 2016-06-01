@@ -2,10 +2,8 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4m5/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.4/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml
   - types/manager-types.yaml
-
-
 
 
 inputs:
@@ -554,6 +552,8 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/manager/scripts/create_conf.py
+            hide_output: &hide_output
+              - running
             fabric_env: &simple_fabric_env
               user: { get_input: ssh_user }
               key_filename: { get_input: ssh_key_filename }
@@ -564,6 +564,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/manager/scripts/creation_validation.py
+            hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
     relationships:
@@ -619,6 +620,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/rabbitmq/scripts/creation_validation.py
+            hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
   elasticsearch:
@@ -636,6 +638,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/elasticsearch/scripts/creation_validation.py
+            hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
   logstash:
@@ -655,6 +658,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/logstash/scripts/creation_validation.py
+            hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
   influxdb:
@@ -670,6 +674,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/influxdb/scripts/creation_validation.py
+            hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
   nginx:
@@ -687,6 +692,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/nginx/scripts/creation_validation.py
+            hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
   riemann:
@@ -708,6 +714,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/riemann/scripts/creation_validation.py
+            hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
   rest_service:
@@ -729,6 +736,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/restservice/scripts/creation_validation.py
+            hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
   mgmt_worker:
@@ -750,6 +758,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/mgmtworker/scripts/creation_validation.py
+            hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
   amqp_influx:
@@ -771,6 +780,7 @@ node_templates:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path: components/amqpinflux/scripts/creation_validation.py
+            hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
   webui:
