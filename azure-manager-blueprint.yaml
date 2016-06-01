@@ -246,7 +246,7 @@ inputs:
 
   cloudify_resources_url:
     type: string
-    default: master.tar.gz
+    default: cloudify-manager-3.4m5.tar.gz
 
   webui_source_url:
     type: string
@@ -591,6 +591,10 @@ inputs:
   agent_source_url:
     type: string
     default: ''
+
+  sanity_app_source_url:
+    type: string
+    default: cloudify-hello-world-example-3.4m5.tar.gz
 
 
 dsl_definitions:
@@ -1051,6 +1055,39 @@ node_templates:
         target: influxdb
       - type: cloudify.relationships.depends_on
         target: manager_configuration
+
+  #################################
+  # Sanity
+  #################################
+  sanity:
+    type: manager.nodes.Sanity
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: sanity_to_mgr_config
+        target: manager_configuration
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: cloudify.relationships.depends_on
+        target: java_runtime
+      - type: cloudify.relationships.depends_on
+        target: elasticsearch
+      - type: cloudify.relationships.depends_on
+        target: logstash
+      - type: cloudify.relationships.depends_on
+        target: influxdb
+      - type: cloudify.relationships.depends_on
+        target: nginx
+      - type: cloudify.relationships.depends_on
+        target: riemann
+      - type: cloudify.relationships.depends_on
+        target: rest_service
+      - type: cloudify.relationships.depends_on
+        target: mgmt_worker
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: amqp_influx
 
   ######################################################################
   # Enable this node if you want to have the CLI installed within
