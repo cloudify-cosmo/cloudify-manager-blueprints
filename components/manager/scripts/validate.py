@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import urllib2
 import platform
 import subprocess
@@ -42,6 +43,27 @@ def _get_os_distro():
     distro, version, _ = \
         platform.linux_distribution(full_distribution_name=False)
     return distro.lower(), version.split('.')[0]
+
+
+def _get_python_version():
+    major_version = sys.version_info[0]
+    minor_version = sys.version_info[1]
+    return major_version, minor_version
+
+
+def _validate_python_version(expected_major_version, expected_minor_version):
+    major_version, minor_version = _get_python_version()
+    ctx.logger.info('Validating Python version...')
+    if not major_version == expected_major_version or \
+            not minor_version == expected_minor_version:
+        return _error(
+            'You are currently running Python {0}.{1}. '
+            'You must be running Python {0}.{1} to run '
+            'Cloudify Manager.'.format(
+                major_version,
+                minor_version,
+                expected_major_version,
+                expected_minor_version))
 
 
 def _validate_sufficient_memory(min_memory_required_in_mb):
@@ -141,6 +163,8 @@ def validate():
     heap_size_gap = ctx.node.properties['allowed_heap_size_gap_in_mb']
     error_summary = []
 
+    error_summary.append(_validate_python_version(
+        expected_major_version=2, expected_minor_version=7))
     error_summary.append(_validate_supported_distros(
         supported_distros=('centos', 'redhat'),
         supported_versions=('7')))

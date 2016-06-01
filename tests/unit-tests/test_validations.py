@@ -44,6 +44,7 @@ class TestValidations(testtools.TestCase):
     @patch('validate._get_host_total_memory', return_value=1)
     @patch('validate._get_available_host_disk_space', return_value=1)
     @patch('validate._validate_resources_package_url', return_value=None)
+    @patch('validate._get_python_version', return_value=(8, 8))
     def test_failed_yet_ignored_validation(self, *_):
         validate.validate()
 
@@ -155,3 +156,28 @@ class TestValidations(testtools.TestCase):
     def test_validate_es_heap_size(self):
         error = validate._validate_es_heap_size('512m', 512)
         self.assertIsNone(error)
+
+    @patch('validate.ctx', CTX)
+    @patch('validate._get_python_version', return_value=(2, 7))
+    def test_validate_python_version(self, _):
+        error = validate._validate_python_version(2, 7)
+        self.assertIsNone(error)
+
+    @patch('validate.ctx', CTX)
+    @patch('validate._get_python_version', return_value=(2, 7))
+    def test_fail_validate_unacceptable_python_major_version(self, _):
+        error = validate._validate_python_version(2, 0)
+        self.assertIn('You must be running Python', error)
+
+    @patch('validate.ctx', CTX)
+    @patch('validate._get_python_version', return_value=(2, 7))
+    def test_fail_validate_unacceptable_python_minor_version(self, _):
+        error = validate._validate_python_version(3, 7)
+        self.assertIn('You must be running Python', error)
+
+    def test_get_python_version(self):
+        major = sys.version_info[0]
+        minor = sys.version_info[1]
+        version = validate._get_python_version()
+        self.assertEqual(version[0], major)
+        self.assertEqual(version[1], minor)
