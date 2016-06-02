@@ -363,16 +363,22 @@ def yum_install(source, service_name):
     if ext.endswith('.rpm'):
         source_path = download_cloudify_resource(source, service_name)
 
-    rpm_handler = RpmPackageHandler(source_path)
-    ctx.logger.info('Checking whether {0} is already installed...'.format(
-        source_path))
-    if rpm_handler.is_rpm_installed():
-        ctx.logger.info('Package {0} is already installed.'.format(source))
-        return
+        rpm_handler = RpmPackageHandler(source_path)
+        ctx.logger.info('Checking whether {0} is already installed...'.format(
+            source_path))
+        if rpm_handler.is_rpm_installed():
+            ctx.logger.info('Package {0} is already installed.'.format(source))
+            return
 
-    # removes any existing versions of the package that do not match
-    # the provided package source version
-    rpm_handler.remove_existing_rpm_package()
+        # removes any existing versions of the package that do not match
+        # the provided package source version
+        rpm_handler.remove_existing_rpm_package()
+    else:
+        installed = run(['yum', '-q', 'list', 'installed', source_path],
+                        ignore_failures=True)
+        if installed.returncode == 0:
+            ctx.logger.info('Package {0} is already installed.'.format(source))
+            return
 
     ctx.logger.info('yum installing {0}...'.format(source_path))
     sudo(['yum', 'install', '-y', source_path])

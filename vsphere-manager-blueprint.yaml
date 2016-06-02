@@ -598,14 +598,15 @@ inputs:
   # Dev Inputs
   #############################
 
+  # Some plugins installed from sources require compilation - installs a
+  # compiler and the python headers to allow that.
+  install_python_compilers:
+    type: boolean
+    default: false
+
   # For development purposes, you can use these, which will override the modules
   # supplied within the rpm.
   # These should be pip installable tar.gz files.
-  # Note that `install_python_compilers` must not be an empty string if one of the
-  # below modules require compilation.
-  install_python_compilers:
-    type: string
-    default: ''
 
   cli_source_url:
     type: string

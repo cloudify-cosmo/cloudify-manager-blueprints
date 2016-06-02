@@ -175,7 +175,7 @@ node_types:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
       install_python_compilers:
-        type: string
+        type: boolean
         default: { get_input: install_python_compilers }
       pip_source_rpm_url:
         type: string
