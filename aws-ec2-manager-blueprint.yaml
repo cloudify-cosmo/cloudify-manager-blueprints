@@ -461,11 +461,25 @@ inputs:
   #############################
   # Upload Resources Inputs
   #############################
+  plugin_resources:
+    description: >
+      Holds any archives that should be uploaded to the manager.
+    default:
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-aws-plugin/1.4/cloudify_aws_plugin-1.4-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-aws-plugin/1.4/cloudify_aws_plugin-1.4-py27-none-linux_x86_64-redhat-Maipo.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-fabric-plugin/1.4/cloudify_fabric_plugin-1.4-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.3/cloudify_diamond_plugin-1.3.3-py27-none-linux_x86_64-redhat-Maipo.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.3/cloudify_diamond_plugin-1.3.3-py27-none-linux_x86_64-centos-Core.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.3/cloudify_diamond_plugin-1.3.3-py26-none-linux_x86_64-centos-Final.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.3/cloudify_diamond_plugin-1.3.3-py27-none-linux_x86_64-Ubuntu-precise.wgn'
+      - 'http://repository.cloudifysource.org/org/cloudify3/wagons/cloudify-diamond-plugin/1.3.3/cloudify_diamond_plugin-1.3.3-py27-none-linux_x86_64-Ubuntu-trusty.wgn'
+
   dsl_resources:
     description: >
       Holds a set of dsl required resources
     default:
       - {'source_path': 'http://www.getcloudify.org/spec/aws-plugin/1.4/plugin.yaml', 'destination_path': '/spec/aws-plugin/1.4/plugin.yaml'}
+
       - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.4/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.4/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.3/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.3/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4m5/types.yaml', 'destination_path': '/spec/cloudify/3.4m5/types.yaml'}
@@ -586,6 +600,7 @@ node_templates:
             - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
 
         upload_resources:
+          plugin_resources: { get_input: plugin_resources }
           dsl_resources: { get_input: dsl_resources }
 
     interfaces:

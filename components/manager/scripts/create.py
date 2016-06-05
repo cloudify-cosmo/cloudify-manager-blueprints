@@ -135,4 +135,5 @@ def deploy_manager_sources():
                 os.path.join(sources_agents_path, agent_file),
                 os.path.join(agent_archives_path, agent_id + agent_extension))
 
+
 deploy_manager_sources()
