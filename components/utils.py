@@ -974,14 +974,17 @@ class BlueprintResourceFactory(object):
         is_url = source.startswith(('http', 'https', 'ftp'))
         filename = get_file_name_from_url(source) if is_url else source
         local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
+        is_manager_package = filename.startswith('cloudify-manager-resources')
         if is_url:
-            if os.path.isfile(local_filepath):
+            if not os.path.isfile(local_filepath):
+                tmp_path = download_file(source)
+            elif os.path.isfile(local_filepath) and not is_manager_package:
                 remove(local_filepath)
-            tmp_path = download_file(source)
+                tmp_path = download_file(source)
         # source is just the name of the file, to be retrieved from
         # the manager resources package
         else:
-            tmp_path = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
+            tmp_path = local_filepath
         ctx.logger.debug('Saving {0} under {1}'.format(
             tmp_path, local_resource_path))
         move(tmp_path, local_resource_path)
