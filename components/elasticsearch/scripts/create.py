@@ -17,9 +17,8 @@ import utils  # NOQA
 CONFIG_PATH = "components/elasticsearch/config"
 ES_SERVICE_NAME = 'elasticsearch'
 
-UPGRADE_DUMP_PATH = '/tmp/es_upgrade_dump/'
-DUMP_FILE_PATH = os.path.join(UPGRADE_DUMP_PATH, 'es_dump')
-DUMP_SUCCESS_FLAG = os.path.join(UPGRADE_DUMP_PATH, 'es_dump_success')
+DUMP_FILE_PATH = os.path.join(utils.ES_UPGRADE_DUMP_PATH, 'es_dump')
+DUMP_SUCCESS_FLAG = os.path.join(utils.ES_UPGRADE_DUMP_PATH, 'es_dump_success')
 
 ctx_properties = utils.ctx_factory.create(ES_SERVICE_NAME)
 
@@ -378,7 +377,7 @@ def dump_upgrade_data():
         for hit in hits:
             type_values.append(hit)
 
-    utils.mkdir(UPGRADE_DUMP_PATH, use_sudo=False)
+    utils.mkdir(utils.ES_UPGRADE_DUMP_PATH, use_sudo=False)
     with open(DUMP_FILE_PATH, 'w') as f:
         for item in type_values:
             f.write(json.dumps(item) + os.linesep)
@@ -400,9 +399,6 @@ def restore_upgrade_data(es_endpoint_ip, es_endpoint_port):
     if res.code != 200:
         ctx.abort_operation('Failed restoring elasticsearch data.')
     ctx.logger.info('Elasticsearch data was successfully restored')
-    if os.path.isfile(DUMP_SUCCESS_FLAG):
-        # Delete marker file
-        os.remove(DUMP_SUCCESS_FLAG)
 
 
 def _create_index_request(line):

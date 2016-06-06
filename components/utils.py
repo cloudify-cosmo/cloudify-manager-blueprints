@@ -31,6 +31,7 @@ DEFAULT_BUFFER_SIZE = 8192
 # Upgrade specific parameters
 UPGRADE_METADATA_FILE = '/opt/cloudify/upgrade_meta/metadata.json'
 AGENTS_ROLLBACK_PATH = '/opt/cloudify/manager-resources/agents_rollback'
+ES_UPGRADE_DUMP_PATH = '/tmp/es_upgrade_dump/'
 
 
 def retry(exception, tries=4, delay=3, backoff=2):
@@ -901,7 +902,7 @@ class BlueprintResourceFactory(object):
         local_resource_path = self._get_local_file_path(service_name,
                                                         resource_name)
 
-        if not os.path.isfile(local_resource_path):
+        if not os.path.isfile(local_resource_path) or render:
             mkdir(os.path.dirname(local_resource_path))
             if user_resource:
                 self._download_user_resource(source,
@@ -1395,10 +1396,13 @@ def _clean_rollback_data():
                              .format(dir_path))
             remove(dir_path)
     if os.path.isdir(AGENTS_ROLLBACK_PATH):
-        ctx.logger.info('Removing rollback agents..')
+        ctx.logger.info('Removing rollback agents...')
         remove(AGENTS_ROLLBACK_PATH)
+    if os.path.isdir(ES_UPGRADE_DUMP_PATH):
+        ctx.logger.info('Removing ES provider context dump...')
+        remove(ES_UPGRADE_DUMP_PATH)
     if os.path.isfile(UPGRADE_METADATA_FILE):
-        ctx.logger.info('Removing upgrade metadata..')
+        ctx.logger.info('Removing upgrade metadata...')
         remove(UPGRADE_METADATA_FILE)
 
 
