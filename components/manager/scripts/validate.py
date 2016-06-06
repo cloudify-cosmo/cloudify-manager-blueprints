@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import urllib2
 import platform
@@ -151,10 +152,15 @@ def _validate_resources_package_url(manager_resources_package_url):
                 manager_resources_package_url, ex.args))
 
 
+def _is_bootstrap():
+    status_file_path = '/opt/cloudify/_workflow_state.json'
+    if os.path.isfile(status_file_path):
+        return False
+    return True
+
+
 def validate():
     ignore_validations = ctx.node.properties['ignore_bootstrap_validations']
-    # remove last character as it contains the `g` or `m`.
-    es_heap_size = ctx.node.properties['es_heap_size']
     resources_package_url = ctx.node.properties['manager_resources_package']
     physical_memory = \
         ctx.node.properties['minimum_required_total_physical_memory_in_mb']
@@ -172,8 +178,12 @@ def validate():
         min_memory_required_in_mb=physical_memory))
     error_summary.append(_validate_sufficient_disk_space(
         min_disk_space_required_in_gb=disk_space))
-    error_summary.append(_validate_es_heap_size(
-        es_heap_size=es_heap_size, allowed_gap_in_mb=heap_size_gap))
+    # memory validation for es is only relevant during bootstrap for now.
+    if _is_bootstrap():
+        # remove last character as it contains the `g` or `m`.
+        es_heap_size = ctx.node.properties['es_heap_size']
+        error_summary.append(_validate_es_heap_size(
+            es_heap_size=es_heap_size, allowed_gap_in_mb=heap_size_gap))
     if resources_package_url:
         error_summary.append(_validate_resources_package_url(
             resources_package_url))
