@@ -2,7 +2,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4rc1/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.4.1.1.1/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml
   - http://www.getcloudify.org/spec/openstack-plugin/1.4/plugin.yaml
   - types/manager-types.yaml
 
@@ -504,7 +504,7 @@ inputs:
       Holds a set of dsl required resources
     default:
       - {'source_path': 'http://www.getcloudify.org/spec/openstack-plugin/1.4/plugin.yaml', 'destination_path': '/spec/openstack-plugin/1.4/plugin.yaml'}
-      - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.4.1.1/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.4.1.1/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.4.1/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.3/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.3/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4rc1/types.yaml', 'destination_path': '/spec/cloudify/3.4rc1/types.yaml'}
 
