@@ -24,6 +24,10 @@ inputs:
     type: string
     default: 'us-east-1'
 
+  elb_region_name:
+    type: string
+    default: 'us-east-1'
+
   use_existing_manager_keypair:
     type: boolean
     default: false
@@ -526,6 +530,7 @@ dsl_definitions:
     aws_access_key_id: { get_input: aws_access_key_id }
     aws_secret_access_key: { get_input: aws_secret_access_key }
     ec2_region_name: { get_input: ec2_region_name }
+    elb_region_name: { get_input: elb_region_name }
 
 
 node_templates:
