@@ -10,6 +10,7 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+
 NODE_NAME = 'manager-resources'
 
 # This MUST be invoked by the first node, before upgrade snapshot is created.
@@ -29,14 +30,14 @@ def deploy_manager_sources():
     utils.mkdir(agent_archives_path)
     if archive_path:
         sources_agents_path = os.path.join(
-                utils.CLOUDIFY_SOURCES_PATH, 'agents')
+            utils.CLOUDIFY_SOURCES_PATH, 'agents')
         # this will leave this several hundreds of MBs archive on the
         # manager. should find a way to clean it after all operations
         # were completed and bootstrap succeeded as it is not longer
         # necessary
         utils.mkdir(utils.CLOUDIFY_SOURCES_PATH)
-        res_name = os.path.basename(archive_path)
-        destination = os.path.join(utils.CLOUDIFY_SOURCES_PATH, res_name)
+        resource_name = os.path.basename(archive_path)
+        destination = os.path.join(utils.CLOUDIFY_SOURCES_PATH, resource_name)
         resources_archive_path = \
             utils.download_cloudify_resource(
                 archive_path, NODE_NAME, destination=destination)
@@ -99,30 +100,25 @@ def deploy_manager_sources():
                 utils.copy(agents_dir, utils.AGENTS_ROLLBACK_PATH)
 
         def restore_agent_resources(agents_dir):
-            ctx.logger.info('Restoring agents in {0}'
-                            .format(utils.AGENTS_ROLLBACK_PATH))
+            ctx.logger.info('Restoring agents in {0}'.format(
+                utils.AGENTS_ROLLBACK_PATH))
             if os.path.isdir(agents_dir):
                 utils.remove(agents_dir)
             utils.mkdir(agents_dir)
             utils.copy(os.path.join(utils.AGENTS_ROLLBACK_PATH, 'agents', '.'),
                        agents_dir)
 
-        manager_resources_home = utils.MANAGER_RESOURCES_HOME
-
-        manager_scripts_path = '{0}/packages/scripts'.format(
-                manager_resources_home)
-        manager_templates_path = '{0}/packages/templates'.format(
-                manager_resources_home)
+        manager_scripts_path = os.path.join(
+            utils.MANAGER_RESOURCES_HOME, 'packages', 'scripts')
+        manager_templates_path = os.path.join(
+            utils.MANAGER_RESOURCES_HOME, 'packages', 'templates')
         if utils.is_upgrade:
             backup_agent_resources(agent_archives_path)
-            if os.path.isdir(agent_archives_path):
-                utils.remove(agent_archives_path)
+            utils.remove(agent_archives_path)
             utils.mkdir(agent_archives_path)
-            if os.path.isdir(manager_scripts_path):
-                utils.remove(manager_scripts_path)
+            utils.remove(manager_scripts_path)
+            utils.remove(manager_templates_path)
             ctx.logger.info('Upgrading agents...')
-            if os.path.isdir(manager_templates_path):
-                utils.remove(manager_templates_path)
         elif utils.is_rollback:
             ctx.logger.info('Restoring agents...')
             restore_agent_resources(agent_archives_path)
