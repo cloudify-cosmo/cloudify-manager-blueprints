@@ -988,6 +988,8 @@ class BlueprintResourceFactory(object):
             elif os.path.isfile(local_filepath) and not is_manager_package:
                 remove(local_filepath)
                 tmp_path = download_file(source)
+            else:
+                tmp_path = local_filepath
         # source is just the name of the file, to be retrieved from
         # the manager resources package
         else:
