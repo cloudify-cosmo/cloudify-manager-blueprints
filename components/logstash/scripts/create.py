@@ -78,14 +78,18 @@ def install_logstash():
 
     # Due to a bug in the handling of configuration files,
     # configuration files with the same name cannot be deployed.
-    # Since the logrotate config files is called `logstash`,
+    # Since the logrotate config file is called `logstash`,
     # we change the name of the logstash env vars config file
     # from logstash to cloudify-logstash to be consistent with
     # other service env var files.
+    init_file = '/etc/init.d/logstash'
     utils.replace_in_file(
         'sysconfig/\$name',
         'sysconfig/cloudify-$name',
-        '/etc/init.d/logstash')
+        init_file)
+    utils.chmod('755', init_file)
+    utils.chown('root', 'root', init_file)
+
     ctx.logger.info('Deploying Logstash sysconfig...')
     utils.deploy_blueprint_resource(
         '{0}/cloudify-logstash'.format(CONFIG_PATH),
