@@ -48,7 +48,8 @@ def _upload_app_blueprint(app_tar):
     headers['Content-Length'] = length
     headers['Content-Type'] = 'application/octet-stream'
     params = urllib.urlencode(
-            dict(application_file_name='singlehost-blueprint.yaml'))
+            dict(application_file_name='no-monitoring-'
+                                       'singlehost-blueprint.yaml'))
 
     endpoint = '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID)
     url = endpoint + '?' + params
@@ -147,40 +148,6 @@ def _assert_webserver_running():
         ctx.abort_operation("Can't connect to webserver")
     if resp.code != 200:
         ctx.abort_operation('Sanity app webserver failed to start')
-
-
-def _assert_deployment_monitoring_data_exists():
-    influx_props = utils.ctx_factory.get('influxdb')
-    influx_host_ip = influx_props.get('influxdb_endpoint_ip')
-
-    if influx_host_ip == '':
-        influx_host_ip = 'localhost'
-    influx_user = 'root'
-    influx_pass = 'root'
-
-    query = 'select * from /^{0}\./i ' \
-            'where time > now() - 5s'.format(DEPLOYMENT_ID)
-
-    params = urllib.urlencode(
-            dict(u=influx_user,
-                 p=influx_pass,
-                 q=query))
-
-    endpoint = 'http://{0}:8086/db/cloudify/series'.format(influx_host_ip)
-    url = endpoint + '?' + params
-
-    resp = utils.http_request(url, method='GET', timeout=30)
-
-    if not resp:
-        ctx.abort_operation("Can't connect to influxdb")
-    if resp.code != 200:
-        ctx.abort_operation('Received invalid response from the '
-                            'monitoring service: {0}'.format(resp.reason))
-
-    resp_content = resp.readlines()
-    json_resp = json.loads(resp_content[0])
-    if not json_resp:
-        ctx.abort_operation('No monitoring data received')
 
 
 def _cleanup_sanity():
@@ -290,11 +257,11 @@ def _get_url_prefix():
 def perform_sanity():
     ctx.logger.info('Starting Manager sanity check...')
     _prepare_sanity_app()
+    ctx.logger.info('Installing sanity app...')
     exec_id = _install_sanity_app()
-    ctx.logger.debug('Sanity app installed. Performing sanity test...')
+    ctx.logger.info('Sanity app installed. Performing sanity test...')
     _assert_webserver_running()
     _assert_logs_and_events(exec_id)
-    _assert_deployment_monitoring_data_exists()
     ctx.logger.info('Manager sanity check successful, '
                     'cleaning up sanity resources.')
     _cleanup_sanity()
