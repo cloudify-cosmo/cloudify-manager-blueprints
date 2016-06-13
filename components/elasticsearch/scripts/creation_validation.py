@@ -48,6 +48,7 @@ def verify_elasticsearch_running(url):
 
 
 if utils.is_upgrade:
+    utils.validate_upgrade_directories(ES_SERVICE_NAME)
     install_properties = utils.ctx_factory.get(ES_SERVICE_NAME)
     ES_ENDPOINT_IP = install_properties['es_endpoint_ip']
     ES_ENDPOINT_PORT = install_properties['es_endpoint_port']
@@ -57,7 +58,5 @@ if utils.is_upgrade:
 
     elasticsearch_url = 'http://{0}:{1}'.format(ES_ENDPOINT_IP,
                                                 ES_ENDPOINT_PORT)
-
-    utils.validate_upgrade_directories(ES_SERVICE_NAME)
     verify_elasticsearch_running(elasticsearch_url)
     verify_properties()

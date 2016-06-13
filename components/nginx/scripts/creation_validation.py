@@ -10,8 +10,8 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-LOGSTASH_SERVICE_NAME = 'logstash'
+NGINX_SERVICE_NAME = 'nginx'
 
 if utils.is_upgrade:
-    utils.validate_upgrade_directories(LOGSTASH_SERVICE_NAME)
-    utils.systemd.verify_alive(LOGSTASH_SERVICE_NAME, append_prefix=False)
+    utils.validate_upgrade_directories(NGINX_SERVICE_NAME)
+    utils.systemd.verify_alive(NGINX_SERVICE_NAME, append_prefix=False)
