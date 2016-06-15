@@ -1100,9 +1100,8 @@ def http_request(url, data=None, method='PUT',
         return urllib2.urlopen(request)
     except urllib2.URLError as e:
         if not should_fail:
-            reqstring = url + (' ' + data if data else '')
             ctx.logger.error('Failed to {0} {1} (reason: {2})'.format(
-                method, reqstring, e.reason))
+                method, url, e.reason))
 
 
 def wait_for_workflow(
