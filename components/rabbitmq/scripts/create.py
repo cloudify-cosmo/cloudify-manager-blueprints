@@ -104,11 +104,6 @@ def _install_rabbitmq():
 
     utils.logrotate(RABBITMQ_SERVICE_NAME)
 
-    utils.deploy_blueprint_resource(
-        '{0}/kill-rabbit'.format(CONFIG_PATH),
-        '/usr/local/bin/kill-rabbit',
-        RABBITMQ_SERVICE_NAME)
-    utils.chmod('500', '/usr/local/bin/kill-rabbit')
     utils.systemd.configure(RABBITMQ_SERVICE_NAME)
 
     ctx.logger.info('Configuring File Descriptors Limit...')
