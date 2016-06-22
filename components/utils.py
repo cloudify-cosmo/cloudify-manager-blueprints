@@ -892,10 +892,10 @@ class BlueprintResourceFactory(object):
             self._archive_resources(service_name)
         elif is_rollback:
             self._restore_resources(service_name)
-            rollback_dest = self._get_dest_by_resources_json(service_name,
-                                                             resource_name)
-            if not rollback_dest:
-                # This resource does was not used prior to upgrade.
+            destination = self._get_dest_by_resources_json(service_name,
+                                                           resource_name)
+            if not destination:
+                # This resource was not used prior to upgrade.
                 return None, None
 
         # The local path is decided according to whether we are in upgrade
