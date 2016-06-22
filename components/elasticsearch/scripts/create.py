@@ -81,6 +81,18 @@ def _configure_elasticsearch(host, port):
     ctx.logger.info('Declaring deployment mapping...')
     http_request(deployment_mapping_endpoint, deployment_mapping, 'PUT')
 
+    execution_mapping_endpoint = storage_endpoint + 'execution/_mapping'
+    execution_mapping = json.dumps({
+        "execution": {
+            "properties": {
+                "parameters": {"enabled": False}
+            }
+        }
+    })
+
+    ctx.logger.info('Declaring execution mapping...')
+    http_request(execution_mapping_endpoint, execution_mapping, 'PUT')
+
     node_mapping_endpoint = storage_endpoint + 'node/_mapping'
     node_mapping = json.dumps({
         "node": {
