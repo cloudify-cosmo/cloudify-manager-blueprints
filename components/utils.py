@@ -902,7 +902,7 @@ class BlueprintResourceFactory(object):
         local_resource_path = self._get_local_file_path(service_name,
                                                         resource_name)
 
-        if not os.path.isfile(local_resource_path) or render:
+        if self._is_download_required(local_resource_path, render):
             mkdir(os.path.dirname(local_resource_path))
             if user_resource:
                 self._download_user_resource(source,
@@ -927,6 +927,16 @@ class BlueprintResourceFactory(object):
                 resources_props[resource_name] = destination
                 self._set_resources_json(resources_props, service_name)
         return local_resource_path, destination
+
+    @staticmethod
+    def _is_download_required(local_resource_path, is_render):
+        result = False
+        if not os.path.isfile(local_resource_path):
+            result = True
+        # rendered resources should be re-rendered if in upgrade.
+        if is_render and is_upgrade:
+            result = True
+        return result
 
     def _get_dest_by_resources_json(self, service_name, resource_name):
         resource_mapping = self._get_resources_json(service_name)
