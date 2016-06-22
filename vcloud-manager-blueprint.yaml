@@ -576,6 +576,15 @@ inputs:
     default: 2
 
   #############################
+  # Sanity Node Inputs
+  #############################
+  application_file_name:
+    description: >
+      Sanity app blueprint file name.
+    type: string
+    default: 'no-monitoring-singlehost-blueprint.yaml'
+
+  #############################
   # Upload Resources Inputs
   #############################
   dsl_resources:

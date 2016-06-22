@@ -945,6 +945,10 @@ node_types:
         description: Sanity app Source URL
         type: string
         default: { get_input: sanity_app_source_url }
+      application_file_name:
+        description: Sanity app blueprint file name
+        type: string
+        default: { get_input: application_file_name }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
