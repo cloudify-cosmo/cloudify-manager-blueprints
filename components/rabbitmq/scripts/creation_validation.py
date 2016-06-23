@@ -17,7 +17,8 @@ IMMUTABLE_PROPERTIES = [
     'rabbitmq_password',
     'rabbitmq_endpoint_ip',
     'rabbitmq_ssl_enabled',
-    'broker_cert_path'
+    'rabbitmq_cert_public',
+    'rabbitmq_cert_private'
 ]
 
 if utils.is_upgrade:
