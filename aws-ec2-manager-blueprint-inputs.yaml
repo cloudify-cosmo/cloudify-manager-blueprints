@@ -276,6 +276,12 @@ aws_secret_access_key: ''
 # Minimum number of worker processes maintained by the management worker.
 #management_worker_min_workers: 2
 
+#################################
+# Sanity Node Configuration
+#################################
+# The application used to prefore sanity validations at the end of bootstrap/upgrade/rollback.
+#application_file_name: 'no-monitoring-singlehost-blueprint.yaml'
+
 #############################
 # Offline Resources Upload
 #############################

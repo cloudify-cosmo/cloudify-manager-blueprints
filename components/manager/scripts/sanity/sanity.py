@@ -12,7 +12,6 @@ ctx.download_resource(
         join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-REST_VERSION = 'v2.1'
 BLUEPRINT_ID = 'sanity_bp'
 DEPLOYMENT_ID = 'sanity_deployment'
 SANITY_SERVICE_NAME = 'sanity'
@@ -47,9 +46,9 @@ def _upload_app_blueprint(app_tar):
     headers = utils.create_maintenance_headers()
     headers['Content-Length'] = length
     headers['Content-Type'] = 'application/octet-stream'
+    application_file_name = ctx_properties['application_file_name']
     params = urllib.urlencode(
-            dict(application_file_name='no-monitoring-'
-                                       'singlehost-blueprint.yaml'))
+            dict(application_file_name=application_file_name))
 
     endpoint = '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID)
     url = endpoint + '?' + params
@@ -251,7 +250,7 @@ def _get_url_prefix():
             rest_protocol,
             manager_ip,
             rest_port,
-            REST_VERSION)
+            utils.REST_VERSION)
 
 
 def perform_sanity():
