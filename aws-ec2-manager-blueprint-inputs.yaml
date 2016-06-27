@@ -42,6 +42,9 @@ aws_secret_access_key: ''
 # This depends on the default user on your AWS AMI.
 #ssh_user: 'centos'
 
+# SSH port used to connect to the manager
+#ssh_port: 22
+
 # This is the default user that the manager will use while connecting to an application host.
 # This user can be overriden in different places.
 #agents_user: 'centos'

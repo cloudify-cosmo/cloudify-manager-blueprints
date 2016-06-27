@@ -20,6 +20,12 @@ inputs:
   ssh_user:
     type: string
 
+  ssh_port:
+    type: string
+    default: 22
+    description: >
+      Manager SSH port
+
   ssh_key_filename:
     type: string
 
@@ -510,6 +516,7 @@ node_templates:
     type: cloudify.nodes.MyCloudifyManager
     properties:
       ssh_user: { get_input: ssh_user }
+      ssh_port: { get_input: ssh_port }
       ssh_key_filename: { get_input: ssh_key_filename }
       cloudify:
         resources_prefix: { get_input: resources_prefix }
@@ -557,6 +564,7 @@ node_templates:
               - running
             fabric_env: &simple_fabric_env
               user: { get_input: ssh_user }
+              port: { get_input: ssh_port }
               key_filename: { get_input: ssh_key_filename }
               host_string: { get_property: [manager_host, public_ip] }
               always_use_pty: true
