@@ -40,6 +40,7 @@ node_types:
             fabric_env: &simple_fabric_env
               default:
                 user: { get_input: ssh_user }
+                port: { get_input: ssh_port }
                 key_filename: { get_input: ssh_key_filename }
                 host_string: { get_attribute: [manager_host, public_ip] }
                 always_use_pty: true
@@ -56,6 +57,8 @@ node_types:
     properties:
       ssh_user:
         default: centos
+      ssh_port:
+        default: 22
       ssh_key_filename:
         default: ''
       agent_local_key_path:

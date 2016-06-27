@@ -72,6 +72,12 @@ inputs:
     default: centos
     type: string
 
+  ssh_port:
+    type: string
+    default: 22
+    description: >
+      Manager SSH port
+
   ssh_key_filename:
     default: ~/.ssh/cloudify-manager-kp.pem
     type: string
@@ -181,6 +187,7 @@ node_templates:
     type: cloudify.nodes.MyCloudifyManager
     properties:
       ssh_user: { get_input: ssh_user }
+      ssh_port: { get_input: ssh_port }
       ssh_key_filename: { get_input: ssh_key_filename }
       agent_local_key_path: { get_input: agent_private_key_path }
       cloudify:
@@ -237,6 +244,7 @@ node_templates:
               - running
             fabric_env: &manager_fabric_env
               user: { get_input: ssh_user }
+              port: { get_input: ssh_port }
               key_filename: { get_property: [management_keypair, private_key_path] }
               host_string: { get_attribute: [manager_server_ip, floating_ip_address] }
         create:

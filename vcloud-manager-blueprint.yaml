@@ -178,7 +178,7 @@ inputs:
   ssh_key_filename:
     type: string
     description: >
-      SSH key path used to connect to the manager
+      Manager SSH port
 
   agent_private_key_path:
     type: string
@@ -416,6 +416,7 @@ node_templates:
     type: cloudify.nodes.MyCloudifyManager
     properties:
       ssh_user: { get_input: ssh_user }
+      ssh_port: { get_input: ssh_port }
       ssh_key_filename: { get_input: ssh_key_filename }
       agent_local_key_path: { get_input: agent_private_key_path }
       cloudify:
