@@ -11,10 +11,12 @@ import base64
 import socket
 import urllib
 import urllib2
+import httplib
 import hashlib
 import tempfile
 import subprocess
 from functools import wraps
+from urlparse import urlparse
 from time import sleep, gmtime, strftime
 from distutils.version import LooseVersion
 
@@ -1099,7 +1101,41 @@ def start_service(service_name, append_prefix=True, ignore_restart_fail=False):
         systemd.start(service_name, append_prefix=append_prefix)
 
 
-def http_request(url, data=None, method='PUT',
+def rest_request(url, **request_kwargs):
+    headers = request_kwargs.get('headers', {})
+    auth_headers = get_auth_headers()
+    headers.update(auth_headers)
+    if is_upgrade or is_rollback:
+        headers.update({'X-BYPASS-MAINTENANCE': 'True'})
+    request_kwargs['headers'] = headers
+
+    manager_config = _get_curr_manager_config()
+    security = manager_config['security']
+    ssl_enabled = security.get('ssl', {}).get('enabled')
+
+    if ssl_enabled:
+        if not url.startswith('https'):
+            url = 'https://{0}'.format(url)
+        server_crt, server_key = _get_rest_key_and_crt()
+        request_kwargs.update({'server_crt': server_crt,
+                               'server_key': server_key})
+        res = https_request(url, **request_kwargs)
+        return RestServiceResponse(res.status, res.read())
+    else:
+        if not url.startswith('http'):
+            url = 'http://{0}'.format(url)
+        res = http_request(url, **request_kwargs)
+        return RestServiceResponse(res.code, res.read())
+
+
+class RestServiceResponse(object):
+
+    def __init__(self, code, content):
+        self.code = code
+        self.content = content
+
+
+def http_request(url, data=None, method='GET',
                  headers=None, timeout=None, should_fail=False):
     headers = headers or {}
     request = urllib2.Request(url, data=data, headers=headers)
@@ -1112,22 +1148,55 @@ def http_request(url, data=None, method='PUT',
         if not should_fail:
             ctx.logger.error('Failed to {0} {1} (reason: {2})'.format(
                 method, url, e.reason))
+            raise e
+
+
+def https_request(url, data=None, method='GET', headers=None, timeout=None,
+                  should_fail=False, server_crt=None, server_key=None):
+    headers = headers or {}
+    parsed_uri = urlparse(url)
+    host = parsed_uri.netloc
+    if ':' not in host:
+        host += ':443'
+    uri = parsed_uri.path
+    if parsed_uri.query:
+        uri += '?{0}'.format(parsed_uri.query)
+    ctx.logger.info('URL: {0}, URI: {1}, method {2}, headers {3} server.cert '
+                    '{4} server.key {5}'.format(url, uri, method,
+                                                headers, server_crt,
+                                                server_key))
+    con = httplib.HTTPSConnection(host=host,
+                                  cert_file=server_crt,
+                                  key_file=server_key,
+                                  timeout=timeout)
+    try:
+        con.request(method, uri, body=data, headers=headers)
+        return con.getresponse()
+    except httplib.HTTPException as e:
+        if not should_fail:
+            ctx.logger.error('Failed to {0} {1} (reason: {2})'.format(
+                    method, url, e.reason))
+            raise e
+
+
+def _get_rest_key_and_crt():
+    nginx_resources = resource_factory.get_resources_dir('nginx')
+    server_key = os.path.join(nginx_resources, 'server.key')
+    server_crt = os.path.join(nginx_resources, 'server.crt')
+    return server_crt, server_key
 
 
 def wait_for_workflow(
         deployment_id,
         workflow_id,
-        url_prefix='http://localhost/api/{0}'.format(REST_VERSION)):
-    headers = create_maintenance_headers()
+        url_prefix='localhost/api/{0}'.format(REST_VERSION)):
     params = urllib.urlencode(dict(deployment_id=deployment_id))
     endpoint = '{0}/executions'.format(url_prefix)
     url = endpoint + '?' + params
-    res = http_request(
-        url,
-        method='GET',
-        headers=headers)
-    res_content = res.readlines()
-    json_res = json.loads(res_content[0])
+
+    res = rest_request(url, method='GET')
+    json_res = json.loads(res.content)
+
     for execution in json_res['items']:
         if execution['workflow_id'] == workflow_id:
             execution_status = execution['status']
@@ -1139,32 +1208,31 @@ def wait_for_workflow(
     return False
 
 
-def _wait_for_execution(execution_id, headers):
+def _wait_for_execution(execution_id):
     poll_interval = 2
     while True:
-        res = _list_executions_with_retries(headers, execution_id)
-        content = json.loads(res.readlines()[0])
+        res = _list_executions_with_retries(execution_id)
+        content = json.loads(res.content)
         execution_item = content['items'][0]
         execution_status = execution_item['status']
         if execution_status == 'terminated':
-            return True
+            return
         elif execution_status == 'failed':
             ctx.abort_operation('Execution with id {0} failed'.
                                 format(execution_id))
         sleep(poll_interval)
 
 
-def _list_executions_with_retries(headers, execution_id, retries=6):
+def _list_executions_with_retries(execution_id, retries=6):
     count = 0
     err = 'Failed listing existing executions.'
-    url = 'http://localhost/api/{0}/executions?' \
-          '_include_system_workflows=true&id={1}'.format(REST_VERSION,
-                                                         execution_id)
+    url = 'localhost/api/{0}/executions?_include_system_workflows=true&id={1}'\
+          .format(REST_VERSION, execution_id)
     while count != retries:
-        res = http_request(url, method='GET', headers=headers)
+        res = rest_request(url, method='GET')
         if res.code != 200:
             err = 'Failed listing existing executions. Message: {0}' \
-                .format(res.readlines())
+                  .format(res.content)
             ctx.logger.error(err)
             sleep(2)
         else:
@@ -1172,20 +1240,10 @@ def _list_executions_with_retries(headers, execution_id, retries=6):
     ctx.abort_operation(err)
 
 
-def create_maintenance_headers(upgrade_props=True):
-    headers = {'X-BYPASS-MAINTENANCE': 'True'}
-    auth_props = get_auth_headers(upgrade_props)
-    headers.update(auth_props)
-    return headers
-
-
-def get_auth_headers(upgrade_props):
+def get_auth_headers():
     headers = {}
-    if upgrade_props:
-        config = ctx_factory.get('manager-config')
-    else:
-        config = ctx_factory.load_rollback_props('manager-config')
-    security = config['security']
+    manager_config = _get_curr_manager_config()
+    security = manager_config['security']
     security_enabled = security['enabled']
     if security_enabled:
         username = security.get('admin_username')
@@ -1196,28 +1254,36 @@ def get_auth_headers(upgrade_props):
     return headers
 
 
+def _get_curr_manager_config():
+    nginx_upgraded = os.path.isdir(
+            ctx_factory.get_rollback_properties_dir('nginx'))
+    if nginx_upgraded:
+        config = ctx_factory.get('manager-config')
+    else:
+        config = ctx_factory.load_rollback_props('manager-config') or \
+                 ctx_factory.get('manager-config')
+    return config
+
+
 def create_upgrade_snapshot():
     if _get_upgrade_data().get('snapshot_id'):
         ctx.logger.debug('Upgrade snapshot already created.')
         return
     snapshot_id = _generate_upgrade_snapshot_id()
-    url = 'http://localhost/api/{0}/snapshots/{1}'.format(REST_VERSION,
-                                                          snapshot_id)
+    url = 'localhost/api/{0}/snapshots/{1}'.format(REST_VERSION, snapshot_id)
     data = json.dumps({'include_metrics': 'true',
                        'include_credentials': 'true'})
-    headers = create_maintenance_headers(upgrade_props=False)
-    req_headers = headers.copy()
-    req_headers.update({'Content-Type': 'application/json'})
+    req_headers = {'Content-Type': 'application/json'}
     ctx.logger.info('Creating snapshot with ID {0}'
                     .format(snapshot_id))
-    res = http_request(url, data=data, method='PUT', headers=req_headers)
+    res = rest_request(url, data=data, method='PUT', headers=req_headers)
     if res.code != 201:
         err = 'Failed creating snapshot {0}. Message: {1}'\
-            .format(snapshot_id, res.readlines())
+            .format(snapshot_id, res.content)
         ctx.logger.error(err)
         ctx.abort_operation(err)
-    execution_id = json.loads(res.readlines()[0])['id']
-    _wait_for_execution(execution_id, headers)
+    execution_id = json.loads(res.content)['id']
+    _wait_for_execution(execution_id)
     ctx.logger.info('Snapshot with ID {0} created successfully'
                     .format(snapshot_id))
     ctx.logger.info('Setting snapshot info to upgrade metadata in {0}'.
@@ -1227,37 +1293,35 @@ def create_upgrade_snapshot():
 
 def restore_upgrade_snapshot():
     snapshot_id = _get_upgrade_data()['snapshot_id']
-    url = 'http://localhost/api/{0}/snapshots/{1}/restore'.format(REST_VERSION,
-                                                                  snapshot_id)
+    url = 'localhost/api/{0}/snapshots/{1}/restore'.format(REST_VERSION,
+                                                           snapshot_id)
     data = json.dumps({'recreate_deployments_envs': 'false',
                        'force': 'true'})
-    headers = create_maintenance_headers(upgrade_props=True)
-    req_headers = headers.copy()
-    req_headers.update({'Content-Type': 'application/json'})
+    req_headers = {'Content-Type': 'application/json'}
     ctx.logger.info('Restoring snapshot with ID {0}'.format(snapshot_id))
-    res = http_request(url, data=data, method='POST', headers=req_headers)
+    res = rest_request(url, data=data, method='POST', headers=req_headers)
     if res.code != 200:
         err = 'Failed restoring snapshot {0}. Message: {1}' \
-            .format(snapshot_id, res.readlines())
+            .format(snapshot_id, res.content)
         ctx.logger.error(err)
         ctx.abort_operation(err)
-    execution_id = json.loads(res.readlines()[0])['id']
-    _wait_for_execution(execution_id, headers)
+    execution_id = json.loads(res.content)['id']
+    _wait_for_execution(execution_id)
     ctx.logger.info('Snapshot with ID {0} restored successfully'
                     .format(snapshot_id))
 
 
 def _generate_upgrade_snapshot_id():
-    url = 'http://localhost/api/{0}/version'.format(REST_VERSION)
-    auth_headers = get_auth_headers(upgrade_props=False)
-    res = http_request(url, method='GET', headers=auth_headers)
+    url = 'localhost/api/{0}/version'.format(REST_VERSION)
+    auth_headers = get_auth_headers()
+    res = rest_request(url, method='GET', headers=auth_headers)
     if res.code != 200:
         err = 'Failed extracting current manager version. Message: {0}' \
-            .format(res.readlines())
+            .format(res.content)
         ctx.logger.error(err)
         ctx.abort_operation(err)
     curr_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
-    version_data = json.loads(res.read())
+    version_data = json.loads(res.content)
     snapshot_upgrade_name = 'upgrade_snapshot_{0}_build_{1}_{2}' \
         .format(version_data['version'],
                 version_data['build'],
@@ -1284,11 +1348,14 @@ def _get_upgrade_data():
 
 
 @retry((IOError, ValueError))
-def check_http_response(url, predicate=None, **request_kwargs):
-    req = urllib2.Request(url, **request_kwargs)
+def check_http_response(url, service_name, predicate=None,
+                        **request_kwargs):
     try:
-        response = urllib2.urlopen(req)
-    except urllib2.HTTPError as e:
+        if service_name in ('nginx', 'restservice'):
+            response = rest_request(url, **request_kwargs)
+        else:
+            response = http_request(url, **request_kwargs)
+    except (urllib2.HTTPError, httplib.HTTPException) as e:
         # HTTPError can also be used as a non-200 response. Pass this
         # through to the predicate function, so it can decide if a
         # non-200 response is fine or not.
@@ -1301,7 +1368,7 @@ def check_http_response(url, predicate=None, **request_kwargs):
 
 def verify_service_http(service_name, url, *args, **kwargs):
     try:
-        return check_http_response(url, *args, **kwargs)
+        return check_http_response(url, service_name, *args, **kwargs)
     except (IOError, ValueError) as e:
         ctx.abort_operation('{0} error: {1}: {2}'.format(service_name, url, e))
 
@@ -1372,19 +1439,19 @@ def verify_immutable_properties(service_name, properties):
 
 
 def _is_version_greater_than_curr(new_version):
-    version_url = 'http://localhost/api/{0}/version'.format(REST_VERSION)
-    version_res = http_request(version_url, method='GET')
+    version_url = 'localhost/api/{0}/version'.format(REST_VERSION)
+    version_res = rest_request(version_url, method='GET')
     if version_res.code != 200:
         ctx.abort_operation('Failed retrieving manager version')
-    curr_version = json.loads(version_res.readlines()[0])['version']
+    curr_version = json.loads(version_res.content)['version']
     ctx.logger.info('Current manager version is {0}.'.format(curr_version))
     return LooseVersion(new_version) > LooseVersion(curr_version)
 
 
-# rollback resources will be removed only if the last upgrade passed
-# successfully and the 'upgrade to' version is greater than the current version
-# # This function MUST be invoked by the first node and before upgrade snapshot
-# is created.
+# rollback resources will be removed upon upgrade execution only if the last
+# upgrade passed successfully and the 'upgrade to' version is greater than
+#  the current version. This function MUST be invoked by the first node and
+#  before upgrade snapshot is created.
 def clean_rollback_resources_if_necessary():
     if not is_upgrade:
         return

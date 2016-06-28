@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import json
+import httplib
 import urllib2
-import urlparse
 from os.path import join, dirname
 
 from cloudify import ctx
@@ -23,22 +23,10 @@ def verify_restservice(url):
     that also requires the storage backend to be up, so if it works, there's
     a good chance everything is configured correctly.
     """
-    blueprints_url = urlparse.urljoin(url, 'api/v2.1/blueprints')
-
-    headers = utils.get_auth_headers(True)
-
-    if utils.is_upgrade or utils.is_rollback:
-        # if we're doing an upgrade, we're in maintenance mode - this request
-        # is safe to perform in maintenance mode, so let's bypass the check
-        headers = utils.create_maintenance_headers()
-    else:
-        headers = utils.get_auth_headers(True)
-
-    req = urllib2.Request(blueprints_url, headers=headers)
-
+    blueprints_url = '{0}/{1}'.format(url, 'api/v2.1/blueprints')
     try:
-        response = urllib2.urlopen(req)
-    except urllib2.URLError as e:
+        response = utils.rest_request(blueprints_url)
+    except (urllib2.URLError, httplib.HTTPException) as e:
         ctx.abort_operation('REST service returned an invalid response: {0}'
                             .format(e))
     if response.code == 401:
@@ -50,7 +38,7 @@ def verify_restservice(url):
                             .format(response.code))
 
     try:
-        json.load(response)
+        json.loads(response.content)
     except ValueError as e:
         ctx.abort_operation('REST service returned malformed JSON: {0}'
                             .format(e))
@@ -61,6 +49,6 @@ utils.start_service(REST_SERVICE_NAME)
 
 utils.systemd.verify_alive(REST_SERVICE_NAME)
 
-restservice_url = 'http://{0}:{1}'.format('127.0.0.1', 8100)
+restservice_url = '127.0.0.1'
 utils.verify_service_http(REST_SERVICE_NAME, restservice_url)
 verify_restservice(restservice_url)
