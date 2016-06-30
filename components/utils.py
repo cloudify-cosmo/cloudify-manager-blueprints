@@ -382,7 +382,10 @@ def yum_install(source, service_name):
             return
 
     ctx.logger.info('yum installing {0}...'.format(source_path))
-    sudo(['yum', 'install', '-y', source_path])
+    proc = sudo(['yum', 'install', '-y', source_path])
+    ctx.logger.info('### YUM OUTPUT START ###')
+    ctx.logger.info(proc.aggr_stdout)
+    ctx.logger.info('### YUM OUTPUT END ###')
 
 
 class RpmPackageHandler(object):
@@ -1300,10 +1303,7 @@ def check_http_response(url, predicate=None, **request_kwargs):
 
 
 def verify_service_http(service_name, url, *args, **kwargs):
-    try:
-        return check_http_response(url, *args, **kwargs)
-    except (IOError, ValueError) as e:
-        ctx.abort_operation('{0} error: {1}: {2}'.format(service_name, url, e))
+    return check_http_response(url, *args, **kwargs)
 
 
 def validate_upgrade_directories(service_name):
