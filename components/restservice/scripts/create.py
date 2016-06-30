@@ -172,6 +172,15 @@ def install_restservice():
 
     # copy_security_config_files()
 
+    ctx.logger.info('Deploying Gunicorn Configuration file...')
+    gunicorn_config_path = os.path.join(REST_SERVICE_HOME, 'gunicorn.conf')
+    ctx.instance.runtime_properties['gunicorn_config_path'] = \
+        gunicorn_config_path
+    utils.deploy_blueprint_resource(
+            os.path.join(CONFIG_PATH, 'gunicorn.conf'),
+            gunicorn_config_path,
+            REST_SERVICE_NAME)
+
     ctx.logger.info('Deploying REST Service Configuration file...')
     # rest ports are set as runtime properties in nginx/scripts/create.py
     # cloudify-rest.conf currently contains localhost for fileserver endpoint.

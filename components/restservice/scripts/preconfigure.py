@@ -26,7 +26,7 @@ def preconfigure_restservice():
         f.write(sec_config)
     utils.move(path, os.path.join(rest_service_home, 'rest-security.conf'))
 
-    utils.systemd.configure(REST_SERVICE_NAME, render=False)
+    utils.systemd.configure(REST_SERVICE_NAME)
 
 
 preconfigure_restservice()
