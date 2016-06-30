@@ -523,7 +523,7 @@ class SystemD(object):
         if self.is_alive(service_name, append_prefix):
             ctx.logger.info('{0} is running'.format(service_name))
         else:
-            ctx.abort_operation('{0} is not running'.format(service_name))
+            raise RuntimeError('{0} is not running'.format(service_name))
 
     @staticmethod
     def _get_full_service_name(service_name, append_prefix):
