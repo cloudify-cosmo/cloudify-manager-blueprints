@@ -97,7 +97,7 @@ agents_user: ''
 #############################
 # Manager Resources Package
 #############################
-#manager_resources_package: https://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.5.0/m1-RELEASE/cloudify-manager-resources_3.5.0-m1-b460.tar.gz
+#manager_resources_package: http://repository.cloudifysource.org/org/cloudify3/3.5.0/m1-RELEASE/cloudify-manager-resources_3.5.0-m1-b460.tar.gz
 
 # Providing a checksum file url will allow validating the resources package.
 # By default, no validation is performed. Providing a checksum file will use
