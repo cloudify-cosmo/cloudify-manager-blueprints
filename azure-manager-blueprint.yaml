@@ -116,6 +116,12 @@ inputs:
     type: string
     default: { get_input: vm_os_username }
 
+  ssh_port:
+    type: string
+    default: 22
+    description: >
+      Manager SSH port
+
   ssh_key_filename:
     type: string
     required: true
@@ -624,6 +630,7 @@ node_templates:
     type: cloudify.nodes.MyCloudifyManager
     properties:
       ssh_user: { get_input: ssh_user }
+      ssh_port: { get_input: ssh_port }
       ssh_key_filename: { get_input: ssh_key_filename }
       agent_local_key_path: { get_input: agent_local_key_path }
       agent_remote_key_path: { get_input: agent_remote_key_path }
@@ -680,6 +687,7 @@ node_templates:
               manager_config_path: { get_property: [SELF, cloudify, plugins, azure_config_path] }
             fabric_env: &manager_fabric_env
               user: { get_input: ssh_user }
+              port: { get_input: ssh_port }
               key_filename: { get_input: ssh_key_filename }
               host_string: { get_attribute: [manager_host, public_ip] }
               always_use_pty: true
