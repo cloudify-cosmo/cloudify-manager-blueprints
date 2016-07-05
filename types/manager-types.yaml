@@ -112,7 +112,6 @@ node_types:
             - name: token
               implementation: flask_securest.authentication_providers.token:TokenAuthenticator
               properties:
-                secret_key: my_secret
           authorization_provider:
             implementation: flask_securest.authorization_providers.role_based_authorization_provider:RoleBasedAuthorizationProvider
             properties:
@@ -150,7 +149,6 @@ node_types:
           auth_token_generator:
             implementation: flask_securest.authentication_providers.token:TokenAuthenticator
             properties:
-              secret_key: my_secret
               expires_in_seconds: 600
           #########################################################################
           # Enabling SSL limits communication with the server to SSL only.
