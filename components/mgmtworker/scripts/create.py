@@ -20,6 +20,8 @@ ctx_properties = utils.ctx_factory.create(MGMT_WORKER_SERVICE_NAME)
 def _install_optional(mgmtworker_venv):
 
     rest_props = utils.ctx_factory.get('restservice')
+    dsl_parser_source_url = \
+        rest_props['dsl_parser_module_source_url']
     rest_client_source_url = \
         rest_props['rest_client_module_source_url']
     plugins_common_source_url = \
@@ -33,6 +35,8 @@ def _install_optional(mgmtworker_venv):
 
     # this allows to upgrade modules if necessary.
     ctx.logger.info('Installing Optional Packages if supplied...')
+    if dsl_parser_source_url:
+        utils.install_python_package(dsl_parser_source_url, mgmtworker_venv)
     if rest_client_source_url:
         utils.install_python_package(rest_client_source_url, mgmtworker_venv)
     if plugins_common_source_url:
