@@ -34,6 +34,6 @@ test:
 
 deployment:
   release:
-    tag: /.*/
+    tag: /^(?!bootstrap-sanity$).*/
     commands:
       - (true)
