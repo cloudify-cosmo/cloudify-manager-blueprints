@@ -166,10 +166,10 @@ def _configure_index_rotation():
                     'logstash-YYYY.mm.dd index patterns...')
     utils.deploy_blueprint_resource(
         'components/elasticsearch/scripts/rotate_es_indices',
-        '/etc/cron.daily/rotate_es_indices', ES_SERVICE_NAME)
-    utils.chown('root', 'root', '/etc/cron.daily/rotate_es_indices')
+        '/etc/cron.hourly/rotate_es_indices', ES_SERVICE_NAME)
+    utils.chown('root', 'root', '/etc/cron.hourly/rotate_es_indices')
     # VALIDATE!
-    utils.sudo('chmod +x /etc/cron.daily/rotate_es_indices')
+    utils.sudo('chmod +x /etc/cron.hourly/rotate_es_indices')
 
 
 def _install_elasticsearch():
