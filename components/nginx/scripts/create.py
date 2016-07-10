@@ -44,7 +44,6 @@ def install_nginx():
     # TODO: can we use static (not runtime) attributes for some of these?
     # how to set them?
     ctx.instance.runtime_properties['default_rest_service_port'] = '8100'
-    ctx.instance.runtime_properties['internal_rest_service_port'] = '8101'
 
     ctx.logger.info('Installing Nginx...')
     utils.set_selinux_permissive()

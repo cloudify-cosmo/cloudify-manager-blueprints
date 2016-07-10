@@ -16,7 +16,7 @@ def install_plugins():
     ctx.logger.info('Installing plugins')
 
     # Getting all the required plugins
-    plugins = ctx.node.properties.get('plugins', {})
+    plugins = ctx.source.node.properties.get('plugins', {})
 
     # Shame to do all the work for nothing
     if plugins:

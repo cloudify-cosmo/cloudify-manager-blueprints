@@ -1,17 +1,47 @@
-# REST and UI server.
+# REST and UI internal server.
 server {
-  # server listening
-  listen              *:80;
+  # server listening for the internal requests.
+  # listens on both 443 and 80, but http will be redirected to https (below)
+  listen              80;
   listen              443 ssl;
-  server_name         _;
+  server_name         {{ ctx.target.instance.runtime_properties.internal_rest_host }};
 
   # force http redirect to https
   if ($scheme = http) {
-      return 301 https://$host$request_uri;
+      return 301 https://$server_name$request_uri;
   }
 
-  ssl_certificate     /root/cloudify/server.crt;
-  ssl_certificate_key /root/cloudify/server.key;
+  ssl_certificate     /root/cloudify/ssl/internal_rest_host.crt;
+  ssl_certificate_key /root/cloudify/ssl/internal_rest_host.key;
+
+  include "/etc/nginx/conf.d/logs-conf.cloudify";
+
+  # serve the UI
+  include "/etc/nginx/conf.d/ui-locations.cloudify";
+
+  # Serves the Rest Service (backed by the cloudify-rest upstream).
+  include "/etc/nginx/conf.d/rest-location.cloudify";
+
+  # Serves the File Server (backed by the cloudify-resources upstream).
+  include "/etc/nginx/conf.d/fileserver-location.cloudify";
+}
+
+
+# REST and UI external server.
+server {
+  # server listening for the external requests.
+  # listens on both 443 and 80, but http will be redirected to https (below)
+  listen              80;
+  listen              443 ssl;
+  server_name         {{ ctx.target.instance.runtime_properties.external_rest_host }};
+
+  # force http redirect to https
+  if ($scheme = http) {
+      return 301 https://$server_name$request_uri;
+  }
+
+  ssl_certificate     /root/cloudify/ssl/external_rest_host.crt;
+  ssl_certificate_key /root/cloudify/ssl/external_rest_host.key;
 
   include "/etc/nginx/conf.d/logs-conf.cloudify";
 
