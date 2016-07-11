@@ -434,8 +434,6 @@ node_templates:
           broker_pass: { get_input: rabbitmq_password }
           broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
           broker_ssl_cert: { get_input: rabbitmq_cert_public }
-          rest_username: { get_input: agent_rest_username }
-          rest_password: { get_input: agent_rest_password }
           verify_rest_certificate: { get_input: agent_verify_rest_certificate }
 
         workflows:

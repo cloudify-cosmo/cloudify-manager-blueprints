@@ -153,7 +153,16 @@ node_types:
             implementation: flask_securest.authentication_providers.token:TokenAuthenticator
             properties:
               secret_key: my_secret
-              expires_in_seconds: 600
+              expires_in_seconds: 86400
+          #########################################################################
+          # Agents use token authentication to communicate with the REST Service,
+          # but if token authentication is disabled, these credentials will be
+          # used instead.
+          # These credentials are also used by the scripts during bootstrap,
+          # upgrade, and rollback.
+          #########################################################################
+          rest_username: { get_input: agent_rest_username }
+          rest_password: { get_input: agent_rest_password }
           #########################################################################
           # Enabling SSL limits communication with the server to SSL only.
           # If enabled, the certificate and private key files must be found in

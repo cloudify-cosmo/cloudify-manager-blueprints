@@ -52,17 +52,6 @@ def _configure_security_properties():
     ctx.instance.runtime_properties['security_enabled'] = security_enabled
     ctx.instance.runtime_properties['ssl_enabled'] = ssl_enabled
 
-    if security_enabled:
-        # agent access-control settings
-        agents_rest_username = agent_config['rest_username']
-        agents_rest_password = agent_config['rest_password']
-        ctx.instance.runtime_properties['agents_rest_username'] = \
-            agents_rest_username
-        ctx.instance.runtime_properties['agents_rest_password'] = \
-            agents_rest_password
-        ctx.logger.info('agents_rest_username: {0}'.
-                        format(agents_rest_username))
-
     if security_enabled and ssl_enabled:
         # manager SSL settings
         ctx.logger.info('SSL is enabled, setting rest port to 443 and '
