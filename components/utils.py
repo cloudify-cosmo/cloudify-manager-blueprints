@@ -1299,10 +1299,10 @@ def get_auth_headers(upgrade_props):
         manager_config = ctx_factory.load_rollback_props('manager-config')
 
     security_enabled = manager_config['security']['enabled']
-    agent_config = manager_config['cloudify']['cloudify_agent']
     if security_enabled:
-        username = agent_config.get('rest_username')
-        password = agent_config.get('rest_password')
+        credentials = manager_config['security']['agent_rest_credentials']
+        username = credentials.get('username')
+        password = credentials.get('password')
         headers.update({'Authorization':
                         'Basic ' + base64.b64encode('{0}:{1}'.format(
                             username, password))})
