@@ -1300,9 +1300,8 @@ def get_auth_headers(upgrade_props):
 
     security_enabled = manager_config['security']['enabled']
     if security_enabled:
-        credentials = manager_config['security']['agent_rest_credentials']
-        username = credentials.get('username')
-        password = credentials.get('password')
+        username = manager_config['security'].get('rest_username')
+        password = manager_config['security'].get('rest_password')
         headers.update({'Authorization':
                         'Basic ' + base64.b64encode('{0}:{1}'.format(
                             username, password))})
