@@ -54,14 +54,15 @@ def _configure_security_properties():
 
     if security_enabled:
         # agent access-control settings
-        agents_rest_username = agent_config['rest_username']
-        agents_rest_password = agent_config['rest_password']
-        ctx.instance.runtime_properties['agents_rest_username'] = \
-            agents_rest_username
-        ctx.instance.runtime_properties['agents_rest_password'] = \
-            agents_rest_password
-        ctx.logger.info('agents_rest_username: {0}'.
-                        format(agents_rest_username))
+        agents_rest_username = agent_config.get('rest_username')
+        agents_rest_password = agent_config.get('rest_password')
+        if agents_rest_username and agents_rest_password:
+            ctx.instance.runtime_properties['agents_rest_username'] = \
+                agents_rest_username
+            ctx.instance.runtime_properties['agents_rest_password'] = \
+                agents_rest_password
+            ctx.logger.info('agents_rest_username: {0}'.
+                            format(agents_rest_username))
 
     if security_enabled and ssl_enabled:
         # manager SSL settings
