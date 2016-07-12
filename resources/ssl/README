@@ -1,0 +1,5 @@
+Files that should be placed in this directory for an SSL secured manager:
+server.key - The private key of the server.
+server.crt - The public certificate of the server.
+
+For more details, see: http://docs.getcloudify.org/3.4.0/manager/security/#ssl
