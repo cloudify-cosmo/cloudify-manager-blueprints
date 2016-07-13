@@ -433,3 +433,9 @@ inputs:
   sanity_app_source_url:
     type: string
     default: cloudify-hello-world-example-3.5m1.tar.gz
+
+  # Some plugins installed from sources require compilation - installs a
+  # compiler and the python headers to allow that.
+  install_python_compilers:
+    type: boolean
+    default: false

@@ -210,16 +210,6 @@ inputs:
       - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.4/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.4/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.5m1/types.yaml', 'destination_path': '/spec/cloudify/3.5m1/types.yaml'}
 
-  #############################
-  # Dev Inputs
-  #############################
-
-  # Some plugins installed from sources require compilation - installs a
-  # compiler and the python headers to allow that.
-  install_python_compilers:
-    type: boolean
-    default: false
-
 ######################################################################
 # This is a vcloud blueprint specific node_type to allow us to define
 # The public_ip of the machine is an accessible property of the host.
