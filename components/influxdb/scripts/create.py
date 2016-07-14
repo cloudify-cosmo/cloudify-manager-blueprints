@@ -28,31 +28,51 @@ def _configure_influxdb(host, port):
     # curl -S -s "http://localhost:8086/db?u=root&p=root" '-d "{\"name\": \"cloudify\"}"  # NOQA
     import urllib
     import urllib2
+    import ast
 
-    endpoint = 'http://{0}:{1}/db'.format(host, port)
+    endpoint_for_list = 'http://{0}:{1}/db'.format(host, port)
+    endpoint_for_creation = ('http://{0}:{1}/cluster/database_configs/'
+                             '{2}'.format(host, port, db_name))
     params = urllib.urlencode(dict(u=db_user, p=db_pass))
-    data = {'name': db_name}
-    url = endpoint + '?' + params
+    url_for_list = endpoint_for_list + '?' + params
+    url_for_creation = endpoint_for_creation + '?' + params
 
     # check if db already exists
-    db_list = eval(urllib2.urlopen(urllib2.Request(url)).read())
+    db_list = eval(urllib2.urlopen(urllib2.Request(url_for_list)).read())
     try:
         assert not any(d.get('name') == db_name for d in db_list)
     except AssertionError:
         ctx.logger.info('Database {0} already exists!'.format(db_name))
         return
 
-    ctx.logger.info('Request is: {0} \'{1}\''.format(url, data))
-
     try:
-        urllib2.urlopen(urllib2.Request(url, json.dumps(data)))
+        utils.deploy_blueprint_resource(
+            '{0}/retention.json'.format(CONFIG_PATH),
+            '/tmp/retention.json', INFLUX_SERVICE_NAME)
+        with open('/tmp/retention.json') as policy_file:
+            retention_policy = policy_file.read()
+        ctx.logger.debug(
+            'Using retention policy: \n{0}'.format(retention_policy))
+        data = json.dumps(ast.literal_eval(retention_policy))
+        ctx.logger.debug('Using retention policy: \n{0}'.format(data))
+        content_length = len(data)
+        request = urllib2.Request(url_for_creation, data, {
+            'Content-Type': 'application/json',
+            'Content-Length': content_length})
+        ctx.logger.debug('Request is: {0}'.format(request))
+        request_reader = urllib2.urlopen(request)
+        response = request_reader.read()
+        ctx.logger.debug('Response: {0}'.format(response))
+        request_reader.close()
+        utils.remove('/tmp/retention.json')
+
     except Exception as ex:
         msg = 'Failed to create: {0} ({1}).'.format(db_name, ex)
         ctx.abort_operation(msg)
 
     # verify db created
     ctx.logger.info('Verifying database create successfully...')
-    db_list = eval(urllib2.urlopen(urllib2.Request(url)).read())
+    db_list = eval(urllib2.urlopen(urllib2.Request(url_for_list)).read())
     try:
         assert any(d.get('name') == db_name for d in db_list)
     except AssertionError:
