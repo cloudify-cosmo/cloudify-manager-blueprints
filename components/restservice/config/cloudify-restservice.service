@@ -4,7 +4,6 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-PIDFile=/var/run/gunicorn.pid
 TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-restservice
