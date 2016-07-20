@@ -314,7 +314,7 @@ def main():
     es_endpoint_ip = ctx_properties['es_endpoint_ip']
     es_endpoint_port = ctx_properties['es_endpoint_port']
 
-    if utils.is_upgrade:
+    if utils.is_upgrade or utils.is_rollback:
         dump_upgrade_data()
 
     if not es_endpoint_ip:

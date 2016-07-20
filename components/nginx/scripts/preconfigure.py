@@ -13,20 +13,24 @@ CONFIG_PATH = 'components/nginx/config'
 EXTERNAL_REST_CERT_PATH = '/root/cloudify/ssl/external_rest_host.crt'
 
 NGINX_SERVICE_NAME = 'nginx'
-ctx_properties = {'service_name': NGINX_SERVICE_NAME}
 
 
 def preconfigure_nginx():
 
     target_runtime_props = ctx.target.instance.runtime_properties
+    source_runtime_props = ctx.source.instance.runtime_properties
+
     # this is used by nginx's default.conf to select the relevant configuration
     rest_protocol = target_runtime_props['rest_protocol']
-
+    rest_host = target_runtime_props['internal_rest_host']
     # TODO: NEED TO IMPLEMENT THIS IN CTX UTILS
-    ctx.source.instance.runtime_properties['rest_protocol'] = rest_protocol
+    source_runtime_props['rest_protocol'] = rest_protocol
+    ctx.logger.info('setting rest host to {}'.format(rest_host))
+    source_runtime_props['rest_host'] = rest_host
     if rest_protocol == 'https':
+
         utils.deploy_rest_certificates(
-            internal_rest_host=target_runtime_props['internal_rest_host'],
+            internal_rest_host=rest_host,
             external_rest_host=target_runtime_props['external_rest_host'])
 
         # get rest public certificate for output later

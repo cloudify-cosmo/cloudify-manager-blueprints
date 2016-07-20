@@ -10,5 +10,7 @@ def preconfigure_restservice():
     ctx.logger.info('security_config is: {0}'.format(security_config))
     ctx.source.instance.runtime_properties['security_configuration'] = \
         security_config
+    ctx.source.instance.runtime_properties['rest_host'] = \
+        ctx.target.instance.runtime_properties['internal_rest_host']
 
 preconfigure_restservice()

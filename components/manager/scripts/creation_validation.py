@@ -10,7 +10,6 @@ ctx.download_resource(
 import utils  # NOQA
 
 IMMUTABLE_PROPERTIES = [
-    'security',
     'ssh_user'
 ]
 

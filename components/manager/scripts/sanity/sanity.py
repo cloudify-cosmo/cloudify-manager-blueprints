@@ -44,7 +44,7 @@ def _upload_app_blueprint(app_tar):
         app_data = f.read()
     length = os.path.getsize(app_tar)
 
-    headers = utils.create_maintenance_headers()
+    headers = {}
     headers['Content-Length'] = length
     headers['Content-Type'] = 'application/octet-stream'
     params = urllib.urlencode(
@@ -53,9 +53,10 @@ def _upload_app_blueprint(app_tar):
 
     endpoint = '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID)
     url = endpoint + '?' + params
-    utils.http_request(url,
+    utils.rest_request(url,
                        data=app_data,
-                       headers=headers)
+                       headers=headers,
+                       method='PUT')
 
 
 def _deploy_app():
@@ -69,20 +70,20 @@ def _deploy_app():
         'blueprint_id': BLUEPRINT_ID,
         'inputs': dep_inputs
     }
-    headers = utils.create_maintenance_headers()
-    headers.update({'content-type': 'application/json'})
+    headers = {'content-type': 'application/json'}
 
-    utils.http_request(
+    utils.rest_request(
             '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
             data=json.dumps(data),
-            headers=headers)
+            headers=headers,
+            method='PUT')
 
     # Waiting for create deployment env to end
     utils.repetitive(
         utils.wait_for_workflow,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='create_deployment_environment',
-        url_prefix=_get_url_prefix(),
+        rest_host=manager_ip,
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to be created'.format(DEPLOYMENT_ID))
 
@@ -92,10 +93,9 @@ def _install_sanity_app():
         'deployment_id': DEPLOYMENT_ID,
         'workflow_id': 'install'
     }
-    headers = utils.create_maintenance_headers()
-    headers.update({'content-type': 'application/json'})
+    headers = {'content-type': 'application/json'}
 
-    resp = utils.http_request(
+    resp = utils.rest_request(
             '{0}/executions'.format(_get_url_prefix()),
             method='POST',
             data=json.dumps(data),
@@ -108,31 +108,30 @@ def _install_sanity_app():
         interval=30,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='install',
-        url_prefix=_get_url_prefix(),
+        rest_host=manager_ip,
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to install'.format(DEPLOYMENT_ID))
 
-    resp_content = resp.readlines()
-    json_resp = json.loads(resp_content[0])
+    json_resp = json.loads(resp.content)
     return json_resp['id']
 
 
 def _assert_logs_and_events(execution_id):
-    headers = utils.create_maintenance_headers()
     params = urllib.urlencode(
             dict(execution_id=execution_id,
                  type='cloudify_log'))
 
     endpoint = '{0}/events'.format(_get_url_prefix())
     url = endpoint + '?' + params
-    resp = utils.http_request(url, method='GET', headers=headers, timeout=30)
+    resp = utils.rest_request(url,
+                              method='GET',
+                              timeout=30)
     if not resp:
         ctx.abort_operation("Can't connect to elasticsearch")
     if resp.code != 200:
         ctx.abort_operation('Failed to retrieve logs/events')
 
-    resp_content = resp.readlines()
-    json_resp = json.loads(resp_content[0])
+    json_resp = json.loads(resp.content)
 
     if 'items' not in json_resp or not json_resp['items']:
         ctx.abort_operation('No logs/events received')
@@ -165,10 +164,9 @@ def _uninstall_sanity_app():
         'deployment_id': DEPLOYMENT_ID,
         'workflow_id': 'uninstall'
     }
-    headers = utils.create_maintenance_headers()
-    headers.update({'content-type': 'application/json'})
+    headers = {'content-type': 'application/json'}
 
-    utils.http_request(
+    utils.rest_request(
         '{0}/executions'.format(_get_url_prefix()),
         method='POST',
         data=json.dumps(data),
@@ -181,7 +179,7 @@ def _uninstall_sanity_app():
         interval=30,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='uninstall',
-        url_prefix=_get_url_prefix(),
+        rest_host=manager_ip,
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to uninstall.'.format(DEPLOYMENT_ID))
 
@@ -189,12 +187,10 @@ def _uninstall_sanity_app():
 def _delete_sanity_deployment():
     if not _is_sanity_dep_exist():
         return
-    headers = utils.create_maintenance_headers()
 
-    resp = utils.http_request(
+    resp = utils.rest_request(
         '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
-        method='DELETE',
-        headers=headers)
+        method='DELETE')
 
     if resp.code != 200:
         ctx.abort_operation('Failed deleting '
@@ -205,11 +201,9 @@ def _delete_sanity_deployment():
 def _delete_sanity_blueprint():
     if not _is_sanity_blueprint_exist():
         return
-    headers = utils.create_maintenance_headers()
-    resp = utils.http_request(
+    resp = utils.rest_request(
         '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID),
-        method='DELETE',
-        headers=headers)
+        method='DELETE')
 
     if resp.code != 200:
         ctx.abort_operation('Failed deleting '
@@ -223,11 +217,9 @@ def _delete_key_file():
 
 
 def _is_sanity_dep_exist(should_fail=False):
-    headers = utils.create_maintenance_headers()
-    res = utils.http_request(
+    res = utils.rest_request(
         '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
         method='GET',
-        headers=headers,
         should_fail=should_fail)
     if not res:
         return False
@@ -235,11 +227,9 @@ def _is_sanity_dep_exist(should_fail=False):
 
 
 def _is_sanity_blueprint_exist(should_fail=False):
-    headers = utils.create_maintenance_headers()
-    res = utils.http_request(
+    res = utils.rest_request(
             '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID),
             method='GET',
-            headers=headers,
             should_fail=should_fail)
     if not res:
         return False
@@ -276,7 +266,15 @@ if os.environ.get('run_sanity') == 'true' or \
     perform_sanity()
 
 if utils.is_upgrade or utils.is_rollback:
-    utils.restore_upgrade_snapshot()
+    # Restore the snapshot at the end of the workflow.
+    utils.restore_upgrade_snapshot(manager_ip)
 
 if utils.is_upgrade:
+    # To keep the upgrade workflow idempotent, this flag is used to figure
+    # out if the next upgrade should dispose of old rollback data.
     utils.set_upgrade_success_in_upgrade_meta()
+
+if utils.is_rollback:
+    # remove data created by the upgrade process.
+    utils.remove(utils.UPGRADE_METADATA_FILE)
+    utils.remove(utils.ES_UPGRADE_DUMP_PATH)
