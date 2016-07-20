@@ -1216,7 +1216,7 @@ def is_file(path):
     try:
         sudo('cat {0}'.format(path))
         return True
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         return False
 
 

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from os.path import join, dirname
-
 from cloudify import ctx
 
 
