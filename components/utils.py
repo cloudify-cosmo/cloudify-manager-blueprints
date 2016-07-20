@@ -1100,7 +1100,7 @@ class BlueprintResourceFactory(object):
 
     @staticmethod
     def _download_source_resource(source, local_resource_path):
-        is_url = source.startswith(('http', 'https', 'ftp'))
+        is_url = source.startswith(('http', 'https', 'ftp', 'file'))
         filename = get_file_name_from_url(source) if is_url else source
         local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
         is_manager_package = filename.startswith('cloudify-manager-resources')
