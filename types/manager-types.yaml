@@ -25,8 +25,6 @@ node_types:
         default: { get_input: minimum_required_available_disk_space_in_gb }
       allowed_heap_size_gap_in_mb:
         default: { get_input: allowed_heap_size_gap_in_mb }
-      manager_version:
-        default: 3.4.0
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -67,6 +65,8 @@ node_types:
         default: /root/.ssh/agent_key.pem
       public_ip:
         default: ''
+      manager_version:
+        default: 3.4.1
       cloudify:
         description: >
           Configuration for Cloudify Manager
@@ -990,7 +990,7 @@ node_types:
             manager_user:
               default: { get_input: ssh_user }
             manager_ip:
-              default: { get_attribute: [manager_host, public_ip] }
+              default: { get_attribute: [manager_configuration, internal_rest_host] }
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 

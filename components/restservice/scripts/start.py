@@ -49,6 +49,6 @@ utils.start_service(REST_SERVICE_NAME)
 
 utils.systemd.verify_alive(REST_SERVICE_NAME)
 
-restservice_url = '127.0.0.1'
+restservice_url = ctx.instance.runtime_properties['rest_host']
 utils.verify_service_http(REST_SERVICE_NAME, restservice_url)
 verify_restservice(restservice_url)

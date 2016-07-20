@@ -240,6 +240,16 @@ def deploy_ssl_cert_and_key(cert_filename, key_filename, cn):
                             'key "{1}" for CN "{2}"...'.
                             format(cert_filename, key_filename, cn))
             _generate_ssl_cert(cert_target_path, key_target_path, cn)
+            deploy_blueprint_resource('',
+                                      cert_target_path,
+                                      NGINX_SERVICE_NAME,
+                                      user_resource=True,
+                                      load_ctx=False)
+            deploy_blueprint_resource('',
+                                      key_target_path,
+                                      NGINX_SERVICE_NAME,
+                                      user_resource=True,
+                                      load_ctx=False)
         else:
             raise
 
@@ -1045,7 +1055,7 @@ class BlueprintResourceFactory(object):
     @staticmethod
     def _is_download_required(local_resource_path, is_render):
         result = False
-        if not os.path.isfile(local_resource_path):
+        if not os.path.isfile(local_resource_path) and not is_rollback:
             result = True
         # rendered resources should be re-rendered if in upgrade.
         if is_render and is_upgrade:
@@ -1059,15 +1069,13 @@ class BlueprintResourceFactory(object):
     def _download_user_resource(self, source, dest, resource_name,
                                 service_name, render=True, load_ctx=True):
         if is_upgrade:
-            install_props = self._get_rollback_resources_json(service_name)
-            existing_resource_path = install_props.get(resource_name, '')
-            if os.path.isfile(existing_resource_path):
+            rollback_props = self._get_rollback_resources_json(service_name)
+            existing_resource_path = rollback_props.get(resource_name, '')
+            if is_file(existing_resource_path):
                 ctx.logger.info('Using existing resource for {0}'
                                 .format(resource_name))
                 # update the resource file we hold that might have changed
-                install_resource = self._get_local_file_path(
-                    service_name, resource_name)
-                copy(existing_resource_path, install_resource)
+                copy(existing_resource_path, dest)
             else:
                 ctx.logger.info('User resource {0} not found on {1}'
                                 .format(resource_name, dest))
@@ -1204,6 +1212,14 @@ resource_factory = BlueprintResourceFactory()
 ctx_factory = CtxPropertyFactory()
 
 
+def is_file(path):
+    try:
+        sudo('cat {0}'.format(path))
+        return True
+    except subprocess.CalledProcessError as e:
+        return False
+
+
 def start_service(service_name, append_prefix=True, ignore_restart_fail=False):
     if is_upgrade or is_rollback:
         systemd.restart(service_name,
@@ -1215,7 +1231,7 @@ def start_service(service_name, append_prefix=True, ignore_restart_fail=False):
 
 def rest_request(url, **request_kwargs):
     headers = request_kwargs.get('headers', {})
-    auth_headers = get_auth_headers()
+    auth_headers = _get_auth_headers()
     headers.update(auth_headers)
     if is_upgrade or is_rollback:
         headers.update({'X-BYPASS-MAINTENANCE': 'True'})
@@ -1274,9 +1290,9 @@ def https_request(url, data=None, method='GET', headers=None, timeout=None,
     if parsed_uri.query:
         uri += '?{0}'.format(parsed_uri.query)
     ctx.logger.info('URL: {0}, URI: {1}, method {2}, headers {3} server.cert '
-                    '{4} server.key {5}'.format(url, uri, method,
-                                                headers, server_crt,
-                                                server_key))
+                    '{4} server.key {5}, host {6}'.format(url, uri, method,
+                                                          headers, server_crt,
+                                                          server_key, host))
     con = httplib.HTTPSConnection(host=host,
                                   cert_file=server_crt,
                                   key_file=server_key,
@@ -1298,10 +1314,10 @@ def _get_rest_key_and_crt():
     return server_crt, server_key
 
 
-def wait_for_workflow(
-        deployment_id,
-        workflow_id,
-        url_prefix='localhost/api/{0}'.format(REST_VERSION)):
+def wait_for_workflow(rest_host,
+                      deployment_id,
+                      workflow_id):
+    url_prefix = '{0}/api/{1}'.format(rest_host, REST_VERSION)
     params = urllib.urlencode(dict(deployment_id=deployment_id))
     endpoint = '{0}/executions'.format(url_prefix)
     url = endpoint + '?' + params
@@ -1320,10 +1336,10 @@ def wait_for_workflow(
     return False
 
 
-def _wait_for_execution(execution_id):
+def _wait_for_execution(rest_host, execution_id):
     poll_interval = 2
     while True:
-        res = _list_executions_with_retries(execution_id)
+        res = _list_executions_with_retries(rest_host, execution_id)
         content = json.loads(res.content)
         execution_item = content['items'][0]
         execution_status = execution_item['status']
@@ -1335,11 +1351,11 @@ def _wait_for_execution(execution_id):
         sleep(poll_interval)
 
 
-def _list_executions_with_retries(execution_id, retries=6):
+def _list_executions_with_retries(rest_host, execution_id, retries=6):
     count = 0
     err = 'Failed listing existing executions.'
-    url = 'localhost/api/{0}/executions?_include_system_workflows=true&id={1}'\
-          .format(REST_VERSION, execution_id)
+    url = '{0}/api/{1}/executions?_include_system_workflows=true&id={2}'\
+          .format(rest_host, REST_VERSION, execution_id)
     while count != retries:
         res = rest_request(url, method='GET')
         if res.code != 200:
@@ -1352,14 +1368,17 @@ def _list_executions_with_retries(execution_id, retries=6):
     ctx.abort_operation(err)
 
 
-def get_auth_headers():
+def _get_auth_headers():
     headers = {}
     manager_config = _get_curr_manager_config()
     security = manager_config['security']
     security_enabled = security['enabled']
     if security_enabled:
-        username = security.get('rest_username')
-        password = security.get('rest_password')
+        # property names changed between 3.4 ==> 3.4.1
+        username = security.get('rest_username',
+                                security.get('admin_username'))
+        password = security.get('rest_password',
+                                security.get('admin_password'))
         headers.update({'Authorization':
                         'Basic ' + base64.b64encode('{0}:{1}'.format(
                             username, password))})
@@ -1377,12 +1396,13 @@ def _get_curr_manager_config():
     return config
 
 
-def create_upgrade_snapshot():
+def create_upgrade_snapshot(rest_host):
     if _get_upgrade_data().get('snapshot_id'):
         ctx.logger.debug('Upgrade snapshot already created.')
         return
-    snapshot_id = _generate_upgrade_snapshot_id()
-    url = 'localhost/api/{0}/snapshots/{1}'.format(REST_VERSION, snapshot_id)
+    snapshot_id = _generate_upgrade_snapshot_id(rest_host)
+    url = '{0}/api/{1}/snapshots/{2}'\
+          .format(rest_host, REST_VERSION, snapshot_id)
     data = json.dumps({'include_metrics': 'true',
                        'include_credentials': 'true'})
     req_headers = {'Content-Type': 'application/json'}
@@ -1395,7 +1415,7 @@ def create_upgrade_snapshot():
         ctx.logger.error(err)
         ctx.abort_operation(err)
     execution_id = json.loads(res.content)['id']
-    _wait_for_execution(execution_id)
+    _wait_for_execution(rest_host, execution_id)
     ctx.logger.info('Snapshot with ID {0} created successfully'
                     .format(snapshot_id))
     ctx.logger.info('Setting snapshot info to upgrade metadata in {0}'.
@@ -1403,10 +1423,11 @@ def create_upgrade_snapshot():
     _set_upgrade_data(snapshot_id=snapshot_id)
 
 
-def restore_upgrade_snapshot():
+def restore_upgrade_snapshot(rest_host):
     snapshot_id = _get_upgrade_data()['snapshot_id']
-    url = 'localhost/api/{0}/snapshots/{1}/restore'.format(REST_VERSION,
-                                                           snapshot_id)
+    url = '{0}/api/{1}/snapshots/{2}/restore'.format(rest_host,
+                                                     REST_VERSION,
+                                                     snapshot_id)
     data = json.dumps({'recreate_deployments_envs': 'false',
                        'force': 'true'})
     req_headers = {'Content-Type': 'application/json'}
@@ -1418,15 +1439,14 @@ def restore_upgrade_snapshot():
         ctx.logger.error(err)
         ctx.abort_operation(err)
     execution_id = json.loads(res.content)['id']
-    _wait_for_execution(execution_id)
+    _wait_for_execution(rest_host, execution_id)
     ctx.logger.info('Snapshot with ID {0} restored successfully'
                     .format(snapshot_id))
 
 
-def _generate_upgrade_snapshot_id():
-    url = 'localhost/api/{0}/version'.format(REST_VERSION)
-    auth_headers = get_auth_headers()
-    res = rest_request(url, method='GET', headers=auth_headers)
+def _generate_upgrade_snapshot_id(rest_host):
+    url = '{0}/api/{1}/version'.format(rest_host, REST_VERSION)
+    res = rest_request(url, method='GET')
     if res.code != 200:
         err = 'Failed extracting current manager version. Message: {0}' \
             .format(res.content)
@@ -1550,8 +1570,8 @@ def verify_immutable_properties(service_name, properties):
                                 service_name, ','.join(descr_parts)))
 
 
-def _is_version_greater_than_curr(new_version):
-    version_url = 'localhost/api/{0}/version'.format(REST_VERSION)
+def _is_version_greater_than_curr(rest_host, new_version):
+    version_url = '{0}/api/{1}/version'.format(rest_host, REST_VERSION)
     version_res = rest_request(version_url, method='GET')
     if version_res.code != 200:
         ctx.abort_operation('Failed retrieving manager version')
@@ -1564,11 +1584,11 @@ def _is_version_greater_than_curr(new_version):
 # upgrade passed successfully and the 'upgrade to' version is greater than
 #  the current version. This function MUST be invoked by the first node and
 #  before upgrade snapshot is created.
-def clean_rollback_resources_if_necessary():
+def clean_rollback_resources_if_necessary(rest_host):
     if not is_upgrade:
         return
     new_version = ctx.node.properties['manager_version']
-    is_upgrade_version = _is_version_greater_than_curr(new_version)
+    is_upgrade_version = _is_version_greater_than_curr(rest_host, new_version)
     # The 'upgrade_success' flag will only be set if the previous upgrade
     # execution ended successfully
     latest_workflow_result = _get_upgrade_data().get('upgrade_success')

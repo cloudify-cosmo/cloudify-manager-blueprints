@@ -26,6 +26,10 @@ ctx.download_resource(
 )
 import utils  # NOQA
 
+# This MUST be invoked by the first node, before upgrade snapshot is created.
+rest_host = ctx.instance.runtime_properties['internal_rest_host']
+utils.clean_rollback_resources_if_necessary(rest_host)
+
 NODE_NAME = 'manager-config'
 
 

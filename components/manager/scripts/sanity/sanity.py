@@ -83,7 +83,7 @@ def _deploy_app():
         utils.wait_for_workflow,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='create_deployment_environment',
-        url_prefix=_get_url_prefix(),
+        rest_host=manager_ip,
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to be created'.format(DEPLOYMENT_ID))
 
@@ -108,7 +108,7 @@ def _install_sanity_app():
         interval=30,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='install',
-        url_prefix=_get_url_prefix(),
+        rest_host=manager_ip,
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to install'.format(DEPLOYMENT_ID))
 
@@ -179,7 +179,7 @@ def _uninstall_sanity_app():
         interval=30,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='uninstall',
-        url_prefix=_get_url_prefix(),
+        rest_host=manager_ip,
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to uninstall.'.format(DEPLOYMENT_ID))
 
@@ -267,7 +267,7 @@ if os.environ.get('run_sanity') == 'true' or \
 
 if utils.is_upgrade or utils.is_rollback:
     # Restore the snapshot at the end of the workflow.
-    utils.restore_upgrade_snapshot()
+    utils.restore_upgrade_snapshot(manager_ip)
 
 if utils.is_upgrade:
     # To keep the upgrade workflow idempotent, this flag is used to figure
