@@ -130,12 +130,12 @@ node_types:
             properties:
               userstore:
                 users:
-                  - username: { get_input: admin_username }
-                    password: { get_input: admin_password }
-                    groups:
-                      - cfy_admins
                   - username: { get_input: agent_rest_username }
                     password: { get_input: agent_rest_password }
+                    groups:
+                      - cfy_admins
+                  - username: { get_input: admin_username }
+                    password: { get_input: admin_password }
                     groups:
                       - cfy_admins
                 groups:
@@ -153,7 +153,10 @@ node_types:
             implementation: flask_securest.authentication_providers.token:TokenAuthenticator
             properties:
               secret_key: my_secret
-              expires_in_seconds: 600
+              expires_in_seconds: 86400
+          agent_rest_credentials:
+            username: { get_input: agent_rest_username }
+            password: { get_input: agent_rest_password }
           #########################################################################
           # Enabling SSL limits communication with the server to SSL only.
           # If enabled, the certificate and private key files must be found in
