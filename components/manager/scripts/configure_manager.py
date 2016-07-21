@@ -74,7 +74,10 @@ def _configure_security_properties():
 def main():
     if utils.is_upgrade:
         utils.create_upgrade_snapshot()
-    _disable_requiretty()
+    # TTY has already been disabled. Rollback may not have the script to
+    # disable TTY since it has been introduced only on 3.4.1
+    if not utils.is_rollback:
+        _disable_requiretty()
     _configure_security_properties()
 
 main()
