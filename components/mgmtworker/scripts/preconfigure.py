@@ -31,8 +31,6 @@ target_runtime_props = ctx.target.instance.runtime_properties
 source_runtime_props = ctx.source.instance.runtime_properties
 
 rest_host = target_runtime_props['internal_rest_host']
-# the file server is accessed through the same address as the rest service
-file_server_host = target_runtime_props['internal_rest_host']
 rest_protocol = target_runtime_props['rest_protocol']
 rest_port = target_runtime_props['rest_port']
 security_enabled = target_runtime_props['security_enabled']
@@ -48,8 +46,31 @@ if verify_rest_certificate.lower() == 'true':
     internal_rest_cert_content = \
         utils.escape_for_systemd(internal_rest_cert_raw)
 
+# the file server is accessed through the same host and protocol as the rest
+# service, but on a different port
+file_server_host = target_runtime_props['file_server_host']
+file_server_port = target_runtime_props['file_server_port']
+file_server_protocol = target_runtime_props['file_server_protocol']
+
+
+debug_message = 'mgmtworker configuration: \n' \
+             'rest_host: {0}\n'\
+             'rest_protocol: {1}\n' \
+             'rest_port: {2}\n' \
+             'security_enabled: {3}\n' \
+             'verify_rest_certificate: {4}\n' \
+             'local_rest_cert_file: {5}\n' \
+             'file_server_host: {6}\n' \
+             'file_server_port: {7}\n' \
+             'file_server_protocol: {8}\n' \
+             .format(rest_host, rest_protocol, rest_port, security_enabled,
+                     verify_rest_certificate, local_rest_cert_file,
+                     file_server_host, file_server_port, file_server_protocol)
+ctx.logger.debug(debug_message)
+
 source_runtime_props['file_server_host'] = file_server_host
-# TODO: find - what is required from the below props?
+source_runtime_props['file_server_port'] = file_server_port
+source_runtime_props['file_server_protocol'] = file_server_protocol
 source_runtime_props['rest_host'] = rest_host
 source_runtime_props['rest_protocol'] = rest_protocol
 source_runtime_props['rest_port'] = rest_port

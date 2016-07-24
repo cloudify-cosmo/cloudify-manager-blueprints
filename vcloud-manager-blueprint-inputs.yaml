@@ -106,7 +106,9 @@ user_public_key: ssh-rsa...
 # by default. To disable certificate verification, set this value to false.
 #agent_verify_rest_certificate: true
 
-# Username and password to be used for login, if the simple userstore implementation is used.
+# Username and password of the Cloudify administrator.
+# This user will also be included in the simple userstore repostiroty if the
+# simple userstore implementation is used.
 #admin_username: 'admin'
 #admin_password: 'admin'
 
