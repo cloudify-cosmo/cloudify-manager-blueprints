@@ -21,9 +21,12 @@ def preconfigure_nginx():
     target_runtime_props = ctx.target.instance.runtime_properties
     # this is used by nginx's default.conf to select the relevant configuration
     rest_protocol = target_runtime_props['rest_protocol']
+    file_server_protocol = target_runtime_props['file_server_protocol']
 
     # TODO: NEED TO IMPLEMENT THIS IN CTX UTILS
     ctx.source.instance.runtime_properties['rest_protocol'] = rest_protocol
+    ctx.source.instance.runtime_properties['file_server_protocol'] = \
+        file_server_protocol
     if rest_protocol == 'https':
         utils.deploy_rest_certificates(
             internal_rest_host=target_runtime_props['internal_rest_host'],
@@ -41,6 +44,12 @@ def preconfigure_nginx():
         '/etc/nginx/conf.d/{0}-rest-server.cloudify'.format(rest_protocol),
         NGINX_SERVICE_NAME, load_ctx=False)
     utils.deploy_blueprint_resource(
+        '{0}/{1}-file-server.cloudify'
+        .format(CONFIG_PATH, file_server_protocol),
+        '/etc/nginx/conf.d/{0}-file-server.cloudify'
+        .format(file_server_protocol),
+        NGINX_SERVICE_NAME, load_ctx=False)
+    utils.deploy_blueprint_resource(
         '{0}/nginx.conf'.format(CONFIG_PATH),
         '/etc/nginx/nginx.conf',
         NGINX_SERVICE_NAME, load_ctx=False)
@@ -55,6 +64,10 @@ def preconfigure_nginx():
     utils.deploy_blueprint_resource(
         '{0}/fileserver-location.cloudify'.format(CONFIG_PATH),
         '/etc/nginx/conf.d/fileserver-location.cloudify',
+        NGINX_SERVICE_NAME, load_ctx=False)
+    utils.deploy_blueprint_resource(
+        '{0}/redirect-to-fileserver.cloudify'.format(CONFIG_PATH),
+        '/etc/nginx/conf.d/redirect-to-fileserver.cloudify',
         NGINX_SERVICE_NAME, load_ctx=False)
     utils.deploy_blueprint_resource(
         '{0}/ui-locations.cloudify'.format(CONFIG_PATH),

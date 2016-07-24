@@ -180,7 +180,7 @@ node_templates:
         import_resolver:
           parameters:
             rules:
-            - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
+            - {'http://www.getcloudify.org/spec': 'file:///opt/manager/resources/spec'}
 
         upload_resources:
           dsl_resources: { get_input: dsl_resources }
