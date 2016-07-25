@@ -113,6 +113,15 @@ inputs:
     type: boolean
     default: false
 
+  #############################
+  # Telecom Edition
+  #############################
+  telecom_edition:
+    description: >
+      Set this to true if you want Telecom Edition
+    type: boolean
+    default: false
+    
 dsl_definitions:
   aws_configuration: &aws_configuration
     aws_access_key_id: { get_input: aws_access_key_id }
