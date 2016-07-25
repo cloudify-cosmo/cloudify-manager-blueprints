@@ -13,25 +13,16 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+ctx.download_resource(
+        join('components', 'elasticsearch', 'scripts', 'es_upgrade_utils.py'),
+        join(dirname(__file__), 'es_upgrade_utils.py'))
+import es_upgrade_utils  # NOQA
+
 
 CONFIG_PATH = "components/elasticsearch/config"
 ES_SERVICE_NAME = 'elasticsearch'
 
-DUMP_FILE_PATH = os.path.join(utils.ES_UPGRADE_DUMP_PATH, 'es_dump')
-DUMP_SUCCESS_FLAG = os.path.join(utils.ES_UPGRADE_DUMP_PATH, 'es_dump_success')
-
 ctx_properties = utils.ctx_factory.create(ES_SERVICE_NAME)
-
-
-def http_request(url, data=None, method='PUT'):
-    request = urllib2.Request(url, data=data)
-    request.get_method = lambda: method
-    try:
-        return urllib2.urlopen(request)
-    except urllib2.URLError as e:
-        reqstring = url + (' ' + data if data else '')
-        ctx.logger.info('Failed to {0} {1} (reason: {2})'.format(
-            method, reqstring, e.reason))
 
 
 def _configure_elasticsearch(host, port):
@@ -48,9 +39,11 @@ def _configure_elasticsearch(host, port):
     })
 
     ctx.logger.info('Deleting `cloudify_storage` index if exists...')
-    http_request(storage_endpoint, method='DELETE')
+    if utils.http_request(storage_endpoint, method='GET'):
+        utils.http_request(storage_endpoint, method='DELETE')
+
     ctx.logger.info('Creating `cloudify_storage` index...')
-    http_request(storage_endpoint, storage_settings, 'PUT')
+    utils.http_request(storage_endpoint, storage_settings, 'PUT')
 
     blueprint_mapping_endpoint = storage_endpoint + 'blueprint/_mapping'
     blueprint_mapping = json.dumps({
@@ -62,7 +55,7 @@ def _configure_elasticsearch(host, port):
     })
 
     ctx.logger.info('Declaring blueprint mapping...')
-    http_request(blueprint_mapping_endpoint, blueprint_mapping, 'PUT')
+    utils.http_request(blueprint_mapping_endpoint, blueprint_mapping, 'PUT')
 
     deployment_mapping_endpoint = storage_endpoint + 'deployment/_mapping'
     deployment_mapping = json.dumps({
@@ -79,7 +72,7 @@ def _configure_elasticsearch(host, port):
     })
 
     ctx.logger.info('Declaring deployment mapping...')
-    http_request(deployment_mapping_endpoint, deployment_mapping, 'PUT')
+    utils.http_request(deployment_mapping_endpoint, deployment_mapping, 'PUT')
 
     execution_mapping_endpoint = storage_endpoint + 'execution/_mapping'
     execution_mapping = json.dumps({
@@ -91,7 +84,7 @@ def _configure_elasticsearch(host, port):
     })
 
     ctx.logger.info('Declaring execution mapping...')
-    http_request(execution_mapping_endpoint, execution_mapping, 'PUT')
+    utils.http_request(execution_mapping_endpoint, execution_mapping, 'PUT')
 
     node_mapping_endpoint = storage_endpoint + 'node/_mapping'
     node_mapping = json.dumps({
@@ -107,7 +100,7 @@ def _configure_elasticsearch(host, port):
     })
 
     ctx.logger.info('Declaring node mapping...')
-    http_request(node_mapping_endpoint, node_mapping, 'PUT')
+    utils.http_request(node_mapping_endpoint, node_mapping, 'PUT')
 
     node_instance_mapping_endpoint = \
         storage_endpoint + 'node_instance/_mapping'
@@ -121,7 +114,8 @@ def _configure_elasticsearch(host, port):
     })
 
     ctx.logger.info('Declaring node instance mapping...')
-    http_request(node_instance_mapping_endpoint, node_instance_mapping, 'PUT')
+    utils.http_request(node_instance_mapping_endpoint,
+                       node_instance_mapping, 'PUT')
 
     deployment_modification_mapping_endpoint = \
         storage_endpoint + 'deployment_modification/_mapping'
@@ -137,7 +131,7 @@ def _configure_elasticsearch(host, port):
     })
 
     ctx.logger.info('Declaring deployment modification mapping...')
-    http_request(
+    utils.http_request(
         deployment_modification_mapping_endpoint,
         deployment_modification_mapping, 'PUT')
 
@@ -156,7 +150,7 @@ def _configure_elasticsearch(host, port):
     })
 
     ctx.logger.info('Declaring deployment update mapping...')
-    http_request(
+    utils.http_request(
         deployment_update_mapping_endpoint,
         deployment_update_mapping, 'PUT')
 
@@ -315,7 +309,9 @@ def main():
     es_endpoint_port = ctx_properties['es_endpoint_port']
 
     if utils.is_upgrade:
-        dump_upgrade_data()
+        # 'provider_context' and 'snapshot' elements will be migrated to the
+        # future version
+        es_upgrade_utils.dump_upgrade_data()
 
     if not es_endpoint_ip:
         es_endpoint_ip = ctx.instance.host_ip
@@ -334,95 +330,17 @@ def main():
         ctx.logger.info('Checking if \'cloudify_storage\' '
                         'index already exists...')
 
-        if http_request('http://{0}:{1}/cloudify_storage'.format(
+        if utils.http_request('http://{0}:{1}/cloudify_storage'.format(
                 es_endpoint_ip, es_endpoint_port), method='HEAD').code == 200:
             ctx.abort_operation('\'cloudify_storage\' index already exists on '
                                 '{0}, terminating bootstrap...'.format(
                                     es_endpoint_ip))
         _configure_elasticsearch(host=es_endpoint_ip, port=es_endpoint_port)
 
-    if utils.is_upgrade or utils.is_rollback:
-        restore_upgrade_data(es_endpoint_ip, es_endpoint_port)
-
     if not es_endpoint_port:
         utils.systemd.stop(ES_SERVICE_NAME, append_prefix=False)
 
     ctx.instance.runtime_properties['es_endpoint_ip'] = es_endpoint_ip
-
-
-def _get_es_install_port():
-    es_props = utils.ctx_factory.load_rollback_props(ES_SERVICE_NAME)
-    return es_props['es_endpoint_port']
-
-
-def _get_es_install_endpoint():
-    es_props = utils.ctx_factory.load_rollback_props(ES_SERVICE_NAME)
-    if es_props['es_endpoint_ip']:
-        es_endpoint = es_props['es_endpoint_ip']
-    else:
-        es_endpoint = ctx.instance.host_ip
-    return es_endpoint
-
-
-def dump_upgrade_data():
-
-    if os.path.exists(DUMP_SUCCESS_FLAG):
-        return
-
-    endpoint = _get_es_install_endpoint()
-    port = _get_es_install_port()
-    storage_endpoint = 'http://{0}:{1}/cloudify_storage'.format(endpoint,
-                                                                port)
-    types = ['provider_context', 'snapshot']
-    ctx.logger.info('Dumping upgrade data: {0}'.format(types))
-    type_values = []
-    for _type in types:
-        res = http_request('{0}/_search?q=_type:{1}&size=10000'
-                           .format(storage_endpoint, _type),
-                           method='GET')
-        if not res.code == 200:
-            ctx.abort_operation('Failed fetching type {0} from '
-                                'cloudify_storage index'.format(_type))
-
-        body = res.read()
-        hits = json.loads(body)['hits']['hits']
-        for hit in hits:
-            type_values.append(hit)
-
-    utils.mkdir(utils.ES_UPGRADE_DUMP_PATH, use_sudo=False)
-    with open(DUMP_FILE_PATH, 'w') as f:
-        for item in type_values:
-            f.write(json.dumps(item) + os.linesep)
-
-    # marker file to indicate dump has succeeded
-    with open(DUMP_SUCCESS_FLAG, 'w') as f:
-        f.write('success')
-
-
-def restore_upgrade_data(es_endpoint_ip, es_endpoint_port):
-    bulk_endpoint = 'http://{0}:{1}/_bulk'.format(es_endpoint_ip,
-                                                  es_endpoint_port)
-    with open(DUMP_FILE_PATH) as f:
-        all_data = ''
-        for line in f.readlines():
-            all_data += _create_index_request(line)
-    ctx.logger.info('Restoring elasticsearch data')
-    res = http_request(url=bulk_endpoint, data=all_data, method='POST')
-    if res.code != 200:
-        ctx.abort_operation('Failed restoring elasticsearch data.')
-    ctx.logger.info('Elasticsearch data was successfully restored')
-
-
-def _create_index_request(line):
-    item = json.loads(line)
-    source = json.dumps(item['_source'])
-    metadata = _only_types(item, ['_type', '_id', '_index'])
-    action_and_meta_data = json.dumps({'index': metadata})
-    return action_and_meta_data + os.linesep + source + os.linesep
-
-
-def _only_types(d, args):
-    return {key: d[key] for key in d.keys() if key in args}
 
 
 main()
