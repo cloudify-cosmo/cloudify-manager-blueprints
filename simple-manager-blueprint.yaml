@@ -237,6 +237,8 @@ node_templates:
         target: manager_resources
       - type: cloudify.relationships.depends_on
         target: java_runtime
+      - type: elasticsearch_to_manager_configuration
+        target: manager_configuration
     interfaces:
       cloudify.interfaces.validation:
         creation:
