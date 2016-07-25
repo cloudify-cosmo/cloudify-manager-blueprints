@@ -596,6 +596,14 @@ inputs:
     type: string
     default: cloudify-hello-world-example-3.4.tar.gz
 
+  #############################
+  # Telecom Edition
+  #############################
+  telecom_edition:
+    description: >
+      Set this to true if you want Telecom Edition
+    type: boolean
+    default: false
 
 dsl_definitions:
   azure_configuration: &azure_configuration

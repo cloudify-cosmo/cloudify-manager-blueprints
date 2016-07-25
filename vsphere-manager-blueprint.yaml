@@ -644,6 +644,15 @@ inputs:
     type: string
     default: ''
 
+  #############################
+  # Telecom Edition
+  #############################
+  telecom_edition:
+    description: >
+      Set this to true if you want Telecom Edition
+    type: boolean
+    default: false
+
 ######################################################################
 # This is a vsphere blueprint specific node_type to allow us to define
 # The public_ip of the machine is an accessible property of the host.

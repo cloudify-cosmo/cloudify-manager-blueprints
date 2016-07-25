@@ -471,6 +471,15 @@ inputs:
     type: string
     default: ''
 
+  #############################
+  # Telecom Edition
+  #############################
+  telecom_edition:
+    description: >
+      Set this to true if you want Telecom Edition
+    type: boolean
+    default: false
+
 ######################################################################
 # This is a simple blueprint specific node_type to allow us to define
 # The public_ip of the machine is an accessible property of the host.
@@ -786,6 +795,8 @@ node_templates:
 
   webui:
     type: manager.nodes.WebUI
+    properties:
+      telecom_edition: { get_input: telecom_edition }
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host

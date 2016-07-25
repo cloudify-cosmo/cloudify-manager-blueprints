@@ -520,6 +520,14 @@ inputs:
     type: string
     default: ''
 
+  #############################
+  # Telecom Edition
+  #############################
+  telecom_edition:
+    description: >
+      Set this to true if you want Telecom Edition
+    type: boolean
+    default: false
 
 dsl_definitions:
   aws_configuration: &aws_configuration

@@ -856,6 +856,10 @@ node_types:
   manager.nodes.WebUI:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      telecom_edition:
+        description: Use Telecom Edition?
+        type: boolean
+        default: false
       webui_tar_source_url:
         description: Cloudify's WebUI Source URL
         type: string
