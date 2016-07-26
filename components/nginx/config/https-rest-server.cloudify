@@ -2,8 +2,8 @@
 server {
   # server listening for internal requests
   # listens on both 443 and 80, but http will be redirected to https (below)
-  listen              80;
-  listen              443 ssl;
+  listen              {{ ctx.target.instance.runtime_properties.internal_rest_host }}:80;
+  listen              {{ ctx.target.instance.runtime_properties.internal_rest_host }}:443 ssl;
   server_name         {{ ctx.target.instance.runtime_properties.internal_rest_host }};
 
   # force http redirect to https
@@ -31,8 +31,8 @@ server {
 server {
   # server listening for external requests
   # listens on both 443 and 80, but http will be redirected to https (below)
-  listen              80;
-  listen              443 ssl default_server;
+  listen              {{ ctx.target.instance.runtime_properties.external_rest_host }}:80;
+  listen              {{ ctx.target.instance.runtime_properties.external_rest_host }}:443 ssl;
   server_name         {{ ctx.target.instance.runtime_properties.external_rest_host }};
 
   # force http redirect to https
