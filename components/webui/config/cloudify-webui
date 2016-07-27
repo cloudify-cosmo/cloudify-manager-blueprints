@@ -1,2 +1,3 @@
 NODEJS_HOME=/opt/nodejs
 WEBUI_HOME=/opt/cloudify-ui
+UI_VARIATION={{ ctx.instance.runtime_properties.ui_variation }}

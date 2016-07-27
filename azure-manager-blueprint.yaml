@@ -190,6 +190,15 @@ inputs:
     type: string
     default: ''
 
+  #############################
+  # Telecom Edition
+  #############################
+  telecom_edition:
+    description: >
+      Set this to true if you want Telecom Edition
+    type: boolean
+    default: false
+
 dsl_definitions:
   azure_configuration: &azure_configuration
     subscription_id: { get_input: subscription_id }
