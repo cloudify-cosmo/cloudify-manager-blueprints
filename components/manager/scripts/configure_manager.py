@@ -28,6 +28,8 @@ import utils  # NOQA
 
 NODE_NAME = 'manager-config'
 
+# This MUST be invoked by the first node, before upgrade snapshot is created.
+utils.clean_rollback_resources_if_necessary()
 
 ctx_properties = utils.ctx_factory.create(NODE_NAME)
 
