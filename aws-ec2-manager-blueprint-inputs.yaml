@@ -81,6 +81,10 @@ aws_secret_access_key: ''
 
 #insecure_endpoints_disabled: false
 
+# Default locations for certificates on agents
+#agent_rest_cert_path: '~/.cloudify/certs/rest.crt'
+#broker_ssl_cert_path: '~/.cloudify/certs/broker.crt'
+
 #############################
 # Bootstrap Validations
 #############################
