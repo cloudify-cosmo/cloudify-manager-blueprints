@@ -37,6 +37,8 @@ security_enabled = target_runtime_props['security_enabled']
 ssl_enabled = target_runtime_props['ssl_enabled']
 verify_rest_certificate = \
     target_runtime_props.get('agent_verify_rest_certificate', '')
+agent_rest_cert_path = target_runtime_props['agent_rest_cert_path']
+broker_ssl_cert_path = target_runtime_props['broker_ssl_cert_path']
 internal_rest_cert_content = ''
 local_rest_cert_file = ''
 
@@ -78,3 +80,5 @@ source_runtime_props['security_enabled'] = security_enabled
 source_runtime_props['verify_rest_certificate'] = verify_rest_certificate
 source_runtime_props['rest_cert_content'] = internal_rest_cert_content
 source_runtime_props['local_rest_cert_file'] = local_rest_cert_file
+source_runtime_props['agent_rest_cert_path'] = agent_rest_cert_path
+source_runtime_props['broker_ssl_cert_path'] = broker_ssl_cert_path

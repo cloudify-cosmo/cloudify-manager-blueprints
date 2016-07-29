@@ -29,6 +29,14 @@ inputs:
     type: boolean
     default: false
 
+  agent_rest_cert_path:
+    description: Location of the rest certificate on the agent
+    default: ~/.cloudify/certs/rest.crt
+
+  broker_ssl_cert_path:
+    description: Location of the broker certificate on the agent
+    default: ~/.cloudify/certs/broker.crt
+
   #################################
   # REST Configuration
   #################################

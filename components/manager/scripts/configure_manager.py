@@ -66,6 +66,11 @@ def _configure_security_properties():
             agent_verify_rest_certificate
         ctx.logger.info('agent_verify_rest_certificate: {0}'.
                         format(agent_verify_rest_certificate))
+
+        ctx.instance.runtime_properties['agent_rest_cert_path'] = \
+            security_config['agent_rest_cert_path']
+        ctx.instance.runtime_properties['broker_ssl_cert_path'] = \
+            security_config['broker_ssl_cert_path']
     else:
         ctx.logger.info('Security is off or SSL disabled, setting rest port '
                         'to 80 and rest protocols to http')

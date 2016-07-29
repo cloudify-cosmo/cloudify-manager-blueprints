@@ -20,6 +20,10 @@ agent_local_key_path: ~/.ssh/id_rsa
 ssh_key_filename: ~/.ssh/id_rsa
 ssh_user: centos
 
+# Default locations for certificates on agents
+#agent_rest_cert_path: '~/.cloudify/certs/rest.crt'
+#broker_ssl_cert_path: '~/.cloudify/certs/broker.crt'
+
 # SSH port used to connect to the manager
 #ssh_port: 22
 
