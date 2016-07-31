@@ -3,6 +3,8 @@
 import re
 import os
 import pwd
+import ssl
+import sys
 import time
 import glob
 import json
@@ -11,6 +13,7 @@ import base64
 import socket
 import urllib
 import urllib2
+import httplib
 import hashlib
 import tempfile
 import subprocess
@@ -19,6 +22,11 @@ from time import sleep, gmtime, strftime
 from distutils.version import LooseVersion
 
 from cloudify import ctx
+
+try:
+    import ipaddress
+except ImportError:
+    ipaddress = None
 
 
 REST_VERSION = 'v2.1'
@@ -141,6 +149,7 @@ def deploy_ssl_certificate(private_or_public, destination, group, cert):
                     "certificate at {2}".format(
                         permissions, ownership, destination))
     chmod(permissions, destination)
+    chmod('a+x', '/root')
     sudo('chown {0} {1}'.format(ownership, destination))
 
 
@@ -296,7 +305,7 @@ def get_file_content(file_path):
             remove(temp_dir)
 
 
-def curl_download_with_retries(source, destination):
+def curl_download_with_retries(source, destination, cert_file=None):
     curl_cmd = ['curl']
     curl_cmd.extend(['--retry', '10'])
     curl_cmd.append('--fail')
@@ -305,11 +314,13 @@ def curl_download_with_retries(source, destination):
     curl_cmd.extend(['--location', source])
     curl_cmd.append('--create-dir')
     curl_cmd.extend(['--output', destination])
+    if cert_file:
+        curl_cmd.extend(['--cacert', cert_file])
     ctx.logger.info('curling: {0}'.format(' '.join(curl_cmd)))
     run(curl_cmd)
 
 
-def download_file(url, destination=''):
+def download_file(url, destination='', cert_file=None):
     if not destination:
         fd, destination = tempfile.mkstemp()
         os.remove(destination)
@@ -317,15 +328,22 @@ def download_file(url, destination=''):
 
     if not os.path.isfile(destination):
         ctx.logger.info('Downloading {0} to {1}...'.format(url, destination))
+        urlopen = build_urlopen(cert_file)
         try:
-            final_url = urllib.urlopen(url).geturl()
+            response = urlopen(url)
+            final_url = response.geturl()
             if final_url != url:
                 ctx.logger.debug('Redirected to {0}'.format(final_url))
-            f = urllib.URLopener()
+
             # TODO: try except with @retry
-            f.retrieve(final_url, destination)
+            with open(destination, 'wb') as f:
+                while True:
+                    chunk = response.read(8192)
+                    if not chunk:
+                        break
+                    f.write(chunk)
         except:
-            curl_download_with_retries(url, destination)
+            curl_download_with_retries(url, destination, cert_file)
     else:
         ctx.logger.info('File {0} already exists...'.format(destination))
     return destination
@@ -1211,25 +1229,252 @@ def start_service(service_name, append_prefix=True, ignore_restart_fail=False):
         systemd.start(service_name, append_prefix=append_prefix)
 
 
+# match_hostname and it's requirements taken from backports.ssl_match_hostname
+# (which is in turn copied from py3.5 stdlib)
+
+def _dnsname_match(dn, hostname, max_wildcards=1):
+    """Matching according to RFC 6125, section 6.4.3
+
+    http://tools.ietf.org/html/rfc6125#section-6.4.3
+    """
+    pats = []
+    if not dn:
+        return False
+
+    # Ported from python3-syntax:
+    # leftmost, *remainder = dn.split(r'.')
+    parts = dn.split(r'.')
+    leftmost = parts[0]
+    remainder = parts[1:]
+
+    wildcards = leftmost.count('*')
+    if wildcards > max_wildcards:
+        # Issue #17980: avoid denials of service by refusing more
+        # than one wildcard per fragment.  A survey of established
+        # policy among SSL implementations showed it to be a
+        # reasonable choice.
+        raise ctx.abort_operation(
+            "too many wildcards in certificate DNS name: {0!r}".format(dn))
+
+    # speed up common case w/o wildcards
+    if not wildcards:
+        return dn.lower() == hostname.lower()
+
+    # RFC 6125, section 6.4.3, subitem 1.
+    # The client SHOULD NOT attempt to match a presented identifier in which
+    # the wildcard character comprises a label other than the left-most label.
+    if leftmost == '*':
+        # When '*' is a fragment by itself, it matches a non-empty dotless
+        # fragment.
+        pats.append('[^.]+')
+    elif leftmost.startswith('xn--') or hostname.startswith('xn--'):
+        # RFC 6125, section 6.4.3, subitem 3.
+        # The client SHOULD NOT attempt to match a presented identifier
+        # where the wildcard character is embedded within an A-label or
+        # U-label of an internationalized domain name.
+        pats.append(re.escape(leftmost))
+    else:
+        # Otherwise, '*' matches any dotless string, e.g. www*
+        pats.append(re.escape(leftmost).replace(r'\*', '[^.]*'))
+
+    # add the remaining fragments, ignore any wildcards
+    for frag in remainder:
+        pats.append(re.escape(frag))
+
+    pat = re.compile(r'\A' + r'\.'.join(pats) + r'\Z', re.IGNORECASE)
+    return pat.match(hostname)
+
+
+def _to_unicode(obj):
+    if isinstance(obj, str) and sys.version_info < (3,):
+        obj = unicode(obj, encoding='ascii', errors='strict')
+    return obj
+
+
+def _ipaddress_match(ipname, host_ip):
+    """Exact matching of IP addresses.
+
+    RFC 6125 explicitly doesn't define an algorithm for this
+    (section 1.7.2 - "Out of Scope").
+    """
+    # OpenSSL may add a trailing newline to a subjectAltName's IP address
+    # Divergence from upstream: ipaddress can't handle byte str
+    ip = ipaddress.ip_address(_to_unicode(ipname).rstrip())
+    return ip == host_ip
+
+
+def _no_hostname_match(hostname, dnsnames):
+    if len(dnsnames) > 1:
+        message = "hostname {0} doesn't match any of {1}".format(
+            hostname, ', '.join(repr(name) for name in dnsnames))
+    elif len(dnsnames) == 1:
+        message = "hostname {0} doesn't match {1}".format(hostname,
+                                                          dnsnames[0])
+    else:
+        message = 'no appropriate commonName or subjectAltName fields found'
+
+    ctx.abort_operation(message)
+
+
+def _get_host_ip_from_hostname(hostname):
+    try:
+        # Divergence from upstream: ipaddress can't handle byte str
+        host_ip = ipaddress.ip_address(_to_unicode(hostname))
+    except ValueError:
+        # Not an IP address (common case)
+        host_ip = None
+    except UnicodeError:
+        # Divergence from upstream: Have to deal with ipaddress not taking
+        # byte strings.  addresses should be all ascii, so we consider it not
+        # an ipaddress in this case
+        host_ip = None
+    except AttributeError:
+        # Divergence from upstream: Make ipaddress library optional
+        if ipaddress is None:
+            host_ip = None
+        else:
+            raise
+
+    return host_ip
+
+
+def match_hostname(cert, hostname):
+    """Verify that *cert* (in decoded format as returned by
+    SSLSocket.getpeercert()) matches the *hostname*.  RFC 2818 and RFC 6125
+    rules are followed, but IP addresses are not accepted for *hostname*.
+
+    CertificateError is raised on failure. On success, the function
+    returns nothing.
+    """
+    if not cert:
+        ctx.abort_operation('empty or no certificate, match_hostname needs a '
+                            'SSL socket or SSL context with either '
+                            'CERT_OPTIONAL or CERT_REQUIRED')
+    host_ip = _get_host_ip_from_hostname(hostname)
+    dnsnames = []
+    san = cert.get('subjectAltName', ())
+    for key, value in san:
+        if key == 'DNS':
+            if host_ip is None and _dnsname_match(value, hostname):
+                return
+            dnsnames.append(value)
+        elif key == 'IP Address':
+            if host_ip is not None and _ipaddress_match(value, host_ip):
+                return
+            dnsnames.append(value)
+
+    if not dnsnames:
+        # The subject is only checked when there is no dNSName entry
+        # in subjectAltName
+        for sub in cert.get('subject', ()):
+            for key, value in sub:
+                # XXX according to RFC 2818, the most specific Common Name
+                # must be used.
+                if key == 'commonName':
+                    if _dnsname_match(value, hostname):
+                        return
+                    dnsnames.append(value)
+
+    _no_hostname_match(hostname, dnsnames)
+
+
+class CertVerifyingConnection(httplib.HTTPConnection):
+    default_port = httplib.HTTPS_PORT
+
+    def __init__(self, host, port=None, cert_file=None, **kwargs):
+        httplib.HTTPConnection.__init__(self, host, port, **kwargs)
+        self._cert_file = cert_file
+
+    def connect(self):
+        httplib.HTTPConnection.connect(self)
+        self.sock = ssl.wrap_socket(self.sock,
+                                    ca_certs=self._cert_file,
+                                    cert_reqs=ssl.CERT_REQUIRED)
+
+        cert = self.sock.getpeercert()
+        hostname = self.host.split(':', 0)[0]
+        match_hostname(cert, hostname)
+
+
+class HTTPSConnectionFactory(object):
+    connection_class = CertVerifyingConnection
+
+    def __init__(self, cert_file):
+        self._cert_file = cert_file
+
+    def __call__(self, host, **kwargs):
+        kwargs.setdefault('cert_file', self._cert_file)
+        return self.connection_class(host, **kwargs)
+
+
+class CertVerifyingHandler(urllib2.HTTPSHandler):
+    def __init__(self, cert_file):
+        urllib2.HTTPSHandler.__init__(self)
+        self._connection_factory = HTTPSConnectionFactory(cert_file)
+
+    def https_open(self, req):
+        return self.do_open(self._connection_factory, req)
+
+
+def build_urlopen(cert_file=None):
+    if not cert_file:
+        return urllib2.urlopen
+
+    handler = CertVerifyingHandler(cert_file=cert_file)
+    opener = urllib2.build_opener(handler)
+    return opener.open
+
+
 def http_request(url, data=None, method='PUT',
-                 headers=None, timeout=None, should_fail=False):
+                 headers=None, timeout=None, should_fail=False,
+                 cert_file=None):
     headers = headers or {}
     request = urllib2.Request(url, data=data, headers=headers)
     request.get_method = lambda: method
+
+    urlopen = build_urlopen(cert_file)
+
     try:
         if timeout:
-            return urllib2.urlopen(request, timeout=timeout)
-        return urllib2.urlopen(request)
+            return urlopen(request, timeout=timeout)
+        return urlopen(request)
     except urllib2.URLError as e:
         if not should_fail:
             ctx.logger.error('Failed to {0} {1} (reason: {2})'.format(
                 method, url, e.reason))
 
 
+def rest_service_url():
+    manager_config = ctx_factory.get('manager-config')
+    security_config = manager_config['security']
+    security_enabled = security_config['enabled']
+    ssl_enabled = security_config['ssl']['enabled']
+    if ssl_enabled and security_enabled:
+        scheme = 'https'
+    else:
+        scheme = 'http'
+
+    return '{0}://{1}/api/{2}'.format(scheme, ctx.instance.host_ip,
+                                      REST_VERSION)
+
+
+def rest_cert_file():
+    manager_config = ctx_factory.get('manager-config')
+    security_config = manager_config['security']
+    security_enabled = security_config['enabled']
+    ssl_enabled = security_config['ssl']['enabled']
+
+    if security_enabled and ssl_enabled:
+        return os.path.join(SSL_CERTS_TARGET_DIR, 'internal_rest_host.crt')
+
+
 def wait_for_workflow(
         deployment_id,
         workflow_id,
-        url_prefix='http://localhost/api/{0}'.format(REST_VERSION)):
+        url_prefix=None):
+    if url_prefix is None:
+        url_prefix = rest_service_url()
+
     headers = create_maintenance_headers()
     params = urllib.urlencode(dict(deployment_id=deployment_id))
     endpoint = '{0}/executions'.format(url_prefix)
@@ -1237,7 +1482,8 @@ def wait_for_workflow(
     res = http_request(
         url,
         method='GET',
-        headers=headers)
+        headers=headers,
+        cert_file=rest_cert_file())
     res_content = res.readlines()
     json_res = json.loads(res_content[0])
     for execution in json_res['items']:
@@ -1269,11 +1515,12 @@ def _wait_for_execution(execution_id, headers):
 def _list_executions_with_retries(headers, execution_id, retries=6):
     count = 0
     err = 'Failed listing existing executions.'
-    url = 'http://localhost/api/{0}/executions?' \
-          '_include_system_workflows=true&id={1}'.format(REST_VERSION,
-                                                         execution_id)
+    url = '{0}/executions?_include_system_workflows=true&id={1}'.format(
+        rest_service_url(), execution_id)
+
     while count != retries:
-        res = http_request(url, method='GET', headers=headers)
+        res = http_request(url, method='GET', headers=headers,
+                           cert_file=rest_cert_file())
         if res.code != 200:
             err = 'Failed listing existing executions. Message: {0}' \
                 .format(res.readlines())
@@ -1314,8 +1561,7 @@ def create_upgrade_snapshot():
         ctx.logger.debug('Upgrade snapshot already created.')
         return
     snapshot_id = _generate_upgrade_snapshot_id()
-    url = 'http://localhost/api/{0}/snapshots/{1}'.format(REST_VERSION,
-                                                          snapshot_id)
+    url = '{0}/snapshots/{1}'.format(rest_service_url(), snapshot_id)
     data = json.dumps({'include_metrics': 'true',
                        'include_credentials': 'true'})
     headers = create_maintenance_headers(upgrade_props=False)
@@ -1323,7 +1569,8 @@ def create_upgrade_snapshot():
     req_headers.update({'Content-Type': 'application/json'})
     ctx.logger.info('Creating snapshot with ID {0}'
                     .format(snapshot_id))
-    res = http_request(url, data=data, method='PUT', headers=req_headers)
+    res = http_request(url, data=data, method='PUT', headers=req_headers,
+                       cert_file=rest_cert_file())
     if res.code != 201:
         err = 'Failed creating snapshot {0}. Message: {1}'\
             .format(snapshot_id, res.readlines())
@@ -1340,15 +1587,15 @@ def create_upgrade_snapshot():
 
 def restore_upgrade_snapshot():
     snapshot_id = _get_upgrade_data()['snapshot_id']
-    url = 'http://localhost/api/{0}/snapshots/{1}/restore'.format(REST_VERSION,
-                                                                  snapshot_id)
+    url = '{0}/snapshots/{1}/restore'.format(rest_service_url(), snapshot_id)
     data = json.dumps({'recreate_deployments_envs': 'false',
                        'force': 'true'})
     headers = create_maintenance_headers(upgrade_props=True)
     req_headers = headers.copy()
     req_headers.update({'Content-Type': 'application/json'})
     ctx.logger.info('Restoring snapshot with ID {0}'.format(snapshot_id))
-    res = http_request(url, data=data, method='POST', headers=req_headers)
+    res = http_request(url, data=data, method='POST', headers=req_headers,
+                       cert_file=rest_cert_file())
     if res.code != 200:
         err = 'Failed restoring snapshot {0}. Message: {1}' \
             .format(snapshot_id, res.readlines())
@@ -1361,9 +1608,10 @@ def restore_upgrade_snapshot():
 
 
 def _generate_upgrade_snapshot_id():
-    url = 'http://localhost/api/{0}/version'.format(REST_VERSION)
+    url = '{0}/version'.format(rest_service_url())
     auth_headers = get_auth_headers(upgrade_props=False)
-    res = http_request(url, method='GET', headers=auth_headers)
+    res = http_request(url, method='GET', headers=auth_headers,
+                       cert_file=rest_cert_file())
     if res.code != 200:
         err = 'Failed extracting current manager version. Message: {0}' \
             .format(res.readlines())
@@ -1397,10 +1645,13 @@ def _get_upgrade_data():
 
 
 @retry((IOError, ValueError))
-def check_http_response(url, predicate=None, **request_kwargs):
+def check_http_response(url, predicate=None, cert_file=None, **request_kwargs):
     req = urllib2.Request(url, **request_kwargs)
+
+    urlopen = build_urlopen(cert_file)
+    ctx.logger.info('Accessing {0} with cert {1}'.format(url, cert_file))
     try:
-        response = urllib2.urlopen(req)
+        response = urlopen(req)
     except urllib2.HTTPError as e:
         # HTTPError can also be used as a non-200 response. Pass this
         # through to the predicate function, so it can decide if a
@@ -1485,8 +1736,9 @@ def verify_immutable_properties(service_name, properties):
 
 
 def _is_version_greater_than_curr(new_version):
-    version_url = 'http://localhost/api/{0}/version'.format(REST_VERSION)
-    version_res = http_request(version_url, method='GET')
+    version_url = '{0}/version'.format(rest_service_url())
+    version_res = http_request(version_url, method='GET',
+                               cert_file=rest_cert_file())
     if version_res.code != 200:
         ctx.abort_operation('Failed retrieving manager version')
     curr_version = json.loads(version_res.readlines()[0])['version']

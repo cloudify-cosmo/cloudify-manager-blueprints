@@ -51,7 +51,8 @@ def _upload_app_blueprint(app_tar):
             dict(application_file_name='no-monitoring-'
                                        'singlehost-blueprint.yaml'))
 
-    endpoint = '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID)
+    endpoint = '{0}/blueprints/{1}'.format(utils.rest_service_url(),
+                                           BLUEPRINT_ID)
     url = endpoint + '?' + params
     utils.http_request(url,
                        data=app_data,
@@ -73,7 +74,8 @@ def _deploy_app():
     headers.update({'content-type': 'application/json'})
 
     utils.http_request(
-            '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
+            '{0}/deployments/{1}'.format(utils.rest_service_url(),
+                                         DEPLOYMENT_ID),
             data=json.dumps(data),
             headers=headers)
 
@@ -82,7 +84,6 @@ def _deploy_app():
         utils.wait_for_workflow,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='create_deployment_environment',
-        url_prefix=_get_url_prefix(),
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to be created'.format(DEPLOYMENT_ID))
 
@@ -96,7 +97,7 @@ def _install_sanity_app():
     headers.update({'content-type': 'application/json'})
 
     resp = utils.http_request(
-            '{0}/executions'.format(_get_url_prefix()),
+            '{0}/executions'.format(utils.rest_service_url()),
             method='POST',
             data=json.dumps(data),
             headers=headers)
@@ -108,7 +109,6 @@ def _install_sanity_app():
         interval=30,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='install',
-        url_prefix=_get_url_prefix(),
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to install'.format(DEPLOYMENT_ID))
 
@@ -123,7 +123,7 @@ def _assert_logs_and_events(execution_id):
             dict(execution_id=execution_id,
                  type='cloudify_log'))
 
-    endpoint = '{0}/events'.format(_get_url_prefix())
+    endpoint = '{0}/events'.format(utils.rest_service_url())
     url = endpoint + '?' + params
     resp = utils.http_request(url, method='GET', headers=headers, timeout=30)
     if not resp:
@@ -169,7 +169,7 @@ def _uninstall_sanity_app():
     headers.update({'content-type': 'application/json'})
 
     utils.http_request(
-        '{0}/executions'.format(_get_url_prefix()),
+        '{0}/executions'.format(utils.rest_service_url()),
         method='POST',
         data=json.dumps(data),
         headers=headers)
@@ -181,7 +181,6 @@ def _uninstall_sanity_app():
         interval=30,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='uninstall',
-        url_prefix=_get_url_prefix(),
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to uninstall.'.format(DEPLOYMENT_ID))
 
@@ -192,7 +191,7 @@ def _delete_sanity_deployment():
     headers = utils.create_maintenance_headers()
 
     resp = utils.http_request(
-        '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
+        '{0}/deployments/{1}'.format(utils.rest_service_url(), DEPLOYMENT_ID),
         method='DELETE',
         headers=headers)
 
@@ -207,7 +206,7 @@ def _delete_sanity_blueprint():
         return
     headers = utils.create_maintenance_headers()
     resp = utils.http_request(
-        '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID),
+        '{0}/blueprints/{1}'.format(utils.rest_service_url(), BLUEPRINT_ID),
         method='DELETE',
         headers=headers)
 
@@ -225,7 +224,7 @@ def _delete_key_file():
 def _is_sanity_dep_exist(should_fail=False):
     headers = utils.create_maintenance_headers()
     res = utils.http_request(
-        '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
+        '{0}/deployments/{1}'.format(utils.rest_service_url(), DEPLOYMENT_ID),
         method='GET',
         headers=headers,
         should_fail=should_fail)
@@ -237,21 +236,14 @@ def _is_sanity_dep_exist(should_fail=False):
 def _is_sanity_blueprint_exist(should_fail=False):
     headers = utils.create_maintenance_headers()
     res = utils.http_request(
-            '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID),
+            '{0}/blueprints/{1}'.format(utils.rest_service_url(),
+                                        BLUEPRINT_ID),
             method='GET',
             headers=headers,
             should_fail=should_fail)
     if not res:
         return False
     return res.code == 200
-
-
-def _get_url_prefix():
-    return '{0}://{1}:{2}/api/{3}'.format(
-            rest_protocol,
-            manager_ip,
-            rest_port,
-            REST_VERSION)
 
 
 def perform_sanity():
