@@ -28,6 +28,10 @@ def install_webui():
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         os.environ.get('INFLUXDB_ENDPOINT_IP')
 
+    # is this a telecom edition?
+    ctx.instance.runtime_properties['ui_variation'] = \
+        'telecom' if ctx_properties['telecom_edition'] else ''
+
     nodejs_home = '/opt/nodejs'
     webui_home = '/opt/cloudify-ui'
     webui_log_path = '/var/log/cloudify/webui'

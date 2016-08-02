@@ -1,9 +1,9 @@
-# REST and UI internal server.
+# REST and UI internal server
 server {
-  # server listening for the internal requests.
+  # server listening for internal requests
   # listens on both 443 and 80, but http will be redirected to https (below)
   listen              80;
-  listen              443 ssl;
+  listen              443 ssl default_server;
   server_name         {{ ctx.target.instance.runtime_properties.internal_rest_host }};
 
   # force http redirect to https
@@ -23,13 +23,13 @@ server {
   include "/etc/nginx/conf.d/rest-location.cloudify";
 
   # Serves the File Server (backed by the cloudify-resources upstream).
-  include "/etc/nginx/conf.d/fileserver-location.cloudify";
+  include "/etc/nginx/conf.d/redirect-to-fileserver.cloudify";
 }
 
 
-# REST and UI external server.
+# REST and UI external server
 server {
-  # server listening for the external requests.
+  # server listening for external requests
   # listens on both 443 and 80, but http will be redirected to https (below)
   listen              80;
   listen              443 ssl;
@@ -52,5 +52,5 @@ server {
   include "/etc/nginx/conf.d/rest-location.cloudify";
 
   # Serves the File Server (backed by the cloudify-resources upstream).
-  include "/etc/nginx/conf.d/fileserver-location.cloudify";
+  include "/etc/nginx/conf.d/redirect-to-fileserver.cloudify";
 }

@@ -223,6 +223,15 @@ inputs:
       - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.4/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.4/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.5m1/types.yaml', 'destination_path': '/spec/cloudify/3.5m1/types.yaml'}
 
+  #############################
+  # Telecom Edition
+  #############################
+  telecom_edition:
+    description: >
+      Set this to true if you want Telecom Edition
+    type: boolean
+    default: false
+
 ######################################################################
 # This is a vsphere blueprint specific node_type to allow us to define
 # The public_ip of the machine is an accessible property of the host.
@@ -313,8 +322,6 @@ node_templates:
           broker_pass: { get_input: rabbitmq_password }
           broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
           broker_ssl_cert: { get_input: rabbitmq_cert_public }
-          rest_username: { get_input: agent_rest_username }
-          rest_password: { get_input: agent_rest_password }
           verify_rest_certificate: { get_input: agent_verify_rest_certificate }
         workflows:
           task_retries: -1  # this means forever
@@ -333,7 +340,7 @@ node_templates:
         import_resolver:
           parameters:
             rules:
-            - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
+            - {'http://www.getcloudify.org/spec': 'file:///opt/manager/resources/spec'}
 
         upload_resources:
           dsl_resources: { get_input: dsl_resources }
@@ -434,6 +441,8 @@ node_templates:
         target: manager_resources
       - type: cloudify.relationships.depends_on
         target: java_runtime
+      - type: elasticsearch_to_manager_configuration
+        target: manager_configuration
 
   logstash:
     type: manager.nodes.Logstash

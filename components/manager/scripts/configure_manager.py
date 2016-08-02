@@ -28,6 +28,8 @@ import utils  # NOQA
 
 NODE_NAME = 'manager-config'
 
+# This MUST be invoked by the first node, before upgrade snapshot is created.
+utils.clean_rollback_resources_if_necessary()
 
 ctx_properties = utils.ctx_factory.create(NODE_NAME)
 
@@ -52,17 +54,6 @@ def _configure_security_properties():
     ctx.instance.runtime_properties['security_enabled'] = security_enabled
     ctx.instance.runtime_properties['ssl_enabled'] = ssl_enabled
 
-    if security_enabled:
-        # agent access-control settings
-        agents_rest_username = agent_config['rest_username']
-        agents_rest_password = agent_config['rest_password']
-        ctx.instance.runtime_properties['agents_rest_username'] = \
-            agents_rest_username
-        ctx.instance.runtime_properties['agents_rest_password'] = \
-            agents_rest_password
-        ctx.logger.info('agents_rest_username: {0}'.
-                        format(agents_rest_username))
-
     if security_enabled and ssl_enabled:
         # manager SSL settings
         ctx.logger.info('SSL is enabled, setting rest port to 443 and '
@@ -81,11 +72,19 @@ def _configure_security_properties():
         ctx.instance.runtime_properties['rest_port'] = 80
         ctx.instance.runtime_properties['rest_protocol'] = 'http'
 
+    # set file-server protocol and port
+    ctx.instance.runtime_properties['file_server_protocol'] = \
+        ctx.instance.runtime_properties['rest_protocol']
+    ctx.instance.runtime_properties['file_server_port'] = 53229
+
 
 def main():
     if utils.is_upgrade:
         utils.create_upgrade_snapshot()
-    _disable_requiretty()
+    # TTY has already been disabled. Rollback may not have the script to
+    # disable TTY since it has been introduced only on 3.4.1
+    if not utils.is_rollback:
+        _disable_requiretty()
     _configure_security_properties()
 
 main()

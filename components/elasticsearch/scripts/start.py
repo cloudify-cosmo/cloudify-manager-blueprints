@@ -12,6 +12,11 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+ctx.download_resource(
+        join('components', 'elasticsearch', 'scripts', 'es_upgrade_utils.py'),
+        join(dirname(__file__), 'es_upgrade_utils.py'))
+import es_upgrade_utils  # NOQA
+
 ES_SERVICE_NAME = 'elasticsearch'
 ctx_properties = utils.ctx_factory.get(ES_SERVICE_NAME)
 ES_ENDPOINT_IP = ctx_properties['es_endpoint_ip']
@@ -46,14 +51,22 @@ def check_index_exists(url, index_name='cloudify_storage'):
             ctx.abort_operation('Invalid ES response: {0}'.format(e))
 
 
-if not ES_ENDPOINT_IP:
-    ctx.logger.info('Starting Elasticsearch Service...')
-    utils.start_service(ES_SERVICE_NAME, append_prefix=False)
-    ES_ENDPOINT_IP = '127.0.0.1'
-    utils.systemd.verify_alive(ES_SERVICE_NAME, append_prefix=False)
+def main():
+    if not ES_ENDPOINT_IP:
+        ctx.logger.info('Starting Elasticsearch Service...')
+        utils.start_service(ES_SERVICE_NAME, append_prefix=False)
+        es_endpoint_ip = '127.0.0.1'
+        utils.systemd.verify_alive(ES_SERVICE_NAME, append_prefix=False)
+    else:
+        es_endpoint_ip = ES_ENDPOINT_IP
+    elasticsearch_url = 'http://{0}:{1}/'.format(es_endpoint_ip,
+                                                 ES_ENDPOINT_PORT)
+    utils.verify_service_http(ES_SERVICE_NAME, elasticsearch_url,
+                              _examine_status_response)
+    check_index_exists(elasticsearch_url)
+    if utils.is_upgrade or utils.is_rollback:
+        # restore the 'provider_context' and 'snapshot' elements from file
+        # created in the 'create.py' script.
+        es_upgrade_utils.restore_upgrade_data(es_endpoint_ip, ES_ENDPOINT_PORT)
 
-elasticsearch_url = 'http://{0}:{1}/'.format(ES_ENDPOINT_IP,
-                                             ES_ENDPOINT_PORT)
-utils.verify_service_http(ES_SERVICE_NAME, elasticsearch_url,
-                          _examine_status_response)
-check_index_exists(elasticsearch_url)
+main()
