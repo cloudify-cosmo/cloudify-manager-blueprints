@@ -180,15 +180,6 @@ inputs:
       - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.4/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.4/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.5m1/types.yaml', 'destination_path': '/spec/cloudify/3.5m1/types.yaml'}
 
-  #############################
-  # Telecom Edition
-  #############################
-  telecom_edition:
-    description: >
-      Set this to true if you want Telecom Edition
-    type: boolean
-    default: false
-
 dsl_definitions:
   azure_configuration: &azure_configuration
     subscription_id: { get_input: subscription_id }

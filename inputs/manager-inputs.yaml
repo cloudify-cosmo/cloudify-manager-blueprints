@@ -439,3 +439,12 @@ inputs:
   install_python_compilers:
     type: boolean
     default: false
+
+  #############################
+  # Telecom Edition
+  #############################
+  telecom_edition:
+    description: >
+      Set this to true if you want Telecom Edition
+    type: boolean
+    default: false
