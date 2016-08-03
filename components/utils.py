@@ -178,25 +178,26 @@ def remove(path, ignore_failure=False):
 
 
 def _generate_ssl_cert(cert_filename, key_filename, cn):
+    with tempfile.NamedTemporaryFile(delete=False) as conf_file:
+        conf_file.write("""
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions=SAN
 
-    alt_name = 'IP:{0}'.format(cn)
+[ req_distinguished_name ]
+commonName={ip}
 
-    fd, conf_file = tempfile.mkstemp()
-    os.close(fd)
-    with open(conf_file, 'w') as f:
-        f.write('subjectAltName={0}\n'
-                'distinguished_name = req_distinguished_name\n'
-                '[ req_distinguished_name ]'
-                'commonName={1}'.format(alt_name, cn))
+[SAN]
+subjectAltName=IP:{ip},DNS:{ip}
+""".format(ip=cn))
 
-    # building openssl command
-    command_arr = shlex.split('openssl req -x509 -nodes -newkey rsa:2048 '
-                              '-out {0} -keyout {1} -days 3650 -batch '
-                              '-subj \'/CN={2}\' -config {3}'.
-                              format(cert_filename, key_filename, cn,
-                                     conf_file))
-    sudo(command_arr)
-    os.remove(conf_file)
+    req_command = shlex.split('openssl req -x509 -nodes -out {0} '
+                              '-newkey rsa:2048 -keyout {1} -config {2} '
+                              '-subj \'/CN={3}\''.
+                              format(cert_filename, key_filename,
+                                     conf_file.name, cn))
+    sudo(req_command)
+    os.remove(conf_file.name)
 
 
 def deploy_ssl_cert_and_key(cert_filename, key_filename, cn):
