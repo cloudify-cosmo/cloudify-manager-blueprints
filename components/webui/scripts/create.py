@@ -30,7 +30,7 @@ def install_webui():
 
     # is this a telecom edition?
     ctx.instance.runtime_properties['ui_variation'] = \
-        'telecom' if ctx_properties['telecom_edition'] else ''
+        'telecom' if ctx_properties.get('telecom_edition') else ''
 
     nodejs_home = '/opt/nodejs'
     webui_home = '/opt/cloudify-ui'
