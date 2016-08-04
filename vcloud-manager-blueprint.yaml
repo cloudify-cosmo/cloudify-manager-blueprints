@@ -722,7 +722,7 @@ node_templates:
   #     - type: cloudify.relationships.depends_on
   #       target: nginx
   #     - type: cloudify.relationships.depends_on
-  #       target: restservice
+  #       target: rest_service
 
 
 plugins:
