@@ -745,7 +745,7 @@ def chown(user, group, path):
 
 
 def ln(source, target, params=None):
-    ctx.logger.debug('Softlinking {0} to {1} with params {2}'.format(
+    ctx.logger.debug('Linking {0} to {1} with params {2}'.format(
         source, target, params))
     command = ['ln']
     if params:

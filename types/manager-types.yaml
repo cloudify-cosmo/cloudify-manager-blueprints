@@ -401,6 +401,57 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
+  manager.nodes.Postgresql:
+    derived_from: cloudify.nodes.DBMS
+    properties:
+      libxslt_rpm_url:
+        description: libxslt rpm URL
+        type: string
+        default: { get_input: libxslt_rpm_url }
+      ps_rpm_url:
+        description: postgresql95 rpm URL
+        type: string
+        default: { get_input: postgresql95_rpm_url }
+      ps_contrib_rpm_url:
+        description: postgresql95 contrib rpm URL
+        type: string
+        default: { get_input: postgresql95_contrib_rpm_url }
+      ps_libs_rpm_url:
+        description: postgresql95 libs rpm URL
+        type: string
+        default: { get_input: postgresql95_libs_rpm_url }
+      ps_server_rpm_url:
+        description: postgresql95 server rpm URL
+        type: string
+        default: { get_input: postgresql95_server_rpm_url }
+      ps_devel_rpm_url:
+        description: postgresql95 devel rpm URL
+        type: string
+        default: { get_input: postgresql95_devel_rpm_url }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/postgresql/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/postgresql/scripts/start.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/postgresql/scripts/stop.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
   manager.nodes.Logstash:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
