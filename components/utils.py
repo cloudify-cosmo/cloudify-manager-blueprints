@@ -1495,11 +1495,12 @@ def _is_version_greater_than_curr(new_version):
 
 # rollback resources will be removed only if the last upgrade passed
 # successfully and the 'upgrade to' version is greater than the current version
-# # This function MUST be invoked by the first node and before upgrade snapshot
+# This function MUST be invoked by the first node and before upgrade snapshot
 # is created.
 def clean_rollback_resources_if_necessary():
     if not is_upgrade:
         return
+
     new_version = ctx.node.properties['manager_version']
     is_upgrade_version = _is_version_greater_than_curr(new_version)
     # The 'upgrade_success' flag will only be set if the previous upgrade
@@ -1509,6 +1510,13 @@ def clean_rollback_resources_if_necessary():
         ctx.logger.info('Preparing manager for upgrade...')
         # Clean manager rollback resources to make room for the new upgrade.
         _clean_rollback_data()
+
+
+def clean_upgrade_resources_if_necessary():
+    if is_upgrade:
+        if os.path.isdir(ES_UPGRADE_DUMP_PATH):
+            ctx.logger.info('Removing ES provider context dump...')
+            remove(ES_UPGRADE_DUMP_PATH)
 
 
 def _clean_rollback_data():
@@ -1524,9 +1532,6 @@ def _clean_rollback_data():
     if os.path.isdir(AGENTS_ROLLBACK_PATH):
         ctx.logger.info('Removing rollback agents...')
         remove(AGENTS_ROLLBACK_PATH)
-    if os.path.isdir(ES_UPGRADE_DUMP_PATH):
-        ctx.logger.info('Removing ES provider context dump...')
-        remove(ES_UPGRADE_DUMP_PATH)
     if os.path.isfile(UPGRADE_METADATA_FILE):
         ctx.logger.info('Removing upgrade metadata...')
         remove(UPGRADE_METADATA_FILE)

@@ -28,6 +28,7 @@ import utils  # NOQA
 
 NODE_NAME = 'manager-config'
 
+utils.clean_upgrade_resources_if_necessary()
 # This MUST be invoked by the first node, before upgrade snapshot is created.
 utils.clean_rollback_resources_if_necessary()
 

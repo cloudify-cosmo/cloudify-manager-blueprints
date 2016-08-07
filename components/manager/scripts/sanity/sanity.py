@@ -284,4 +284,3 @@ if utils.is_upgrade:
 if utils.is_rollback:
     # remove data created by the upgrade process.
     utils.remove(utils.UPGRADE_METADATA_FILE)
-    utils.remove(utils.ES_UPGRADE_DUMP_PATH)
