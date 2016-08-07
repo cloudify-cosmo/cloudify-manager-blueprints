@@ -255,16 +255,18 @@ def _get_url_prefix():
 
 
 def perform_sanity():
-    ctx.logger.info('Starting Manager sanity check...')
-    _prepare_sanity_app()
-    ctx.logger.info('Installing sanity app...')
-    exec_id = _install_sanity_app()
-    ctx.logger.info('Sanity app installed. Performing sanity test...')
-    _assert_webserver_running()
-    _assert_logs_and_events(exec_id)
-    ctx.logger.info('Manager sanity check successful, '
-                    'cleaning up sanity resources.')
-    _cleanup_sanity()
+    try:
+        ctx.logger.info('Starting Manager sanity check...')
+        _prepare_sanity_app()
+        ctx.logger.info('Installing sanity app...')
+        exec_id = _install_sanity_app()
+        ctx.logger.info('Sanity app installed. Performing sanity test...')
+        _assert_webserver_running()
+        _assert_logs_and_events(exec_id)
+        ctx.logger.info('Manager sanity check successful, '
+                        'cleaning up sanity resources.')
+    finally:
+        _cleanup_sanity()
 
 # the 'run_sanity' parameter is injected explicitly from the cli as an
 # operation parameter with 'true' as its value.
