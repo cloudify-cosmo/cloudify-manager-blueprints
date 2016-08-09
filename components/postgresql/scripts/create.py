@@ -49,6 +49,7 @@ def _init_postgresql():
     ctx.logger.info('Setting PostgreSQL logs path...')
     ps_95_logs_path = "/var/lib/pgsql/9.5/data/pg_log"
     ps_logs_path = "/var/log/cloudify/postgresql"
+    utils.mkdir(ps_logs_path)
     utils.ln(source=ps_95_logs_path, target=ps_logs_path, params='-s')
 
 
