@@ -417,8 +417,6 @@ node_templates:
 
   webui:
     type: manager.nodes.WebUI
-    properties:
-      telecom_edition: { get_input: telecom_edition }
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
