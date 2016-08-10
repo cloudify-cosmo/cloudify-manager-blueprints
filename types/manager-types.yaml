@@ -891,7 +891,7 @@ node_types:
       telecom_edition:
         description: Use Telecom Edition?
         type: boolean
-        default: false
+        default: { get_input: telecom_edition }
       webui_tar_source_url:
         description: Cloudify's WebUI Source URL
         type: string
