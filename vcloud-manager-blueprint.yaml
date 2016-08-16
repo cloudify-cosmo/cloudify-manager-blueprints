@@ -828,6 +828,19 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/manager/scripts/vcloud/update-vcloud-vm.sh
+            fabric_env:               
+              user: { get_input: ssh_user }
+              key_filename: { get_input: ssh_key_filename }
+              host_string: { get_attribute: [manager_public_ip, public_ip] }
+              port: { get_input: ssh_port }
+              disable_known_hosts: True
+              always_use_pty: true
 
   manager_configuration:
     type: cloudify.nodes.MyCloudifyManager
@@ -876,7 +889,7 @@ node_templates:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
-            script_path: components/manager/scripts/vcloud/update-vcloud-vm.sh
+            script_path: components/manager/scripts/create_conf.py
             hide_output: &hide_output
               - running
             fabric_env: &vcloud_fabric_env

@@ -967,7 +967,7 @@ node_types:
             manager_user:
               default: { get_input: ssh_user }
             manager_ip:
-              default: { get_attribute: [manager_host, public_ip] }
+              default: { get_attribute: [manager_host, ip] }
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 

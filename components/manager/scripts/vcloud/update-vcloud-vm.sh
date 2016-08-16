@@ -29,3 +29,6 @@ if [ "z$status" == 'zactive' ]; then
 else
     echo "Skipping update firewall, please update rules manually"
 fi
+
+echo "Installing required vcloud system-level dependencies"
+sudo yum install gcc python-devel libxml2-devel libxslt-devel -y
