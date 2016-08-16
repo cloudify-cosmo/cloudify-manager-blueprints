@@ -197,7 +197,7 @@ inputs:
     description: >
       Set this to true if you want Telecom Edition
     type: boolean
-    default: false
+    default: true
 
 dsl_definitions:
   azure_configuration: &azure_configuration
