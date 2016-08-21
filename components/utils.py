@@ -165,6 +165,11 @@ def move(source, destination, rename_only=False):
 
 
 def copy(source, destination):
+    destination_dir = os.path.dirname(destination)
+    if not os.path.exists(destination_dir):
+        ctx.logger.info('Path does not exist: {0}. Creating it...'.
+                        format(destination_dir))
+        sudo(['mkdir', '-p', destination_dir])
     sudo(['cp', '-rp', source, destination])
 
 

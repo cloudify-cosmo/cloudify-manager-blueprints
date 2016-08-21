@@ -310,6 +310,12 @@ user_public_key: ssh-rsa...
 #elasticsearch_clustering_discovery_port: 54329
 
 #############################
+# PostgreSQL Configuration
+#############################
+# You can configure the PostgreSQL database name for cloudify
+#postgresql_db_name: 'cloudify_db'
+
+#############################
 # InfluxDB Configuration
 #############################
 # You can configure an external endpoint of an InfluxDB Cluster to use
