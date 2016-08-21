@@ -13,14 +13,41 @@ PS_SERVICE_NAME = 'postgresql-9.5'
 ctx_properties = utils.ctx_factory.get(PS_SERVICE_NAME)
 
 
-def main():
+def _start_postgres():
     ctx.logger.info('Starting PostgreSQL Service...')
-    utils.start_service(PS_SERVICE_NAME, append_prefix=False)
-    utils.systemd.verify_alive(PS_SERVICE_NAME, append_prefix=False)
+    utils.systemd.stop(service_name=PS_SERVICE_NAME,
+                       append_prefix=False)
+    utils.systemd.start(service_name=PS_SERVICE_NAME,
+                        append_prefix=False)
+    utils.systemd.verify_alive(service_name=PS_SERVICE_NAME,
+                               append_prefix=False)
+
+
+def _create_default_db(db_name, username, password):
+    ctx.logger.info('Going to create default postgresql data: '
+                    '[db: {0}]'.format(db_name))
+    ps_config_dir = 'components/postgresql/config'
+    ps_config_source = join(ps_config_dir, 'create_default_db.sh')
+    ps_config_destination = '/tmp/create_default_db.sh'
+    ctx.download_resource(source=ps_config_source,
+                          destination=ps_config_destination)
+    utils.sudo('chmod +x {0}'.format(ps_config_destination))
+    utils.sudo('su - postgres -c "{cmd} {db} {user} {password}"'
+               .format(cmd=ps_config_destination, db=db_name,
+                       user=username, password=password))
+
+
+def main():
+    db_name = ctx.node.properties['postgresql_db_name']
+    _start_postgres()
+    _create_default_db(db_name=db_name,
+                       username='cloudify',
+                       password='cloudify')
 
     if utils.is_upgrade or utils.is_rollback:
         # restore the 'provider_context' and 'snapshot' elements from file
         # created in the 'create.py' script.
         ctx.logger.error('NOT IMPLEMENTED - need to restore upgrade data')
+
 
 main()

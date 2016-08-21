@@ -20,8 +20,14 @@ import sys
 import urllib2
 import platform
 import subprocess
+from os.path import join, dirname
 
 from cloudify import ctx
+
+ctx.download_resource(
+    join('components', 'utils.py'),
+    join(dirname(__file__), 'utils.py'))
+import utils  # NOQA
 
 
 def _error(message):
@@ -153,6 +159,9 @@ def _validate_supported_distros(supported_distros, supported_versions):
 
 
 def _validate_resources_package_url(manager_resources_package_url):
+    if manager_resources_package_url.startswith(utils.CLOUDIFY_SOURCES_PATH):
+        ctx.logger.info('using local resource package')
+        return
     try:
         urllib2.urlopen(manager_resources_package_url)
     except urllib2.HTTPError as ex:
