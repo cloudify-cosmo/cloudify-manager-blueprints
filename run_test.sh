@@ -4,7 +4,7 @@ if [ $1 == "validate-blueprints" ]; then
   cfy init
   blueprints=`find . -name "*-manager-blueprint.yaml"`
   for blueprint in $blueprints; do
-    cfy blueprints validate -p $blueprint
+    cfy blueprints validate $blueprint
   done
 elif [ $1 == "flake8" ]; then
   flake8 .

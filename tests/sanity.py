@@ -13,18 +13,17 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
-import json
-import logging
 import os
-import urllib2
+import json
 import time
+import logging
+import urllib2
 
 import boto.ec2
-from boto import exception as boto_exception
-
 from retrying import retry
-from fabric.api import settings as fabric_settings
 from fabric.api import run as fabric_run
+from boto import exception as boto_exception
+from fabric.api import settings as fabric_settings
 
 
 REGION = 'us-east-1'
@@ -186,7 +185,7 @@ def run_test(conn, ip_address, key_file_path):
         f.write(inputs)
 
     execute('cfy init')
-    execute('cfy bootstrap -p ../simple-manager-blueprint.yaml '
+    execute('cfy bootstrap ../simple-manager-blueprint.yaml '
             '-i inputs.json --install-plugins')
 
     generated_key_path = '/root/.ssh/key.pem'
@@ -212,16 +211,16 @@ def run_test(conn, ip_address, key_file_path):
     with open('hello-inputs.json', 'w') as f:
         f.write(hello_inputs)
 
-    execute('cfy blueprints upload -b {0} -p '
+    execute('cfy blueprints upload -b {0} '
             'cloudify-hello-world-example/singlehost-blueprint.yaml'.format(
                 BLUEPRINT_ID))
-    execute('cfy deployments create -b {0} -d {1} -i hello-inputs.json'.format(
+    execute('cfy deployments create -b {0} {1} -i hello-inputs.json'.format(
         BLUEPRINT_ID, DEPLOYMENT_ID))
 
     # Sleep some time because of CFY-4066
     lgr.info('Waiting for 15 seconds before executing install workflow...')
     time.sleep(15)
-    execute('cfy executions start -d {0} -w install'.format(DEPLOYMENT_ID))
+    execute('cfy executions start install -d {0}'.format(DEPLOYMENT_ID))
 
     url = 'http://{0}:{1}'.format(ip_address, webserver_port)
     lgr.info('Verifying deployment at {0}'.format(url))
