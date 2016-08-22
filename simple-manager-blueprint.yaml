@@ -346,8 +346,6 @@ node_templates:
         target: rabbitmq
       - type: riemann_to_nginx
         target: nginx
-      - type: cloudify.relationships.depends_on
-        target: manager_configuration
     interfaces:
       cloudify.interfaces.validation:
         creation:
