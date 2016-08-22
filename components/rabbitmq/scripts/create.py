@@ -42,6 +42,8 @@ def _create_user_and_set_permissions(rabbitmq_username,
                     rabbitmq_username, rabbitmq_password])
         utils.sudo(['rabbitmqctl', 'set_permissions',
                     rabbitmq_username, '.*', '.*', '.*'], retries=5)
+        utils.sudo(['rabbitmqctl', 'set_user_tags', rabbitmq_username,
+                    'administrator'])
 
 
 def _set_security(rabbitmq_ssl_enabled,
@@ -110,6 +112,11 @@ def _install_rabbitmq():
     utils.deploy_blueprint_resource(
         '{0}/rabbitmq_ulimit.conf'.format(CONFIG_PATH),
         '/etc/security/limits.d/rabbitmq.conf',
+        RABBITMQ_SERVICE_NAME)
+
+    utils.deploy_blueprint_resource(
+        '{0}/rabbitmq-definitions.json'.format(CONFIG_PATH),
+        '/etc/rabbitmq/definitions.json',
         RABBITMQ_SERVICE_NAME)
 
     utils.systemd.systemctl('daemon-reload')

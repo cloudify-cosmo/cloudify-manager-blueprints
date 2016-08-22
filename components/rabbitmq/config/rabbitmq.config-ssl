@@ -8,5 +8,6 @@
                           {keyfile,   "/etc/rabbitmq/rabbit-priv.pem"},
                           {versions, ['tlsv1.2', 'tlsv1.1']}
                          ]}
-          ]}
+ ]},
+ {rabbitmq_management, [{load_definitions, "/etc/rabbitmq/definitions.json"}]}
 ].

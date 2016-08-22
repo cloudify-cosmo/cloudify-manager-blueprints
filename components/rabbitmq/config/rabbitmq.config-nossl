@@ -1,1 +1,4 @@
-[{rabbit, [{loopback_users, []}]}].
+[
+ {rabbit, [{loopback_users, []}]},
+ {rabbitmq_management, [{load_definitions, "/etc/rabbitmq/definitions.json"}]}
+].
