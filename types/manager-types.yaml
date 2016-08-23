@@ -407,6 +407,10 @@ node_types:
   manager.nodes.Postgresql:
     derived_from: cloudify.nodes.DBMS
     properties:
+      postgresql_db_name:
+        description: postgresql default db name
+        type: string
+        default: { get_input: postgresql_db_name }
       libxslt_rpm_url:
         description: libxslt rpm URL
         type: string
@@ -438,6 +442,13 @@ node_types:
           inputs:
             script_path:
               default: components/postgresql/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/postgresql/scripts/config.sh
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
         start:

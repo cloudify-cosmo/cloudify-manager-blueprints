@@ -385,6 +385,14 @@ inputs:
     default: 54329
 
   #############################
+  # PostgreSQL Inputs
+  #############################
+  postgresql_db_name:
+    description: postgresql default db name
+    type: string
+    default: 'cloudify_db'
+
+  #############################
   # InfluxDB Inputs
   #############################
   influxdb_endpoint_ip:
