@@ -446,6 +446,8 @@ node_templates:
         target: manager_configuration
       - type: restservice_to_elasticsearch
         target: elasticsearch
+      - type: restservice_to_postgresql
+        target: postgresql
       - type: restservice_to_rabbitmq
         target: rabbitmq
 
