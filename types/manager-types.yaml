@@ -435,6 +435,9 @@ node_types:
         description: postgresql95 devel rpm URL
         type: string
         default: { get_input: postgresql95_devel_rpm_url }
+      psycopg2_rpm_url:
+        type: string
+        default: { get_input: python_psycopg2_rpm_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -1087,6 +1090,9 @@ relationships:
     derived_from: cloudify.relationships.connected_to
 
   restservice_to_elasticsearch:
+    derived_from: cloudify.relationships.connected_to
+
+  restservice_to_postgresql:
     derived_from: cloudify.relationships.connected_to
 
   nginx_to_webui:
