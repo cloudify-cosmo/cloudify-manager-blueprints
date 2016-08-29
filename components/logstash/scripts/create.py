@@ -64,13 +64,14 @@ def install_logstash():
     utils.mkdir(logstash_log_path)
     utils.chown('logstash', 'logstash', logstash_log_path)
 
-    ctx.logger.info('Creating systemd unit override...')
+    ctx.logger.debug('Creating systemd unit override...')
     utils.mkdir(logstash_unit_override)
     utils.deploy_blueprint_resource(
         '{0}/restart.conf'.format(CONFIG_PATH),
         '{0}/restart.conf'.format(logstash_unit_override),
         LOGSTASH_SERVICE_NAME)
-    ctx.logger.info('Deploying Logstash conf...')
+
+    ctx.logger.info('Deploying Logstash configuration...')
     utils.deploy_blueprint_resource(
         '{0}/logstash.conf'.format(CONFIG_PATH),
         '{0}/logstash.conf'.format(logstash_conf_path),
@@ -90,7 +91,7 @@ def install_logstash():
     utils.chmod('755', init_file)
     utils.chown('root', 'root', init_file)
 
-    ctx.logger.info('Deploying Logstash sysconfig...')
+    ctx.logger.debug('Deploying Logstash sysconfig...')
     utils.deploy_blueprint_resource(
         '{0}/cloudify-logstash'.format(CONFIG_PATH),
         '/etc/sysconfig/cloudify-logstash',

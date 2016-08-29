@@ -14,8 +14,8 @@ ctx.download_resource(
 import utils  # NOQA
 
 ctx.download_resource(
-        join('components', 'elasticsearch', 'scripts', 'es_upgrade_utils.py'),
-        join(dirname(__file__), 'es_upgrade_utils.py'))
+    join('components', 'elasticsearch', 'scripts', 'es_upgrade_utils.py'),
+    join(dirname(__file__), 'es_upgrade_utils.py'))
 import es_upgrade_utils  # NOQA
 
 
@@ -27,6 +27,7 @@ ctx_properties = utils.ctx_factory.create(ES_SERVICE_NAME)
 
 def _configure_elasticsearch(host, port):
 
+    ctx.logger.info('Configuring Elasticsearch storage index...')
     storage_endpoint = 'http://{0}:{1}/cloudify_storage/'.format(host, port)
     storage_settings = json.dumps({
         "settings": {
@@ -38,11 +39,11 @@ def _configure_elasticsearch(host, port):
         }
     })
 
-    ctx.logger.info('Deleting `cloudify_storage` index if exists...')
+    ctx.logger.debug('Deleting `cloudify_storage` index if exists...')
     if utils.http_request(storage_endpoint, method='GET'):
         utils.http_request(storage_endpoint, method='DELETE')
 
-    ctx.logger.info('Creating `cloudify_storage` index...')
+    ctx.logger.debug('Creating `cloudify_storage` index...')
     utils.http_request(storage_endpoint, storage_settings, 'PUT')
 
     blueprint_mapping_endpoint = storage_endpoint + 'blueprint/_mapping'
@@ -54,7 +55,7 @@ def _configure_elasticsearch(host, port):
         }
     })
 
-    ctx.logger.info('Declaring blueprint mapping...')
+    ctx.logger.debug('Declaring blueprint mapping...')
     utils.http_request(blueprint_mapping_endpoint, blueprint_mapping, 'PUT')
 
     deployment_mapping_endpoint = storage_endpoint + 'deployment/_mapping'
@@ -71,7 +72,7 @@ def _configure_elasticsearch(host, port):
         }
     })
 
-    ctx.logger.info('Declaring deployment mapping...')
+    ctx.logger.debug('Declaring deployment mapping...')
     utils.http_request(deployment_mapping_endpoint, deployment_mapping, 'PUT')
 
     execution_mapping_endpoint = storage_endpoint + 'execution/_mapping'
@@ -83,7 +84,7 @@ def _configure_elasticsearch(host, port):
         }
     })
 
-    ctx.logger.info('Declaring execution mapping...')
+    ctx.logger.debug('Declaring execution mapping...')
     utils.http_request(execution_mapping_endpoint, execution_mapping, 'PUT')
 
     node_mapping_endpoint = storage_endpoint + 'node/_mapping'
@@ -99,7 +100,7 @@ def _configure_elasticsearch(host, port):
         }
     })
 
-    ctx.logger.info('Declaring node mapping...')
+    ctx.logger.debug('Declaring node mapping...')
     utils.http_request(node_mapping_endpoint, node_mapping, 'PUT')
 
     node_instance_mapping_endpoint = \
@@ -113,7 +114,7 @@ def _configure_elasticsearch(host, port):
         }
     })
 
-    ctx.logger.info('Declaring node instance mapping...')
+    ctx.logger.debug('Declaring node instance mapping...')
     utils.http_request(node_instance_mapping_endpoint,
                        node_instance_mapping, 'PUT')
 
@@ -130,7 +131,7 @@ def _configure_elasticsearch(host, port):
         }
     })
 
-    ctx.logger.info('Declaring deployment modification mapping...')
+    ctx.logger.debug('Declaring deployment modification mapping...')
     utils.http_request(
         deployment_modification_mapping_endpoint,
         deployment_modification_mapping, 'PUT')
@@ -149,20 +150,23 @@ def _configure_elasticsearch(host, port):
         }
     })
 
-    ctx.logger.info('Declaring deployment update mapping...')
+    ctx.logger.debug('Declaring deployment update mapping...')
     utils.http_request(
         deployment_update_mapping_endpoint,
         deployment_update_mapping, 'PUT')
 
 
 def _configure_index_rotation():
-    ctx.logger.info('Configuring Elasticsearch Index Rotation cronjob for '
-                    'logstash-YYYY.mm.dd index patterns...')
+    ctx.logger.info('Configurating index rotation...')
+    ctx.logger.debug(
+        'Setting up curator rotation cronjob for logstash-YYYY.mm.dd '
+        'index patterns...')
     utils.deploy_blueprint_resource(
         'components/elasticsearch/scripts/rotate_es_indices',
         '/etc/cron.daily/rotate_es_indices', ES_SERVICE_NAME)
     utils.chown('root', 'root', '/etc/cron.daily/rotate_es_indices')
-    # VALIDATE!
+    # TODO: VALIDATE!
+    # TODO: use utils.chmod
     utils.sudo('chmod +x /etc/cron.daily/rotate_es_indices')
 
 
@@ -193,32 +197,32 @@ def _install_elasticsearch():
 
     utils.yum_install(es_source_url, service_name=ES_SERVICE_NAME)
 
-    ctx.logger.info('Chowning {0} by elasticsearch user...'.format(
-        es_logs_path))
+    ctx.logger.info('Configuring Elasticsearch...')
     utils.chown('elasticsearch', 'elasticsearch', es_logs_path)
 
-    ctx.logger.info('Creating systemd unit override...')
+    ctx.logger.debug('Creating systemd unit override...')
     utils.mkdir(es_unit_override)
     utils.deploy_blueprint_resource(
         os.path.join(CONFIG_PATH, 'restart.conf'),
         os.path.join(es_unit_override, 'restart.conf'), ES_SERVICE_NAME)
 
-    ctx.logger.info('Deploying Elasticsearch Configuration...')
+    ctx.logger.debug('Deploying Elasticsearch configuration file...')
     utils.deploy_blueprint_resource(
         os.path.join(CONFIG_PATH, 'elasticsearch.yml'),
         os.path.join(es_conf_path, 'elasticsearch.yml'), ES_SERVICE_NAME)
     utils.chown('elasticsearch', 'elasticsearch',
                 os.path.join(es_conf_path, 'elasticsearch.yml'))
 
-    ctx.logger.info('Deploying elasticsearch logging configuration file...')
+    ctx.logger.debug(
+        'Deploying elasticsearch logging configuration file...')
     utils.deploy_blueprint_resource(
         os.path.join(CONFIG_PATH, 'logging.yml'),
         os.path.join(es_conf_path, 'logging.yml'), ES_SERVICE_NAME)
     utils.chown('elasticsearch', 'elasticsearch',
                 os.path.join(es_conf_path, 'logging.yml'))
 
-    ctx.logger.info('Creating Elasticsearch scripts folder and '
-                    'additional external Elasticsearch scripts...')
+    ctx.logger.debug('Creating Elasticsearch scripts folder and '
+                     'additional external Elasticsearch scripts...')
     utils.mkdir(es_scripts_path)
     utils.deploy_blueprint_resource(
         os.path.join(CONFIG_PATH, 'scripts', 'append.groovy'),
@@ -226,7 +230,7 @@ def _install_elasticsearch():
         ES_SERVICE_NAME
     )
 
-    ctx.logger.info('Setting Elasticsearch Heap Size...')
+    ctx.logger.debug('Setting Elasticsearch Heap Size...')
     # we should treat these as templates.
     utils.replace_in_file(
         '(?:#|)ES_HEAP_SIZE=(.*)',
@@ -234,13 +238,13 @@ def _install_elasticsearch():
         '/etc/sysconfig/elasticsearch')
 
     if es_java_opts:
-        ctx.logger.info('Setting additional JAVA_OPTS...')
+        ctx.logger.debug('Setting additional JAVA_OPTS...')
         utils.replace_in_file(
             '(?:#|)ES_JAVA_OPTS=(.*)',
             'ES_JAVA_OPTS={0}'.format(es_java_opts),
             '/etc/sysconfig/elasticsearch')
 
-    ctx.logger.info('Setting Elasticsearch logs path...')
+    ctx.logger.debug('Setting Elasticsearch logs path...')
     utils.replace_in_file(
         '(?:#|)LOG_DIR=(.*)',
         'LOG_DIR={0}'.format(es_logs_path),
@@ -327,8 +331,8 @@ def main():
                         '{0}:{1}...'.format(es_endpoint_ip, es_endpoint_port))
         time.sleep(5)
         utils.wait_for_port(es_endpoint_port, es_endpoint_ip)
-        ctx.logger.info('Checking if \'cloudify_storage\' '
-                        'index already exists...')
+        ctx.logger.info("Checking if 'cloudify_storage' "
+                        "index already exists...")
 
         if utils.http_request('http://{0}:{1}/cloudify_storage'.format(
                 es_endpoint_ip, es_endpoint_port), method='HEAD').code == 200:

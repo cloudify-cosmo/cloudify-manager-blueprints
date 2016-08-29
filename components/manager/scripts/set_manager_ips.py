@@ -24,14 +24,14 @@ source_runtime_props = ctx.source.instance.runtime_properties
 
 # set private ip according to the host ip (backward compatible)
 private_ip = ctx.target.instance.host_ip
-ctx.logger.info('Setting manager_configuration private ip to: {0}'.
-                format(private_ip))
+ctx.logger.debug('Setting manager_configuration private ip to: {0}'.format(
+    private_ip))
 source_runtime_props['private_ip'] = private_ip
 
 # set public ip from input to this script
 public_ip = inputs['public_ip']
-ctx.logger.info('Setting manager_configuration public ip to: {0}'.
-                format(public_ip))
+ctx.logger.debug('Setting manager_configuration public ip to: {0}'.format(
+    public_ip))
 source_runtime_props['public_ip'] = public_ip
 
 
@@ -41,19 +41,20 @@ agent_configuration = ctx.source.node.properties['cloudify']['cloudify_agent']
 broker_ip = agent_configuration.get('broker_ip', '').strip()
 if broker_ip:
     source_runtime_props['broker_ip'] = broker_ip
-    ctx.logger.info('broker_ip set to: {0}'.format(
+    ctx.logger.debug('broker_ip set to: {0}'.format(
         source_runtime_props['broker_ip']))
 else:
     broker_ip = private_ip
     source_runtime_props['broker_ip'] = broker_ip
-    ctx.logger.info('broker_ip is empty, setting to private ip: {0}'.
-                    format(private_ip))
+    ctx.logger.debug(
+        'broker_ip is empty, setting to private ip: '
+        '{0}'.format(private_ip))
 
 
 # set the internal REST host according to the REST internal endpoint type
 # (public ip / private ip)
 rest_host_internal_endpoint_type = inputs['rest_host_internal_endpoint_type']
-ctx.logger.info('rest_host_internal_endpoint_type is: {0}'.format(
+ctx.logger.debug('rest_host_internal_endpoint_type is: {0}'.format(
     rest_host_internal_endpoint_type))
 if rest_host_internal_endpoint_type == 'private_ip':
     source_runtime_props['internal_rest_host'] = private_ip
@@ -63,7 +64,7 @@ else:
     raise NonRecoverableError('invalid rest_host_internal_endpoint_type: "{0}"'
                               ', valid values: "public_ip", "private_ip"'.
                               format(rest_host_internal_endpoint_type))
-ctx.logger.info('internal_rest_host set to: {0}'.format(
+ctx.logger.debug('internal_rest_host set to: {0}'.format(
     source_runtime_props['internal_rest_host']))
 
 # set the internal rest host as the file-server host
@@ -74,7 +75,7 @@ source_runtime_props['file_server_host'] = \
 # set the external REST host according to the REST external endpoint type
 # (public ip / private ip)
 rest_host_external_endpoint_type = inputs['rest_host_external_endpoint_type']
-ctx.logger.info('rest_host_external_endpoint_type is: {0}'.format(
+ctx.logger.debug('rest_host_external_endpoint_type is: {0}'.format(
     rest_host_external_endpoint_type))
 if rest_host_external_endpoint_type == 'private_ip':
     source_runtime_props['external_rest_host'] = private_ip
@@ -84,5 +85,5 @@ else:
     raise NonRecoverableError('invalid rest_host_external_endpoint_type: "{0}"'
                               ', valid values: "public_ip", "private_ip"'.
                               format(rest_host_external_endpoint_type))
-ctx.logger.info('external_rest_host set to: {0}'.format(
+ctx.logger.debug('external_rest_host set to: {0}'.format(
     source_runtime_props['external_rest_host']))

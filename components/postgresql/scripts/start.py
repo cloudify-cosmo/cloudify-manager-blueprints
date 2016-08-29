@@ -24,14 +24,18 @@ def _start_postgres():
 
 
 def _create_default_db(db_name, username, password):
-    ctx.logger.info('Going to create default postgresql data: '
-                    '[db: {0}]'.format(db_name))
+    ctx.logger.info('Creating default postgresql database: {0}...'.format(
+        db_name))
+    # TODO: join...
     ps_config_dir = 'components/postgresql/config'
     ps_config_source = join(ps_config_dir, 'create_default_db.sh')
+    # TODO: Replace with tempfile.gettempdir() and join
     ps_config_destination = '/tmp/create_default_db.sh'
     ctx.download_resource(source=ps_config_source,
                           destination=ps_config_destination)
+    # TODO: Use utils.chmod...
     utils.sudo('chmod +x {0}'.format(ps_config_destination))
+    # TODO: Can't we use a rest call here? Is there such a thing?
     utils.sudo('su - postgres -c "{cmd} {db} {user} {password}"'
                .format(cmd=ps_config_destination, db=db_name,
                        user=username, password=password))

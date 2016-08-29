@@ -133,13 +133,13 @@ def deploy_ssl_certificate(private_or_public, destination, group, cert):
     else:
         ctx.abort_operation("Certificates may only be 'private' or 'public', "
                             "not {0}".format(private_or_public))
-    ctx.logger.info(
+    ctx.logger.debug(
         "Deploying {0} SSL certificate in {1} for group {2}".format(
             private_or_public, destination, group))
     sudo_write_to_file(cert, destination)
-    ctx.logger.info("Setting permissions ({0}) and ownership ({1}) of SSL "
-                    "certificate at {2}".format(
-                        permissions, ownership, destination))
+    ctx.logger.debug('Setting permissions ({0}) and ownership ({1}) of '
+                     'SSL certificate at {2}'.format(
+                         permissions, ownership, destination))
     chmod(permissions, destination)
     sudo('chown {0} {1}'.format(ownership, destination))
 
@@ -167,8 +167,9 @@ def move(source, destination, rename_only=False):
 def copy(source, destination):
     destination_dir = os.path.dirname(destination)
     if not os.path.exists(destination_dir):
-        ctx.logger.info('Path does not exist: {0}. Creating it...'.
-                        format(destination_dir))
+        ctx.logger.debug(
+            'Path does not exist: {0}. Creating it...'.format(
+                destination_dir))
         sudo(['mkdir', '-p', destination_dir])
     sudo(['cp', '-rp', source, destination])
 
@@ -178,8 +179,8 @@ def remove(path, ignore_failure=False):
         ctx.logger.debug('Removing {0}...'.format(path))
         sudo(['rm', '-rf', path], ignore_failures=ignore_failure)
     else:
-        ctx.logger.info('Path does not exist: {0}. Skipping...'
-                        .format(path))
+        ctx.logger.debug(
+            'Path does not exist: {0}. Skipping...'.format(path))
 
 
 def _generate_ssl_cert(cert_filename, key_filename, cn):
@@ -224,8 +225,9 @@ def deploy_ssl_cert_and_key(cert_filename, key_filename, cn):
     key_target_path = os.path.join(SSL_CERTS_TARGET_DIR, key_filename)
     try:
         # trying to deploy pre-existing certificates
-        ctx.logger.info('Deploying SSL certificate "{0}" and SSL private '
-                        'key "{1}"...'.format(cert_filename, key_filename))
+        ctx.logger.info(
+            'Deploying SSL certificate "{0}" and SSL private '
+            'key "{1}"...'.format(cert_filename, key_filename))
         deploy_blueprint_resource(user_supplied_cert_path,
                                   cert_target_path,
                                   NGINX_SERVICE_NAME,
@@ -239,9 +241,10 @@ def deploy_ssl_cert_and_key(cert_filename, key_filename, cn):
     except subprocess.CalledProcessError as e:
         if "No such file or directory" in e.stderr:
             # pre-existing cert not found, generating new cert
-            ctx.logger.info('Generating SSL certificate "{0}" and SSL private '
-                            'key "{1}" for CN "{2}"...'.
-                            format(cert_filename, key_filename, cn))
+            ctx.logger.info(
+                'Generating SSL certificate "{0}" and SSL private '
+                'key "{1}" for CN "{2}"...'.format(
+                    cert_filename, key_filename, cn))
             _generate_ssl_cert(cert_target_path, key_target_path, cn)
         else:
             raise
@@ -282,7 +285,7 @@ def install_python_package(source, venv=''):
 
 def get_file_content(file_path):
     """
-    using sudo to copy the file to a temp folder, to allow access to the file
+    Using sudo to copy the file to a temp folder, to allow access to the file
     even if it's in a restricted directory (e.g. '/root').
     Then, chmoding the file so the current user can read it.
     :param file_path: the path to the file
@@ -310,7 +313,7 @@ def curl_download_with_retries(source, destination):
     curl_cmd.extend(['--location', source])
     curl_cmd.append('--create-dir')
     curl_cmd.extend(['--output', destination])
-    ctx.logger.info('curling: {0}'.format(' '.join(curl_cmd)))
+    ctx.logger.debug('curling: {0}'.format(' '.join(curl_cmd)))
     run(curl_cmd)
 
 
@@ -321,7 +324,8 @@ def download_file(url, destination=''):
         os.close(fd)
 
     if not os.path.isfile(destination):
-        ctx.logger.info('Downloading {0} to {1}...'.format(url, destination))
+        ctx.logger.info('Downloading {0} to {1}...'.format(
+            url, destination))
         try:
             final_url = urllib.urlopen(url).geturl()
             if final_url != url:
@@ -332,7 +336,7 @@ def download_file(url, destination=''):
         except:
             curl_download_with_retries(url, destination)
     else:
-        ctx.logger.info('File {0} already exists...'.format(destination))
+        ctx.logger.debug('File {0} already exists...'.format(destination))
     return destination
 
 
@@ -429,8 +433,9 @@ def wait_for_port(port, host='localhost'):
 
     for tries in range(24):
         if not is_port_open(port, host=host):
-            ctx.logger.info('{0}:{1} is not available yet, '
-                            'retrying... ({2}/24)'.format(host, port, counter))
+            ctx.logger.info(
+                '{0}:{1} is not available yet, retrying... '
+                '({2}/24)'.format(host, port, counter))
             time.sleep(2)
             counter += 1
             continue
@@ -482,10 +487,12 @@ def yum_install(source, service_name):
         source_path = download_cloudify_resource(source, service_name)
 
         rpm_handler = RpmPackageHandler(source_path)
-        ctx.logger.info('Checking whether {0} is already installed...'.format(
-            source_path))
+        ctx.logger.info(
+            'Checking whether {0} is already installed...'.format(
+                source_path))
         if rpm_handler.is_rpm_installed():
-            ctx.logger.info('Package {0} is already installed.'.format(source))
+            ctx.logger.debug('Package {0} is already installed.'.format(
+                source))
             return
 
         # removes any existing versions of the package that do not match
@@ -495,9 +502,9 @@ def yum_install(source, service_name):
         installed = run(['yum', '-q', 'list', 'installed', source_path],
                         ignore_failures=True)
         if installed.returncode == 0:
-            ctx.logger.info('Package {0} is already installed.'.format(source))
+            ctx.logger.debug('Package {0} is already installed.'.format(
+                source))
             return
-
     ctx.logger.info('yum installing {0}...'.format(source_path))
     sudo(['yum', 'install', '-y', source_path])
 
@@ -513,8 +520,9 @@ class RpmPackageHandler(object):
         """
         package_name = self.get_rpm_package_name()
         if self._is_package_installed(package_name):
-            ctx.logger.info('Removing existing package sources for package '
-                            'with name: {0}'.format(package_name))
+            ctx.logger.debug(
+                'Removing existing package sources for package '
+                'with name: {0}'.format(package_name))
             sudo(['rpm', '--noscripts', '-e', package_name])
 
     @staticmethod
@@ -573,14 +581,13 @@ class SystemD(object):
         env_src = "components/{0}/config/{1}".format(service_name, sid)
         srv_src = "components/{0}/config/{1}.service".format(service_name, sid)
 
-        ctx.logger.info('Deploying systemd EnvironmentFile...')
+        ctx.logger.debug('Deploying systemd EnvironmentFile...')
         deploy_blueprint_resource(env_src, env_dst, service_name,
                                   render=render)
-        ctx.logger.info('Deploying systemd .service file...')
+        ctx.logger.debug('Deploying systemd .service file...')
         deploy_blueprint_resource(srv_src, srv_dst, service_name,
                                   render=render)
-
-        ctx.logger.info('Enabling systemd .service...')
+        ctx.logger.debug('Enabling systemd .service...')
         self.systemctl('enable', '{0}.service'.format(sid))
         self.systemctl('daemon-reload')
 
@@ -604,27 +611,30 @@ class SystemD(object):
     def enable(self, service_name, retries=0, append_prefix=True):
         full_service_name = self._get_full_service_name(service_name,
                                                         append_prefix)
-        ctx.logger.info('Enabling systemd service {0}...'
-                        .format(full_service_name))
+        ctx.logger.debug('Enabling systemd service {0}...'.format(
+            full_service_name))
         self.systemctl('enable', service_name, retries)
 
     def start(self, service_name, retries=0, append_prefix=True):
         full_service_name = self._get_full_service_name(service_name,
                                                         append_prefix)
-        ctx.logger.info('Starting systemd service {0}...'
-                        .format(full_service_name))
+        ctx.logger.debug('Starting systemd service {0}...'.format(
+            full_service_name))
         self.systemctl('start', full_service_name, retries)
 
     def stop(self, service_name, retries=0, append_prefix=True,
              ignore_failure=False):
         full_service_name = self._get_full_service_name(service_name,
                                                         append_prefix)
-        ctx.logger.info('Stopping systemd service {0}...'
-                        .format(full_service_name))
+        ctx.logger.debug('Stopping systemd service {0}...'.format(
+            full_service_name))
         self.systemctl('stop', full_service_name, retries,
                        ignore_failure=ignore_failure)
 
-    def restart(self, service_name, retries=0, ignore_failure=False,
+    def restart(self,
+                service_name,
+                retries=0,
+                ignore_failure=False,
                 append_prefix=True):
         full_service_name = self._get_full_service_name(service_name,
                                                         append_prefix)
@@ -638,7 +648,7 @@ class SystemD(object):
 
     def verify_alive(self, service_name, append_prefix=True):
         if self.is_alive(service_name, append_prefix):
-            ctx.logger.info('{0} is running'.format(service_name))
+            ctx.logger.debug('{0} is running'.format(service_name))
         else:
             ctx.abort_operation('{0} is not running'.format(service_name))
 
@@ -656,7 +666,7 @@ def replace_in_file(this, with_this, in_here):
     """Replaces all occurences of the regex in all matches
     from a file with a specific value.
     """
-    ctx.logger.info('Replacing {0} with {1} in {2}...'.format(
+    ctx.logger.debug('Replacing {0} with {1} in {2}...'.format(
         this, with_this, in_here))
     with open(in_here) as f:
         content = f.read()
@@ -678,14 +688,14 @@ def set_selinux_permissive():
     """
     ctx.logger.info('Checking whether SELinux in enforced...')
     if 'Enforcing' == get_selinux_state():
-        ctx.logger.info('SELinux is enforcing, setting permissive state...')
+        ctx.logger.debug('SELinux is enforcing, setting permissive state...')
         sudo(['setenforce', 'permissive'])
         replace_in_file(
             'SELINUX=enforcing',
             'SELINUX=permissive',
             '/etc/selinux/config')
     else:
-        ctx.logger.info('SELinux is not enforced.')
+        ctx.logger.debug('SELinux is not enforced.')
 
 
 def get_rabbitmq_endpoint_ip(endpoint=None):
@@ -706,9 +716,10 @@ def create_service_user(user, home):
     ctx.logger.info('Checking whether user {0} exists...'.format(user))
     try:
         pwd.getpwnam(user)
-        ctx.logger.info('User {0} already exists...'.format(user))
+        ctx.logger.debug('User {0} already exists...'.format(user))
     except KeyError:
-        ctx.logger.info('Creating user {0}, home: {1}...'.format(user, home))
+        ctx.logger.info('Creating user {0}, home: {1}...'.format(
+            user, home))
         sudo(['useradd', '--shell', '/sbin/nologin', '--home-dir', home,
               '--no-create-home', '--system', user])
 
@@ -725,7 +736,7 @@ def logrotate(service):
         ctx.logger.info('Deploying logrotate hourly cron job...')
         move('/etc/cron.daily/logrotate', '/etc/cron.hourly/logrotate')
 
-    ctx.logger.info('Deploying logrotate config...')
+    ctx.logger.debug('Deploying logrotate config...')
     config_file_source = 'components/{0}/config/logrotate'.format(service)
     logrotated_path = '/etc/logrotate.d'
     config_file_destination = os.path.join(logrotated_path, service)
@@ -740,12 +751,13 @@ def logrotate(service):
 
 
 def chmod(mode, path):
-    ctx.logger.info('chmoding {0}: {1}'.format(path, mode))
+    ctx.logger.debug('chmoding {0}: {1}'.format(path, mode))
     sudo(['chmod', mode, path])
 
 
 def chown(user, group, path):
-    ctx.logger.info('chowning {0} by {1}:{2}...'.format(path, user, group))
+    ctx.logger.debug('chowning {0} by {1}:{2}...'.format(
+        path, user, group))
     sudo(['chown', '-R', '{0}:{1}'.format(user, group), path])
 
 
@@ -769,7 +781,8 @@ def clean_var_log_dir(service):
 
 def untar(source, destination='/tmp', strip=1, skip_old_files=False):
     # TODO: use tarfile instead
-    ctx.logger.debug('Extracting {0} to {1}...'.format(source, destination))
+    ctx.logger.debug('Extracting {0} to {1}...'.format(
+        source, destination))
     tar_command = ['tar', '-xzvf', source, '-C', destination,
                    '--strip={0}'.format(strip)]
     if skip_old_files:
@@ -778,7 +791,8 @@ def untar(source, destination='/tmp', strip=1, skip_old_files=False):
 
 
 def validate_md5_checksum(resource_path, md5_checksum_file_path):
-    ctx.logger.info('Validating md5 checksum for {0}'.format(resource_path))
+    ctx.logger.info('Validating md5 checksum for {0}'.format(
+        resource_path))
     with open(md5_checksum_file_path) as checksum_file:
         original_md5 = checksum_file.read().rstrip('\n\r').split()[0]
 
@@ -805,7 +819,7 @@ def write_to_json_file(content, file_path):
 
 
 def load_manager_config_prop(prop_name):
-    ctx.logger.info('Loading {0} configuration'.format(prop_name))
+    ctx.logger.debug('Loading {0} configuration'.format(prop_name))
     manager_props = ctx_factory.get('manager-config')
     return json.dumps(manager_props[prop_name])
 
@@ -814,8 +828,8 @@ def _is_upgrade():
     # This file is uploaded as part of the upgrade/rollback command.
     status_file_path = '/opt/cloudify/_workflow_state.json'
     if os.path.isfile(status_file_path):
-        ctx.logger.info('Loading workflow status file: {0}'
-                        .format(status_file_path))
+        ctx.logger.debug('Loading workflow status file: {0}'.format(
+            status_file_path))
         with open(status_file_path) as f:
             status = json.load(f)
         return status['is_upgrade']
@@ -889,8 +903,8 @@ class CtxPropertyFactory(object):
 
     def _write_props_to_file(self, ctx_props, service_name):
         dest_file_path = self._get_props_file_path(service_name)
-        ctx.logger.info('Saving {0} input configuration to {1}'
-                        .format(service_name, dest_file_path))
+        ctx.logger.debug('Saving {0} input configuration to {1}'.format(
+            service_name, dest_file_path))
         write_to_json_file(ctx_props, dest_file_path)
 
     def _restore_properties(self, service_name):
@@ -899,8 +913,9 @@ class CtxPropertyFactory(object):
         rollback_props_path = self._get_rollback_props_file_path(
             service_name)
         if os.path.isfile(rollback_props_path):
-            ctx.logger.info('Restoring service input properties for service '
-                            '{0}'.format(service_name))
+            ctx.logger.debug(
+                'Restoring service input properties for service '
+                '{0}'.format(service_name))
             rollback_dir = self.get_rollback_properties_dir(service_name)
             install_dir = self._get_properties_dir(service_name)
             if os.path.isdir(install_dir):
@@ -914,8 +929,8 @@ class CtxPropertyFactory(object):
         rollback_props_path = self._get_rollback_props_file_path(
             service_name)
         if not os.path.isfile(rollback_props_path):
-            ctx.logger.info('Archiving previous input properties for service '
-                            '{0}'.format(service_name))
+            ctx.logger.debug('Archiving previous input properties for '
+                             'service {0}'.format(service_name))
             mkdir(os.path.dirname(rollback_props_path))
             properties_file_path = self._get_props_file_path(service_name)
             move(properties_file_path, rollback_props_path)
@@ -972,8 +987,8 @@ class CtxPropertyFactory(object):
             with open(upgrade_props_file) as f:
                 return json.load(f)
         else:
-            ctx.logger.debug('Failed loading rollback properties. Properties '
-                             'file does not exist.')
+            ctx.logger.debug('Failed loading rollback properties. '
+                             'Properties file does not exist.')
 
 
 class BlueprintResourceFactory(object):
@@ -1065,15 +1080,15 @@ class BlueprintResourceFactory(object):
             install_props = self._get_rollback_resources_json(service_name)
             existing_resource_path = install_props.get(resource_name, '')
             if os.path.isfile(existing_resource_path):
-                ctx.logger.info('Using existing resource for {0}'
-                                .format(resource_name))
+                ctx.logger.debug('Using existing resource for {0}'.format(
+                    resource_name))
                 # update the resource file we hold that might have changed
                 install_resource = self._get_local_file_path(
                     service_name, resource_name)
                 copy(existing_resource_path, install_resource)
             else:
-                ctx.logger.info('User resource {0} not found on {1}'
-                                .format(resource_name, dest))
+                ctx.logger.debug('User resource {0} not found on {1}'.format(
+                    resource_name, dest))
 
         if not os.path.isfile(dest):
             if render:
@@ -1085,16 +1100,16 @@ class BlueprintResourceFactory(object):
     @staticmethod
     def _download_resource(source, dest):
         resource_name = os.path.basename(dest)
-        ctx.logger.info('Downloading resource {0} to {1}'
-                        .format(resource_name, dest))
+        ctx.logger.info('Downloading resource {0} to {1}'.format(
+            resource_name, dest))
         tmp_file = ctx.download_resource(source)
         move(tmp_file, dest)
 
     def _download_resource_and_render(self, source, dest, service_name,
                                       load_ctx):
         resource_name = os.path.basename(dest)
-        ctx.logger.info('Downloading resource {0} to {1}'
-                        .format(resource_name, dest))
+        ctx.logger.debug('Downloading resource {0} to {1}'.format(
+            resource_name, dest))
         if load_ctx:
             params = self._load_node_props(service_name)
             tmp_file = ctx.download_resource_and_render(source, '', params)
@@ -1154,8 +1169,8 @@ class BlueprintResourceFactory(object):
             # node resources have already been moved.
             return
         # restore all rollback resources to their original destination
-        ctx.logger.info('Restoring service {0} configuration resources...'
-                        .format(service_name))
+        ctx.logger.debug('Restoring service {0} configuration resources...'
+                         .format(service_name))
         self._restore_service_configuration(rollback_dir, service_name)
 
         resources_dir = self.get_resources_dir(service_name)
@@ -1182,8 +1197,8 @@ class BlueprintResourceFactory(object):
 
         resources_dir = self.get_resources_dir(service_name)
         if os.path.isdir(resources_dir):
-            ctx.logger.info('Archiving service {0} node resources...'
-                            .format(service_name))
+            ctx.logger.debug('Archiving service {0} node resources...'
+                             .format(service_name))
             move(resources_dir, rollback_dir, rename_only=True)
 
     def get_resources_dir(self, service_name):
@@ -1216,8 +1231,12 @@ def start_service(service_name, append_prefix=True, ignore_restart_fail=False):
         systemd.start(service_name, append_prefix=append_prefix)
 
 
-def http_request(url, data=None, method='PUT',
-                 headers=None, timeout=None, should_fail=False):
+def http_request(url,
+                 data=None,
+                 method='PUT',
+                 headers=None,
+                 timeout=None,
+                 should_fail=False):
     headers = headers or {}
     request = urllib2.Request(url, data=data, headers=headers)
     request.get_method = lambda: method
@@ -1231,10 +1250,10 @@ def http_request(url, data=None, method='PUT',
                 method, url, e.reason))
 
 
-def wait_for_workflow(
-        deployment_id,
-        workflow_id,
-        url_prefix='http://localhost/api/{0}'.format(REST_VERSION)):
+def wait_for_workflow(deployment_id,
+                      workflow_id,
+                      url_prefix='http://localhost/api/{0}'.format(
+                          REST_VERSION)):
     headers = create_maintenance_headers()
     params = urllib.urlencode(dict(deployment_id=deployment_id))
     endpoint = '{0}/executions'.format(url_prefix)
@@ -1325,8 +1344,7 @@ def create_upgrade_snapshot():
     headers = create_maintenance_headers(upgrade_props=False)
     req_headers = headers.copy()
     req_headers.update({'Content-Type': 'application/json'})
-    ctx.logger.info('Creating snapshot with ID {0}'
-                    .format(snapshot_id))
+    ctx.logger.debug('Creating snapshot with ID {0}'.format(snapshot_id))
     res = http_request(url, data=data, method='PUT', headers=req_headers)
     if res.code != 201:
         err = 'Failed creating snapshot {0}. Message: {1}'\
@@ -1335,10 +1353,10 @@ def create_upgrade_snapshot():
         ctx.abort_operation(err)
     execution_id = json.loads(res.readlines()[0])['id']
     _wait_for_execution(execution_id, headers)
-    ctx.logger.info('Snapshot with ID {0} created successfully'
-                    .format(snapshot_id))
-    ctx.logger.info('Setting snapshot info to upgrade metadata in {0}'.
-                    format(UPGRADE_METADATA_FILE))
+    ctx.logger.debug('Snapshot with ID {0} created successfully'
+                     .format(snapshot_id))
+    ctx.logger.debug('Setting snapshot info to upgrade metadata in {0}'
+                     .format(UPGRADE_METADATA_FILE))
     _set_upgrade_data(snapshot_id=snapshot_id)
 
 
@@ -1351,7 +1369,7 @@ def restore_upgrade_snapshot():
     headers = create_maintenance_headers(upgrade_props=True)
     req_headers = headers.copy()
     req_headers.update({'Content-Type': 'application/json'})
-    ctx.logger.info('Restoring snapshot with ID {0}'.format(snapshot_id))
+    ctx.logger.debug('Restoring snapshot with ID {0}'.format(snapshot_id))
     res = http_request(url, data=data, method='POST', headers=req_headers)
     if res.code != 200:
         err = 'Failed restoring snapshot {0}. Message: {1}' \
@@ -1371,14 +1389,11 @@ def _generate_upgrade_snapshot_id():
     if res.code != 200:
         err = 'Failed extracting current manager version. Message: {0}' \
             .format(res.readlines())
-        ctx.logger.error(err)
         ctx.abort_operation(err)
     curr_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     version_data = json.loads(res.read())
-    snapshot_upgrade_name = 'upgrade_snapshot_{0}_build_{1}_{2}' \
-        .format(version_data['version'],
-                version_data['build'],
-                curr_time)
+    snapshot_upgrade_name = 'upgrade_snapshot_{0}_build_{1}_{2}'.format(
+        version_data['version'], version_data['build'], curr_time)
 
     return snapshot_upgrade_name
 
@@ -1412,7 +1427,7 @@ def check_http_response(url, predicate=None, **request_kwargs):
         response = e
 
     if predicate is not None and not predicate(response):
-        raise ValueError(response)
+        raise ValueError('Failed opening url {0} ({1})'.format(url, response))
     return response
 
 
@@ -1494,7 +1509,7 @@ def _is_version_greater_than_curr(new_version):
     if version_res.code != 200:
         ctx.abort_operation('Failed retrieving manager version')
     curr_version = json.loads(version_res.readlines()[0])['version']
-    ctx.logger.info('Current manager version is {0}.'.format(curr_version))
+    ctx.logger.debug('Current manager version is {0}.'.format(curr_version))
     return LooseVersion(new_version) > LooseVersion(curr_version)
 
 
@@ -1512,7 +1527,7 @@ def clean_rollback_resources_if_necessary():
     # execution ended successfully
     latest_workflow_result = _get_upgrade_data().get('upgrade_success')
     if latest_workflow_result and is_upgrade_version:
-        ctx.logger.info('Preparing manager for upgrade...')
+        ctx.logger.debug('Preparing manager for upgrade...')
         # Clean manager rollback resources to make room for the new upgrade.
         _clean_rollback_data()
 
@@ -1520,25 +1535,26 @@ def clean_rollback_resources_if_necessary():
 def clean_upgrade_resources_if_necessary():
     if is_upgrade:
         if os.path.isdir(ES_UPGRADE_DUMP_PATH):
-            ctx.logger.info('Removing ES provider context dump...')
+            ctx.logger.debug('Removing ES provider context dump...')
             remove(ES_UPGRADE_DUMP_PATH)
 
 
 def _clean_rollback_data():
     walk_dir_info = os.walk('/opt/cloudify')
-    ctx.logger.info('Removing any existing rollback resources...')
+    ctx.logger.debug('Removing any existing rollback resources...')
     for details in walk_dir_info:
         dir_path = details[0]
         dir_name = os.path.basename(dir_path)
         if dir_name in ('node_properties_rollback', 'resources_rollback'):
-            ctx.logger.debug('Removing existing rollback resources from {0}...'
-                             .format(dir_path))
+            ctx.logger.debug(
+                'Removing existing rollback resources from {0}...'.format(
+                    dir_path))
             remove(dir_path)
     if os.path.isdir(AGENTS_ROLLBACK_PATH):
-        ctx.logger.info('Removing rollback agents...')
+        ctx.logger.debug('Removing rollback agents...')
         remove(AGENTS_ROLLBACK_PATH)
     if os.path.isfile(UPGRADE_METADATA_FILE):
-        ctx.logger.info('Removing upgrade metadata...')
+        ctx.logger.debug('Removing upgrade metadata...')
         remove(UPGRADE_METADATA_FILE)
 
 
