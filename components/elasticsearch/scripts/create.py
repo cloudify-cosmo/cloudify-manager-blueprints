@@ -14,8 +14,8 @@ ctx.download_resource(
 import utils  # NOQA
 
 ctx.download_resource(
-        join('components', 'elasticsearch', 'scripts', 'es_upgrade_utils.py'),
-        join(dirname(__file__), 'es_upgrade_utils.py'))
+    join('components', 'elasticsearch', 'scripts', 'es_upgrade_utils.py'),
+    join(dirname(__file__), 'es_upgrade_utils.py'))
 import es_upgrade_utils  # NOQA
 
 
@@ -163,7 +163,8 @@ def _configure_index_rotation():
         '/etc/cron.daily/rotate_es_indices', ES_SERVICE_NAME)
     utils.chown('root', 'root', '/etc/cron.daily/rotate_es_indices')
     # VALIDATE!
-    utils.sudo('chmod +x /etc/cron.daily/rotate_es_indices')
+    # TODO: Use utils.chmod
+    utils.run('chmod +x /etc/cron.daily/rotate_es_indices')
 
 
 def _install_elasticsearch():

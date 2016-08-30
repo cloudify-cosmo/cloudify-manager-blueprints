@@ -102,7 +102,8 @@ def sudo(command, retries=0, globx=False, ignore_failures=False):
                ignore_failures=ignore_failures)
 
 
-def sudo_write_to_file(contents, destination):
+def write_to_file(contents, destination):
+    # TODO: Just write to file.
     fd, path = tempfile.mkstemp()
     os.close(fd)
     with open(path, 'w') as f:
@@ -136,29 +137,24 @@ def deploy_ssl_certificate(private_or_public, destination, group, cert):
     ctx.logger.info(
         "Deploying {0} SSL certificate in {1} for group {2}".format(
             private_or_public, destination, group))
-    sudo_write_to_file(cert, destination)
+    write_to_file(cert, destination)
     ctx.logger.info("Setting permissions ({0}) and ownership ({1}) of SSL "
                     "certificate at {2}".format(
                         permissions, ownership, destination))
     chmod(permissions, destination)
-    sudo('chown {0} {1}'.format(ownership, destination))
+    run('chown {0} {1}'.format(ownership, destination))
 
 
-def mkdir(dir, use_sudo=True):
-    if os.path.isdir(dir):
+def mkdir(directory):
+    if os.path.isdir(directory):
         return
-    ctx.logger.debug('Creating Directory: {0}'.format(dir))
-    cmd = ['mkdir', '-p', dir]
-    if use_sudo:
-        sudo(cmd)
-    else:
-        run(cmd)
+    ctx.logger.debug('Creating Directory: {0}'.format(directory))
+    os.makedirs(directory)
 
 
-# idempotent move operation
 def move(source, destination, rename_only=False):
     if rename_only:
-        sudo(['mv', '-T', source, destination])
+        run(['mv', '-T', source, destination])
     else:
         copy(source, destination)
         remove(source)
@@ -166,17 +162,22 @@ def move(source, destination, rename_only=False):
 
 def copy(source, destination):
     destination_dir = os.path.dirname(destination)
-    if not os.path.exists(destination_dir):
-        ctx.logger.info('Path does not exist: {0}. Creating it...'.
-                        format(destination_dir))
-        sudo(['mkdir', '-p', destination_dir])
-    sudo(['cp', '-rp', source, destination])
+    if not os.path.isdir(destination_dir):
+        ctx.logger.info('Path does not exist: {0}. Creating it...'.format(
+            destination_dir))
+        mkdir(destination_dir)
+    run(['cp', '-rp', source, destination])
+    # shutil.copy2(source, destination)
 
 
 def remove(path, ignore_failure=False):
     if os.path.exists(path):
         ctx.logger.debug('Removing {0}...'.format(path))
-        sudo(['rm', '-rf', path], ignore_failures=ignore_failure)
+        run(['rm', '-rf', path], ignore_failures=ignore_failure)
+        # if os.path.isfile(source):
+        #     os.remove(source)
+        # elif os.path.isdir(source):
+        #     shutil.rmtree(source)
     else:
         ctx.logger.info('Path does not exist: {0}. Skipping...'
                         .format(path))
@@ -200,7 +201,7 @@ def _generate_ssl_cert(cert_filename, key_filename, cn):
                               '-subj \'/CN={2}\' -config {3}'.
                               format(cert_filename, key_filename, cn,
                                      conf_file))
-    sudo(command_arr)
+    run(command_arr)
     os.remove(conf_file)
 
 
@@ -273,16 +274,16 @@ def install_python_package(source, venv=''):
     if venv:
         ctx.logger.info('Installing {0} in virtualenv {1}...'.format(
             source, venv))
-        sudo(['{0}/bin/pip'.format(
+        run(['{0}/bin/pip'.format(
             venv), 'install', source, '--upgrade'])
     else:
         ctx.logger.info('Installing {0}'.format(source))
-        sudo(['pip', 'install', source, '--upgrade'])
+        run(['pip', 'install', source, '--upgrade'])
 
 
 def get_file_content(file_path):
     """
-    using sudo to copy the file to a temp folder, to allow access to the file
+    Using sudo to copy the file to a temp folder, to allow access to the file
     even if it's in a restricted directory (e.g. '/root').
     Then, chmoding the file so the current user can read it.
     :param file_path: the path to the file
@@ -499,7 +500,7 @@ def yum_install(source, service_name):
             return
 
     ctx.logger.info('yum installing {0}...'.format(source_path))
-    sudo(['yum', 'install', '-y', source_path])
+    run(['yum', 'install', '-y', source_path])
 
 
 class RpmPackageHandler(object):
@@ -515,7 +516,7 @@ class RpmPackageHandler(object):
         if self._is_package_installed(package_name):
             ctx.logger.info('Removing existing package sources for package '
                             'with name: {0}'.format(package_name))
-            sudo(['rpm', '--noscripts', '-e', package_name])
+            run(['rpm', '--noscripts', '-e', package_name])
 
     @staticmethod
     def _is_package_installed(name):
@@ -556,8 +557,10 @@ class SystemD(object):
         systemctl_cmd = ['systemctl', action]
         if service:
             systemctl_cmd.append(service)
-        return sudo(systemctl_cmd, retries=retries,
-                    ignore_failures=ignore_failure)
+        return run(
+            systemctl_cmd,
+            retries=retries,
+            ignore_failures=ignore_failure)
 
     def configure(self, service_name, render=True):
         """This configures systemd for a specific service.
@@ -679,7 +682,7 @@ def set_selinux_permissive():
     ctx.logger.info('Checking whether SELinux in enforced...')
     if 'Enforcing' == get_selinux_state():
         ctx.logger.info('SELinux is enforcing, setting permissive state...')
-        sudo(['setenforce', 'permissive'])
+        run(['setenforce', 'permissive'])
         replace_in_file(
             'SELINUX=enforcing',
             'SELINUX=permissive',
@@ -709,8 +712,8 @@ def create_service_user(user, home):
         ctx.logger.info('User {0} already exists...'.format(user))
     except KeyError:
         ctx.logger.info('Creating user {0}, home: {1}...'.format(user, home))
-        sudo(['useradd', '--shell', '/sbin/nologin', '--home-dir', home,
-              '--no-create-home', '--system', user])
+        run(['useradd', '--shell', '/sbin/nologin', '--home-dir', home,
+             '--no-create-home', '--system', user])
 
 
 def logrotate(service):
@@ -741,26 +744,42 @@ def logrotate(service):
 
 def chmod(mode, path):
     ctx.logger.info('chmoding {0}: {1}'.format(path, mode))
-    sudo(['chmod', mode, path])
+    run(['chmod', mode, path])
+    # if len(mode) == '3':
+    #     mode = int('0{0}'.format(mode))
+    # os.chmod(path, mode)
 
 
 def chown(user, group, path):
     ctx.logger.info('chowning {0} by {1}:{2}...'.format(path, user, group))
-    sudo(['chown', '-R', '{0}:{1}'.format(user, group), path])
+    run(['chown', '-R', '{0}:{1}'.format(user, group), path])
+    # uid = pwd.getpwnam(user).pw_uid
+    # gid = grp.getgrnam(group).gr_gid
+
+    # if os.path.isdir(path):
+    #     for root, dirs, files in os.walk(path):
+    #         for dirname in dirs:
+    #             os.chown(os.path.join(root, dirname), uid, gid)
+    #         for filename in files:
+    #             os.chown(os.path.join(root, filename), uid, gid)
+    # else:
+    #     os.chown(path, uid, gid)
 
 
 def ln(source, target, params=None):
     ctx.logger.debug('Linking {0} to {1} with params {2}'.format(
         source, target, params))
+
+    # os.symlink(source, target)
     command = ['ln']
     if params:
         command.append(params)
     command.append(source)
     command.append(target)
     if '*' in source or '*' in target:
-        sudo(command, globx=True)
+        run(command, globx=True)
     else:
-        sudo(command)
+        run(command)
 
 
 def clean_var_log_dir(service):
@@ -774,7 +793,7 @@ def untar(source, destination='/tmp', strip=1, skip_old_files=False):
                    '--strip={0}'.format(strip)]
     if skip_old_files:
         tar_command.append('--skip-old-files')
-    sudo(tar_command)
+    run(tar_command)
 
 
 def validate_md5_checksum(resource_path, md5_checksum_file_path):
@@ -1088,6 +1107,7 @@ class BlueprintResourceFactory(object):
         ctx.logger.info('Downloading resource {0} to {1}'
                         .format(resource_name, dest))
         tmp_file = ctx.download_resource(source)
+        # TODO: use dest directory in download-resource
         move(tmp_file, dest)
 
     def _download_resource_and_render(self, source, dest, service_name,
@@ -1101,6 +1121,7 @@ class BlueprintResourceFactory(object):
         else:
             # rendering will be possible only for runtime properties
             tmp_file = ctx.download_resource_and_render(source, '')
+        # TODO: use dest directory in download-resource
         move(tmp_file, dest)
 
     @staticmethod
@@ -1123,6 +1144,7 @@ class BlueprintResourceFactory(object):
             tmp_path = local_filepath
         ctx.logger.debug('Saving {0} under {1}'.format(
             tmp_path, local_resource_path))
+        # TODO: use dest directory in download-resource
         move(tmp_path, local_resource_path)
 
     @staticmethod

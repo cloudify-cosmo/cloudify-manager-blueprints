@@ -31,10 +31,13 @@ def _create_default_db(db_name, username, password):
     ps_config_destination = '/tmp/create_default_db.sh'
     ctx.download_resource(source=ps_config_source,
                           destination=ps_config_destination)
-    utils.sudo('chmod +x {0}'.format(ps_config_destination))
-    utils.sudo('su - postgres -c "{cmd} {db} {user} {password}"'
-               .format(cmd=ps_config_destination, db=db_name,
-                       user=username, password=password))
+    # TODO: Use utils.chmod
+    utils.run('chmod +x {0}'.format(ps_config_destination))
+    utils.run('su - postgres -c "{cmd} {db} {user} {password}"'.format(
+        cmd=ps_config_destination,
+        db=db_name,
+        user=username,
+        password=password))
 
 
 def main():

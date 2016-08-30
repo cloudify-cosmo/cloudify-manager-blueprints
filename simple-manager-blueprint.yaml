@@ -71,6 +71,21 @@ inputs:
     type: boolean
     default: false
 
+
+dsl_definitions:
+  exec_config: &exec_config
+    hide_output:
+      - running
+    use_sudo: true
+    fabric_env:
+      user: { get_input: ssh_user }
+      port: { get_input: ssh_port }
+      key_filename: { get_input: ssh_key_filename }
+      host_string: { get_property: [manager_host, public_ip] }
+      always_use_pty: true
+
+
+
 ######################################################################
 # This is a simple blueprint specific node_type to allow us to define
 # The public_ip of the machine is an accessible property of the host.
@@ -156,22 +171,14 @@ node_templates:
         configure:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/manager/scripts/configure_manager.py
-            hide_output: &hide_output
-              - running
-            fabric_env: &simple_fabric_env
-              user: { get_input: ssh_user }
-              port: { get_input: ssh_port }
-              key_filename: { get_input: ssh_key_filename }
-              host_string: { get_property: [manager_host, public_ip] }
-              always_use_pty: true
       cloudify.interfaces.validation:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/manager/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
     relationships:
       - type: cloudify.relationships.contained_in
@@ -231,9 +238,8 @@ node_templates:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/rabbitmq/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   elasticsearch:
     type: manager.nodes.Elasticsearch
@@ -251,9 +257,8 @@ node_templates:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/elasticsearch/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   postgresql:
     type: manager.nodes.Postgresql
@@ -267,9 +272,8 @@ node_templates:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/postgresql/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   logstash:
     type: manager.nodes.Logstash
@@ -289,9 +293,8 @@ node_templates:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/logstash/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   influxdb:
     type: manager.nodes.InfluxDB
@@ -307,9 +310,8 @@ node_templates:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/influxdb/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   nginx:
     type: manager.nodes.Nginx
@@ -327,9 +329,8 @@ node_templates:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/nginx/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   riemann:
     type: manager.nodes.Riemann
@@ -351,9 +352,8 @@ node_templates:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/riemann/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   rest_service:
     type: manager.nodes.RestService
@@ -377,9 +377,8 @@ node_templates:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/restservice/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   mgmt_worker:
     type: manager.nodes.ManagementWorker
@@ -401,9 +400,8 @@ node_templates:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/mgmtworker/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   amqp_influx:
     type: manager.nodes.AmqpInfluxBroker
@@ -425,9 +423,8 @@ node_templates:
         creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
+            << : *exec_config
             script_path: components/amqpinflux/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   webui:
     type: manager.nodes.WebUI
@@ -473,22 +470,6 @@ node_templates:
         target: manager_resources
       - type: cloudify.relationships.depends_on
         target: amqp_influx
-
-  ######################################################################
-  # Enable this node if you want to have the CLI installed within
-  # the manager. This might aid in debugging problems or just
-  # controlling the manager from within itself.
-  ######################################################################
-  # cli:
-  #   type: manager.nodes.CLI
-  #   relationships:
-  #     - type: cloudify.relationships.contained_in
-  #       target: manager_host
-  #     - type: cloudify.relationships.depends_on
-  #       target: nginx
-  #     - type: cloudify.relationships.depends_on
-  #       target: rest_service
-
 
 plugins:
   cli:

@@ -42,8 +42,9 @@ def _disable_requiretty():
                                     script_dest,
                                     NODE_NAME)
 
-    utils.sudo('chmod +x {0}'.format(script_dest))
-    utils.sudo(script_dest)
+    # TODO: Use utils.chmod
+    utils.run('chmod +x {0}'.format(script_dest))
+    utils.run(script_dest)
 
 
 def _configure_security_properties():

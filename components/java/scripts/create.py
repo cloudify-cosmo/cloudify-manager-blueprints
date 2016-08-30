@@ -30,7 +30,8 @@ def install_java():
     # Java install log is dropped in /var/log.
     # Move it to live with the rest of the cloudify logs
     if os.path.isfile('/var/log/java_install.log'):
-        utils.sudo('mv /var/log/java_install.log /var/log/cloudify')
+        # TODO: Use utils.move
+        utils.run('mv /var/log/java_install.log /var/log/cloudify')
 
 
 install_java()

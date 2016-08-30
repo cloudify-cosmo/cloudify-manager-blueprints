@@ -79,7 +79,7 @@ def install_mgmtworker():
 
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip(
-                rabbit_props.get('rabbitmq_endpoint_ip'))
+            rabbit_props.get('rabbitmq_endpoint_ip'))
 
     # Fix possible injections in json of rabbit credentials
     # See json.org for string spec
