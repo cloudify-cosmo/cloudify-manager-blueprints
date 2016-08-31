@@ -83,6 +83,7 @@ def _deploy_app():
         deployment_id=DEPLOYMENT_ID,
         workflow_id='create_deployment_environment',
         url_prefix=_get_url_prefix(),
+        timeout=60,
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to be created'.format(DEPLOYMENT_ID))
 
