@@ -19,6 +19,7 @@ ctx_properties = utils.ctx_factory.create(AMQPINFLUX_SERVICE_NAME)
 
 
 def _install_optional(amqpinflux_venv):
+    ctx.logger.info('Installing optional modules...')
     amqpinflux_source_url = ctx_properties['amqpinflux_module_source_url']
     # this allows to upgrade amqpinflux if necessary.
     if amqpinflux_source_url:
@@ -53,7 +54,7 @@ def install_amqpinflux():
     rabbit_props = utils.ctx_factory.get('rabbitmq')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip(
-                rabbit_props.get('rabbitmq_endpoint_ip'))
+            rabbit_props.get('rabbitmq_endpoint_ip'))
     ctx.instance.runtime_properties['rabbitmq_username'] = \
         rabbit_props.get('rabbitmq_username')
     ctx.instance.runtime_properties['rabbitmq_password'] = \
@@ -74,12 +75,11 @@ def install_amqpinflux():
     utils.yum_install(amqpinflux_rpm_source_url,
                       service_name=AMQPINFLUX_SERVICE_NAME)
     _install_optional(amqpinflux_venv)
+
+    ctx.logger.info('Configuring AMQPInflux...')
     utils.create_service_user(amqpinflux_user, AMQPINFLUX_HOME)
     _deploy_broker_configuration(amqpinflux_group)
-
-    ctx.logger.info('Fixing permissions...')
     utils.chown(amqpinflux_user, amqpinflux_group, AMQPINFLUX_HOME)
-
     utils.systemd.configure(AMQPINFLUX_SERVICE_NAME)
 
 

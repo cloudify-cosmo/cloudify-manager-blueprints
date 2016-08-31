@@ -207,7 +207,7 @@ def validate():
     # if no error occurred in a validation, we need to remove its reference.
     error_summary = [error for error in error_summary if error]
     if error_summary:
-        printable_error_summary = '\n' + '\n'.join(error_summary)
+        printable_error_summary = '\n' + '\n\t'.join(error_summary)
         if ignore_validations:
             ctx.logger.warn('Ignoring validation errors. {0}'.format(
                 printable_error_summary))

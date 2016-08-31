@@ -35,9 +35,8 @@ def _clear_guest_permissions_if_guest_exists():
 def _create_user_and_set_permissions(rabbitmq_username,
                                      rabbitmq_password):
     if not check_if_user_exists(rabbitmq_username):
-        ctx.logger.info('Creating new user {0}:{1} and setting '
-                        'permissions...'.format(
-                            rabbitmq_username, rabbitmq_password))
+        ctx.logger.info('Creating new user and setting permissions...'.format(
+            rabbitmq_username, rabbitmq_password))
         utils.sudo(['rabbitmqctl', 'add_user',
                     rabbitmq_username, rabbitmq_password])
         utils.sudo(['rabbitmqctl', 'set_permissions',
