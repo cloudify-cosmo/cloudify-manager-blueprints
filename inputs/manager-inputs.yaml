@@ -71,6 +71,14 @@ inputs:
     default: 1000
 
   #############################
+  # Execute Before Bootstrap
+  #############################
+  execute_before_bootstrap:
+    description: >
+      A list of commands or scripts to execute before bootstrapping.
+    default: []
+
+  #############################
   # Manager Resources Package
   #############################
   manager_resources_package:

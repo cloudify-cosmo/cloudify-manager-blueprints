@@ -25,6 +25,8 @@ node_types:
         default: { get_input: minimum_required_available_disk_space_in_gb }
       allowed_heap_size_gap_in_mb:
         default: { get_input: allowed_heap_size_gap_in_mb }
+      execute_before_bootstrap:
+        default: { get_input: execute_before_bootstrap }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
