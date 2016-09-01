@@ -285,6 +285,7 @@ external_network_name: ''
 #############################
 # You can configure the PostgreSQL database name for cloudify
 #postgresql_db_name: 'cloudify_db'
+#postgresql_host: 'localhost'
 
 #############################
 # InfluxDB Configuration

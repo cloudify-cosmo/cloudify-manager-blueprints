@@ -277,6 +277,7 @@ aws_secret_access_key: ''
 #############################
 # You can configure the PostgreSQL database name for cloudify
 #postgresql_db_name: 'cloudify_db'
+#postgresql_host: 'localhost'
 
 #############################
 # InfluxDB Configuration
