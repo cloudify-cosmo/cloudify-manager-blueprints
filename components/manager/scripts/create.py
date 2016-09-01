@@ -16,6 +16,16 @@ NODE_NAME = 'manager-resources'
 ctx_properties = utils.ctx_factory.create(NODE_NAME)
 
 
+def execute_before_bootstrap():
+    exec_paths = ctx_properties['execute_before_bootstrap']
+    for path in exec_paths:
+        # TODO: Upon moving to Python 3, convert to urllib2.urlparse
+        if '://' in path and path.split('://', 1)[0] in ('http', 'https'):
+            path = utils.download_file(path)
+            utils.chmod('744', path)
+        utils.run(path)
+
+
 def deploy_manager_sources():
     """Deploys all manager sources from a single archive.
     """
@@ -131,4 +141,6 @@ def deploy_manager_sources():
                 os.path.join(sources_agents_path, agent_file),
                 os.path.join(agent_archives_path, agent_id + agent_extension))
 
+
+execute_before_bootstrap()
 deploy_manager_sources()
