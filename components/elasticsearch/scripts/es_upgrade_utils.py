@@ -1,21 +1,9 @@
 #!/usr/bin/env python
-#########
-# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-#  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  * See the License for the specific language governing permissions and
-#  * limitations under the License.
-"""es_upgrade_utils.py: This script is used to migrate elements between
+
+"""This script is used to migrate elements between
 versions upon manager inplace upgrade/rollback. The data elements migrated
-by this script are 'provider_context' and 'snapshot' element types."""
+by this script are 'provider_context' and 'snapshot' element types.
+"""
 
 import os
 import json
@@ -23,8 +11,8 @@ from cloudify import ctx
 from os.path import join, dirname
 
 ctx.download_resource(
-        join('components', 'utils.py'),
-        join(dirname(__file__), 'utils.py'))
+    join('components', 'utils.py'),
+    join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
 DUMP_FILE_PATH = os.path.join(utils.ES_UPGRADE_DUMP_PATH, 'es_dump')
@@ -71,7 +59,7 @@ def dump_upgrade_data():
         for hit in hits:
             type_values.append(hit)
 
-    utils.mkdir(utils.ES_UPGRADE_DUMP_PATH, use_sudo=False)
+    utils.mkdir(utils.ES_UPGRADE_DUMP_PATH)
     with open(DUMP_FILE_PATH, 'w') as f:
         for item in type_values:
             f.write(json.dumps(item) + os.linesep)

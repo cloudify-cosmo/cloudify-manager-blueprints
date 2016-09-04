@@ -96,7 +96,6 @@ def _install_influxdb():
     utils.mkdir(influxdb_log_path)
 
     utils.yum_install(influxdb_source_url, service_name=INFLUX_SERVICE_NAME)
-    utils.sudo(['rm', '-rf', '/etc/init.d/influxdb'])
 
     ctx.logger.info('Deploying InfluxDB configuration...')
     utils.deploy_blueprint_resource(

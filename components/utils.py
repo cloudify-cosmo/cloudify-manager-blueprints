@@ -155,7 +155,6 @@ def mkdir(dir, use_sudo=True):
         run(cmd)
 
 
-# idempotent move operation
 def move(source, destination, rename_only=False):
     if rename_only:
         sudo(['mv', '-T', source, destination])

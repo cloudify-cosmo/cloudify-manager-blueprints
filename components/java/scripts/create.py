@@ -23,14 +23,10 @@ def install_java():
 
     utils.yum_install(java_source_url, service_name='java')
 
-    # Make sure the cloudify logs dir exists before we try moving the java log
-    # there -p will cause it not to error if the dir already exists
-    utils.mkdir('/var/log/cloudify')
-
     # Java install log is dropped in /var/log.
     # Move it to live with the rest of the cloudify logs
     if os.path.isfile('/var/log/java_install.log'):
-        utils.sudo('mv /var/log/java_install.log /var/log/cloudify')
+        utils.move('/var/log/java_install.log', '/var/log/cloudify')
 
 
 install_java()

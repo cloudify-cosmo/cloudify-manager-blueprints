@@ -42,8 +42,12 @@ def _disable_requiretty():
                                     script_dest,
                                     NODE_NAME)
 
-    utils.sudo('chmod +x {0}'.format(script_dest))
-    utils.sudo(script_dest)
+    utils.run('chmod +x {0}'.format(script_dest))
+    utils.run(script_dest)
+
+
+def _create_cloudify_logs_dir():
+    utils.mkdir('/var/log/cloudify')
 
 
 def _configure_security_properties():
@@ -90,6 +94,7 @@ def main():
     # disable TTY since it has been introduced only on 3.4.1
     if not utils.is_rollback:
         _disable_requiretty()
+    _create_cloudify_logs_dir()
     _configure_security_properties()
 
 main()

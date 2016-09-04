@@ -165,9 +165,8 @@ def _configure_index_rotation():
         'components/elasticsearch/scripts/rotate_es_indices',
         '/etc/cron.daily/rotate_es_indices', ES_SERVICE_NAME)
     utils.chown('root', 'root', '/etc/cron.daily/rotate_es_indices')
-    # TODO: VALIDATE!
     # TODO: use utils.chmod
-    utils.sudo('chmod +x /etc/cron.daily/rotate_es_indices')
+    utils.run('chmod +x /etc/cron.daily/rotate_es_indices')
 
 
 def _install_elasticsearch():

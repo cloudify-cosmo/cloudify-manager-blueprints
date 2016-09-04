@@ -18,7 +18,8 @@ echo "Installing rest service plugins"
 
     pushd ${plugin_dir}
         if [[ {{ plugin.source }} == *.wgn ]]; then
-            # install wagon plugin
+            # Install Wagon
+            # TODO: Do we need sudo here?
             sudo $VENV/bin/pip install {{ plugin.install_args }}
         else
             sudo $VENV/bin/pip install . {{ plugin.install_args }}

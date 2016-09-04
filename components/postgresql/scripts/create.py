@@ -44,7 +44,7 @@ def _install_postgresql():
 def _init_postgresql():
     ctx.logger.info('Init PostreSQL DATA folder...')
     postgresql95_setup = '/usr/pgsql-9.5/bin/postgresql95-setup'
-    utils.sudo(command=[postgresql95_setup, 'initdb'])
+    utils.run(command=[postgresql95_setup, 'initdb'])
 
     ctx.logger.info('Starting PostgreSQL server...')
     utils.systemd.enable(service_name=PS_SERVICE_NAME, append_prefix=False)

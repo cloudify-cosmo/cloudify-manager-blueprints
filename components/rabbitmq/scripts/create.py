@@ -19,17 +19,15 @@ ctx_properties = utils.ctx_factory.create(RABBITMQ_SERVICE_NAME)
 
 
 def check_if_user_exists(username):
-    if username in utils.sudo(
-            ['rabbitmqctl', 'list_users'], retries=5).aggr_stdout:
-        return True
-    return False
+    users = utils.run(['rabbitmqctl', 'list_users'], retries=5).aggr_stdout
+    return username in users
 
 
 def _clear_guest_permissions_if_guest_exists():
     if check_if_user_exists('guest'):
         ctx.logger.info('Disabling RabbitMQ guest user...')
-        utils.sudo(['rabbitmqctl', 'clear_permissions', 'guest'], retries=5)
-        utils.sudo(['rabbitmqctl', 'delete_user', 'guest'], retries=5)
+        utils.run(['rabbitmqctl', 'clear_permissions', 'guest'], retries=5)
+        utils.run(['rabbitmqctl', 'delete_user', 'guest'], retries=5)
 
 
 def _create_user_and_set_permissions(rabbitmq_username,
@@ -37,12 +35,12 @@ def _create_user_and_set_permissions(rabbitmq_username,
     if not check_if_user_exists(rabbitmq_username):
         ctx.logger.info('Creating new user and setting permissions...'.format(
             rabbitmq_username, rabbitmq_password))
-        utils.sudo(['rabbitmqctl', 'add_user',
-                    rabbitmq_username, rabbitmq_password])
-        utils.sudo(['rabbitmqctl', 'set_permissions',
-                    rabbitmq_username, '.*', '.*', '.*'], retries=5)
-        utils.sudo(['rabbitmqctl', 'set_user_tags', rabbitmq_username,
-                    'administrator'])
+        utils.run(['rabbitmqctl', 'add_user',
+                   rabbitmq_username, rabbitmq_password])
+        utils.run(['rabbitmqctl', 'set_permissions',
+                   rabbitmq_username, '.*', '.*', '.*'], retries=5)
+        utils.run(['rabbitmqctl', 'set_user_tags', rabbitmq_username,
+                   'administrator'])
 
 
 def _set_security(rabbitmq_ssl_enabled,
@@ -131,9 +129,8 @@ def _install_rabbitmq():
     ctx.logger.info('Enabling RabbitMQ Plugins...')
     # Occasional timing issues with rabbitmq starting have resulted in
     # failures when first trying to enable plugins
-    utils.sudo(['rabbitmq-plugins', 'enable', 'rabbitmq_management'],
-               retries=5)
-    utils.sudo(['rabbitmq-plugins', 'enable', 'rabbitmq_tracing'], retries=5)
+    utils.run(['rabbitmq-plugins', 'enable', 'rabbitmq_management'], retries=5)
+    utils.run(['rabbitmq-plugins', 'enable', 'rabbitmq_tracing'], retries=5)
 
     _clear_guest_permissions_if_guest_exists()
     _create_user_and_set_permissions(rabbitmq_username, rabbitmq_password)
