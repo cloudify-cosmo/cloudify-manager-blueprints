@@ -36,6 +36,7 @@ function create_admin_user() {
     password=$3
     run_psql "CREATE USER $user WITH PASSWORD '$password';"
     run_psql "GRANT ALL PRIVILEGES ON DATABASE $db TO $user;"
+    run_psql "ALTER USER $user CREATEDB;"
 }
 
 clean_database_and_user ${db_name} ${user}

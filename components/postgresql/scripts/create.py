@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from os.path import join, dirname
 from cloudify import ctx
 ctx.download_resource(
@@ -42,9 +43,13 @@ def _install_postgresql():
 
 
 def _init_postgresql():
-    ctx.logger.info('Init PostreSQL DATA folder...')
+    ctx.logger.info('Initializing PostreSQL DATA folder...')
     postgresql95_setup = '/usr/pgsql-9.5/bin/postgresql95-setup'
-    utils.sudo(command=[postgresql95_setup, 'initdb'])
+    try:
+        utils.sudo(command=[postgresql95_setup, 'initdb'])
+    except Exception:
+        ctx.logger.debug('PostreSQL DATA folder already been init...')
+        pass
 
     ctx.logger.info('Starting PostgreSQL server...')
     utils.systemd.enable(service_name=PS_SERVICE_NAME, append_prefix=False)
@@ -54,7 +59,8 @@ def _init_postgresql():
     ps_95_logs_path = "/var/lib/pgsql/9.5/data/pg_log"
     ps_logs_path = "/var/log/cloudify/postgresql"
     utils.mkdir(ps_logs_path)
-    utils.ln(source=ps_95_logs_path, target=ps_logs_path, params='-s')
+    if not os.path.isdir(ps_95_logs_path):
+        utils.ln(source=ps_95_logs_path, target=ps_logs_path, params='-s')
 
 
 def main():
