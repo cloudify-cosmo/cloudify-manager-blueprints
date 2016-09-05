@@ -404,6 +404,12 @@ inputs:
     type: string
     default: 'cloudify_db'
 
+  postgresql_host:
+    description: postgresql default host
+    type: string
+    default: 'localhost'
+
+
   #############################
   # InfluxDB Inputs
   #############################

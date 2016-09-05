@@ -95,6 +95,8 @@ def deploy_broker_configuration():
     postgresql_props = utils.ctx_factory.get('postgresql-9.5')
     ctx.instance.runtime_properties['postgresql_db_name'] = \
         postgresql_props.get('postgresql_db_name')
+    ctx.instance.runtime_properties['postgresql_host'] = \
+        postgresql_props.get('postgresql_host')
 
     # Add certificate and select port, as applicable
     if rabbitmq_ssl_enabled:

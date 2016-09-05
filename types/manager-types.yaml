@@ -413,6 +413,10 @@ node_types:
         description: postgresql default db name
         type: string
         default: { get_input: postgresql_db_name }
+      postgresql_host:
+        description: postgresql default host
+        type: string
+        default: { get_input: postgresql_host }
       libxslt_rpm_url:
         description: libxslt rpm URL
         type: string
