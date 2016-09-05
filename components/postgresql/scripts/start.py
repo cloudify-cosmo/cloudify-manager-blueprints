@@ -60,9 +60,13 @@ def _create_postgres_pass_file(host, db_name, username, password):
             pgpass_path
         ))
         os.remove(pgpass_path)
-    with os.fdopen(os.open(pgpass_path, os.O_WRONLY | os.O_CREAT, 0600), 'w')\
-            as pgpass_file:
-        pgpass_file.write(pgpass_content)
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file.write(pgpass_content)
+        temp_file.flush()
+        utils.chmod('0600', temp_file.name)
+        utils.move(source=temp_file.name,
+                   destination=pgpass_path,
+                   rename_only=True)
         ctx.logger.debug('Postgresql pass file {0} created'.format(
             pgpass_path))
 
