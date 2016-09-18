@@ -55,4 +55,15 @@ def configure_mgmtworker():
     utils.systemd.configure(MGMT_WORKER_SERVICE_NAME)
     utils.logrotate(MGMT_WORKER_SERVICE_NAME)
 
+
+def configure_logging():
+    logging_config_dir = '/etc/cloudify'
+    config_name = 'logging.conf'
+    config_file_destination = os.path.join(logging_config_dir, config_name)
+    config_file_source = os.path.join(CONFIG_PATH, config_name)
+    utils.mkdir(logging_config_dir)
+    ctx.download_resource(config_file_source, config_file_destination)
+
+
 configure_mgmtworker()
+configure_logging()
