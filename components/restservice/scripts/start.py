@@ -38,6 +38,10 @@ def verify_restservice(url):
 
     try:
         response = urllib2.urlopen(req)
+    # keep an errorneous HTTP response to examine its status code, but still
+    # abort on fatal errors like being unable to connect at all
+    except urllib2.HTTPError as e:
+        response = e
     except urllib2.URLError as e:
         ctx.abort_operation('REST service returned an invalid response: {0}'
                             .format(e))
