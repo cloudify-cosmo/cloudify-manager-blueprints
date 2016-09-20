@@ -21,7 +21,7 @@ import json
 from flask import Flask
 from flask_security import Security
 
-from manager_rest.storage.models import db
+from manager_rest.storage.models import db, Tenant
 from manager_rest.security import user_datastore
 from manager_rest.utils import add_users_and_roles_to_userstore
 
@@ -59,6 +59,12 @@ def _create_db_tables(config):
     app.app_context().push()
 
 
+def _add_default_tenant():
+    t = Tenant(name='default_tenant')
+    db.session.add(t)
+    db.session.commit()
+
+
 if __name__ == '__main__':
     # We're expecting to receive as an argument the path to the config file
     assert len(sys.argv) == 2, 'No config file path was provided'
@@ -67,6 +73,10 @@ if __name__ == '__main__':
 
     print 'Creating tables in the DB'
     _create_db_tables(config)
+    print 'Tables created successfully'
+
+    print 'Adding default tenant'
+    _add_default_tenant()
     print 'Tables created successfully'
 
     print 'Adding users and roles to the DB'
