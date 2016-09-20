@@ -57,10 +57,6 @@ aws_secret_access_key: ''
 #############################
 # Security Settings
 #############################
-# Cloudify REST security is disabled by default. To disable security, set to true.
-# Note: If security is disabled, the other security inputs are irrelevant.
-#security_enabled: false
-
 # Enabling SSL limits communication with the server to SSL only.
 # NOTE: If enabled, the certificate and private key files must reside in resources/ssl.
 #ssl_enabled: false
@@ -79,7 +75,7 @@ aws_secret_access_key: ''
 #agent_rest_username: 'cfy_agent'
 #agent_rest_password: 'cfy_agent'
 
-#insecure_endpoints_disabled: false
+#insecure_endpoints_disabled: true
 
 # Default locations for certificates on agents
 #agent_rest_cert_path: '~/.cloudify/certs/rest.crt'
@@ -278,6 +274,16 @@ aws_secret_access_key: ''
 # You can configure the PostgreSQL database name for cloudify
 #postgresql_db_name: 'cloudify_db'
 #postgresql_host: 'localhost'
+
+#############################
+# LDAP Configuration
+#############################
+#ldap_server: ''
+#ldap_username: ''
+#ldap_password: ''
+#ldap_domain: ''
+#ldap_is_active_directory: true
+#ldap_dn_extra: ''
 
 #############################
 # InfluxDB Configuration

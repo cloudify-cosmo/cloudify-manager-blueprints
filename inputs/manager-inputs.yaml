@@ -3,9 +3,6 @@ inputs:
   #############################
   # Security Settings
   #############################
-  security_enabled:
-    default: false
-
   ssl_enabled:
     default: false
 
@@ -27,7 +24,7 @@ inputs:
   insecure_endpoints_disabled:
     description: Disables insecure REST endpoints
     type: boolean
-    default: false
+    default: true
 
   agent_rest_cert_path:
     description: Location of the rest certificate on the agent
@@ -411,6 +408,36 @@ inputs:
 
 
   #############################
+  # LDAP Inputs
+  #############################
+  ldap_server:
+    description: LDAP server
+    type: string
+    default: ''
+  ldap_username:
+    description: LDAP admin username
+    type: string
+    default: ''
+  ldap_password:
+    description: LDAP admin password
+    type: string
+    default: ''
+  ldap_domain:
+    description: LDAP Domain
+    type: string
+    default: ''
+  ldap_is_active_directory:
+    description: >
+      True if Active Directory will be used as the LDAP authenticator
+    type: boolean
+    default: true
+  ldap_dn_extra:
+    description: >
+      Any extra LDAP information (separated by the `;` sign. e.g. a=1;b=2)
+    type: string
+    default: ''
+
+  #############################
   # InfluxDB Inputs
   #############################
   influxdb_endpoint_ip:
@@ -473,10 +500,6 @@ inputs:
     default: ''
 
   script_plugin_source_url:
-    type: string
-    default: ''
-
-  securest_source_url:
     type: string
     default: ''
 
