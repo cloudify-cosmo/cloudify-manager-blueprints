@@ -224,6 +224,52 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
+  manager.nodes.Consul:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      consul_package_url:
+        default: { get_input: consul_package_url }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/consul/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  manager.nodes.Keepalived:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      keepalived_rpm_url:
+        description: Keepalived RPM package URL
+        default: { get_input: keepalived_rpm_url }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/keepalived/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  manager.nodes.Syncthing:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      syncthing_package_url:
+        default: { get_input: syncthing_package_url}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/syncthing/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
   manager.nodes.RabbitMQ:
     derived_from: cloudify.nodes.MessageBusServer
     properties:
@@ -419,6 +465,12 @@ node_types:
       psycopg2_rpm_url:
         type: string
         default: { get_input: python_psycopg2_rpm_url }
+      repmgr_rpm_url:
+        type: string
+        default: { get_input: repmgr_rpm_url }
+      pgbouncer_rpm_url:
+        type: string
+        default: { get_input: pgbouncer_rpm_url }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

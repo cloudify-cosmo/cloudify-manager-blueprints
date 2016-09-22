@@ -520,6 +520,16 @@ node_templates:
     - type: cloudify.azure.relationships.connected_to_ip_configuration
       target: vm_nic_ip_cfg
 
+  keepalived:
+    type: manager.nodes.Keepalived
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
   # on specific hosts. It allows us to define the runtime environment
@@ -553,6 +563,14 @@ node_templates:
   ######################################################################
   # These are the nodes comprising the Cloudify Manager's components
   ######################################################################
+  consul:
+    type: manager.nodes.Consul
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+
   rabbitmq:
     type: manager.nodes.RabbitMQ
     relationships:
@@ -574,6 +592,16 @@ node_templates:
         target: java_runtime
       - type: elasticsearch_to_manager_configuration
         target: manager_configuration
+
+  syncthing:
+    type: manager.nodes.Syncthing
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: consul
 
   postgresql:
     type: manager.nodes.Postgresql
