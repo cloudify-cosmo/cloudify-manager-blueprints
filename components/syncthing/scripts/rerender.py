@@ -44,12 +44,20 @@ for node in nodes_data:
             })
 
 config['devices'] = devices
-config['folders'] = [{
-    'id': 'resources-1',
-    'path': '/opt/manager/resources',
-    'rescanIntervalS': 15,
-    'devices': [{'deviceID': d['deviceID']} for d in devices]
-}]
+config['folders'] = [
+    {
+        'id': 'resources-1',
+        'path': '/opt/manager/resources',
+        'rescanIntervalS': 15,
+        'devices': [{'deviceID': d['deviceID']} for d in devices]
+    },
+    {
+        'id': 'mgmtworker-env-1',
+        'path': '/opt/mgmtworker/env/lib',
+        'rescanIntervalS': 30,
+        'devices': [{'deviceID': d['deviceID']} for d in devices]
+    }
+]
 
 print config
 print request('http://127.0.0.1:8384/rest/system/config',
