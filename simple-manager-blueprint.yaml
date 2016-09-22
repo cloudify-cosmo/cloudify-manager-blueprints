@@ -185,6 +185,16 @@ node_templates:
                 rest_host_internal_endpoint_type: { get_property: [rest_service, rest_host_internal_endpoint_type] }
                 rest_host_external_endpoint_type: { get_property: [rest_service, rest_host_external_endpoint_type] }
 
+  keepalived:
+    type: manager.nodes.Keepalived
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
   # on specific hosts. It allows us to define the runtime environment
@@ -217,6 +227,14 @@ node_templates:
   # ######################################################################
   # # These are the nodes comprising the Cloudify Manager's components
   # ######################################################################
+  consul:
+    type: manager.nodes.Consul
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+
   rabbitmq:
     type: manager.nodes.RabbitMQ
     relationships:
@@ -255,6 +273,16 @@ node_templates:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
+  syncthing:
+    type: manager.nodes.Syncthing
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: consul
+
   postgresql:
     type: manager.nodes.Postgresql
     relationships:
@@ -262,6 +290,8 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: consul
     interfaces:
       cloudify.interfaces.validation:
         creation:
