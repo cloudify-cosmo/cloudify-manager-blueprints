@@ -368,6 +368,9 @@ node_templates:
     properties:
       openstack_config: *openstack_configuration
       resource_id: { get_input: manager_port_name }
+      port:
+        allowed_address_pairs:
+          - ip_address: { get_input: floating_port_fixed_ip }
     relationships:
       - type: cloudify.relationships.contained_in
         target: management_network
@@ -432,8 +435,6 @@ node_templates:
         - port: 8301
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
         - port: 8384
-          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
-        - port: 8500
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
         - port: 8500
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
