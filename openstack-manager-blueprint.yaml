@@ -64,6 +64,38 @@ inputs:
     type: boolean
     default: false
 
+  use_existing_management_network:
+    type: boolean
+    default: false
+
+  use_existing_management_subnet:
+    type: boolean
+    default: false
+
+  use_existing_management_router:
+    type: boolean
+    default: false
+
+  use_existing_virtual_floating_ip:
+    type: boolean
+    default: false
+
+  use_existing_agents_security_group:
+    type: boolean
+    default: false
+
+  use_existing_manager_security_group:
+    type: boolean
+    default: false
+
+  virtual_floating_ip_id:
+    type: string
+    default: ''
+
+  use_existing_floating_port:
+    type: boolean
+    default: false
+
   manager_server_name:
     default: cloudify-manager-server
     type: string
@@ -120,6 +152,13 @@ inputs:
   manager_port_name:
     default: cloudify-manager-port
     type: string
+
+  floating_port_name:
+    default: cloudify-manager-floating-port
+    type: string
+
+  floating_port_fixed_ip:
+    default: 172.16.0.200
 
   skip_openstack_cert_verification:
     default: false
@@ -282,6 +321,8 @@ node_templates:
                 rest_host_external_endpoint_type: { get_property: [rest_service, rest_host_external_endpoint_type] }
       - type: cloudify.relationships.depends_on
         target: manager_server_ip
+      - type: cloudify.relationships.depends_on
+        target: virtual_floating_ip
 
   management_keypair:
     type: cloudify.openstack.nodes.KeyPair
@@ -303,12 +344,14 @@ node_templates:
     type: cloudify.openstack.nodes.Network
     properties:
       resource_id: { get_input: management_network_name }
+      use_external_resource: { get_input: use_existing_management_network }
       openstack_config: *openstack_configuration
 
   management_subnet:
     type: cloudify.openstack.nodes.Subnet
     properties:
       resource_id: { get_input: management_subnet_name }
+      use_external_resource: { get_input: use_existing_management_subnet }
       subnet:
         ip_version: 4
         cidr: 172.16.0.0/16
@@ -337,6 +380,7 @@ node_templates:
     type: cloudify.openstack.nodes.Router
     properties:
       resource_id: { get_input: management_router }
+      use_external_resource: { get_input: use_existing_management_router }
       openstack_config: *openstack_configuration
     relationships:
       - target: external_network
@@ -353,6 +397,7 @@ node_templates:
     type: cloudify.openstack.nodes.SecurityGroup
     properties:
       resource_id: { get_input: agents_security_group_name }
+      use_external_resource: { get_input: use_existing_agents_security_group }
       security_group:
         description: Security group for Cloudify agent VMs
       rules:
@@ -366,6 +411,7 @@ node_templates:
     type: cloudify.openstack.nodes.SecurityGroup
     properties:
       resource_id: { get_input: manager_security_group_name }
+      use_external_resource: { get_input: use_existing_manager_security_group }
       security_group:
         description: Security group for Cloudify Manager VM
       rules:
@@ -375,7 +421,23 @@ node_templates:
           remote_ip_prefix: 0.0.0.0/0
         - port: 22
           remote_ip_prefix: 0.0.0.0/0
+        - port: 5431
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 5432
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
         - port: 5672
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 8300
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 8301
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 8384
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 8500
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 8500
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 22000
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
         - port: 53229
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
@@ -397,6 +459,8 @@ node_templates:
   virtual_floating_ip:
     type: cloudify.openstack.nodes.FloatingIP
     properties:
+      resource_id: { get_input: virtual_floating_ip_id }
+      use_external_resource: { get_input: use_existing_virtual_floating_ip }
       floatingip:
         floating_network_name: { get_input: external_network_name }
       openstack_config: *openstack_configuration
@@ -405,7 +469,9 @@ node_templates:
     type: cloudify.openstack.nodes.Port
     properties:
       openstack_config: *openstack_configuration
-      resource_id: { get_input: manager_port_name }
+      resource_id: { get_input: floating_port_name }
+      use_external_resource: { get_input: use_existing_floating_port }
+      fixed_ip: { get_input: floating_port_fixed_ip }
     relationships:
       - type: cloudify.relationships.contained_in
         target: management_network
@@ -469,7 +535,7 @@ node_templates:
   keepalived:
     type: manager.nodes.Keepalived
     properties:
-      keepalived_floating_ip: {get_attribute: [floating_port, fixed_ip_address]}
+      keepalived_floating_ip: { get_property: [floating_port, fixed_ip] }
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
