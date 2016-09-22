@@ -1,7 +1,6 @@
-#!/opt/manager/env/bin/python
+#!/usr/bin/env python
 
 import json
-import sys
 
 import xml.etree.ElementTree as ET
 import urllib2
@@ -12,35 +11,37 @@ apikey = tree.findall('.//gui/apikey')[0].text
 headers = {'X-Api-Key': apikey}
 
 
-def json_request(url, data=None, method='GET'):
+def request(url, data=None, method='GET', parse_json=True):
     req = urllib2.Request(url, data=data, headers=headers)
     req.get_method = lambda: method
     resp = urllib2.urlopen(req)
-    return json.load(resp)
+    if parse_json:
+        return json.load(resp)
+    return resp.read()
 
 
-status = json_request('http://127.0.0.1:8384/rest/system/status')
+status = request('http://127.0.0.1:8384/rest/system/status')
 my_id = status['myID']
-config = json_request('http://127.0.0.1:8384/rest/system/config')
+config = request('http://127.0.0.1:8384/rest/system/config')
 
 config['options']['listenAddresses'] = ['tcp://0.0.0.0']
 
 devices = []
-try:
-    nodes = open('/opt/cloudify/syncthing/syncthings.csv')
-except IOError:
-    sys.exit(0)
 
-with nodes as f:
-    for line in f:
-        if line.strip():
-            node_id, addr, name = line.strip().split(',')
-            if node_id != my_id:
-                devices.append({
-                    'deviceID': node_id,
-                    'addresses': [addr],
-                    'name': name
-                })
+nodes_resp = urllib2.urlopen('http://127.0.0.1:8500/v1/kv/syncthing?recurse')
+nodes_data = json.load(nodes_resp)
+
+
+for node in nodes_data:
+    line = node['Value'].decode('base64').strip()
+    if line:
+        node_id, addr, name = line.strip().split(',')
+        if node_id != my_id:
+            devices.append({
+                'deviceID': node_id,
+                'addresses': [addr],
+                'name': name
+            })
 
 config['devices'] = devices
 config['folders'] = [{
@@ -50,5 +51,6 @@ config['folders'] = [{
     'devices': [{'deviceID': d['deviceID']} for d in devices]
 }]
 
-json_request('http://127.0.0.1:8384/rest/system/config',
-             data=json.dumps(config), method='POST')
+print config
+print request('http://127.0.0.1:8384/rest/system/config',
+              data=json.dumps(config), method='POST', parse_json=False)

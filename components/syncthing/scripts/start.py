@@ -68,6 +68,6 @@ utils.run([
     '-XPUT',
     '-d',
     '{0},tcp://{1},{2}'.format(my_id, ctx.instance.host_ip, ctx.instance.id),
-    'http://{0}:8500/v1/kv/syncthing/{1}'.format(
+    'http://127.0.0.1:8500/v1/kv/syncthing/{1}'.format(
         ctx.instance.host_ip, ctx.instance.id),
 ])
