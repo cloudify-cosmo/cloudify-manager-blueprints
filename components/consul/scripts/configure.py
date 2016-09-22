@@ -21,7 +21,7 @@ consul_config = {
     'server': True,
     'ui': True,
     'advertise_addr': ctx.instance.host_ip,
-    'client_addr': ctx.instance.host_ip,
+    'client_addr': '0.0.0.0',
     'data_dir': '/var/consul',
     'node_name': ctx.instance.id
 }
