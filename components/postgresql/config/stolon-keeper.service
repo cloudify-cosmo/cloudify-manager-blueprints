@@ -1,0 +1,25 @@
+[Unit]
+Description=stolon keeper
+
+[Service]
+ExecStart=/opt/cloudify/stolon/bin/stolon-keeper \
+    --data-dir /var/pgdata \
+    --id {{ ctx.instance.id }} \
+    --cluster-name {{ ctx.node.properties.cluster_name }} \
+    --store-backend consul \
+    --store-endpoints {{ ctx.instance.host_ip }}:8500 \
+    --pg-repl-username {{ ctx.node.properties.pg_repl_username }} \
+    --pg-repl-password {{ ctx.node.properties.pg_repl_password }} \
+    --pg-su-password {{ ctx.node.properties.pg_su_password }} \
+    --pg-bin-path /usr/pgsql-9.5/bin \
+    --pg-listen-address {{ ctx.instance.host_ip }} \
+    --listen-address {{ ctx.instance.host_ip }}
+
+User={{ ctx.node.properties.user }}
+
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target

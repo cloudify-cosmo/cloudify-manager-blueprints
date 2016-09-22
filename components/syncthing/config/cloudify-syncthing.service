@@ -1,0 +1,13 @@
+[Unit]
+Description=syncthing
+
+[Service]
+EnvironmentFile=-/etc/sysconfig/cloudify-syncthing
+ExecStart=/opt/cloudify/syncthing/syncthing
+
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target

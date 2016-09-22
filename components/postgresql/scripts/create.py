@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 from os.path import join, dirname
 from cloudify import ctx
 ctx.download_resource(
@@ -42,32 +41,30 @@ def _install_postgresql():
     utils.yum_install(source=psycopg2_rpm_url, service_name=PS_SERVICE_NAME)
 
 
-def _init_postgresql():
-    ctx.logger.info('Initializing PostreSQL DATA folder...')
-    postgresql95_setup = '/usr/pgsql-9.5/bin/postgresql95-setup'
-    try:
-        utils.sudo(command=[postgresql95_setup, 'initdb'])
-    except Exception:
-        ctx.logger.debug('PostreSQL DATA folder already been init...')
-        pass
+def _install_stolon():
+    utils.yum_install('go', PS_SERVICE_NAME)
+    utils.yum_install('git', PS_SERVICE_NAME)
 
-    ctx.logger.info('Starting PostgreSQL server...')
-    utils.systemd.enable(service_name=PS_SERVICE_NAME, append_prefix=False)
-    utils.systemd.start(service_name=PS_SERVICE_NAME, append_prefix=False)
+    utils.sudo([
+        'git',
+        'clone',
+        'https://github.com/sorintlab/stolon',
+        '/opt/cloudify/stolon'
+    ])
+    ctx.logger.info('Building stolon')
+    utils.sudo(['/opt/cloudify/stolon/build'])
 
-    ctx.logger.info('Setting PostgreSQL logs path...')
-    ps_95_logs_path = "/var/lib/pgsql/9.5/data/pg_log"
-    ps_logs_path = "/var/log/cloudify/postgresql"
-    utils.mkdir(ps_logs_path)
-    if not os.path.isdir(ps_95_logs_path):
-        utils.ln(source=ps_95_logs_path, target=ps_logs_path, params='-s')
+
+def _prepare_data_dir():
+    utils.mkdir(ctx_properties['data_dir'])
+    utils.chown(ctx_properties['user'], ctx_properties['user'],
+                ctx_properties['data_dir'])
 
 
 def main():
     _prepare_env()
     _install_postgresql()
-    _init_postgresql()
-    utils.systemd.restart(service_name=PS_SERVICE_NAME, append_prefix=False)
-
+    _install_stolon()
+    _prepare_data_dir()
 
 main()

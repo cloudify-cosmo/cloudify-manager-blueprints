@@ -1,0 +1,15 @@
+[Unit]
+Description=consul
+
+[Service]
+EnvironmentFile=-/etc/sysconfig/cloudify-consul
+ExecStart=/opt/cloudify/consul/consul \
+    agent \
+    -config-dir /etc/consul.d
+
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target

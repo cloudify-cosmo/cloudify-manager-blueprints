@@ -30,6 +30,7 @@ source_runtime_props['private_ip'] = private_ip
 
 # set public ip from input to this script
 public_ip = inputs['public_ip']
+floating_ip = inputs['floating_ip']
 ctx.logger.debug('Setting manager_configuration public ip to: {0}'.format(
     public_ip))
 source_runtime_props['public_ip'] = public_ip
@@ -60,6 +61,8 @@ if rest_host_internal_endpoint_type == 'private_ip':
     source_runtime_props['internal_rest_host'] = private_ip
 elif rest_host_internal_endpoint_type == 'public_ip':
     source_runtime_props['internal_rest_host'] = public_ip
+elif rest_host_internal_endpoint_type == 'floating_ip':
+    source_runtime_props['internal_rest_host'] = floating_ip
 else:
     raise NonRecoverableError('invalid rest_host_internal_endpoint_type: "{0}"'
                               ', valid values: "public_ip", "private_ip"'.
@@ -81,6 +84,8 @@ if rest_host_external_endpoint_type == 'private_ip':
     source_runtime_props['external_rest_host'] = private_ip
 elif rest_host_external_endpoint_type == 'public_ip':
     source_runtime_props['external_rest_host'] = public_ip
+elif rest_host_internal_endpoint_type == 'floating_ip':
+    source_runtime_props['external_rest_host'] = floating_ip
 else:
     raise NonRecoverableError('invalid rest_host_external_endpoint_type: "{0}"'
                               ', valid values: "public_ip", "private_ip"'.

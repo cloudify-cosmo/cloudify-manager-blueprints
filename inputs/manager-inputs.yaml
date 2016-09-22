@@ -225,6 +225,44 @@ inputs:
     default: node-v0.10.35-linux-x64.tar.gz
 
   #############################
+  # Keepalived Inputs
+  #############################
+  keepalived_floating_ip:
+    type: string
+    default: ''
+
+  keepalived_state:
+    type: string
+    default: MASTER
+
+  keepalived_interface:
+    type: string
+    default: eth0
+
+  keepalived_priority:
+    type: integer
+    default: 100
+
+  #############################
+  # Consul Inputs
+  #############################
+
+  consul_package_url:
+    type: string
+    default: https://releases.hashicorp.com/consul/0.6.4/consul_0.6.4_linux_amd64.zip
+
+  consul_join:
+    default: []
+
+  #############################
+  # Syncthing Inputs
+  #############################
+
+  syncthing_package_url:
+    type: string
+    default: https://github.com/syncthing/syncthing/releases/download/v0.14.5/syncthing-linux-amd64-v0.14.5.tar.gz
+
+  #############################
   # RabbitMQ Inputs
   #############################
 
@@ -404,7 +442,7 @@ inputs:
   postgresql_host:
     description: postgresql default host
     type: string
-    default: 'localhost'
+    default: 'localhost:25432'
 
 
   #############################

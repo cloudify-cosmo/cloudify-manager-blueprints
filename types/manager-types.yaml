@@ -224,6 +224,101 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
+  manager.nodes.Consul:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      consul_package_url:
+        default: { get_input: consul_package_url }
+      consul_join:
+        default: { get_input: consul_join }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/consul/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/consul/scripts/configure.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/consul/scripts/start.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  manager.nodes.Keepalived:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      keepalived_state:
+        default: { get_input: keepalived_state }
+      keepalived_floating_ip:
+        default: { get_input: keepalived_floating_ip }
+      keepalived_interface:
+        default: { get_input: keepalived_interface }
+      keepalived_priority:
+        default: { get_input: keepalived_priority }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/keepalived/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/keepalived/scripts/configure.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/keepalived/scripts/start.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  manager.nodes.Syncthing:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      syncthing_package_url:
+        default: { get_input: syncthing_package_url}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/syncthing/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/syncthing/scripts/configure.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/syncthing/scripts/start.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
   manager.nodes.RabbitMQ:
     derived_from: cloudify.nodes.MessageBusServer
     properties:
@@ -388,6 +483,22 @@ node_types:
         description: postgresql default db name
         type: string
         default: { get_input: postgresql_db_name }
+      cluster_name:
+        description: stolon cluster name
+        type: string
+        default: stolon-cluster
+      pg_repl_username:
+        default: repluser
+      pg_repl_password:
+        default: replpassword
+      pg_su_password:
+        default: root
+      user:
+        default: postgres
+      port:
+        default: 25432
+      data_dir:
+        default: /var/pgdata
       postgresql_host:
         description: postgresql default host
         type: string
@@ -432,7 +543,7 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/postgresql/scripts/config.sh
+              default: components/postgresql/scripts/configure.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
         start:

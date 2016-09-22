@@ -15,39 +15,22 @@ PS_SERVICE_NAME = 'postgresql-9.5'
 ctx_properties = utils.ctx_factory.get(PS_SERVICE_NAME)
 
 
-def _start_postgres():
-    ctx.logger.info('Starting PostgreSQL Service...')
-    utils.systemd.stop(service_name=PS_SERVICE_NAME,
-                       append_prefix=False)
-    utils.systemd.start(service_name=PS_SERVICE_NAME,
-                        append_prefix=False)
-    utils.systemd.verify_alive(service_name=PS_SERVICE_NAME,
-                               append_prefix=False)
+def _start_services():
+
+    for service_name in ['stolon-sentinel', 'stolon-keeper', 'stolon-proxy']:
+        ctx.logger.info('Starting {0}...'.format(service_name))
+        utils.systemd.enable(service_name)
+        utils.start_service(service_name)
+        utils.systemd.verify_alive(service_name)
 
 
-def _create_default_db(db_name, username, password):
-    ctx.logger.info('Creating default postgresql database: {0}...'.format(
-        db_name))
-    ps_config_source = 'components/postgresql/config/create_default_db.sh'
-    ps_config_destination = join(tempfile.gettempdir(),
-                                 'create_default_db.sh')
-    ctx.download_resource(source=ps_config_source,
-                          destination=ps_config_destination)
-    utils.chmod('+x', ps_config_destination)
-    # TODO: Can't we use a rest call here? Is there such a thing?
-    utils.sudo('su - postgres -c "{cmd} {db} {user} {password}"'
-               .format(cmd=ps_config_destination, db=db_name,
-                       user=username, password=password))
-
-
-def _create_postgres_pass_file(host, db_name, username, password):
+def _create_postgres_pass_file(host, db_name, username, password, port=5432):
     pgpass_path = '/root/.pgpass'
     ctx.logger.info('Creating postgresql pgpass file: {0}'.format(
         pgpass_path))
-    postgresql_default_port = 5432
     pgpass_content = '{host}:{port}:{db_name}:{user}:{password}'.format(
         host=host,
-        port=postgresql_default_port,
+        port=port,
         db_name=db_name,
         user=username,
         password=password
@@ -71,14 +54,53 @@ def _create_postgres_pass_file(host, db_name, username, password):
             pgpass_path))
 
 
+def psql(cmd):
+    return utils.sudo([
+        'env',
+        'PGPASSWORD={0}'.format(ctx_properties['pg_su_password']),
+        'psql',
+        '--host', '127.0.0.1',
+        '--port', '25432',
+        '-U', 'postgres',
+        '-c', cmd
+    ], ignore_failures=True)
+
+
+def _create_default_db(db_name, username, password):
+    # XXX use psycopg2, since we're installing it anyway?
+    user_exists = psql(
+        "select 'exists' from pg_user where usename='{0}';".format(username)
+    )
+    if 'exists' not in user_exists.aggr_stdout:
+        psql("create user {0} with password '{1}' login createdb;"
+             .format(username, password))
+
+    db_exists = psql(
+        "select 'exists' from pg_database where datname='{0}';".format(db_name)
+    )
+    if 'exists' not in db_exists.aggr_stdout:
+        psql('create database {0} with owner {1};'.format(db_name, username))
+
+
+@utils.retry(RuntimeError, tries=20)
+def _check_postgresql_up():
+    ret = psql('select 1;')
+    if ret.returncode != 0:
+        raise RuntimeError('pg not running')
+
+
 def main():
     db_name = ctx.node.properties['postgresql_db_name']
     host = ctx.node.properties['postgresql_host']
     _create_postgres_pass_file(host=host,
                                db_name='*',
                                username='cloudify',
-                               password='cloudify')
-    _start_postgres()
+                               password='cloudify',
+                               port=25432)
+    _start_services()
+
+    # need to wait for the cluster to bootstrap and choose a master
+    _check_postgresql_up()
     _create_default_db(db_name=db_name,
                        username='cloudify',
                        password='cloudify')

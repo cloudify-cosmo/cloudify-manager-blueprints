@@ -12,4 +12,7 @@ PS_SERVICE_NAME = 'postgresql-9.5'
 
 ctx_properties = utils.CtxPropertyFactory().get(PS_SERVICE_NAME)
 
-utils.systemd.stop(PS_SERVICE_NAME, append_prefix=False)
+
+for service_name in ['stolon-sentinel', 'stolon-keeper', 'stolon-proxy']:
+    ctx.logger.info('Stopping {0}...'.format(service_name))
+    utils.systemd.stop(service_name)

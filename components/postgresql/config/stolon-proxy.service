@@ -1,0 +1,17 @@
+[Unit]
+Description=stolon proxy
+
+[Service]
+ExecStart=/opt/cloudify/stolon/bin/stolon-proxy \
+    --cluster-name {{ ctx.node.properties.cluster_name }} \
+    --store-backend consul \
+    --store-endpoints {{ ctx.instance.host_ip }}:8500 \
+    --port {{ ctx.node.properties.port }} \
+    --listen-address 0.0.0.0
+
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target

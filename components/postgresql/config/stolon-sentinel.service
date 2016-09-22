@@ -1,0 +1,17 @@
+[Unit]
+Description=stolon sentinel
+
+[Service]
+ExecStart=/opt/cloudify/stolon/bin/stolon-sentinel \
+    --cluster-name {{ ctx.node.properties.cluster_name }} \
+    --store-backend consul \
+    --store-endpoints {{ ctx.instance.host_ip }}:8500 \
+    --listen-address {{ ctx.instance.host_ip }} \
+    --initial-cluster-config /opt/cloudify/stolon/initial_cluster_config.json
+
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target
