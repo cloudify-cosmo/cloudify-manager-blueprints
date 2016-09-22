@@ -43,6 +43,9 @@ inputs:
   rest_host_internal_endpoint_type:
     default: private_ip
 
+  restservice_skip_create_db:
+    default: false
+
   #############################
   # Bootstrap Validations
   #############################
@@ -487,6 +490,10 @@ inputs:
   #############################
   # Management Worker Inputs
   #############################
+  mgmtworker_rabbitmq_endpoint_ip:
+    type: string
+    default: ''
+
   management_worker_log_level:
     description: >
       Sets the logging level to use for the management workers. This affects the logging performed
