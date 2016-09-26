@@ -914,7 +914,7 @@ node_types:
       rabbitmq_endpoint_ip:
         description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
         type: string
-        default: { get_input: mgmtworker_rabbitmq_endpoint_ip }
+        default: { get_input: rabbitmq_endpoint_ip }
       rabbitmq_username:
         description: RabbitMQ username for access to queues.
         type: string
