@@ -57,7 +57,7 @@ config['folders'] = [
 if os.path.exists('/opt/mgmtworker/env'):
     config['folders'].append({
         'id': 'mgmtworker-env-1',
-        'path': '/opt/mgmtworker/env/lib',
+        'path': '/opt/mgmtworker/env/plugins',
         'rescanIntervalS': 30,
         'devices': [{'deviceID': d['deviceID']} for d in devices]
     })
