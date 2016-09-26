@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import json
 
 import xml.etree.ElementTree as ET
@@ -44,12 +45,22 @@ for node in nodes_data:
             })
 
 config['devices'] = devices
-config['folders'] = [{
-    'id': 'resources-1',
-    'path': '/opt/manager/resources',
-    'rescanIntervalS': 15,
-    'devices': [{'deviceID': d['deviceID']} for d in devices]
-}]
+config['folders'] = [
+    {
+        'id': 'resources-1',
+        'path': '/opt/manager/resources',
+        'rescanIntervalS': 15,
+        'devices': [{'deviceID': d['deviceID']} for d in devices]
+    }
+]
+
+if os.path.exists('/opt/mgmtworker/env'):
+    config['folders'].append({
+        'id': 'mgmtworker-env-1',
+        'path': '/opt/mgmtworker/env/plugins',
+        'rescanIntervalS': 30,
+        'devices': [{'deviceID': d['deviceID']} for d in devices]
+    })
 
 print config
 print request('http://127.0.0.1:8384/rest/system/config',
