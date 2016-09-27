@@ -1097,7 +1097,7 @@ node_types:
           inputs:
             script_path:
               default: components/manager/scripts/sanity/sanity.py
-            manager_user:
+            ssh_user:
               default: { get_input: ssh_user }
             manager_ip:
               default: { get_attribute: [manager_host, public_ip] }

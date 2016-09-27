@@ -18,7 +18,7 @@ DEPLOYMENT_ID = 'sanity_deployment'
 SANITY_SERVICE_NAME = 'sanity'
 
 manager_ip = os.environ.get('manager_ip')
-manager_user = os.environ.get('manager_user')
+ssh_user = os.environ.get('ssh_user')
 manager_remote_key_path = \
     ctx.instance.runtime_properties['manager_remote_key_path']
 rest_protocol = ctx.instance.runtime_properties['rest_protocol']
@@ -63,7 +63,7 @@ def _deploy_app():
         return
 
     dep_inputs = {'server_ip': manager_ip,
-                  'agent_user': manager_user,
+                  'agent_user': ssh_user,
                   'agent_private_key_path': manager_remote_key_path}
     data = {
         'blueprint_id': BLUEPRINT_ID,
