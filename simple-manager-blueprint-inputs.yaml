@@ -37,7 +37,7 @@
 # This user will also be included in the simple userstore repostiroty if the
 # simple userstore implementation is used.
 #admin_username: 'admin'
-#admin_password: 'admin'
+#admin_password: ''
 
 # Username and password used by agents in REST calls
 #agent_rest_username: 'cfy_agent'

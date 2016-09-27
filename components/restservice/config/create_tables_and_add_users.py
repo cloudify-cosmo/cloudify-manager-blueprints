@@ -36,10 +36,11 @@ def _get_flask_app(config):
             config['postgresql_db_name']
         )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECURITY_USER_IDENTITY_ATTRIBUTES'] = 'username, email'
     return app
 
 
-def _add_users_and_roles(config):
+def _add_users_and_roles(config, default_tenant):
     print 'Adding users and roles to the DB'
     # Need to load security_configuration with a yaml loader, as it's a string
     security_config = yaml.load(config['security_configuration'])
@@ -47,7 +48,8 @@ def _add_users_and_roles(config):
     add_users_and_roles_to_userstore(
         user_datastore,
         users=userstore.get('users', []),
-        roles=userstore.get('roles', [])
+        roles=userstore.get('roles', []),
+        default_tenant=default_tenant
     )
     print 'Users and roles added successfully'
 
@@ -66,10 +68,11 @@ def _create_db_tables(config):
 def _add_default_tenant():
     default_tenant_name = 'default_tenant'
     print 'Adding default tenant ' + default_tenant_name
-    t = Tenant(name=default_tenant_name)
-    db.session.add(t)
+    default_tenant = Tenant(name=default_tenant_name)
+    db.session.add(default_tenant)
     db.session.commit()
     print 'Tables updated successfully'
+    return default_tenant
 
 
 if __name__ == '__main__':
@@ -78,5 +81,5 @@ if __name__ == '__main__':
     with open(sys.argv[1], 'r') as f:
         config = json.load(f)
     _create_db_tables(config)
-    _add_default_tenant()
-    _add_users_and_roles(config)
+    default_tenant = _add_default_tenant()
+    _add_users_and_roles(config, default_tenant)
