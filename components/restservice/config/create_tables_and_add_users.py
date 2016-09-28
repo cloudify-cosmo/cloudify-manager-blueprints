@@ -40,6 +40,7 @@ def _get_flask_app(config):
 
 
 def _add_users_and_roles(config):
+    print 'Adding users and roles to the DB'
     # Need to load security_configuration with a yaml loader, as it's a string
     security_config = yaml.load(config['security_configuration'])
     userstore = security_config.get('userstore', {})
@@ -48,21 +49,27 @@ def _add_users_and_roles(config):
         users=userstore.get('users', []),
         roles=userstore.get('roles', [])
     )
+    print 'Users and roles added successfully'
 
 
 def _create_db_tables(config):
+    print 'Creating tables in the DB'
     app = _get_flask_app(config)
     Security(app=app, datastore=user_datastore)
     with app.app_context():
         db.init_app(app)
         db.create_all()
     app.app_context().push()
+    print 'Tables created successfully'
 
 
 def _add_default_tenant():
-    t = Tenant(name='default_tenant')
+    default_tenant_name = 'default_tenant'
+    print 'Adding default tenant ' + default_tenant_name
+    t = Tenant(name=default_tenant_name)
     db.session.add(t)
     db.session.commit()
+    print 'Tables updated successfully'
 
 
 if __name__ == '__main__':
@@ -70,15 +77,6 @@ if __name__ == '__main__':
     assert len(sys.argv) == 2, 'No config file path was provided'
     with open(sys.argv[1], 'r') as f:
         config = json.load(f)
-
-    print 'Creating tables in the DB'
     _create_db_tables(config)
-    print 'Tables created successfully'
-
-    print 'Adding default tenant'
     _add_default_tenant()
-    print 'Tables created successfully'
-
-    print 'Adding users and roles to the DB'
     _add_users_and_roles(config)
-    print 'Users and roles added successfully'

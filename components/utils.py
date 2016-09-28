@@ -1326,6 +1326,8 @@ def get_auth_headers(upgrade_props):
     if security_enabled:
         username = manager_config['security'].get('rest_username')
         password = manager_config['security'].get('rest_password')
+        ctx.logger.debug('Authorization using {0}:{1}'.format(username,
+                                                              password))
         headers.update({'Authorization':
                         'Basic ' + base64.b64encode('{0}:{1}'.format(
                             username, password))})
