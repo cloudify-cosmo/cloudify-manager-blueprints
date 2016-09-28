@@ -1,0 +1,40 @@
+
+keystone_username: ''
+keystone_password: ''
+keystone_tenant_name: ''
+keystone_url: ''
+region: ''
+
+manager_server_name: 'asdf-test-manager'
+management_network_name: asdf-management-network
+management_subnet_name: asdf-management-network-subnet
+management_router: asdf-management-router
+manager_security_group_name: asdf-sg-manager
+agents_security_group_name: asdf-sg-agents
+manager_port_name: asdf-manager-port
+
+image_id: 74ff4015-aee1-4e02-aaa8-1c77b2650394
+flavor_id: 9cf6e43b-e191-47ca-8665-f8592e2d6227
+external_network_name: 'external'
+
+
+use_existing_manager_keypair: true
+use_existing_agent_keypair: true
+
+ssh_key_filename: ~/projects/cloudify/asdf.pem
+agent_private_key_path: ~/projects/cloudify/asdf.pem
+
+manager_public_key_name: 'asdf'
+agent_public_key_name: 'asdf'
+
+
+# DNS entries to add to subnet. Defaults to none.
+management_subnet_dns_nameservers:
+  - 8.8.8.8
+  - 8.8.4.4
+
+rest_host_external_endpoint_type: public_ip
+rest_host_internal_endpoint_type: floating_ip
+keepalived_interface: eth0
+keepalived_priority: 150
+mgmtworker_rabbitmq_endpoint_ip: 172.16.0.200

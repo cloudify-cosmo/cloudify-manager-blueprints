@@ -96,7 +96,8 @@ def _log_results(result):
 def configure_restservice():
     _deploy_security_configuration()
     utils.systemd.configure(REST_SERVICE_NAME, render=False)
-    _create_db_tables_and_add_users()
+    if not ctx.node.properties['skip_create']:
+        _create_db_tables_and_add_users()
 
 
 configure_restservice()

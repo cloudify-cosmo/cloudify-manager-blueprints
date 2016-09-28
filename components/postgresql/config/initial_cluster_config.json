@@ -1,0 +1,10 @@
+{
+    "request_timeout": "10s",
+    "sleep_interval": "2s",
+    "keeper_fail_interval": "6s",
+    "synchronous_replication": false,
+    "init_with_multiple_keepers": true,
+    "pg_parameters": {
+        "log_min_duration_statement": "100ms"
+    }
+}
