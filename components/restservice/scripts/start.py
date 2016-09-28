@@ -32,6 +32,9 @@ def verify_restservice(url):
     else:
         headers = utils.get_auth_headers(True)
 
+    ctx.logger.debug('Sending request to rest-service '
+                     '[url: {0}, headers: {1}]'.format(blueprints_url,
+                                                       headers))
     req = urllib2.Request(blueprints_url, headers=headers)
 
     try:
@@ -61,8 +64,10 @@ def verify_restservice(url):
 ctx.logger.info('Starting Cloudify REST Service...')
 utils.start_service(REST_SERVICE_NAME)
 
+ctx.logger.info('Verifying Rest service is running...')
 utils.systemd.verify_alive(REST_SERVICE_NAME)
 
+ctx.logger.info('Verifying Rest service is working as expected...')
 restservice_url = 'http://{0}:{1}'.format('127.0.0.1', 8100)
 utils.verify_service_http(REST_SERVICE_NAME, restservice_url)
 verify_restservice(restservice_url)
