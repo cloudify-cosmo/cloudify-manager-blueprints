@@ -651,7 +651,7 @@ inputs:
     description: >
       Set this to true if you want Telecom Edition
     type: boolean
-    default: false
+    default: true
 
 ######################################################################
 # This is a vsphere blueprint specific node_type to allow us to define
