@@ -613,7 +613,7 @@ class SystemD(object):
                                                         append_prefix)
         ctx.logger.debug('Enabling systemd service {0}...'.format(
             full_service_name))
-        self.systemctl('enable', service_name, retries)
+        self.systemctl('enable', full_service_name, retries)
 
     def start(self, service_name, retries=0, append_prefix=True):
         full_service_name = self._get_full_service_name(service_name,
