@@ -21,9 +21,10 @@ import json
 from flask import Flask
 from flask_security import Security
 
-from manager_rest.storage.models import db, Tenant
 from manager_rest.security import user_datastore
-from manager_rest.utils import add_users_and_roles_to_userstore
+from manager_rest.storage.models import db, Tenant
+from manager_rest.constants import DEFAULT_TENANT_NAME
+from manager_rest.utils import create_security_roles_and_admin_user
 
 
 def _get_flask_app(config):
@@ -40,18 +41,16 @@ def _get_flask_app(config):
     return app
 
 
-def _add_users_and_roles(config, default_tenant):
-    print 'Adding users and roles to the DB'
-    # Need to load security_configuration with a yaml loader, as it's a string
+def _create_security_roles_and_admin_user(config, default_tenant):
+    print 'Creating security roles and admin user'
     security_config = yaml.load(config['security_configuration'])
-    userstore = security_config.get('userstore', {})
-    add_users_and_roles_to_userstore(
+    create_security_roles_and_admin_user(
         user_datastore,
-        users=userstore.get('users', []),
-        roles=userstore.get('roles', []),
+        admin_username=security_config['admin_username'],
+        admin_password=security_config['admin_password'],
         default_tenant=default_tenant
     )
-    print 'Users and roles added successfully'
+    print 'Security roles and admin user created successfully'
 
 
 def _create_db_tables(config):
@@ -66,12 +65,11 @@ def _create_db_tables(config):
 
 
 def _add_default_tenant():
-    default_tenant_name = 'default_tenant'
-    print 'Adding default tenant ' + default_tenant_name
-    default_tenant = Tenant(name=default_tenant_name)
+    print 'Adding default tenant ' + DEFAULT_TENANT_NAME
+    default_tenant = Tenant(name=DEFAULT_TENANT_NAME)
     db.session.add(default_tenant)
     db.session.commit()
-    print 'Tables updated successfully'
+    print 'Default tenant created successfully'
     return default_tenant
 
 
@@ -82,4 +80,4 @@ if __name__ == '__main__':
         config = json.load(f)
     _create_db_tables(config)
     default_tenant = _add_default_tenant()
-    _add_users_and_roles(config, default_tenant)
+    _create_security_roles_and_admin_user(config, default_tenant)

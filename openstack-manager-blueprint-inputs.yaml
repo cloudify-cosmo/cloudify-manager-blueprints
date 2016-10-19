@@ -79,10 +79,6 @@ external_network_name: ''
 #admin_username: 'admin'
 #admin_password: ''
 
-# Username and password used by agents in REST calls
-#agent_rest_username: 'cfy_agent'
-#agent_rest_password: 'cfy_agent'
-
 #insecure_endpoints_disabled: true
 
 # Default locations for certificates on agents
