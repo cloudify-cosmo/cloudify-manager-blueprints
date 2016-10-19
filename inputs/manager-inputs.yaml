@@ -81,7 +81,7 @@ inputs:
   manager_resources_package:
     description: A URL to a tar files containing all of the manager's resources
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/4.0.0/m5-RELEASE/cloudify-manager-resources_4.0.0-m5-b465.tar.gz
+    default: http://repository.cloudifysource.org/org/cloudify3/4.0.0/m6-RELEASE/cloudify-manager-resources_4.0.0-m6-b466.tar.gz
 
   manager_resources_package_checksum_file:
     description: >
@@ -105,28 +105,28 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: Ubuntu-trusty-agent_4.0.0-m5-b465.tar.gz
-      ubuntu_precise_agent: Ubuntu-precise-agent_4.0.0-m5-b465.tar.gz
-      centos_7x_agent: centos-Core-agent_4.0.0-m5-b465.tar.gz
-      centos_6x_agent: centos-Final-agent_4.0.0-m5-b465.tar.gz
-      redhat_7x_agent: redhat-Maipo-agent_4.0.0-m5-b465.tar.gz
-      redhat_6x_agent: redhat-Santiago-agent_4.0.0-m5-b465.tar.gz
-      cloudify_windows_agent: cloudify-windows-agent_4.0.0-m5-b465.exe
+      ubuntu_trusty_agent: Ubuntu-trusty-agent_4.0.0-m6-b466.tar.gz
+      ubuntu_precise_agent: Ubuntu-precise-agent_4.0.0-m6-b466.tar.gz
+      centos_7x_agent: centos-Core-agent_4.0.0-m6-b466.tar.gz
+      centos_6x_agent: centos-Final-agent_4.0.0-m6-b466.tar.gz
+      redhat_7x_agent: redhat-Maipo-agent_4.0.0-m6-b466.tar.gz
+      redhat_6x_agent: redhat-Santiago-agent_4.0.0-m6-b466.tar.gz
+      cloudify_windows_agent: cloudify-windows-agent_4.0.0-m6-b466.exe
 
   #############################
   # Cloudify Modules
   #############################
   rest_service_rpm_source_url:
     type: string
-    default: cloudify-rest-service-4.0.0-m5_b465.x86_64.rpm
+    default: cloudify-rest-service-4.0.0-m6_b466.x86_64.rpm
 
   management_worker_rpm_source_url:
     type: string
-    default: cloudify-management-worker-4.0.0-m5_b465.x86_64.rpm
+    default: cloudify-management-worker-4.0.0-m6_b466.x86_64.rpm
 
   amqpinflux_rpm_source_url:
     type: string
-    default: cloudify-amqp-influx-4.0.0-m5_b465.x86_64.rpm
+    default: cloudify-amqp-influx-4.0.0-m6_b466.x86_64.rpm
 
   cloudify_resources_url:
     type: string
@@ -134,7 +134,7 @@ inputs:
 
   webui_source_url:
     type: string
-    default: cloudify-ui-4.0.0-m5-b465.tgz
+    default: cloudify-ui-4.0.0-m6-b466.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
