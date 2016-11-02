@@ -132,7 +132,7 @@
 #############################
 # Manager Resources Package
 #############################
-#manager_resources_package: http://repository.cloudifysource.org/org/cloudify3/4.0.0/m6-RELEASE/cloudify-manager-resources_4.0.0-m6-b466.tar.gz
+#manager_resources_package: http://repository.cloudifysource.org/org/cloudify3/4.0.0/m7-RELEASE/cloudify-manager-resources_4.0.0-m7-b467.tar.gz
 
 # Providing a checksum file url will allow validating the resources package.
 # By default, no validation is performed. Providing a checksum file will use
@@ -360,4 +360,4 @@
 #  - {'source_path': 'http://www.getcloudify.org/spec/openstack-plugin/1.5/plugin.yaml', 'destination_path': '/spec/openstack-plugin/1.5/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/vsphere-plugin/2.0.1/plugin.yaml', 'destination_path': '/spec/vsphere-plugin/2.0.1/plugin.yaml'}
-#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.0m6/types.yaml', 'destination_path': '/spec/cloudify/4.0m6/types.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.0m7/types.yaml', 'destination_path': '/spec/cloudify/4.0m7/types.yaml'}
