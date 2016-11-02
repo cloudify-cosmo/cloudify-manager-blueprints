@@ -95,7 +95,7 @@ def _log_results(result):
 
 def configure_restservice():
     _deploy_security_configuration()
-    utils.systemd.configure(REST_SERVICE_NAME, render=False)
+    utils.systemd.configure(REST_SERVICE_NAME)
     _create_db_tables_and_add_users()
 
 
