@@ -740,6 +740,12 @@ node_types:
         description: Use existing elasticsearch configuration
         type: string
         default: true
+      gunicorn_worker_count:
+        description: |
+          The number of worker processes for handling requests.
+          Default value (0), means to use 2 * cpu_count + 1 processes.
+        type: integer
+        default: 0
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
