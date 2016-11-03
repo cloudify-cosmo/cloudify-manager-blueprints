@@ -743,9 +743,9 @@ node_types:
       gunicorn_worker_count:
         description: |
           The number of worker processes for handling requests.
-          Default value (0), means to use 2 * cpu_count + 1 processes.
+          If value is set to 0, then (2 * cpu_count + 1 processes) will be used.
         type: integer
-        default: 0
+        default: { get_input: rest_service_gunicorn_worker_count }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

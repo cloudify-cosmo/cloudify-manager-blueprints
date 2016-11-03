@@ -278,6 +278,13 @@
 # valid values: public_ip, private_ip
 #rest_host_internal_endpoint_type: private_ip
 
+#rest_service_gunicorn_worker_count:
+#  description: |
+#    The number of worker processes for handling requests.
+#    If the default value (0) is set, then (2 * cpu_count + 1 processes) will be used.
+#  type: integer
+#  default: 0
+
 #############################
 # Offline Resources Upload
 #############################
