@@ -21,7 +21,7 @@ import json
 from flask import Flask
 from flask_security import Security
 
-from manager_rest.security import user_datastore
+from manager_rest.storage import user_datastore
 from manager_rest.storage.models import db, Tenant
 from manager_rest.constants import DEFAULT_TENANT_NAME
 from manager_rest.utils import create_security_roles_and_admin_user
