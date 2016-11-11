@@ -61,6 +61,12 @@ def install_logstash():
 
     utils.yum_install(logstash_source_url, service_name=LOGSTASH_SERVICE_NAME)
 
+    ctx.logger.info('Installing logstash-output-jdbc plugin...')
+    utils.run([
+        'sudo', '-u', 'logstash',
+        '/opt/logstash/bin/plugin', 'install', 'logstash-output-jdbc',
+    ])
+
     utils.mkdir(logstash_log_path)
     utils.chown('logstash', 'logstash', logstash_log_path)
 
