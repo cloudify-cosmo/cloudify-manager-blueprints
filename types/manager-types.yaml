@@ -1076,6 +1076,9 @@ relationships:
   logstash_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to
 
+  logstash_to_postgresql:
+    derived_from: cloudify.relationships.connected_to
+
   restservice_to_elasticsearch:
     derived_from: cloudify.relationships.connected_to
 
