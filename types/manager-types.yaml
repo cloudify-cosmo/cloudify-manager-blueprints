@@ -461,6 +461,9 @@ node_types:
         description: Logstash tar.gz Source URL
         type: string
         default: { get_input: logstash_source_url }
+      logstash_output_jdbc_plugin_url:
+        description: logstash-output-jdbc-plugin location
+        default: { get_input: logstash_output_jdbc_plugin_url }
       postgresql_host:
         description: PostgreSQL server IP address
         type: string

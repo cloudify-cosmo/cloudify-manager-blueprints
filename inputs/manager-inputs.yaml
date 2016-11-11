@@ -214,6 +214,11 @@ inputs:
     type: string
     default: logstash-1.5.0-1.noarch.rpm
 
+  logstash_output_jdbc_plugin_url:
+    description: logstash-output-jdbc-plugin location
+    type: string
+    default: logstash-output-jdbc-0.2.10.gem
+
   nginx_source_url:
     type: string
     default: nginx-1.8.0-1.el7.ngx.x86_64.rpm
