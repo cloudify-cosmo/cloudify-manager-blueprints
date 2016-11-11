@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
 import os
-from os.path import join, dirname
+from os.path import (
+    basename,
+    dirname,
+    join,
+)
 
 from cloudify import ctx
 
@@ -22,6 +26,7 @@ def install_logstash():
     logstash_unit_override = '/etc/systemd/system/logstash.service.d'
 
     logstash_source_url = ctx_properties['logstash_rpm_source_url']
+    postgresql_jdbc_driver_url = ctx_properties['postgresql_jdbc_driver_url']
 
     rabbitmq_username = ctx_properties['rabbitmq_username']
     rabbitmq_password = ctx_properties['rabbitmq_password']
@@ -66,6 +71,16 @@ def install_logstash():
         'sudo', '-u', 'logstash',
         '/opt/logstash/bin/plugin', 'install', 'logstash-output-jdbc',
     ])
+
+    ctx.logger.info('Copying PostgreSQL JDBC driver...')
+    utils.download_cloudify_resource(
+        postgresql_jdbc_driver_url,
+        LOGSTASH_SERVICE_NAME,
+        join(
+            '/opt/logstash/vendor/jar/jdbc',
+            basename(postgresql_jdbc_driver_url),
+        ),
+    )
 
     utils.mkdir(logstash_log_path)
     utils.chown('logstash', 'logstash', logstash_log_path)
