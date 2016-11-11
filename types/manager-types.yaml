@@ -461,6 +461,10 @@ node_types:
         description: Logstash tar.gz Source URL
         type: string
         default: { get_input: logstash_source_url }
+      postgresql_jdbc_driver_url:
+        description: PostgreSQL JDBC driver
+        type: string
+        default: { get_input: postgresql_jdbc_driver_url }
       es_endpoint_port:
         type: integer
         default: { get_input: elasticsearch_endpoint_port }
