@@ -26,6 +26,9 @@ def install_logstash():
     logstash_unit_override = '/etc/systemd/system/logstash.service.d'
 
     logstash_source_url = ctx_properties['logstash_rpm_source_url']
+    logstash_output_jdbc_plugin_url = (
+        ctx_properties['logstash_output_jdbc_plugin_url']
+    )
     postgresql_jdbc_driver_url = ctx_properties['postgresql_jdbc_driver_url']
 
     rabbitmq_username = ctx_properties['rabbitmq_username']
@@ -67,9 +70,13 @@ def install_logstash():
     utils.yum_install(logstash_source_url, service_name=LOGSTASH_SERVICE_NAME)
 
     ctx.logger.info('Installing logstash-output-jdbc plugin...')
+    logstash_output_jdbc_plugin = utils.download_cloudify_resource(
+        logstash_output_jdbc_plugin_url,
+        LOGSTASH_SERVICE_NAME,
+    )
     utils.run([
         'sudo', '-u', 'logstash',
-        '/opt/logstash/bin/plugin', 'install', 'logstash-output-jdbc',
+        '/opt/logstash/bin/plugin', 'install', logstash_output_jdbc_plugin,
     ])
 
     ctx.logger.info('Copying PostgreSQL JDBC driver...')
