@@ -461,6 +461,14 @@ node_types:
         description: Logstash tar.gz Source URL
         type: string
         default: { get_input: logstash_source_url }
+      postgresql_host:
+        description: PostgreSQL server IP address
+        type: string
+        default: { get_input: postgresql_host }
+      postgresql_db_name:
+        description: PostgreSQL database name
+        type: string
+        default: { get_input: postgresql_db_name }
       postgresql_jdbc_driver_url:
         description: PostgreSQL JDBC driver
         type: string
