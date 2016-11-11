@@ -82,6 +82,18 @@ def install_logstash():
         ),
     )
 
+    ctx.logger.info('Creating PostgreSQL tables...')
+    for table_name in ['logs', 'events']:
+        utils.run([
+            'sudo', '-u', 'postgres',
+            'psql', 'cloudify_db', '-c',
+            (
+                'CREATE TABLE {0} (timestamp TIMESTAMP, message TEXT);'
+                'ALTER TABLE {0} OWNER TO cloudify;'
+                .format(table_name)
+            )
+        ])
+
     utils.mkdir(logstash_log_path)
     utils.chown('logstash', 'logstash', logstash_log_path)
 
