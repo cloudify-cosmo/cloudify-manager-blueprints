@@ -137,6 +137,18 @@ def _assert_logs_and_events(execution_id):
     if 'items' not in json_resp or not json_resp['items']:
         ctx.abort_operation('No logs/events received')
 
+    db_name = 'cloudify_db'
+    for table_name in ['logs', 'events']:
+        proc = utils.run([
+            'sudo', '-u', 'postgres',
+            'psql', db_name, '-t', '-c',
+            'SELECT COUNT(*) FROM {0}'.format(table_name),
+        ])
+        count = int(proc.aggr_stdout)
+        if count <= 0:
+            ctx.abort_operation(
+                'Failed to retrieve {0} from PostgreSQL'.format(table_name))
+
 
 def _assert_webserver_running():
     resp = utils.http_request(
