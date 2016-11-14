@@ -390,6 +390,14 @@ node_types:
         description: postgresql default host
         type: string
         default: { get_input: postgresql_host }
+      postgresql_username:
+        description: postgresql default username
+        type: string
+        default: { get_input: postgresql_username }
+      postgresql_password:
+        description: postgresql default password
+        type: string
+        default: { get_input: postgresql_password }
       libxslt_rpm_url:
         description: libxslt rpm URL
         type: string

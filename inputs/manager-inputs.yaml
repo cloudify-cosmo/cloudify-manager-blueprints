@@ -445,6 +445,15 @@ inputs:
     type: string
     default: 'localhost'
 
+  postgresql_username:
+    description: postgresql default username
+    type: string
+    default: 'cloudify'
+
+  postgresql_password:
+    description: postgresql default password
+    type: string
+    default: 'cloudify'
 
   #############################
   # LDAP Inputs
