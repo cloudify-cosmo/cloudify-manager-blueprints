@@ -21,6 +21,19 @@ def configure_logstash():
 
     logstash_conf_path = '/etc/logstash/conf.d'
 
+    rabbitmq_username = ctx.instance.runtime_properties['rabbitmq_username']
+    rabbitmq_password = ctx.instance.runtime_properties['rabbitmq_password']
+
+    # Confirm username and password have been supplied for broker before
+    # continuing.
+    # Components other than logstash and riemann have this handled in code.
+    # Note that these are not directly used in this script, but are used by the
+    # deployed resources, hence the check here.
+    if not rabbitmq_username or not rabbitmq_password:
+        ctx.abort_operation(
+            'Both rabbitmq_username and rabbitmq_password must be supplied '
+            'and at least 1 character long in the manager blueprint inputs.')
+
     ctx.logger.info('Deploying Logstash configuration...')
     utils.deploy_blueprint_resource(
         '{0}/logstash.conf'.format(CONFIG_PATH),

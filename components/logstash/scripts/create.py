@@ -30,9 +30,6 @@ def install_logstash():
         'https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar'
     )
 
-    rabbitmq_username = ctx_properties['rabbitmq_username']
-    rabbitmq_password = ctx_properties['rabbitmq_password']
-
     logstash_log_path = '/var/log/cloudify/logstash'
 
     # injected as an input to the script
@@ -50,16 +47,6 @@ def install_logstash():
         rabbit_props['rabbitmq_username']
     ctx.instance.runtime_properties['rabbitmq_password'] = \
         rabbit_props['rabbitmq_password']
-
-    # Confirm username and password have been supplied for broker before
-    # continuing.
-    # Components other than logstash and riemann have this handled in code.
-    # Note that these are not directly used in this script, but are used by the
-    # deployed resources, hence the check here.
-    if not rabbitmq_username or not rabbitmq_password:
-        ctx.abort_operation(
-            'Both rabbitmq_username and rabbitmq_password must be supplied '
-            'and at least 1 character long in the manager blueprint inputs.')
 
     ctx.logger.info('Installing Logstash...')
     utils.set_selinux_permissive()
