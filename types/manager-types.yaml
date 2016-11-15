@@ -1106,7 +1106,7 @@ relationships:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/logstash/scripts/preconfigure.py
+              default: components/logstash/scripts/preconfigure_postgresql_properties.py
             fabric_env: *simple_fabric_env
 
   restservice_to_elasticsearch:
