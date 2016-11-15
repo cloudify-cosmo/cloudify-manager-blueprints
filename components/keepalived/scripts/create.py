@@ -19,4 +19,5 @@ def install_keepalived():
     utils.yum_install(keepalived_rpm_url,
                       service_name=KEEPALIVED_SERVICE_NAME)
 
+
 install_keepalived()

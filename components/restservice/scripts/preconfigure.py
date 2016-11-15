@@ -10,4 +10,5 @@ def preconfigure_restservice():
     ctx.source.instance.runtime_properties['security_configuration'] = \
         security_config
 
+
 preconfigure_restservice()

@@ -390,6 +390,14 @@ node_types:
         description: postgresql default host
         type: string
         default: { get_input: postgresql_host }
+      postgresql_username:
+        description: postgresql default username
+        type: string
+        default: { get_input: postgresql_username }
+      postgresql_password:
+        description: postgresql default password
+        type: string
+        default: { get_input: postgresql_password }
       libxslt_rpm_url:
         description: libxslt rpm URL
         type: string
@@ -461,21 +469,13 @@ node_types:
         description: Logstash tar.gz Source URL
         type: string
         default: { get_input: logstash_source_url }
-      es_endpoint_port:
-        type: integer
-        default: { get_input: elasticsearch_endpoint_port }
-      rabbitmq_endpoint_ip:
-        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
+      logstash_output_jdbc_plugin_url:
+        description: logstash-output-jdbc-plugin location
+        default: { get_input: logstash_output_jdbc_plugin_url }
+      postgresql_jdbc_driver_url:
+        description: PostgreSQL JDBC driver
         type: string
-        default: { get_input: rabbitmq_endpoint_ip }
-      rabbitmq_username:
-        description: RabbitMQ username for access to queues.
-        type: string
-        default: { get_input: rabbitmq_username }
-      rabbitmq_password:
-        description: RabbitMQ password for access to queues.
-        type: string
-        default: { get_input: rabbitmq_password }
+        default: { get_input: postgresql_jdbc_driver_url }
       use_existing_on_upgrade:
         description: Use existing logstash configuration
         type: string
@@ -489,8 +489,13 @@ node_types:
               default: components/logstash/scripts/create.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
-            ES_ENDPOINT_IP:
-              default: { get_attribute: [elasticsearch, es_endpoint_ip] }
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/logstash/scripts/configure.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
@@ -1072,9 +1077,36 @@ relationships:
 
   logstash_to_elasticsearch:
     derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/logstash/scripts/preconfigure_elasticsearch_properties.py
+            fabric_env: *simple_fabric_env
 
   logstash_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/logstash/scripts/preconfigure_rabbitmq_properties.py
+            fabric_env: *simple_fabric_env
+
+  logstash_to_postgresql:
+    derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/logstash/scripts/preconfigure_postgresql_properties.py
+            fabric_env: *simple_fabric_env
 
   restservice_to_elasticsearch:
     derived_from: cloudify.relationships.connected_to

@@ -74,14 +74,20 @@ def _create_postgres_pass_file(host, db_name, username, password):
 def main():
     db_name = ctx.node.properties['postgresql_db_name']
     host = ctx.node.properties['postgresql_host']
-    _create_postgres_pass_file(host=host,
-                               db_name='*',
-                               username='cloudify',
-                               password='cloudify')
+    username = ctx.node.properties['postgresql_username']
+    password = ctx.node.properties['postgresql_password']
+    _create_postgres_pass_file(
+        host=host,
+        db_name='*',
+        username=username,
+        password=password,
+    )
     _start_postgres()
-    _create_default_db(db_name=db_name,
-                       username='cloudify',
-                       password='cloudify')
+    _create_default_db(
+        db_name=db_name,
+        username=username,
+        password=password,
+    )
 
     if utils.is_upgrade or utils.is_rollback:
         # restore the 'provider_context' and 'snapshot' elements from file

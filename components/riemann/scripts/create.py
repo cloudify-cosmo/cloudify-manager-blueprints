@@ -73,4 +73,5 @@ def install_riemann():
     ctx.logger.info('Extracting Manager Repository...')
     utils.untar(manager_repo, '/tmp')
 
+
 install_riemann()
