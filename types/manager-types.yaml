@@ -479,18 +479,6 @@ node_types:
       es_endpoint_port:
         type: integer
         default: { get_input: elasticsearch_endpoint_port }
-      rabbitmq_endpoint_ip:
-        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
-        type: string
-        default: { get_input: rabbitmq_endpoint_ip }
-      rabbitmq_username:
-        description: RabbitMQ username for access to queues.
-        type: string
-        default: { get_input: rabbitmq_username }
-      rabbitmq_password:
-        description: RabbitMQ password for access to queues.
-        type: string
-        default: { get_input: rabbitmq_password }
       use_existing_on_upgrade:
         description: Use existing logstash configuration
         type: string
