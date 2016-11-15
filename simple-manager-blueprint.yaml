@@ -316,6 +316,8 @@ node_templates:
         target: elasticsearch
       - type: logstash_to_postgresql
         target: postgresql
+      - type: logstash_to_rabbitmq
+        target: rabbitmq
     interfaces:
       cloudify.interfaces.validation:
         creation:
