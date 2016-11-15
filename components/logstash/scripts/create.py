@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 from os.path import (
     basename,
     dirname,
@@ -31,13 +30,6 @@ def install_logstash():
     )
 
     logstash_log_path = '/var/log/cloudify/logstash'
-
-    # injected as an input to the script
-    ctx.instance.runtime_properties['es_endpoint_ip'] = \
-        os.environ['ES_ENDPOINT_IP']
-    elasticsearch_props = utils.ctx_factory.get('elasticsearch')
-    ctx.instance.runtime_properties['es_endpoint_port'] = \
-        elasticsearch_props['es_endpoint_port']
 
     ctx.logger.info('Installing Logstash...')
     utils.set_selinux_permissive()
