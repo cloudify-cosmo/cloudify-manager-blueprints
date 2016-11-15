@@ -1082,6 +1082,14 @@ relationships:
 
   logstash_to_elasticsearch:
     derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/logstash/scripts/preconfigure_elasticsearch_properties.py
+            fabric_env: *simple_fabric_env
 
   logstash_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to
