@@ -514,6 +514,13 @@ node_types:
             fabric_env: *simple_fabric_env
             ES_ENDPOINT_IP:
               default: { get_attribute: [elasticsearch, es_endpoint_ip] }
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/logstash/scripts/configure.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:

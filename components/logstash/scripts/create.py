@@ -34,7 +34,6 @@ def install_logstash():
     rabbitmq_password = ctx_properties['rabbitmq_password']
 
     logstash_log_path = '/var/log/cloudify/logstash'
-    logstash_conf_path = '/etc/logstash/conf.d'
 
     # injected as an input to the script
     ctx.instance.runtime_properties['es_endpoint_ip'] = \
@@ -106,35 +105,6 @@ def install_logstash():
         '{0}/restart.conf'.format(logstash_unit_override),
         LOGSTASH_SERVICE_NAME)
 
-    ctx.logger.info('Deploying Logstash configuration...')
-    utils.deploy_blueprint_resource(
-        '{0}/logstash.conf'.format(CONFIG_PATH),
-        '{0}/logstash.conf'.format(logstash_conf_path),
-        LOGSTASH_SERVICE_NAME)
 
-    # Due to a bug in the handling of configuration files,
-    # configuration files with the same name cannot be deployed.
-    # Since the logrotate config file is called `logstash`,
-    # we change the name of the logstash env vars config file
-    # from logstash to cloudify-logstash to be consistent with
-    # other service env var files.
-    init_file = '/etc/init.d/logstash'
-    utils.replace_in_file(
-        'sysconfig/\$name',
-        'sysconfig/cloudify-$name',
-        init_file)
-    utils.chmod('755', init_file)
-    utils.chown('root', 'root', init_file)
-
-    ctx.logger.debug('Deploying Logstash sysconfig...')
-    utils.deploy_blueprint_resource(
-        '{0}/cloudify-logstash'.format(CONFIG_PATH),
-        '/etc/sysconfig/cloudify-logstash',
-        LOGSTASH_SERVICE_NAME)
-
-    utils.logrotate(LOGSTASH_SERVICE_NAME)
-    utils.sudo(['/sbin/chkconfig', 'logstash', 'on'])
-    utils.clean_var_log_dir(LOGSTASH_SERVICE_NAME)
-
-
-install_logstash()
+if __name__ == '__main__':
+    install_logstash()
