@@ -39,15 +39,6 @@ def install_logstash():
     ctx.instance.runtime_properties['es_endpoint_port'] = \
         elasticsearch_props['es_endpoint_port']
 
-    rabbit_props = utils.ctx_factory.get('rabbitmq')
-    ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip(
-            rabbit_props.get('rabbitmq_endpoint_ip'))
-    ctx.instance.runtime_properties['rabbitmq_username'] = \
-        rabbit_props['rabbitmq_username']
-    ctx.instance.runtime_properties['rabbitmq_password'] = \
-        rabbit_props['rabbitmq_password']
-
     ctx.logger.info('Installing Logstash...')
     utils.set_selinux_permissive()
     utils.copy_notice(LOGSTASH_SERVICE_NAME)
