@@ -70,4 +70,5 @@ def main():
         # created in the 'create.py' script.
         es_upgrade_utils.restore_upgrade_data(es_endpoint_ip, ES_ENDPOINT_PORT)
 
+
 main()

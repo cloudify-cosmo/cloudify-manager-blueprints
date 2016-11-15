@@ -40,4 +40,5 @@ def configure_riemann():
     utils.systemd.configure(RIEMANN_SERVICE_NAME)
     utils.clean_var_log_dir(RIEMANN_SERVICE_NAME)
 
+
 configure_riemann()
