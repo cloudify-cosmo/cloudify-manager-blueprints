@@ -21,8 +21,9 @@ def configure_logstash():
 
     logstash_conf_path = '/etc/logstash/conf.d'
 
-    rabbitmq_username = ctx.instance.runtime_properties['rabbitmq_username']
-    rabbitmq_password = ctx.instance.runtime_properties['rabbitmq_password']
+    runtime_properties = ctx.instance.runtime_properties
+    rabbitmq_username = runtime_properties.get('rabbitmq_username')
+    rabbitmq_password = runtime_properties.get('rabbitmq_password')
 
     # Confirm username and password have been supplied for broker before
     # continuing.
