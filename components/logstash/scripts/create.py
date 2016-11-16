@@ -47,7 +47,7 @@ def install_logstash():
     jar_path = '/opt/logstash/vendor/jar'
     jdbc_path = join(jar_path, 'jdbc')
     utils.mkdir(jdbc_path)
-    utils.chown('logstash', 'logstash', '/opt/logstash/vendor/jar')
+    utils.chown('logstash', 'logstash', jar_path)
     utils.download_file(
         postgresql_jdbc_driver_url,
         join(jdbc_path, basename(postgresql_jdbc_driver_url)),
