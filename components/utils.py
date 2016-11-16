@@ -305,14 +305,25 @@ def get_file_content(file_path):
 
 
 def curl_download_with_retries(source, destination):
-    curl_cmd = ['curl']
-    curl_cmd.extend(['--retry', '10'])
-    curl_cmd.append('--fail')
-    curl_cmd.append('--silent')
-    curl_cmd.append('--show-error')
-    curl_cmd.extend(['--location', source])
-    curl_cmd.append('--create-dir')
-    curl_cmd.extend(['--output', destination])
+    """Download file using the curl command.
+
+    :param source: Source URL for the file to download
+    :typ source: str
+    :param destination:
+        Path to the directory where the file should be downloaded
+    :type destination: str
+
+    """
+    curl_cmd = [
+        'curl',
+        '--retry', '10',
+        '--fail',
+        '--silent',
+        '--show-error',
+        '--location', source,
+        '--create-dir',
+        '--output', destination,
+    ]
     ctx.logger.debug('curling: {0}'.format(' '.join(curl_cmd)))
     run(curl_cmd)
 
