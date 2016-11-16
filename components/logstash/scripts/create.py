@@ -44,14 +44,14 @@ def install_logstash():
     ])
 
     ctx.logger.info('Installing PostgreSQL JDBC driver...')
+    jar_path = '/opt/logstash/vendor/jar'
+    jdbc_path = join(jar_path, 'jdbc')
+    utils.mkdir(jdbc_path)
+    utils.chown('logstash', 'logstash', '/opt/logstash/vendor/jar')
     utils.download_file(
         postgresql_jdbc_driver_url,
-        join(
-            '/opt/logstash/vendor/jar/jdbc',
-            basename(postgresql_jdbc_driver_url),
-        ),
+        join(jdbc_path, basename(postgresql_jdbc_driver_url)),
     )
-    utils.chown('logstash', 'logstash', '/opt/logstash/vendor/jar')
 
     ctx.logger.info('Creating PostgreSQL tables...')
     for table_name in ['logs', 'events']:
