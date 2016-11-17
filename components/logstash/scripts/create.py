@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import tempfile
+
 from os.path import (
     basename,
     dirname,
@@ -28,6 +30,9 @@ def install_logstash():
     postgresql_jdbc_driver_url = (
         'https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar'
     )
+    logstash_output_jdbc_url = (
+        'https://rubygems.org/downloads/logstash-output-jdbc-0.2.10.gem'
+    )
 
     logstash_log_path = '/var/log/cloudify/logstash'
 
@@ -38,9 +43,17 @@ def install_logstash():
     utils.yum_install(logstash_source_url, service_name=LOGSTASH_SERVICE_NAME)
 
     ctx.logger.info('Installing logstash-output-jdbc plugin...')
+    logstash_output_jdbc_path = join(
+        tempfile.gettempdir(),
+        basename(logstash_output_jdbc_url),
+    )
+    utils.download_file(
+        logstash_output_jdbc_url,
+        logstash_output_jdbc_path,
+    )
     utils.run([
         'sudo', '-u', 'logstash',
-        '/opt/logstash/bin/plugin', 'install', 'logstash-output-jdbc',
+        '/opt/logstash/bin/plugin', 'install', logstash_output_jdbc_path,
     ])
 
     ctx.logger.info('Installing PostgreSQL JDBC driver...')
