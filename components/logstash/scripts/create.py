@@ -66,10 +66,9 @@ def create_postgresql_tables():
         (
             'CREATE TABLE {0} ('
             'timestamp TIMESTAMP,'
-            'context JSONB,'
             'logger TEXT,'
             'level TEXT,'
-            'message JSONB,'
+            'message TEXT,'
             'message_code TEXT'
             ');'
             'ALTER TABLE {0} OWNER TO cloudify;'
@@ -83,9 +82,8 @@ def create_postgresql_tables():
         (
             'CREATE TABLE {0} ('
             'timestamp TIMESTAMP,'
-            'context JSONB,'
             'event_type TEXT,'
-            'message JSONB,'
+            'message TEXT,'
             'message_code TEXT'
             ');'
             'ALTER TABLE {0} OWNER TO cloudify;'
