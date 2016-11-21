@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import tempfile
+
 from os.path import (
     basename,
     dirname,
@@ -20,15 +22,81 @@ LOGSTASH_SERVICE_NAME = 'logstash'
 ctx_properties = utils.ctx_factory.create(LOGSTASH_SERVICE_NAME)
 
 
-def install_logstash():
+def install_logstash_output_jdbc_plugin():
+    """"Install output plugin needed to write to SQL databases."""
+    plugin_url = ctx_properties['logstash_output_jdbc_plugin_url']
+    plugin_url = (
+        'https://rubygems.org/downloads/logstash-output-jdbc-0.2.10.gem'
+    )
 
+    ctx.logger.info('Installing logstash-output-jdbc plugin...')
+    plugin_path = join(tempfile.gettempdir(), basename(plugin_url))
+    utils.download_file(plugin_url, plugin_path)
+    utils.run([
+        'sudo', '-u', 'logstash',
+        '/opt/logstash/bin/plugin', 'install', plugin_path,
+    ])
+
+
+def install_postgresql_jdbc_driver():
+    """Install driver used by the jdbc plugin to write data to postgresql."""
+    driver_url = ctx_properties['postgresql_jdbc_driver_url']
+
+    ctx.logger.info('Installing PostgreSQL JDBC driver...')
+    jar_path = '/opt/logstash/vendor/jar'
+    jdbc_path = join(jar_path, 'jdbc')
+    utils.mkdir(jdbc_path)
+    utils.chown('logstash', 'logstash', jar_path)
+    driver_path = utils.download_file(driver_url)
+    utils.run([
+        'sudo', '-u', 'logstash',
+        'cp',
+        driver_path,
+        join(jdbc_path, basename(driver_url)),
+    ])
+
+
+def create_postgresql_tables():
+    """Create database tables to store log/event information."""
+    ctx.logger.info('Creating PostgreSQL tables...')
+
+    utils.run([
+        'sudo', '-u', 'postgres',
+        'psql', 'cloudify_db', '-c',
+        (
+            'CREATE TABLE {0} ('
+            'timestamp TIMESTAMP,'
+            'logger TEXT,'
+            'level TEXT,'
+            'message TEXT,'
+            'message_code TEXT'
+            ');'
+            'ALTER TABLE {0} OWNER TO cloudify;'
+            .format('logs')
+        )
+    ])
+
+    utils.run([
+        'sudo', '-u', 'postgres',
+        'psql', 'cloudify_db', '-c',
+        (
+            'CREATE TABLE {0} ('
+            'timestamp TIMESTAMP,'
+            'event_type TEXT,'
+            'message TEXT,'
+            'message_code TEXT'
+            ');'
+            'ALTER TABLE {0} OWNER TO cloudify;'
+            .format('events')
+        )
+    ])
+
+
+def install_logstash():
+    """Install logstash as a systemd service."""
     logstash_unit_override = '/etc/systemd/system/logstash.service.d'
 
     logstash_source_url = ctx_properties['logstash_rpm_source_url']
-    postgresql_jdbc_driver_url = (
-        'https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar'
-    )
-
     logstash_log_path = '/var/log/cloudify/logstash'
 
     ctx.logger.info('Installing Logstash...')
@@ -37,36 +105,9 @@ def install_logstash():
 
     utils.yum_install(logstash_source_url, service_name=LOGSTASH_SERVICE_NAME)
 
-    ctx.logger.info('Installing logstash-output-jdbc plugin...')
-    utils.run([
-        'sudo', '-u', 'logstash',
-        '/opt/logstash/bin/plugin', 'install', 'logstash-output-jdbc',
-    ])
-
-    ctx.logger.info('Installing PostgreSQL JDBC driver...')
-    jar_path = '/opt/logstash/vendor/jar'
-    jdbc_path = join(jar_path, 'jdbc')
-    utils.mkdir(jdbc_path)
-    utils.chown('logstash', 'logstash', jar_path)
-    jdbc_driver_path = utils.download_file(postgresql_jdbc_driver_url)
-    utils.run([
-        'sudo', '-u', 'logstash',
-        'cp',
-        jdbc_driver_path,
-        join(jdbc_path, basename(postgresql_jdbc_driver_url)),
-    ])
-
-    ctx.logger.info('Creating PostgreSQL tables...')
-    for table_name in ['logs', 'events']:
-        utils.run([
-            'sudo', '-u', 'postgres',
-            'psql', 'cloudify_db', '-c',
-            (
-                'CREATE TABLE {0} (timestamp TIMESTAMP, message TEXT);'
-                'ALTER TABLE {0} OWNER TO cloudify;'
-                .format(table_name)
-            )
-        ])
+    install_logstash_output_jdbc_plugin()
+    install_postgresql_jdbc_driver()
+    create_postgresql_tables()
 
     utils.mkdir(logstash_log_path)
     utils.chown('logstash', 'logstash', logstash_log_path)

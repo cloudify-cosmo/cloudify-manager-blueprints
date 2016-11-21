@@ -196,7 +196,7 @@ inputs:
 
   postgresql_jdbc_driver_url:
     type: string
-    default: postgresql-9.4.1212.jar
+    default: 'https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar'
 
   python_psycopg2_rpm_url:
     type: string
@@ -217,7 +217,7 @@ inputs:
   logstash_output_jdbc_plugin_url:
     description: logstash-output-jdbc-plugin location
     type: string
-    default: logstash-output-jdbc-0.2.10.gem
+    default: 'https://rubygems.org/downloads/logstash-output-jdbc-0.2.10.gem'
 
   nginx_source_url:
     type: string
