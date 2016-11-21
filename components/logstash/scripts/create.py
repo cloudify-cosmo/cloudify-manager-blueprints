@@ -24,6 +24,7 @@ ctx_properties = utils.ctx_factory.create(LOGSTASH_SERVICE_NAME)
 
 def install_logstash_output_jdbc_plugin():
     """"Install output plugin needed to write to SQL databases."""
+    plugin_url = ctx_properties['logstash_output_jdbc_plugin_url']
     plugin_url = (
         'https://rubygems.org/downloads/logstash-output-jdbc-0.2.10.gem'
     )
@@ -39,9 +40,7 @@ def install_logstash_output_jdbc_plugin():
 
 def install_postgresql_jdbc_driver():
     """Install driver used by the jdbc plugin to write data to postgresql."""
-    driver_url = (
-        'https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar'
-    )
+    driver_url = ctx_properties['postgresql_jdbc_driver_url']
 
     ctx.logger.info('Installing PostgreSQL JDBC driver...')
     jar_path = '/opt/logstash/vendor/jar'
