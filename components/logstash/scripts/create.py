@@ -69,8 +69,11 @@ def create_postgresql_tables():
             'logger TEXT,'
             'level TEXT,'
             'message TEXT,'
+            'message_vector TSVECTOR,'
             'message_code TEXT'
             ');'
+            'CREATE INDEX {0}_message_vector_idx '
+            'ON {0} USING GIN (message_vector);'
             'ALTER TABLE {0} OWNER TO cloudify;'
             .format('logs')
         )
@@ -84,8 +87,11 @@ def create_postgresql_tables():
             'timestamp TIMESTAMP,'
             'event_type TEXT,'
             'message TEXT,'
+            'message_vector TSVECTOR,'
             'message_code TEXT'
             ');'
+            'CREATE INDEX {0}_message_vector_idx '
+            'ON {0} USING GIN (message_vector);'
             'ALTER TABLE {0} OWNER TO cloudify;'
             .format('events')
         )
