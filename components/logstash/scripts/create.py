@@ -56,48 +56,6 @@ def install_postgresql_jdbc_driver():
     ])
 
 
-def create_postgresql_tables():
-    """Create database tables to store log/event information."""
-    ctx.logger.info('Creating PostgreSQL tables...')
-
-    utils.run([
-        'sudo', '-u', 'postgres',
-        'psql', 'cloudify_db', '-c',
-        (
-            'CREATE TABLE {0} ('
-            'timestamp TIMESTAMP,'
-            'logger TEXT,'
-            'level TEXT,'
-            'message TEXT,'
-            'message_vector TSVECTOR,'
-            'message_code TEXT'
-            ');'
-            'CREATE INDEX {0}_message_vector_idx '
-            'ON {0} USING GIN (message_vector);'
-            'ALTER TABLE {0} OWNER TO cloudify;'
-            .format('logs')
-        )
-    ])
-
-    utils.run([
-        'sudo', '-u', 'postgres',
-        'psql', 'cloudify_db', '-c',
-        (
-            'CREATE TABLE {0} ('
-            'timestamp TIMESTAMP,'
-            'event_type TEXT,'
-            'message TEXT,'
-            'message_vector TSVECTOR,'
-            'message_code TEXT'
-            ');'
-            'CREATE INDEX {0}_message_vector_idx '
-            'ON {0} USING GIN (message_vector);'
-            'ALTER TABLE {0} OWNER TO cloudify;'
-            .format('events')
-        )
-    ])
-
-
 def install_logstash():
     """Install logstash as a systemd service."""
     logstash_unit_override = '/etc/systemd/system/logstash.service.d'
@@ -113,7 +71,6 @@ def install_logstash():
 
     install_logstash_output_jdbc_plugin()
     install_postgresql_jdbc_driver()
-    create_postgresql_tables()
 
     utils.mkdir(logstash_log_path)
     utils.chown('logstash', 'logstash', logstash_log_path)
