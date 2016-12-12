@@ -34,7 +34,7 @@ class TestRestServiceFile(TestCase):
                 'gunicorn_worker_count': 0,
             },
         })
-        self.assertThat(text, Contains('-w $(($(nproc)*2+1)) \\'))
+        self.assertThat(text, Contains('-w $((${WORKER_COUNT} > ${MAX_WORKER_COUNT} ? ${MAX_WORKER_COUNT} : ${WORKER_COUNT})) \\'))  # NOQA
 
     def test_render_integer(self):
         """Render template using an integer as the worker count."""

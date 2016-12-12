@@ -349,7 +349,7 @@ user_public_key: ssh-rsa...
 #rest_service_gunicorn_worker_count:
 #  description: |
 #    The number of worker processes for handling requests.
-#    If the default value (0) is set, then (2 * cpu_count + 1 processes) will be used.
+#    If the default value (0) is set, then min((2 * cpu_count + 1 processes), 12) will be used.
 #  type: integer
 #  default: 0
 
