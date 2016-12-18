@@ -309,12 +309,13 @@ aws_secret_access_key: ''
 # valid values: public_ip, private_ip
 #rest_host_internal_endpoint_type: private_ip
 
-#rest_service_gunicorn_worker_count:
-#  description: |
-#    The number of worker processes for handling requests.
-#    If the default value (0) is set, then  min((2 * cpu_count + 1 processes), 12) will be used.
-#  type: integer
-#  default: 0
+# The number of gunicorn worker processes for handling requests.
+# If the default value (0) is set, then min((2 * cpu_count + 1 processes), 12) will be used.
+#rest_service_gunicorn_worker_count: 0
+
+# The maximum number of requests a worker will process before restarting.
+# If this is set to zero then the automatic worker restarts are disabled.
+#rest_service_gunicorn_max_requests: 1000
 
 #############################
 # Offline Resources Upload

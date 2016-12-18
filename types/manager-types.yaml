@@ -751,6 +751,12 @@ node_types:
           If value is set to 0, then min((2 * cpu_count + 1 processes), 12) will be used.
         type: integer
         default: { get_input: rest_service_gunicorn_worker_count }
+      gunicorn_max_requests:
+        description: |
+          The maximum number of requests a worker will process before restarting.
+          If this is set to zero then the automatic worker restarts are disabled.
+        type: integer
+        default: { get_input: rest_service_gunicorn_max_requests }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
