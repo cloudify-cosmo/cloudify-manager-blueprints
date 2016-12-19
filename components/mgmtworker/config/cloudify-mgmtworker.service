@@ -17,7 +17,7 @@ ExecStart=/opt/mgmtworker/env/bin/celery worker \
     --app=cloudify_agent.app.app \
     --loglevel=${CELERY_LOG_LEVEL} \
     --queues=cloudify.management \
-    --logfile=${CELERY_LOG_DIR}/cloudify.management_worker.log \
+    --logfile=${CELERY_LOG_DIR}/cloudify.management_worker%%I.log \
     --autoscale={{ node.properties.max_workers }},{{ node.properties.min_workers }} \
     --without-gossip \
     --without-mingle \
