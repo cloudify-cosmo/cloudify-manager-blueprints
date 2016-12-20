@@ -10,6 +10,7 @@ EnvironmentFile=-/etc/sysconfig/cloudify-restservice
 ExecStart=/bin/sh -c '/opt/manager/env/bin/gunicorn \
     --pid /var/run/gunicorn.pid \
     -w {{ node.properties.gunicorn_worker_count or '$((${WORKER_COUNT} > ${MAX_WORKER_COUNT} ? ${MAX_WORKER_COUNT} : ${WORKER_COUNT}))' }} \
+    --max-requests {{ node.properties.gunicorn_max_requests }} \
     -b 0.0.0.0:${REST_PORT} \
     --timeout 300 manager_rest.server:app \
     --log-file /var/log/cloudify/rest/gunicorn.log \
