@@ -569,6 +569,13 @@ inputs:
     type: integer
     default: 0
 
+  rest_service_gunicorn_max_requests:
+    description: |
+      The maximum number of requests a worker will process before restarting.
+      If this is set to zero then the automatic worker restarts are disabled.
+    type: integer
+    default: 1000
+
   #############################
   # InfluxDB Inputs
   #############################
