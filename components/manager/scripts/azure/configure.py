@@ -12,12 +12,6 @@
 #    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
-'''
-    scripts.azure.configure
-    ~~~~~~~~~~~~~~~~~~~~~~~
-    Cloudify Manager configure script that creates a provider
-    context configuration file for user deployments to use
-'''
 
 # Built-in Imports
 import tempfile
@@ -27,9 +21,8 @@ import os
 import fabric.api
 
 
-def configure_manager(manager_config_path,
-                      manager_config):
-    '''Sets config defaults and creates the config file'''
+def configure_manager(manager_config_path, manager_config):
+
     _, temp_config = tempfile.mkstemp()
     config = ConfigParser()
 
@@ -50,8 +43,8 @@ def configure_manager(manager_config_path,
     with open(temp_config, 'w') as temp_config_file:
         config.write(temp_config_file)
 
-    fabric.api.sudo('mkdir -p {0}'.
-                    format(os.path.dirname(manager_config_path)))
+    fabric.api.sudo('mkdir -p {0}'
+                    .format(os.path.dirname(manager_config_path)))
     fabric.api.put(temp_config,
                    manager_config_path,
                    use_sudo=True)
