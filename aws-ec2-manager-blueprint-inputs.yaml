@@ -242,7 +242,7 @@ aws_secret_access_key: ''
 # A new index corresponding with today's date will be added each day.
 # Elasticsearch Curator is used to rotate the indices on a daily basis
 # via a cronjob. This allows to determine the number of days to keep.
-#elasticsearch_index_rotation_interval: 7
+#elasticsearch_index_rotation_interval: 30
 
 # You can configure an external endpoint of an Elasticsearch Cluster to use
 # instead of the built in one. The built in Elasticsearch cluster will not run.
