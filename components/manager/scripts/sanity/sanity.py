@@ -266,6 +266,7 @@ def perform_sanity():
                     'cleaning up sanity resources.')
     _cleanup_sanity()
 
+
 # the 'run_sanity' parameter is injected explicitly from the cli as an
 # operation parameter with 'true' as its value.
 # This is done to prevent the sanity test from running before the
