@@ -443,7 +443,7 @@ inputs:
     description: >
       Determines the number of days to keep.
     type: integer
-    default: 7
+    default: 30
 
   elasticsearch_endpoint_ip:
     description: >
