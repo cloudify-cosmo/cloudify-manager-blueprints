@@ -48,10 +48,12 @@ inputs:
   # VM inputs
   vm_size:
     type: string
+    default: Standard_A3
     required: true
 
   vm_os_family:
     type: string
+    default: linux
     required: true
 
   vm_image_publisher:
@@ -127,10 +129,6 @@ inputs:
     type: string
     required: true
 
-  agent_local_key_path:
-    type: string
-    required: true
-
   azure_config:
     default:
       subscription_id: { get_input: subscription_id }
@@ -145,14 +143,6 @@ inputs:
   agent_local_key_path:
     type: string
     default: '~/.ssh/id_rsa'
-
-  client_id:
-    type: string
-    default: ''
-
-  tenant_id:
-    type: string
-    default: ''
 
   #############################
   # Upload Resources Inputs
@@ -216,6 +206,7 @@ node_templates:
   # Manager.
   # #####################################################################
 
+
   manager_resources:
     type: cloudify.nodes.ManagerResources
     relationships:
@@ -228,7 +219,6 @@ node_templates:
     type: cloudify.nodes.MyCloudifyManager
     properties:
       ssh_user: { get_input: ssh_user }
-      ssh_port: { get_input: ssh_port }
       ssh_key_filename: { get_input: ssh_key_filename }
       agent_local_key_path: { get_input: agent_local_key_path }
       agent_remote_key_path: { get_input: agent_remote_key_path }
@@ -247,7 +237,6 @@ node_templates:
           broker_pass: { get_input: rabbitmq_password }
           broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
           broker_ssl_cert: { get_input: rabbitmq_cert_public }
-          verify_rest_certificate: { get_input: agent_verify_rest_certificate }
           env:
             CFY_AZURE_CONFIG_PATH: { get_property: [SELF, cloudify, plugins, azure_config_path] }
 
@@ -268,7 +257,7 @@ node_templates:
         import_resolver:
           parameters:
             rules:
-            - {'http://www.getcloudify.org/spec': 'file:///opt/manager/resources/spec'}
+            - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
 
         upload_resources:
           plugin_resources: { get_input: plugin_resources }
@@ -276,33 +265,29 @@ node_templates:
 
     interfaces:
       cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/manager/scripts/configure_manager.py
+            hide_output: &hide_output
+              - running
+            fabric_env: &manager_fabric_env
+              user: { get_input: ssh_user }
+              key_filename: { get_input: ssh_key_filename }
+              host_string: { get_attribute: [manager_host, public_ip] }
+              always_use_pty: true
         configure:
           implementation: fabric.fabric_plugin.tasks.run_task
           inputs:
             tasks_file: components/manager/scripts/azure/configure.py
             task_name: configure_manager
-            task_properties:
-              manager_config: *azure_configuration
-              manager_config_path: { get_property: [SELF, cloudify, plugins, azure_config_path] }
-            fabric_env: &manager_fabric_env
-              user: { get_input: ssh_user }
-              port: { get_input: ssh_port }
-              key_filename: { get_input: ssh_key_filename }
-              host_string: { get_attribute: [manager_host, public_ip] }
-              always_use_pty: true
-#        create:
-#          implementation: fabric.fabric_plugin.tasks.run_script
-#          inputs:
-#            script_path: components/manager/scripts/configure_manager.sh
-#            fabric_env:
-#              <<: *manager_fabric_env
-        create:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/manager/scripts/configure_manager.py
             fabric_env:
               <<: *manager_fabric_env
               always_use_pty: true
+            task_properties:
+              manager_config: *azure_configuration
+              manager_config_path: { get_property: [SELF, cloudify, plugins, azure_config_path] }
+            hide_output: *hide_output
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
@@ -314,8 +299,6 @@ node_templates:
                 public_ip: { get_attribute: [manager_host, public_ip] }
                 rest_host_internal_endpoint_type: { get_property: [rest_service, rest_host_internal_endpoint_type] }
                 rest_host_external_endpoint_type: { get_property: [rest_service, rest_host_external_endpoint_type] }
-      - type: cloudify.relationships.depends_on
-        target: manager_host
 
   resource_group:
     type: cloudify.azure.nodes.ResourceGroup
@@ -327,7 +310,6 @@ node_templates:
   storage_account:
     type: cloudify.azure.nodes.storage.StorageAccount
     properties:
-      name: {concat:[{get_input: resource_prefix},sa,{get_input: resource_suffix}]}
       location: { get_input: location }
       retry_after: { get_input: retry_after }
       azure_config: { get_input: azure_config }
@@ -340,7 +322,6 @@ node_templates:
   virtual_network:
     type: cloudify.azure.nodes.network.VirtualNetwork
     properties:
-      name: {concat:[{get_input: resource_prefix},vnet,{get_input: resource_suffix}]}
       location: { get_input: location }
       retry_after: { get_input: retry_after }
       azure_config: { get_input: azure_config }
@@ -351,7 +332,6 @@ node_templates:
   subnet:
     type: cloudify.azure.nodes.network.Subnet
     properties:
-      name: {concat:[{get_input: resource_prefix},subnet,{get_input: resource_suffix}]}
       location: { get_input: location }
       retry_after: { get_input: retry_after }
       azure_config: { get_input: azure_config }
@@ -365,7 +345,6 @@ node_templates:
   network_security_group:
     type: cloudify.azure.nodes.network.NetworkSecurityGroup
     properties:
-      name: {concat:[{get_input: resource_prefix},nsg,{get_input: resource_suffix}]}
       location: { get_input: location }
       retry_after: { get_input: retry_after }
       azure_config: { get_input: azure_config }
@@ -444,7 +423,6 @@ node_templates:
   manager_host:
     type: cloudify.azure.nodes.compute.VirtualMachine
     properties:
-      name: {concat:[{get_input: resource_prefix},vm,{get_input: resource_suffix}]}
       location: { get_input: location }
       retry_after: { get_input: retry_after }
       azure_config: { get_input: azure_config }
@@ -460,7 +438,6 @@ node_templates:
             sku: { get_input: vm_image_sku }
             version: { get_input: vm_image_version }
         osProfile:
-          computerName: { get_property: [SELF, name] }
           adminUsername: { get_input: vm_os_username }
           adminPassword: { get_input: vm_os_password }
           linuxConfiguration:
@@ -480,7 +457,6 @@ node_templates:
   vm_public_ip:
     type: cloudify.azure.nodes.network.PublicIPAddress
     properties:
-      name: {concat:[{get_input: resource_prefix},pipvm,{get_input: resource_suffix}]}
       location: { get_input: location }
       retry_after: { get_input: retry_after }
       azure_config: { get_input: azure_config }
@@ -493,7 +469,6 @@ node_templates:
   vm_nic_ip_cfg:
     type: cloudify.azure.nodes.network.IPConfiguration
     properties:
-      name: {concat:[{get_input: resource_prefix},ipvm,{get_input: resource_suffix}]}
       location: { get_input: location }
       retry_after: { get_input: retry_after }
       azure_config: { get_input: azure_config }
@@ -508,7 +483,6 @@ node_templates:
   vm_nic:
     type: cloudify.azure.nodes.network.NetworkInterfaceCard
     properties:
-      name: {concat:[{get_input: resource_prefix},nicvm,{get_input: resource_suffix}]}
       location: { get_input: location }
       retry_after: { get_input: retry_after }
       azure_config: { get_input: azure_config }
@@ -517,7 +491,7 @@ node_templates:
       target: resource_group
     - type: cloudify.azure.relationships.nic_connected_to_network_security_group
       target: network_security_group
-    - type: cloudify.azure.relationships.connected_to_ip_configuration
+    - type: cloudify.azure.relationships.nic_connected_to_ip_configuration
       target: vm_nic_ip_cfg
 
   keepalived:
