@@ -567,8 +567,7 @@ node_templates:
         # it will fall back to the original http link.
         import_resolver:
           parameters:
-            rules:
-            - {'http://www.getcloudify.org/spec': 'http://localhost:53229/spec'}
+            rules: { get_input: import_resolver_rules }
 
         upload_resources:
           dsl_resources: { get_input: dsl_resources }

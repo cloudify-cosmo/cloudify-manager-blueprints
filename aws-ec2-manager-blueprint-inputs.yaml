@@ -300,3 +300,14 @@ aws_secret_access_key: ''
 #  - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/vsphere-plugin/2.0/plugin.yaml', 'destination_path': '/spec/vsphere-plugin/2.0/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4.1/types.yaml', 'destination_path': '/spec/cloudify/3.4.1/types.yaml'}
+
+###############################
+# Import Resolver Configuration
+###############################
+# An imported URL is prefix-matched against the key in each entry. If a match is found,
+# then the URL prefix is replaced with the value of the corresponding entry.
+# That allows serving YAML files from within the manager, even when the imported URL
+# points to the external network.
+
+#import_resolver_rules:
+#  - {'http://www.getcloudify.org/spec': 'file:///opt/manager/resources/spec'}
