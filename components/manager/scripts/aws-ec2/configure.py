@@ -24,12 +24,14 @@ from boto.ec2 import get_region
 
 # Cloudify Imports
 from cloudify import ctx
-from ec2 import constants
+from cloudify_aws import constants
 
 
-def configure_manager(
-        manager_config_path=constants.AWS_DEFAULT_CONFIG_PATH,
-        aws_config=None):
+def configure_manager(manager_config_path, aws_config=None):
+
+    if not manager_config_path:
+        manager_config_path = os.environ.get(
+            constants.AWS_CONFIG_PATH_ENV_VAR_NAME)
 
     aws_config = aws_config or {}
 

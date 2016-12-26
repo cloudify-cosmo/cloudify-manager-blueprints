@@ -13,8 +13,8 @@ ctx.download_resource(
 import utils  # NOQA
 
 ctx.download_resource(
-        join('components', 'elasticsearch', 'scripts', 'es_upgrade_utils.py'),
-        join(dirname(__file__), 'es_upgrade_utils.py'))
+    join('components', 'elasticsearch', 'scripts', 'es_upgrade_utils.py'),
+    join(dirname(__file__), 'es_upgrade_utils.py'))
 import es_upgrade_utils  # NOQA
 
 ES_SERVICE_NAME = 'elasticsearch'
@@ -40,6 +40,7 @@ def _examine_status_response(response):
 
 def check_index_exists(url, index_name='cloudify_storage'):
     """Check that the cloudify_storage ES index exists."""
+    ctx.logger.info('Checking that the storage index exists...')
     index_url = urlparse.urljoin(url, index_name)
     try:
         return urllib2.urlopen(index_url)
@@ -68,5 +69,6 @@ def main():
         # restore the 'provider_context' and 'snapshot' elements from file
         # created in the 'create.py' script.
         es_upgrade_utils.restore_upgrade_data(es_endpoint_ip, ES_ENDPOINT_PORT)
+
 
 main()

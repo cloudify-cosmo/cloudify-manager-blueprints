@@ -67,8 +67,7 @@ def _configure_influxdb(host, port):
         utils.remove('/tmp/retention.json')
 
     except Exception as ex:
-        msg = 'Failed to create: {0} ({1}).'.format(db_name, ex)
-        ctx.abort_operation(msg)
+        ctx.abort_operation('Failed to create: {0} ({1}).'.format(db_name, ex))
 
     # verify db created
     ctx.logger.info('Verifying database create successfully...')
@@ -76,8 +75,7 @@ def _configure_influxdb(host, port):
     try:
         assert any(d.get('name') == db_name for d in db_list)
     except AssertionError:
-        msg = 'Verification failed!'
-        ctx.abort_operation(msg)
+        ctx.abort_operation('Verification failed!')
     ctx.logger.info('Databased {0} created successfully.'.format(db_name))
 
 
@@ -100,13 +98,12 @@ def _install_influxdb():
     utils.yum_install(influxdb_source_url, service_name=INFLUX_SERVICE_NAME)
     utils.sudo(['rm', '-rf', '/etc/init.d/influxdb'])
 
-    ctx.logger.info('Deploying InfluxDB config.toml...')
+    ctx.logger.info('Deploying InfluxDB configuration...')
     utils.deploy_blueprint_resource(
         '{0}/config.toml'.format(CONFIG_PATH),
         '{0}/shared/config.toml'.format(influxdb_home),
         INFLUX_SERVICE_NAME)
 
-    ctx.logger.info('Fixing user permissions...')
     utils.chown(influxdb_user, influxdb_group, influxdb_home)
     utils.chown(influxdb_user, influxdb_group, influxdb_log_path)
 

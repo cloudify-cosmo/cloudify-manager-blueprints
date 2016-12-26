@@ -11,6 +11,7 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+
 RABBITMQ_SERVICE_NAME = 'rabbitmq'
 ctx_properties = utils.ctx_factory.get(RABBITMQ_SERVICE_NAME)
 rabbitmq_endpoint_ip = ctx_properties['rabbitmq_endpoint_ip']
@@ -39,7 +40,7 @@ def check_port_accessible(host, port):
 
 def set_rabbitmq_policy(name, expression, policy):
     policy = json.dumps(policy)
-    ctx.logger.info('Setting policy {0} on queues {1} to {2}'.format(
+    ctx.logger.debug('Setting policy {0} on queues {1} to {2}'.format(
         name, expression, policy))
     # shlex screws this up because we need to pass json and shlex
     # strips quotes so we explicitly pass it as a list.

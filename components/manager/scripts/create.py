@@ -16,6 +16,16 @@ NODE_NAME = 'manager-resources'
 ctx_properties = utils.ctx_factory.create(NODE_NAME)
 
 
+def execute_before_bootstrap():
+    exec_paths = ctx_properties['execute_before_bootstrap']
+    for path in exec_paths:
+        # TODO: Upon moving to Python 3, convert to urllib2.urlparse
+        if '://' in path and path.split('://', 1)[0] in ('http', 'https'):
+            path = utils.download_file(path)
+            utils.chmod('744', path)
+        utils.run(path)
+
+
 def deploy_manager_sources():
     """Deploys all manager sources from a single archive.
     """
@@ -35,6 +45,8 @@ def deploy_manager_sources():
         utils.mkdir(utils.CLOUDIFY_SOURCES_PATH)
         resource_name = os.path.basename(archive_path)
         destination = os.path.join(utils.CLOUDIFY_SOURCES_PATH, resource_name)
+
+        ctx.logger.info('Downloading manager resources package...')
         resources_archive_path = \
             utils.download_cloudify_resource(
                 archive_path, NODE_NAME, destination=destination)
@@ -42,6 +54,7 @@ def deploy_manager_sources():
         # of now, we'll only be validating the manager resources package.
 
         if not skip_checksum_validation:
+            ctx.logger.info('Validating checksum...')
             skip_if_failed = False
             if not archive_checksum_path:
                 skip_if_failed = True
@@ -128,4 +141,6 @@ def deploy_manager_sources():
                 os.path.join(sources_agents_path, agent_file),
                 os.path.join(agent_archives_path, agent_id + agent_extension))
 
+
+execute_before_bootstrap()
 deploy_manager_sources()

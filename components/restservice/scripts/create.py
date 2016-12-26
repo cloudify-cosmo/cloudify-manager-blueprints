@@ -27,7 +27,6 @@ def install_optional(rest_venv):
 
     dsl_parser_source_url = props['dsl_parser_module_source_url']
     rest_client_source_url = props['rest_client_module_source_url']
-    securest_source_url = props['securest_module_source_url']
     plugins_common_source_url = props['plugins_common_module_source_url']
     script_plugin_source_url = props['script_plugin_module_source_url']
     agent_source_url = props['agent_module_source_url']
@@ -40,8 +39,6 @@ def install_optional(rest_venv):
         utils.install_python_package(dsl_parser_source_url, rest_venv)
     if rest_client_source_url:
         utils.install_python_package(rest_client_source_url, rest_venv)
-    if securest_source_url:
-        utils.install_python_package(securest_source_url, rest_venv)
     if plugins_common_source_url:
         utils.install_python_package(plugins_common_source_url, rest_venv)
     if script_plugin_source_url:
@@ -95,6 +92,8 @@ def deploy_broker_configuration():
     postgresql_props = utils.ctx_factory.get('postgresql-9.5')
     ctx.instance.runtime_properties['postgresql_db_name'] = \
         postgresql_props.get('postgresql_db_name')
+    ctx.instance.runtime_properties['postgresql_host'] = \
+        postgresql_props.get('postgresql_host')
 
     # Add certificate and select port, as applicable
     if rabbitmq_ssl_enabled:
@@ -164,18 +163,6 @@ def install_restservice():
     _configure_dbus(rest_venv)
     install_optional(rest_venv)
     utils.logrotate(REST_SERVICE_NAME)
-
-    ctx.logger.info('Copying role configuration files...')
-    utils.deploy_blueprint_resource(
-            os.path.join(REST_RESOURCES_PATH, 'roles_config.yaml'),
-            os.path.join(REST_SERVICE_HOME, 'roles_config.yaml'),
-            REST_SERVICE_NAME, user_resource=True)
-    utils.deploy_blueprint_resource(
-            os.path.join(REST_RESOURCES_PATH, 'userstore.yaml'),
-            os.path.join(REST_SERVICE_HOME, 'userstore.yaml'),
-            REST_SERVICE_NAME, user_resource=True)
-
-    # copy_security_config_files()
 
     ctx.logger.info('Deploying REST Service Configuration file...')
     # rest ports are set as runtime properties in nginx/scripts/create.py

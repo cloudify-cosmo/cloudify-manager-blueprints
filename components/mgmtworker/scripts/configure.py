@@ -14,9 +14,9 @@
 #  * See the License for the specific language governing permissions and
 #  * limitations under the License.
 
+import tempfile
 
-import os
-from os.path import join, dirname
+from os.path import join, isfile, dirname
 
 from cloudify import ctx
 
@@ -45,8 +45,8 @@ def configure_mgmtworker():
     # To sandy: I don't quite understand this check...
     # there is no else here..
     # for python_path in ${mgmtworker_venv}/lib/python*; do
-    if os.path.isfile(os.path.join(mgmtworker_venv, 'bin/python')):
-        broker_conf_path = os.path.join(celery_work_dir, 'broker_config.json')
+    if isfile(join(mgmtworker_venv, 'bin/python')):
+        broker_conf_path = join(celery_work_dir, 'broker_config.json')
         utils.deploy_blueprint_resource(
             '{0}/broker_config.json'.format(CONFIG_PATH), broker_conf_path,
             MGMT_WORKER_SERVICE_NAME)
@@ -55,4 +55,18 @@ def configure_mgmtworker():
     utils.systemd.configure(MGMT_WORKER_SERVICE_NAME)
     utils.logrotate(MGMT_WORKER_SERVICE_NAME)
 
+
+def configure_logging():
+    ctx.logger.info('Configuring Management worker logging...')
+    logging_config_dir = '/etc/cloudify'
+    config_name = 'logging.conf'
+    config_file_destination = join(logging_config_dir, config_name)
+    config_file_source = join(CONFIG_PATH, config_name)
+    utils.mkdir(logging_config_dir)
+    config_file_temp_destination = join(tempfile.gettempdir(), config_name)
+    ctx.download_resource(config_file_source, config_file_temp_destination)
+    utils.move(config_file_temp_destination, config_file_destination)
+
+
 configure_mgmtworker()
+configure_logging()

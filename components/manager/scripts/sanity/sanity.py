@@ -18,7 +18,7 @@ DEPLOYMENT_ID = 'sanity_deployment'
 SANITY_SERVICE_NAME = 'sanity'
 
 manager_ip = os.environ.get('manager_ip')
-manager_user = os.environ.get('manager_user')
+ssh_user = os.environ.get('ssh_user')
 manager_remote_key_path = \
     ctx.instance.runtime_properties['manager_remote_key_path']
 rest_protocol = ctx.instance.runtime_properties['rest_protocol']
@@ -63,7 +63,7 @@ def _deploy_app():
         return
 
     dep_inputs = {'server_ip': manager_ip,
-                  'agent_user': manager_user,
+                  'agent_user': ssh_user,
                   'agent_private_key_path': manager_remote_key_path}
     data = {
         'blueprint_id': BLUEPRINT_ID,
@@ -137,6 +137,18 @@ def _assert_logs_and_events(execution_id):
 
     if 'items' not in json_resp or not json_resp['items']:
         ctx.abort_operation('No logs/events received')
+
+    db_name = 'cloudify_db'
+    for table_name in ['logs', 'events']:
+        proc = utils.run([
+            'sudo', '-u', 'postgres',
+            'psql', db_name, '-t', '-c',
+            'SELECT COUNT(*) FROM {0}'.format(table_name),
+        ])
+        count = int(proc.aggr_stdout)
+        if count <= 0:
+            ctx.abort_operation(
+                'Failed to retrieve {0} from PostgreSQL'.format(table_name))
 
 
 def _assert_webserver_running():
@@ -266,6 +278,7 @@ def perform_sanity():
     ctx.logger.info('Manager sanity check successful, '
                     'cleaning up sanity resources.')
     _cleanup_sanity()
+
 
 # the 'run_sanity' parameter is injected explicitly from the cli as an
 # operation parameter with 'true' as its value.

@@ -62,18 +62,18 @@ def _configure_security_properties():
     if security_enabled and ssl_enabled:
         # manager SSL settings
         ctx.logger.info('SSL is enabled, setting rest port to 443 and '
-                        'rest_protocol to https')
+                        'rest protocol to https...')
         ctx.instance.runtime_properties['rest_port'] = 443
         ctx.instance.runtime_properties['rest_protocol'] = 'https'
         # agent SSL settings
         agent_verify_rest_certificate = agent_config['verify_rest_certificate']
         ctx.instance.runtime_properties['agent_verify_rest_certificate'] = \
             agent_verify_rest_certificate
-        ctx.logger.info('agent_verify_rest_certificate: {0}'.
-                        format(agent_verify_rest_certificate))
+        ctx.logger.debug('agent_verify_rest_certificate: {0}'
+                         .format(agent_verify_rest_certificate))
     else:
         ctx.logger.info('Security is off or SSL disabled, setting rest port '
-                        'to 80 and rest protocols to http')
+                        'to 80 and rest protocols to http...')
         ctx.instance.runtime_properties['rest_port'] = 80
         ctx.instance.runtime_properties['rest_protocol'] = 'http'
 
@@ -91,5 +91,6 @@ def main():
     if not utils.is_rollback:
         _disable_requiretty()
     _configure_security_properties()
+
 
 main()

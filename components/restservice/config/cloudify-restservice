@@ -16,3 +16,7 @@ REST_SERVICE_LOG_PATH="/var/log/cloudify/rest"
 
 # REST Service port
 REST_PORT=8100
+
+# gunicorn configuration
+WORKER_COUNT=$(($(nproc) * 2 + 1))
+MAX_WORKER_COUNT=12

@@ -23,10 +23,6 @@ def verify_restservice(url):
     that also requires the storage backend to be up, so if it works, there's
     a good chance everything is configured correctly.
     """
-    blueprints_url = urlparse.urljoin(url, 'api/v2.1/blueprints')
-
-    headers = utils.get_auth_headers(True)
-
     if utils.is_upgrade or utils.is_rollback:
         # if we're doing an upgrade, we're in maintenance mode - this request
         # is safe to perform in maintenance mode, so let's bypass the check
@@ -34,10 +30,20 @@ def verify_restservice(url):
     else:
         headers = utils.get_auth_headers(True)
 
+    utils.verify_service_http(REST_SERVICE_NAME, url, headers=headers)
+
+    blueprints_url = urlparse.urljoin(url, 'api/v2.1/blueprints')
+    ctx.logger.debug('Sending request to rest-service '
+                     '[url: {0}, headers: {1}]'.format(blueprints_url,
+                                                       headers))
     req = urllib2.Request(blueprints_url, headers=headers)
 
     try:
         response = urllib2.urlopen(req)
+    # keep an erroneous HTTP response to examine its status code, but still
+    # abort on fatal errors like being unable to connect at all
+    except urllib2.HTTPError as e:
+        response = e
     except urllib2.URLError as e:
         ctx.abort_operation('REST service returned an invalid response: {0}'
                             .format(e))
@@ -59,8 +65,9 @@ def verify_restservice(url):
 ctx.logger.info('Starting Cloudify REST Service...')
 utils.start_service(REST_SERVICE_NAME)
 
+ctx.logger.info('Verifying Rest service is running...')
 utils.systemd.verify_alive(REST_SERVICE_NAME)
 
+ctx.logger.info('Verifying Rest service is working as expected...')
 restservice_url = 'http://{0}:{1}'.format('127.0.0.1', 8100)
-utils.verify_service_http(REST_SERVICE_NAME, restservice_url)
 verify_restservice(restservice_url)
