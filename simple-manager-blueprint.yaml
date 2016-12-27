@@ -4,7 +4,7 @@ imports:
   - http://www.getcloudify.org/spec/cloudify/3.4.1/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml
   - types/manager-types.yaml
-
+  - inputs/manager-inputs.yaml
 
 inputs:
 

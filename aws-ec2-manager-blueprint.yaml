@@ -5,6 +5,7 @@ imports:
   - http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml
   - http://www.getcloudify.org/spec/aws-plugin/1.4.1/plugin.yaml
   - types/manager-types.yaml
+  - inputs/manager-inputs.yaml
 
 inputs:
 

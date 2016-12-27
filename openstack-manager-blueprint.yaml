@@ -5,9 +5,7 @@ imports:
   - http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml
   - http://www.getcloudify.org/spec/openstack-plugin/1.4/plugin.yaml
   - types/manager-types.yaml
-
-
-
+  - inputs/manager-inputs.yaml
 
 inputs:
 
