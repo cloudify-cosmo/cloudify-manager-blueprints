@@ -1,0 +1,7 @@
+
+node_templates:
+  manager_ip_setter:
+    type: manager.nodes.ManagerIPSetter
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
