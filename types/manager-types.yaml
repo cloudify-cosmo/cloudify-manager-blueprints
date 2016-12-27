@@ -951,6 +951,25 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
+  manager.nodes.ManagerIPSetter:
+    derived_from: cloudify.nodes.ApplicationModule
+    properties:
+      admin_username:
+        default: { get_input: admin_username }
+      admin_password:
+        default: { get_input: admin_password }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/manager-ip-setter/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+            set_manager_ip_on_boot:
+              default: { get_input: set_manager_ip_on_boot }
+
   manager.nodes.Stage:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
