@@ -260,7 +260,7 @@ inputs:
 
   consul_package_url:
     type: string
-    default: consul_0.6.4_linux_amd64.zip
+    default: consul_0.7.2_linux_amd64.zip
 
   #############################
   # Syncthing Inputs
