@@ -135,7 +135,7 @@ aws_secret_access_key: ''
 #management_worker_rpm_source_url: ''
 #amqpinflux_rpm_source_url: ''
 #cloudify_resources_url: ''
-#webui_source_url: ''
+#stage_source_url: ''
 
 # This is a Cloudify specific redistribution of Grafana.
 #grafana_source_url: ''

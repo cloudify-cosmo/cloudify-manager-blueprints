@@ -1,0 +1,15 @@
+[Unit]
+Description=Cloudify Stage Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+EnvironmentFile=-/etc/sysconfig/cloudify-stage
+User=stage
+Group=stage
+ExecStart=/opt/nodejs/bin/node /opt/cloudify-stage/backend/server.js
+
+[Install]
+WantedBy=multi-user.target

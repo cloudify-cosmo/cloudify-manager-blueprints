@@ -951,27 +951,23 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
-  manager.nodes.WebUI:
+  manager.nodes.Stage:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
       telecom_edition:
         description: Use Telecom Edition?
         type: boolean
         default: { get_input: telecom_edition }
-      webui_tar_source_url:
-        description: Cloudify's WebUI Source URL
+      stage_tar_source_url:
+        description: Cloudify Stage Source URL
         type: string
-        default: { get_input: webui_source_url }
-      grafana_tar_source_url:
-        description: Cloudify's Grafana Source URL
-        type: string
-        default: { get_input: grafana_source_url }
+        default: { get_input: stage_source_url }
       nodejs_tar_source_url:
         description: NodeJS tgz Source URL
         type: string
         default: { get_input: nodejs_source_url }
       use_existing_on_upgrade:
-        description: Use existing webui configuration
+        description: Use existing stage configuration
         type: string
         default: true
     interfaces:
@@ -980,7 +976,7 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/webui/scripts/create.py
+              default: components/stage/scripts/create.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
             INFLUXDB_ENDPOINT_IP:
@@ -989,14 +985,14 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/webui/scripts/start.py
+              default: components/stage/scripts/start.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
         stop:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/webui/scripts/stop.py
+              default: components/stage/scripts/stop.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -1120,7 +1116,7 @@ relationships:
   restservice_to_postgresql:
     derived_from: cloudify.relationships.connected_to
 
-  nginx_to_webui:
+  nginx_to_stage:
     derived_from: cloudify.relationships.connected_to
 
   riemann_to_rabbitmq:
@@ -1217,8 +1213,8 @@ relationships:
   restservice_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to
 
-  webui_to_influxdb:
+  stage_to_influxdb:
     derived_from: cloudify.relationships.connected_to
 
-  webui_to_restservice:
+  stage_to_restservice:
     derived_from: cloudify.relationships.connected_to

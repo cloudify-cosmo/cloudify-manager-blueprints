@@ -141,7 +141,7 @@ inputs:
     type: string
     default: cloudify-manager-4.0m11.tar.gz
 
-  webui_source_url:
+  stage_source_url:
     type: string
     default: cloudify-stage-4.0.0-m11.tgz
 

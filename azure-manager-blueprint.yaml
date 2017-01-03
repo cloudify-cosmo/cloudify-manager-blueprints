@@ -508,7 +508,7 @@ node_templates:
   # on specific hosts. It allows us to define the runtime environment
   # and install it only once per host and then have a node depend on it.
   # Note that Erlang and NodeJS are also installed as runtime envs as
-  # part of the RabbitMQ and WebUI nodes respectively but as they're not
+  # part of the RabbitMQ and Stage nodes respectively but as they're not
   # used by multiple nodes, we're not specifying them as independent
   # entities.
   # #####################################################################
@@ -690,15 +690,15 @@ node_templates:
       - type: amqpinflux_to_influxdb
         target: influxdb
 
-  # webui:
-  #   type: manager.nodes.WebUI
-  #   relationships:
-  #     - type: cloudify.relationships.contained_in
-  #       target: manager_host
-  #     - type: webui_to_restservice
-  #       target: rest_service
-  #     - type: webui_to_influxdb
-  #       target: influxdb
+  stage:
+    type: manager.nodes.Stage
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: stage_to_restservice
+        target: rest_service
+      - type: stage_to_influxdb
+        target: influxdb
 
   #################################
   # Sanity

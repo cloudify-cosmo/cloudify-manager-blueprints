@@ -1,4 +1,4 @@
-/var/log/cloudify/webui/*.log {
+/var/log/cloudify/stage/*.log {
         hourly
         rotate 7
         size 100M
