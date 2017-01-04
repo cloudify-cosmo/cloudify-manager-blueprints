@@ -248,7 +248,7 @@ inputs:
 
   nodejs_source_url:
     type: string
-    default: node-v0.10.35-linux-x64.tar.gz
+    default: node-v4.4.5-linux-x64.tar.gz
 
   keepalived_rpm_url:
     type: string
