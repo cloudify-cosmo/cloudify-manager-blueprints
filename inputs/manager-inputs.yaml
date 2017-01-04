@@ -90,7 +90,7 @@ inputs:
   manager_resources_package:
     description: A URL to a tar files containing all of the manager's resources
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/4.0.0/m11-RELEASE/cloudify-manager-resources_4.0.0-m11.tar.gz
+    default: http://repository.cloudifysource.org/cloudify/16.12.1/release/cloudify-manager-resources_16.12.1-community.tar.gz
 
   manager_resources_package_checksum_file:
     description: >
@@ -143,7 +143,7 @@ inputs:
 
   webui_source_url:
     type: string
-    default: cloudify-ui-4.0.0-m11.tgz
+    default: cloudify-stage-4.0.0-m11.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:

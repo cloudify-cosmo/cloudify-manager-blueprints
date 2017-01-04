@@ -99,7 +99,7 @@ client_secret: ''
 #############################
 # Manager Resources Package
 #############################
-#manager_resources_package: http://repository.cloudifysource.org/org/cloudify3/4.0.0/m11-RELEASE/cloudify-manager-resources_4.0.0-m11.tar.gz
+#manager_resources_package: http://repository.cloudifysource.org/cloudify/16.12.1/release/cloudify-manager-resources_16.12.1-community.tar.gz
 
 # Providing a checksum file url will allow validating the resources package.
 # By default, no validation is performed. Providing a checksum file will use
