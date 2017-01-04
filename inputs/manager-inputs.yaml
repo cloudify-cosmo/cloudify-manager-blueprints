@@ -143,7 +143,7 @@ inputs:
 
   webui_source_url:
     type: string
-    default: cloudify-ui-4.0.0-m11.tgz
+    default: cloudify-stage-4.0.0-m11.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
