@@ -120,9 +120,14 @@ def _install_sanity_app():
 
 def _assert_logs_and_events(execution_id):
     headers = utils.create_maintenance_headers()
-    params = urllib.urlencode(
-            dict(execution_id=execution_id,
-                 type='cloudify_log'))
+    params = urllib.urlencode((
+        ('execution_id', execution_id),
+        ('type', 'cloudify_event'),
+        ('type', 'cloudify_log'),
+        ('_sort', '@timestamp'),
+        ('_size', 100),
+        ('_offset', 0),
+    ))
 
     endpoint = '{0}/events'.format(_get_url_prefix())
     url = endpoint + '?' + params
