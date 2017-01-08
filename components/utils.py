@@ -1320,7 +1320,8 @@ def _list_executions_with_retries(headers, execution_id, retries=6):
 
 
 def create_maintenance_headers(upgrade_props=True):
-    headers = {'X-BYPASS-MAINTENANCE': 'True'}
+    headers = {'X-BYPASS-MAINTENANCE': 'True',
+               'tenant': 'default_tenant'}
     auth_props = get_auth_headers(upgrade_props)
     headers.update(auth_props)
     return headers

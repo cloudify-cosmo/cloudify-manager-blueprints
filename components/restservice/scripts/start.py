@@ -29,6 +29,7 @@ def verify_restservice(url):
         headers = utils.create_maintenance_headers()
     else:
         headers = utils.get_auth_headers(True)
+        headers['tenant'] = 'default_tenant'
 
     utils.verify_service_http(REST_SERVICE_NAME, url, headers=headers)
 
