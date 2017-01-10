@@ -9,8 +9,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-WEBUI_SERVICE_NAME = 'webui'
+STAGE_SERVICE_NAME = 'stage'
 
 
-ctx.logger.info('Starting WebUI Service...')
-utils.start_service(WEBUI_SERVICE_NAME)
+ctx.logger.info('Stopping Stage (UI) Service...')
+utils.systemd.stop(STAGE_SERVICE_NAME)
