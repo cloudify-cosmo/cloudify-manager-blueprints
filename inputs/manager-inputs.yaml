@@ -114,28 +114,28 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: Ubuntu-trusty-agent_4.0.0-m11.tar.gz
-      ubuntu_precise_agent: Ubuntu-precise-agent_4.0.0-m11.tar.gz
-      centos_7x_agent: centos-Core-agent_4.0.0-m11.tar.gz
-      centos_6x_agent: centos-Final-agent_4.0.0-m11.tar.gz
-      redhat_7x_agent: redhat-Maipo-agent_4.0.0-m11.tar.gz
-      redhat_6x_agent: redhat-Santiago-agent_4.0.0-m11.tar.gz
-      cloudify_windows_agent: cloudify-windows-agent_4.0.0-m11.exe
+      ubuntu_trusty_agent: Ubuntu-trusty-agent_4.0.0-m12.tar.gz
+      ubuntu_precise_agent: Ubuntu-precise-agent_4.0.0-m12.tar.gz
+      centos_7x_agent: centos-Core-agent_4.0.0-m12.tar.gz
+      centos_6x_agent: centos-Final-agent_4.0.0-m12.tar.gz
+      redhat_7x_agent: redhat-Maipo-agent_4.0.0-m12.tar.gz
+      redhat_6x_agent: redhat-Santiago-agent_4.0.0-m12.tar.gz
+      cloudify_windows_agent: cloudify-windows-agent_4.0.0-m12.exe
 
   #############################
   # Cloudify Modules
   #############################
   rest_service_rpm_source_url:
     type: string
-    default: cloudify-rest-service-4.0.0-m11.x86_64.rpm
+    default: cloudify-rest-service-4.0.0-m12.x86_64.rpm
 
   management_worker_rpm_source_url:
     type: string
-    default: cloudify-management-worker-4.0.0-m11.x86_64.rpm
+    default: cloudify-management-worker-4.0.0-m12.x86_64.rpm
 
   amqpinflux_rpm_source_url:
     type: string
-    default: cloudify-amqp-influx-4.0.0-m11.x86_64.rpm
+    default: cloudify-amqp-influx-4.0.0-m12.x86_64.rpm
 
   cloudify_resources_url:
     type: string
@@ -143,7 +143,7 @@ inputs:
 
   stage_source_url:
     type: string
-    default: cloudify-stage-4.0.0-m11.tgz
+    default: cloudify-stage-4.0.0-m12.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
