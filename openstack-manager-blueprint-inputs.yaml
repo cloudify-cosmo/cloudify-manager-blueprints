@@ -340,7 +340,7 @@ external_network_name: ''
 #  - {'source_path': 'http://www.getcloudify.org/spec/openstack-plugin/1.5/plugin.yaml', 'destination_path': '/spec/openstack-plugin/1.5/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/vsphere-plugin/2.0.1/plugin.yaml', 'destination_path': '/spec/vsphere-plugin/2.0.1/plugin.yaml'}
-#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.0m11/types.yaml', 'destination_path': '/spec/cloudify/4.0m11/types.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.0m12/types.yaml', 'destination_path': '/spec/cloudify/4.0m12/types.yaml'}
 
 ###############################
 # Import Resolver Configuration
