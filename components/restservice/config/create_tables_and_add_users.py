@@ -18,27 +18,11 @@ import sys
 import yaml
 import json
 
-from flask import Flask
-from flask_security import Security
-
 from manager_rest.storage.models import Tenant
 from manager_rest.storage import db, user_datastore
 from manager_rest.constants import DEFAULT_TENANT_NAME
-from manager_rest.utils import create_security_roles_and_admin_user
-
-
-def _get_flask_app(config):
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = \
-        'postgresql://{0}:{1}@{2}/{3}'.format(
-            'cloudify',
-            'cloudify',
-            config['postgresql_host'],
-            config['postgresql_db_name']
-        )
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECURITY_USER_IDENTITY_ATTRIBUTES'] = 'username, email'
-    return app
+from manager_rest.utils import (setup_flask_app,
+                                create_security_roles_and_admin_user)
 
 
 def _create_security_roles_and_admin_user(config, default_tenant):
@@ -55,12 +39,9 @@ def _create_security_roles_and_admin_user(config, default_tenant):
 
 def _create_db_tables(config):
     print 'Creating tables in the DB'
-    app = _get_flask_app(config)
-    Security(app=app, datastore=user_datastore)
+    app = setup_flask_app(db, user_datastore, config['postgresql_host'])
     with app.app_context():
-        db.init_app(app)
         db.create_all()
-    app.app_context().push()
     print 'Tables created successfully'
 
 
