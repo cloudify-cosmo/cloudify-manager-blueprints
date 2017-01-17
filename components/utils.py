@@ -1135,21 +1135,21 @@ class BlueprintResourceFactory(object):
         filename = get_file_name_from_url(source) if is_url else source
 
         is_manager_package = filename.startswith('cloudify-manager-resources')
-        local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
-        # if is_manager_package:
-        #     local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
-        # else:
-        #     ctx.logger.info("limor - file name: {0}".format(filename))
-        #     ctx.logger.info("limor - folder name: {0}".format(CLOUDIFY_SOURCES_PATH))
-        #     local_filepath_list = glob.glob(os.path.join(CLOUDIFY_SOURCES_PATH, filename))
-        #     if not local_filepath_list:
-        #         ctx.logger.error("limor - file does not exist: {0}".format(local_filepath_list))
-        #         ctx.abort_operation("limor - file does not exist: {0}".format(local_filepath_list))
-        #     if len(local_filepath_list) > 1:
-        #         ctx.logger.error("limor - more than one file found: {0}".format(local_filepath_list))
-        #         ctx.abort_operation("limor - more than one file found: {0}".format(local_filepath_list))
-        #     local_filepath = ''.join(local_filepath_list)
-        #     ctx.logger.info("limor - dest_file_path is: {0}".format(local_filepath))
+        # local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
+        if is_manager_package:
+            local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
+        else:
+            ctx.logger.info("limor - file name: {0}".format(filename))
+            ctx.logger.info("limor - folder name: {0}".format(CLOUDIFY_SOURCES_PATH))
+            local_filepath_list = glob.glob(os.path.join(CLOUDIFY_SOURCES_PATH, filename))
+            if not local_filepath_list:
+                ctx.logger.error("limor - file does not exist: {0}".format(local_filepath_list))
+                ctx.abort_operation("limor - file does not exist: {0}".format(local_filepath_list))
+            if len(local_filepath_list) > 1:
+                ctx.logger.error("limor - more than one file found: {0}".format(local_filepath_list))
+                ctx.abort_operation("limor - more than one file found: {0}".format(local_filepath_list))
+            local_filepath = ''.join(local_filepath_list)
+            ctx.logger.info("limor - dest_file_path is: {0}".format(local_filepath))
 
         if is_url:
             if not os.path.isfile(local_filepath):
@@ -1180,15 +1180,15 @@ class BlueprintResourceFactory(object):
                 and resource_name.endswith(('.rpm', '.tar.gz', '.tgz', '.exe')):
                     ctx.logger.info("limor - file name: {0}".format(resource_name))
                     ctx.logger.info("limor - folder name: {0}".format(base_service_res_dir))
-                    local_filepath_list = glob.glob(os.path.join(base_service_res_dir, resource_name))
+                    local_filepath_list = glob.glob(os.path.join(CLOUDIFY_SOURCES_PATH, resource_name))
                     if not local_filepath_list:
                         ctx.logger.error("limor - file does not exist: {0}".format(local_filepath_list))
                         ctx.abort_operation("limor - file does not exist: {0}".format(local_filepath_list))
                     if len(local_filepath_list) > 1:
                         ctx.logger.error("limor - more than one file found: {0}".format(local_filepath_list))
                         ctx.abort_operation("limor - more than one file found: {0}".format(local_filepath_list))
-                    local_filepath = ''.join(local_filepath_list)
-                    ctx.logger.info("limor - dest_file_path is: {0}".format(local_filepath))
+                    dest_file_path = os.path.join(base_service_res_dir, os.path.basename(''.join(local_filepath_list)))
+                    ctx.logger.info("limor - dest_file_path is: {0}".format(dest_file_path))
         else:
             dest_file_path = os.path.join(base_service_res_dir, resource_name)
 
