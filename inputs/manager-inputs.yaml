@@ -139,7 +139,7 @@ inputs:
 
   cloudify_resources_url:
     type: string
-    default: cloudify-manager-4.0m12.tar.gz
+    default: cloudify-manager-*.tar.gz
 
   stage_source_url:
     type: string
@@ -568,7 +568,7 @@ inputs:
 
   sanity_app_source_url:
     type: string
-    default: cloudify-hello-world-example-4.0m12.tar.gz
+    default: cloudify-hello-world-example-*.tar.gz
 
   ###############################
   # Import Resolver Configuration
