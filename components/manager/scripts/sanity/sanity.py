@@ -131,6 +131,8 @@ def _assert_logs_and_events(execution_id):
 
     endpoint = '{0}/events'.format(_get_url_prefix())
     url = endpoint + '?' + params
+    ctx.logger.debug('Sending request to url: {0}, with the following '
+                     'headers: {1}'.format(url, headers))
     resp = utils.http_request(url, method='GET', headers=headers, timeout=30)
     if not resp:
         ctx.abort_operation("Can't connect to elasticsearch")
@@ -141,6 +143,8 @@ def _assert_logs_and_events(execution_id):
     json_resp = json.loads(resp_content[0])
 
     if 'items' not in json_resp or not json_resp['items']:
+        ctx.logger.debug('No items received. The response is: '
+                         '{0}'.format(json_resp))
         ctx.abort_operation('No logs/events received')
 
     db_name = 'cloudify_db'
