@@ -139,14 +139,6 @@ def install_restservice():
         ctx_properties['rest_service_rpm_source_url']
 
     rest_venv = os.path.join(REST_SERVICE_HOME, 'env')
-    # Also, manager_rest_config_path is mandatory since the manager's code
-    # reads this env var. it should be renamed to rest_service_config_path.
-    os.environ['manager_rest_config_path'] = os.path.join(
-            REST_SERVICE_HOME, 'cloudify-rest.conf')
-    os.environ['rest_service_config_path'] = os.path.join(
-            REST_SERVICE_HOME, 'cloudify-rest.conf')
-    os.environ['manager_rest_security_config_path'] = os.path.join(
-            REST_SERVICE_HOME, 'rest-security.conf')
     rest_service_log_path = '/var/log/cloudify/rest'
 
     ctx.logger.info('Installing REST Service...')

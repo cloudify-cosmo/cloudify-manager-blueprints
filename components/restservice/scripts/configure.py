@@ -16,6 +16,7 @@
 
 
 import os
+import base64
 from os.path import join, dirname
 import tempfile
 import json
@@ -35,12 +36,25 @@ REST_SERVICE_NAME = 'restservice'
 
 def _deploy_security_configuration():
     ctx.logger.info('Deploying REST Security configuration file...')
-    security_configuration = \
-        ctx.instance.runtime_properties['security_configuration']
+
+    # Generating random hash salt and secret key
+    security_configuration = {
+        'hash_salt': base64.b64encode(os.urandom(32)),
+        'secret_key': base64.b64encode(os.urandom(32))
+    }
+
+    # Update the runtime properties with the new values. The conversion to
+    # and from a JSON string is necessary due to how __getitem__ and
+    # __setitem__ are implemented in ctx-py.py
+    runtime_props = ctx.instance.runtime_properties
+    current_props = json.loads(runtime_props['security_configuration'])
+    current_props.update(security_configuration)
+    runtime_props['security_configuration'] = json.dumps(current_props)
+
     fd, path = tempfile.mkstemp()
     os.close(fd)
     with open(path, 'w') as f:
-        f.write(security_configuration)
+        json.dump(security_configuration, f)
     utils.move(path, join(REST_SERVICE_HOME, 'rest-security.conf'))
 
 
@@ -57,15 +71,12 @@ def _create_db_tables_and_add_users():
     python_path = '{0}/env/bin/python'.format(REST_SERVICE_HOME)
     runtime_props = ctx.instance.runtime_properties
 
+    args_dict = json.loads(runtime_props['security_configuration'])
+    args_dict['postgresql_host'] = runtime_props['postgresql_host']
+
     # The script won't have access to the ctx, so we dump the relevant args
     # to a JSON file, and pass its path to the script
-    args_dict = {
-        'security_configuration': runtime_props['security_configuration'],
-        'postgresql_db_name': runtime_props['postgresql_db_name'],
-        'postgresql_host': runtime_props['postgresql_host']
-    }
-    args_file_location = join(tempfile.gettempdir(),
-                              'security_config.json')
+    args_file_location = join(tempfile.gettempdir(), 'security_config.json')
     with open(args_file_location, 'w') as f:
         json.dump(args_dict, f)
 
