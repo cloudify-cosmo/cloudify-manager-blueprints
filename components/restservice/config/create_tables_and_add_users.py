@@ -15,7 +15,6 @@
 #  * limitations under the License.
 
 import sys
-import yaml
 import json
 
 from manager_rest.storage import db
@@ -24,22 +23,22 @@ from manager_rest.storage.storage_utils import \
     create_default_user_tenant_and_roles
 
 
-def _create_security_roles_and_admin_user(config):
-    print 'Creating security roles and admin user'
-    security_config = yaml.load(config['security_configuration'])
-    create_default_user_tenant_and_roles(
-        admin_username=security_config['admin_username'],
-        admin_password=security_config['admin_password'],
+def _create_db_and_defaults(config):
+    print 'Setting up a Flask app'
+    setup_flask_app(
+        manager_ip=config['postgresql_host'],
+        hash_salt=config['hash_salt'],
+        secret_key=config['secret_key']
     )
-    print 'Security roles and admin user created successfully'
 
-
-def _create_db_tables(config):
     print 'Creating tables in the DB'
-    app = setup_flask_app(manager_ip=config['postgresql_host'])
-    with app.app_context():
-        db.create_all()
-    print 'Tables created successfully'
+    db.create_all()
+
+    print 'Creating bootstrap admin, default tenant and security roles'
+    create_default_user_tenant_and_roles(
+        admin_username=config['admin_username'],
+        admin_password=config['admin_password'],
+    )
 
 
 if __name__ == '__main__':
@@ -47,5 +46,4 @@ if __name__ == '__main__':
     assert len(sys.argv) == 2, 'No config file path was provided'
     with open(sys.argv[1], 'r') as f:
         config = json.load(f)
-    _create_db_tables(config)
-    _create_security_roles_and_admin_user(config)
+    _create_db_and_defaults(config)
