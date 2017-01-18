@@ -521,7 +521,7 @@ def yum_install(source, service_name):
     sudo(['yum', 'install', '-y', source_path])
 
 
-def get_cloudify_regex_pkg(filename):
+def get_filepath_from_pkg_name(filename):
     local_filepath_list = \
         [fn for fn in glob.glob(os.path.join(CLOUDIFY_SOURCES_PATH, filename))
          if not os.path.basename(fn).startswith(SINGLE_TAR_PREFIX)]
@@ -531,7 +531,7 @@ def get_cloudify_regex_pkg(filename):
     if len(local_filepath_list) > 1:
         ctx.abort_operation("More than one file: {0} found in sources path:"
                             " {1}".format(filename, CLOUDIFY_SOURCES_PATH))
-    local_filepath = ''.join(local_filepath_list)
+    local_filepath = ''.join(local_filepath_list[0])
     ctx.logger.debug("File exists in sources path: {0}".format(local_filepath))
 
     return local_filepath
@@ -1150,13 +1150,11 @@ class BlueprintResourceFactory(object):
     def _download_source_resource(source, local_resource_path):
         is_url = source.startswith(('http', 'https', 'ftp'))
         filename = get_file_name_from_url(source) if is_url else source
-
         is_manager_package = filename.startswith(SINGLE_TAR_PREFIX)
-
         if is_manager_package:
             local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
         else:
-            local_filepath = get_cloudify_regex_pkg(filename)
+            local_filepath = get_filepath_from_pkg_name(filename)
 
         if is_url:
             if not os.path.isfile(local_filepath):
@@ -1179,15 +1177,21 @@ class BlueprintResourceFactory(object):
         node_props = ctx_factory.get(service_name)
         return {'node': {'properties': node_props}}
 
+    def _is_cloudify_pkg(self, filename):
+        if (filename.startswith('cloudify')
+            or filename.find('-agent_') != -1) \
+                and not filename.startswith(SINGLE_TAR_PREFIX) \
+                and filename.endswith((
+                        '.rpm', '.tar.gz', '.tgz', '.exe')):
+            return True
+        else:
+            return False
+
     def _get_local_file_path(self, service_name, resource_name):
         base_service_res_dir = self.get_resources_dir(service_name)
 
-        if (resource_name.startswith('cloudify')
-            or resource_name.find('-agent_') != -1) \
-                and not resource_name.startswith(SINGLE_TAR_PREFIX) \
-                and resource_name.endswith((
-                        '.rpm', '.tar.gz', '.tgz', '.exe')):
-            local_filepath = get_cloudify_regex_pkg(resource_name)
+        if self._is_cloudify_pkg(resource_name):
+            local_filepath = get_filepath_from_pkg_name(resource_name)
             dest_file_path = os.path.join(base_service_res_dir,
                                           os.path.basename(local_filepath))
         else:
