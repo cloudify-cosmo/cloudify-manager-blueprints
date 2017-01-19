@@ -30,6 +30,7 @@ SSL_CERTS_SOURCE_DIR = 'resources/ssl'
 SSL_CERTS_TARGET_DIR = '/root/cloudify/ssl'
 NGINX_SERVICE_NAME = 'nginx'
 DEFAULT_BUFFER_SIZE = 8192
+SINGLE_TAR_PREFIX = 'cloudify-manager-resources'
 
 # Upgrade specific parameters
 UPGRADE_METADATA_FILE = '/opt/cloudify/upgrade_meta/metadata.json'
@@ -518,6 +519,22 @@ def yum_install(source, service_name):
             return
     ctx.logger.info('yum installing {0}...'.format(source_path))
     sudo(['yum', 'install', '-y', source_path])
+
+
+def get_filepath_from_pkg_name(filename):
+    local_filepath_list = \
+        [fn for fn in glob.glob(os.path.join(CLOUDIFY_SOURCES_PATH, filename))
+         if not os.path.basename(fn).startswith(SINGLE_TAR_PREFIX)]
+    if not local_filepath_list:
+        ctx.abort_operation("File: {0} does not exist in sources path: {1}".
+                            format(filename, CLOUDIFY_SOURCES_PATH))
+    if len(local_filepath_list) > 1:
+        ctx.abort_operation("More than one file: {0} found in sources path:"
+                            " {1}".format(filename, CLOUDIFY_SOURCES_PATH))
+    local_filepath = ''.join(local_filepath_list[0])
+    ctx.logger.debug("File exists in sources path: {0}".format(local_filepath))
+
+    return local_filepath
 
 
 class RpmPackageHandler(object):
@@ -1133,8 +1150,12 @@ class BlueprintResourceFactory(object):
     def _download_source_resource(source, local_resource_path):
         is_url = source.startswith(('http', 'https', 'ftp'))
         filename = get_file_name_from_url(source) if is_url else source
-        local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
-        is_manager_package = filename.startswith('cloudify-manager-resources')
+        is_manager_package = filename.startswith(SINGLE_TAR_PREFIX)
+        if is_manager_package:
+            local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
+        else:
+            local_filepath = get_filepath_from_pkg_name(filename)
+
         if is_url:
             if not os.path.isfile(local_filepath):
                 tmp_path = download_file(source)
@@ -1156,9 +1177,33 @@ class BlueprintResourceFactory(object):
         node_props = ctx_factory.get(service_name)
         return {'node': {'properties': node_props}}
 
+    def _is_cloudify_pkg(self,  filename):
+        """Cloudify packages start with 'cloudify' or include '-agent_'
+
+        and end with one of the suffix '.rpm', '.tar.gz', '.tgz', '.exe'.
+        The function who calls this function wish to gel all cloudify
+        packages except of single tar package.
+        """
+
+        if (filename.startswith('cloudify')
+            or filename.find('-agent_') != -1) \
+                and not filename.startswith(SINGLE_TAR_PREFIX) \
+                and filename.endswith((
+                        '.rpm', '.tar.gz', '.tgz', '.exe')):
+            return True
+        else:
+            return False
+
     def _get_local_file_path(self, service_name, resource_name):
         base_service_res_dir = self.get_resources_dir(service_name)
-        dest_file_path = os.path.join(base_service_res_dir, resource_name)
+
+        if self._is_cloudify_pkg(resource_name):
+            local_filepath = get_filepath_from_pkg_name(resource_name)
+            dest_file_path = os.path.join(base_service_res_dir,
+                                          os.path.basename(local_filepath))
+        else:
+            dest_file_path = os.path.join(base_service_res_dir, resource_name)
+
         return dest_file_path
 
     def _get_resources_json(self, service_name):
