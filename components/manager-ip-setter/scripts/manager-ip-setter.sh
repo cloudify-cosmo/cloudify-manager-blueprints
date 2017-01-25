@@ -24,48 +24,14 @@ function set_manager_ip() {
 
   echo "Updating logstash.conf.."
   /usr/bin/sed -i -e "s/host => "'"'".*"'"'"/host => "'"'"${ip}"'"'"/" /etc/logstash/conf.d/logstash.conf
+  /usr/bin/sed -i -e "s#postgresql://.*:#postgresql://${ip}:#" /etc/logstash/conf.d/logstash.conf
+
 
   echo "Updating broker_config.json.."
   /usr/bin/sed -i -e "s/"'"'"broker_hostname"'"'": "'"'".*"'"'"/"'"'"broker_hostname"'"'": "'"'"${ip}"'"'"/" /opt/mgmtworker/work/broker_config.json
 
   echo "Updating broker_ip in provider context.."
-
-  python << END
-import requests, json, sys, time
-username = "{{ ctx.node.properties.admin_username }}"
-password = "{{ ctx.node.properties.admin_password }}"
-auth = (username, password)
-headers = {"Tenant": "default_tenant", 'Content-Type': 'application/json'}
-print('- Getting provider context...')
-attempt = 1
-while True:
-  r = requests.get('http://localhost/api/v3/version', auth=auth, headers=headers)
-  if r.status_code == 200:
-    print('- REST API is up!')
-    break
-  if attempt == 10:
-    break
-  print('- REST API not yet up.. retrying in 5 seconds..')
-  time.sleep(5)
-  attempt += 1
-
-r = requests.get('http://localhost/api/v3/provider/context', auth=auth, headers=headers)
-if r.status_code != 200:
-  print("Failed getting provider context.")
-  print(r.text)
-  sys.exit(1)
-response = r.json()
-name = response['name']
-context = response['context']
-context['cloudify']['cloudify_agent']['broker_ip'] = '${ip}'
-print('- Updating provider context...')
-data = {'name': name, 'context': context}
-r = requests.post('http://localhost/api/v3/provider/context', auth=auth, headers=headers, params={'update': 'true'}, data=json.dumps(data))
-if r.status_code != 200:
-  print("Failed updating provider context.")
-  print(r.text)
-  sys.exit(1)
-END
+  /opt/cloudify/manager-ip-setter/update-provider-context.py ${ip}
 
   echo "Done!"
 
