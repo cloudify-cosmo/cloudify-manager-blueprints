@@ -404,16 +404,6 @@ node_templates:
       - target: manager_server_ip
         type: cloudify.openstack.server_connected_to_floating_ip
 
-  keepalived:
-    type: manager.nodes.Keepalived
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_configuration
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
   # on specific hosts. It allows us to define the runtime environment

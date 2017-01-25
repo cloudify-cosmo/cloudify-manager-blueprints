@@ -493,16 +493,6 @@ node_templates:
     - type: cloudify.azure.relationships.nic_connected_to_ip_configuration
       target: vm_nic_ip_cfg
 
-  keepalived:
-    type: manager.nodes.Keepalived
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_configuration
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
   # on specific hosts. It allows us to define the runtime environment

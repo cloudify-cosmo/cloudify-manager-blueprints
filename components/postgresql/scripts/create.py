@@ -27,8 +27,6 @@ def _install_postgresql():
     ps_server_rpm_url = ctx_properties['ps_server_rpm_url']
     ps_devel_rpm_url = ctx_properties['ps_devel_rpm_url']
     psycopg2_rpm_url = ctx_properties['psycopg2_rpm_url']
-    repmgr_rpm_url = ctx_properties['repmgr_rpm_url']
-    pgbouncer_rpm_url = ctx_properties['pgbouncer_rpm_url']
 
     ctx.logger.info('Installing PostgreSQL dependencies...')
     utils.yum_install(source=libxslt_rpm_url, service_name=PS_SERVICE_NAME)
@@ -42,10 +40,6 @@ def _install_postgresql():
 
     ctx.logger.info('Installing python libs for PostgreSQL...')
     utils.yum_install(source=psycopg2_rpm_url, service_name=PS_SERVICE_NAME)
-
-    ctx.logger.info('Installing replication tools for PostgreSQL...')
-    utils.yum_install(source=repmgr_rpm_url, service_name=PS_SERVICE_NAME)
-    utils.yum_install(source=pgbouncer_rpm_url, service_name=PS_SERVICE_NAME)
 
 
 def _init_postgresql():
