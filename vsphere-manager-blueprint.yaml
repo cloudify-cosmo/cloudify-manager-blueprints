@@ -397,16 +397,6 @@ node_templates:
                 rest_host_internal_endpoint_type: { get_property: [rest_service, rest_host_internal_endpoint_type] }
                 rest_host_external_endpoint_type: { get_property: [rest_service, rest_host_external_endpoint_type] }
 
-  keepalived:
-    type: manager.nodes.Keepalived
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_configuration
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-
   # #####################################################################
   # The Python and Java nodes are used to provide runtime environments
   # on specific hosts. It allows us to define the runtime environment
