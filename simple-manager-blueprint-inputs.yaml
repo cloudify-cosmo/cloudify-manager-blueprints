@@ -290,8 +290,8 @@
 # Images configuration
 ###############################
 
-# Sets whether the first time a VM is booted from a Cloudify manager image
-# its private IP will be propagated to all configuration files.
+# Sets whether the first time the manager's VM is booted from a Cloudify manager image
+# its private IP will be propagated to all relevant configuration files.
 #set_manager_ip_on_boot: false
 
 #############################

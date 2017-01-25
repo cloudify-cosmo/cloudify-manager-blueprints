@@ -354,6 +354,14 @@ user_public_key: ssh-rsa...
 # If this is set to zero then the automatic worker restarts are disabled.
 #rest_service_gunicorn_max_requests: 1000
 
+###############################
+# Images configuration
+###############################
+
+# Sets whether the first time the manager's VM is booted from a Cloudify manager image
+# its private IP will be propagated to all relevant configuration files.
+#set_manager_ip_on_boot: false
+
 #############################
 # Offline Resources Upload
 #############################
