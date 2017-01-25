@@ -559,6 +559,16 @@ inputs:
     default: cloudify-hello-world-example-*.tar.gz
 
   ###############################
+  # Images configuration
+  ###############################
+
+  set_manager_ip_on_boot:
+    description: >
+      Sets whether the first time the manager's VM is booted from a Cloudify manager image
+      its private IP will be propagated to all relevant configuration files.
+    default: false
+
+  ###############################
   # Import Resolver Configuration
   ###############################
 

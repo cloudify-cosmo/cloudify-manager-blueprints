@@ -1,0 +1,12 @@
+[Unit]
+Description=Cloudify Manager IP Setter
+Before=cloudify-mgmtworker.service cloudify-amqpinflux.service cloudify-riemann.service logstash.service
+After=network.target cloudify-restservice.service
+
+[Service]
+TimeoutStartSec=0
+EnvironmentFile=-/etc/sysconfig/cloudify-manager-ip-setter
+ExecStart=/opt/cloudify/manager-ip-setter/manager-ip-setter.sh
+
+[Install]
+WantedBy=default.target

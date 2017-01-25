@@ -5,6 +5,7 @@ imports:
   - http://www.getcloudify.org/spec/fabric-plugin/1.4.2/plugin.yaml
   - types/manager-types.yaml
   - inputs/manager-inputs.yaml
+  - components/manager-ip-setter/node-template.yaml
 
 inputs:
 
