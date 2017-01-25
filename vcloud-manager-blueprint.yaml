@@ -1,7 +1,7 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/4.0m12/types.yaml
+  - http://www.getcloudify.org/spec/cloudify/4.0m13/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.4.2/plugin.yaml
   - http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml
   - types/manager-types.yaml
@@ -208,7 +208,7 @@ inputs:
       - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.4.2/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.4.2/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.5/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.5/plugin.yaml'}
-      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.0m12/types.yaml', 'destination_path': '/spec/cloudify/4.0m12/types.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.0m13/types.yaml', 'destination_path': '/spec/cloudify/4.0m13/types.yaml'}
 
   #############################
   # Dev Inputs
