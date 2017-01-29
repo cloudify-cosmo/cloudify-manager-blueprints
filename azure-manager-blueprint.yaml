@@ -1,9 +1,9 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.4.1/types.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.4.2/types.yaml
   - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-azure-plugin/1.4.1/plugin.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.4.2/plugin.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml
   - types/manager-types.yaml
 
 inputs:
@@ -111,8 +111,8 @@ inputs:
       Holds a set of dsl required resources
     default:
     - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.4.1/plugin.yaml'}
-    - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.3/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.3/plugin.yaml'}
-    - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4.1/types.yaml', 'destination_path': '/spec/cloudify/3.4.1/types.yaml'}
+    - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.5/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.5/plugin.yaml'}
+    - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4.2/types.yaml', 'destination_path': '/spec/cloudify/3.4.2/types.yaml'}
 
   # Auth inputs
   ssh_user:
@@ -194,7 +194,7 @@ inputs:
   manager_resources_package:
     description: A URL to a tar files containing all of the manager's resources
     type: string
-    default: http://repository.cloudifysource.org/org/cloudify3/3.4.2/sp-RELEASE/cloudify-manager-resources_3.4.1-sp-b410.tar.gz
+    default: http://repository.cloudifysource.org/org/cloudify3/3.4.2/sp-RELEASE/cloudify-manager-resources_3.4.2-sp-b420.tar.gz
 
   manager_resources_package_checksum_file:
     description: >
@@ -218,36 +218,36 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: Ubuntu-trusty-agent_3.4.1-sp-b410.tar.gz
-      ubuntu_precise_agent: Ubuntu-precise-agent_3.4.1-sp-b410.tar.gz
-      centos_7x_agent: centos-Core-agent_3.4.1-sp-b410.tar.gz
-      centos_6x_agent: centos-Final-agent_3.4.1-sp-b410.tar.gz
-      redhat_7x_agent: redhat-Maipo-agent_3.4.1-sp-b410.tar.gz
-      redhat_6x_agent: redhat-Santiago-agent_3.4.1-sp-b410.tar.gz
-      cloudify_windows_agent: cloudify-windows-agent_3.4.1-sp-b410.exe
+      ubuntu_trusty_agent: Ubuntu-trusty-agent_3.4.2-sp-b420.tar.gz
+      ubuntu_precise_agent: Ubuntu-precise-agent_3.4.2-sp-b420.tar.gz
+      centos_7x_agent: centos-Core-agent_3.4.2-sp-b420.tar.gz
+      centos_6x_agent: centos-Final-agent_3.4.2-sp-b420.tar.gz
+      redhat_7x_agent: redhat-Maipo-agent_3.4.2-sp-b420.tar.gz
+      redhat_6x_agent: redhat-Santiago-agent_3.4.2-sp-b420.tar.gz
+      cloudify_windows_agent: cloudify-windows-agent_3.4.2-sp-b420.exe
 
   #############################
   # Cloudify Modules
   #############################
   rest_service_rpm_source_url:
     type: string
-    default: cloudify-rest-service-3.4.1-sp_b410.x86_64.rpm
+    default: cloudify-rest-service-3.4.2-sp_b420.x86_64.rpm
 
   management_worker_rpm_source_url:
     type: string
-    default: cloudify-management-worker-3.4.1-sp_b410.x86_64.rpm
+    default: cloudify-management-worker-3.4.2-sp_b420.x86_64.rpm
 
   amqpinflux_rpm_source_url:
     type: string
-    default: cloudify-amqp-influx-3.4.1-sp_b410.x86_64.rpm
+    default: cloudify-amqp-influx-3.4.2-sp_b420.x86_64.rpm
 
   cloudify_resources_url:
     type: string
-    default: cloudify-manager-3.4.1.tar.gz
+    default: cloudify-manager-3.4.2.tar.gz
 
   webui_source_url:
     type: string
-    default: cloudify-ui-3.4.1-sp-b410.tgz
+    default: cloudify-ui-3.4.2-sp-b420.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
@@ -554,8 +554,8 @@ inputs:
       - {'source_path': 'http://www.getcloudify.org/spec/aws-plugin/1.4.1/plugin.yaml', 'destination_path': '/spec/aws-plugin/1.4.1/plugin.yaml'}
 
       - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.4.1/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.4.1/plugin.yaml'}
-      - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.3/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.3/plugin.yaml'}
-      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4.1/types.yaml', 'destination_path': '/spec/cloudify/3.4.1/types.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.5/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.5/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/3.4.2/types.yaml', 'destination_path': '/spec/cloudify/3.4.2/types.yaml'}
 
   ###############################
   # Import Resolver Configuration
@@ -620,7 +620,7 @@ inputs:
 
   sanity_app_source_url:
     type: string
-    default: cloudify-hello-world-example-3.4.1.tar.gz
+    default: cloudify-hello-world-example-3.4.2.tar.gz
 
   #############################
   # Telecom Edition
