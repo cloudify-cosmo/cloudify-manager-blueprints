@@ -27,6 +27,7 @@ def preconfigure_nginx():
     ctx.source.instance.runtime_properties['rest_protocol'] = rest_protocol
     ctx.source.instance.runtime_properties['file_server_protocol'] = \
         file_server_protocol
+    utils.generate_certificate()
     if rest_protocol == 'https':
         utils.deploy_rest_certificates(
             internal_rest_host=target_runtime_props['internal_rest_host'],
