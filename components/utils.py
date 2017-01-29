@@ -28,6 +28,8 @@ MANAGER_RESOURCES_HOME = '/opt/manager/resources'
 AGENT_ARCHIVES_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
 SSL_CERTS_SOURCE_DIR = 'resources/ssl'
 SSL_CERTS_TARGET_DIR = '/root/cloudify/ssl'
+AGENT_SSL_CERT_FILENAME = 'cloudify-agent-cert.pem'
+AGENT_SSL_KEY_FILENAME = 'cloudify-agent-key.pem'
 NGINX_SERVICE_NAME = 'nginx'
 DEFAULT_BUFFER_SIZE = 8192
 SINGLE_TAR_PREFIX = 'cloudify-manager-resources'
@@ -182,6 +184,16 @@ def remove(path, ignore_failure=False):
     else:
         ctx.logger.debug(
             'Path does not exist: {0}. Skipping...'.format(path))
+
+
+def generate_certificate():
+    mkdir(SSL_CERTS_TARGET_DIR)
+    sudo([
+        'openssl', 'req', '-x509', '-newkey', 'rsa:2048',
+        '-keyout', os.path.join(SSL_CERTS_TARGET_DIR, AGENT_SSL_KEY_FILENAME),
+        '-out', os.path.join(SSL_CERTS_TARGET_DIR, AGENT_SSL_CERT_FILENAME),
+        '-days', '36500', '-batch', '-nodes'
+    ])
 
 
 def _generate_ssl_cert(cert_filename, key_filename, cn):
