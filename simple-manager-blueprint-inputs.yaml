@@ -57,7 +57,7 @@ agents_user: ''
 #############################
 # Manager Resources Package
 #############################
-#manager_resources_package: http://repository.cloudifysource.org/org/cloudify3/3.4.1/sp-RELEASE/cloudify-manager-resources_3.4.1-sp-b410.tar.gz
+#manager_resources_package: http://repository.cloudifysource.org/org/cloudify3/3.4.2/sp-RELEASE/cloudify-manager-resources_3.4.1-sp-b410.tar.gz
 
 # Providing a checksum file url will allow validating the resources package.
 # By default, no validation is performed. Providing a checksum file will use
