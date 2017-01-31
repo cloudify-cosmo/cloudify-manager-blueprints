@@ -1,6 +1,12 @@
 location / {
     root              /opt/manager/resources;
     autoindex on;
+    auth_request /auth;
     allow             all;
     deny              all;
+}
+
+location /auth {
+    proxy_pass http://localhost:80/api/v3/file-server-auth;
+    proxy_set_header X-Original-URI $request_uri;
 }
