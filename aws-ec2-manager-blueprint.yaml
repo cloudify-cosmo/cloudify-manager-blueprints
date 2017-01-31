@@ -275,6 +275,27 @@ node_templates:
           from_port: 53229
           to_port: 53229
           src_group_id: { get_property: [agents_security_group, resource_id] }
+        # Cluster-related ports, only used in a manager cluster
+        - ip_protocol: tcp
+          from_port: 8300
+          to_port: 8300
+          src_group_id: { get_property: [agents_security_group, resource_id] }
+        - ip_protocol: tcp
+          from_port: 8301
+          to_port: 8301
+          src_group_id: { get_property: [agents_security_group, resource_id] }
+        - ip_protocol: tcp
+          from_port: 8500
+          to_port: 8500
+          src_group_id: { get_property: [agents_security_group, resource_id] }
+        - ip_protocol: tcp
+          from_port: 22000
+          to_port: 22000
+          src_group_id: { get_property: [agents_security_group, resource_id] }
+        - ip_protocol: tcp
+          from_port: 15432
+          to_port: 15432
+          src_group_id: { get_property: [agents_security_group, resource_id] }
       aws_config: *aws_configuration
     relationships:
       - type: cloudify.relationships.depends_on
