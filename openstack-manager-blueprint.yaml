@@ -377,6 +377,17 @@ node_templates:
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
         - port: 53229
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        # Cluster-related ports, only used in a manager cluster
+        - port: 8300
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 8301
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 8500
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 22000
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 15432
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
       openstack_config: *openstack_configuration
 
   manager_server_ip:

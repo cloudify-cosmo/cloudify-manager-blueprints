@@ -415,6 +415,63 @@ node_templates:
             priority: 500
             access: Allow
             direction: Inbound
+        # Cluster-related ports, only used in a manager cluster
+        - name: consul_server
+          properties:
+            description: Inter-cluster consul access
+            protocol: Tcp
+            sourcePortRange: '*'
+            destinationPortRange: 8300
+            sourceAddressPrefix: { get_input: subnet_private_cidr }
+            destinationAddressPrefix: '*'
+            priority: 600
+            access: Allow
+            direction: Inbound
+        - name: consul_serf_lan
+          properties:
+            description: Serf port used by consul
+            protocol: Tcp
+            sourcePortRange: '*'
+            destinationPortRange: 8301
+            sourceAddressPrefix: { get_input: subnet_private_cidr }
+            destinationAddressPrefix: '*'
+            priority: 601
+            access: Allow
+            direction: Inbound
+        - name: consul_client
+          properties:
+            description: Consul API used in recovery
+            protocol: Tcp
+            sourcePortRange: '*'
+            destinationPortRange: 8500
+            sourceAddressPrefix: { get_input: subnet_private_cidr }
+            destinationAddressPrefix: '*'
+            priority: 602
+            access: Allow
+            direction: Inbound
+        - name: filesystem_replication
+          properties:
+            description: Filesystem replication server access
+            protocol: Tcp
+            sourcePortRange: '*'
+            destinationPortRange: 22000
+            sourceAddressPrefix: { get_input: subnet_private_cidr }
+            destinationAddressPrefix: '*'
+            priority: 603
+            access: Allow
+            direction: Inbound
+        - name: db_replication
+          properties:
+            description: Database replication server access
+            protocol: Tcp
+            sourcePortRange: '*'
+            destinationPortRange: 15432
+            sourceAddressPrefix: { get_input: subnet_private_cidr }
+            destinationAddressPrefix: '*'
+            priority: 604
+            access: Allow
+            direction: Inbound
+
     relationships:
     - type: cloudify.azure.relationships.contained_in_resource_group
       target: resource_group
