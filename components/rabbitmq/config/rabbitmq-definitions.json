@@ -5,7 +5,7 @@
       "vhost": "/",
       "type": "fanout",
       "durable": true,
-      "auto_delete": true,
+      "auto_delete": false,
       "internal": false,
       "arguments": {}
     },
@@ -14,7 +14,7 @@
       "vhost": "/",
       "type": "fanout",
       "durable": true,
-      "auto_delete": true,
+      "auto_delete": false,
       "internal": false,
       "arguments": {}
     }
