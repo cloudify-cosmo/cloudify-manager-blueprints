@@ -279,23 +279,23 @@ node_templates:
         - ip_protocol: tcp
           from_port: 8300
           to_port: 8300
-          src_group_id: { get_property: [agents_security_group, resource_id] }
+          cidr_ip: 0.0.0.0/0
         - ip_protocol: tcp
           from_port: 8301
           to_port: 8301
-          src_group_id: { get_property: [agents_security_group, resource_id] }
+          cidr_ip: 0.0.0.0/0
         - ip_protocol: tcp
           from_port: 8500
           to_port: 8500
-          src_group_id: { get_property: [agents_security_group, resource_id] }
+          cidr_ip: 0.0.0.0/0
         - ip_protocol: tcp
           from_port: 22000
           to_port: 22000
-          src_group_id: { get_property: [agents_security_group, resource_id] }
+          cidr_ip: 0.0.0.0/0
         - ip_protocol: tcp
           from_port: 15432
           to_port: 15432
-          src_group_id: { get_property: [agents_security_group, resource_id] }
+          cidr_ip: 0.0.0.0/0
       aws_config: *aws_configuration
     relationships:
       - type: cloudify.relationships.depends_on
