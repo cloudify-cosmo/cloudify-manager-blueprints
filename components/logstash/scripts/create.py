@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import tempfile
-
 from os.path import (
     basename,
     dirname,
@@ -25,13 +23,10 @@ ctx_properties = utils.ctx_factory.create(LOGSTASH_SERVICE_NAME)
 def install_logstash_output_jdbc_plugin():
     """"Install output plugin needed to write to SQL databases."""
     plugin_url = ctx_properties['logstash_output_jdbc_plugin_url']
-    plugin_url = (
-        'https://rubygems.org/downloads/logstash-output-jdbc-0.2.10.gem'
-    )
 
     ctx.logger.info('Installing logstash-output-jdbc plugin...')
-    plugin_path = join(tempfile.gettempdir(), basename(plugin_url))
-    utils.download_file(plugin_url, plugin_path)
+    plugin_path = utils.download_cloudify_resource(
+        plugin_url, service_name=LOGSTASH_SERVICE_NAME)
     utils.run([
         'sudo', '-u', 'logstash',
         '/opt/logstash/bin/plugin', 'install', plugin_path,
@@ -47,7 +42,8 @@ def install_postgresql_jdbc_driver():
     jdbc_path = join(jar_path, 'jdbc')
     utils.mkdir(jdbc_path)
     utils.chown('logstash', 'logstash', jar_path)
-    driver_path = utils.download_file(driver_url)
+    driver_path = utils.download_cloudify_resource(
+        driver_url, service_name=LOGSTASH_SERVICE_NAME)
     utils.run([
         'sudo', '-u', 'logstash',
         'cp',
