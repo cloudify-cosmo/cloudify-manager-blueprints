@@ -422,7 +422,7 @@ node_templates:
             protocol: Tcp
             sourcePortRange: '*'
             destinationPortRange: 8300
-            sourceAddressPrefix: { get_input: subnet_private_cidr }
+            sourceAddressPrefix: '*'
             destinationAddressPrefix: '*'
             priority: 600
             access: Allow
@@ -433,7 +433,7 @@ node_templates:
             protocol: Tcp
             sourcePortRange: '*'
             destinationPortRange: 8301
-            sourceAddressPrefix: { get_input: subnet_private_cidr }
+            sourceAddressPrefix: '*'
             destinationAddressPrefix: '*'
             priority: 601
             access: Allow
@@ -444,7 +444,7 @@ node_templates:
             protocol: Tcp
             sourcePortRange: '*'
             destinationPortRange: 8500
-            sourceAddressPrefix: { get_input: subnet_private_cidr }
+            sourceAddressPrefix: '*'
             destinationAddressPrefix: '*'
             priority: 602
             access: Allow
@@ -455,7 +455,7 @@ node_templates:
             protocol: Tcp
             sourcePortRange: '*'
             destinationPortRange: 22000
-            sourceAddressPrefix: { get_input: subnet_private_cidr }
+            sourceAddressPrefix: '*'
             destinationAddressPrefix: '*'
             priority: 603
             access: Allow
@@ -466,7 +466,7 @@ node_templates:
             protocol: Tcp
             sourcePortRange: '*'
             destinationPortRange: 15432
-            sourceAddressPrefix: { get_input: subnet_private_cidr }
+            sourceAddressPrefix: '*'
             destinationAddressPrefix: '*'
             priority: 604
             access: Allow
