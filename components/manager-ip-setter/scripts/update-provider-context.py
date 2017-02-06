@@ -15,13 +15,16 @@ def update_provider_context(manager_ip):
     print('- Getting provider context...')
     attempt = 1
     while True:
-        r = requests.get(
-            'http://localhost/api/version', auth=auth, headers=headers)
-        if r.status_code == 200:
-            print('- REST API is up!')
-            break
-        if attempt == 10:
-            break
+        try:
+            r = requests.get(
+                'http://localhost/api/version', auth=auth, headers=headers)
+            if r.status_code == 200:
+                print('- REST API is up!')
+                break
+            if attempt == 10:
+                break
+        except Exception as e:
+            print('- Error accessing REST API: {}'.format(e))
         print('- REST API not yet up.. retrying in 5 seconds..')
         time.sleep(5)
         attempt += 1
