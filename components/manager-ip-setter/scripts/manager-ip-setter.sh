@@ -22,11 +22,6 @@ function set_manager_ip() {
   /usr/bin/sed -i -e "s#MANAGER_FILE_SERVER_BLUEPRINTS_ROOT_URL="'"'"http://.*:53229/blueprints"'"'"#MANAGER_FILE_SERVER_BLUEPRINTS_ROOT_URL="'"'"http://${ip}:53229/blueprints"'"'"#" /etc/sysconfig/cloudify-mgmtworker
   /usr/bin/sed -i -e "s#MANAGER_FILE_SERVER_DEPLOYMENTS_ROOT_URL="'"'"http://.*:53229/deployments"'"'"#MANAGER_FILE_SERVER_DEPLOYMENTS_ROOT_URL="'"'"http://${ip}:53229/deployments"'"'"#" /etc/sysconfig/cloudify-mgmtworker
 
-  echo "Updating logstash.conf.."
-  /usr/bin/sed -i -e "s/host => "'"'".*"'"'"/host => "'"'"${ip}"'"'"/" /etc/logstash/conf.d/logstash.conf
-  /usr/bin/sed -i -e "s#postgresql://.*:#postgresql://${ip}:#" /etc/logstash/conf.d/logstash.conf
-
-
   echo "Updating broker_config.json.."
   /usr/bin/sed -i -e "s/"'"'"broker_hostname"'"'": "'"'".*"'"'"/"'"'"broker_hostname"'"'": "'"'"${ip}"'"'"/" /opt/mgmtworker/work/broker_config.json
 
