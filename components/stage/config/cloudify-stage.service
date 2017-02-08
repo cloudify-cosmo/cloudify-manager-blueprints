@@ -6,9 +6,10 @@ After=network-online.target
 [Service]
 TimeoutStartSec=0
 Restart=on-failure
-EnvironmentFile=-/etc/sysconfig/cloudify-stage
+EnvironmentFile=/etc/sysconfig/cloudify-stage
 User=stage
 Group=stage
+WorkingDirectory=/opt/cloudify-stage/backend
 ExecStart=/opt/nodejs/bin/node /opt/cloudify-stage/backend/server.js
 
 [Install]
