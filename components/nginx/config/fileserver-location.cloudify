@@ -1,7 +1,7 @@
 location / {
     root              /opt/manager/resources;
     autoindex on;
-    auth_request /auth;
+#    auth_request /auth;
     allow             all;
     deny              all;
 }
