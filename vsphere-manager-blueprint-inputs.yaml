@@ -15,9 +15,7 @@
 #vsphere_port: 443
 # datacenter name in vsphere
 #vsphere_datacenter_name: Datacenter
-# Resource pool name. Represents a set of physical resources:
-# a single host, a subset of a host's resources, or resources
-# spanning multiple hosts
+# Resource pool name.
 #vsphere_resource_pool_name: Resources
 # signifies if server is to be automatically placed on a host
 #vsphere_auto_placement: false
@@ -104,6 +102,15 @@
 #admin_password: 'admin'
 
 #insecure_endpoints_disabled: false
+
+#############################
+# Manager Server Settings
+#############################
+#manager_server_cpus: 2
+# If you override the manager server memory, you may need to override
+# minimum_required_total_physical_memory_in_mb, or risk validations failing.
+#manager_server_memory: 4608
+
 
 #############################
 # Bootstrap Validations
