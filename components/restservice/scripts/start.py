@@ -34,9 +34,6 @@ def verify_restservice(url):
     utils.verify_service_http(REST_SERVICE_NAME, url, headers=headers)
 
     blueprints_url = urlparse.urljoin(url, 'api/v2.1/blueprints')
-    ctx.logger.debug('Sending request to rest-service '
-                     '[url: {0}, headers: {1}]'.format(blueprints_url,
-                                                       headers))
     req = urllib2.Request(blueprints_url, headers=headers)
 
     try:
