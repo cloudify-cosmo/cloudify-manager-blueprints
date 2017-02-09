@@ -12,6 +12,7 @@ checkout:
       fi
 dependencies:
   override:
+    - pip install pip --upgrade
     - pip install setuptools --upgrade
     - pip install pytz
     - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.4.2.zip
