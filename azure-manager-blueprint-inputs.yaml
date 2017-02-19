@@ -64,10 +64,6 @@ client_secret: ''
 # NOTE: If enabled, the certificate and private key files must reside in resources/ssl.
 #ssl_enabled: false
 
-# If SSL is enabled, agent requests to the REST service verify its certificate
-# by default. To disable certificate verification, set this value to false.
-#agent_verify_rest_certificate: true
-
 # Username and password of the Cloudify administrator.
 # This user will also be included in the simple userstore repostiroty if the
 # simple userstore implementation is used.
@@ -77,7 +73,6 @@ client_secret: ''
 #insecure_endpoints_disabled: true
 
 # Default locations for certificates on agents
-#agent_rest_cert_path: '~/.cloudify/certs/rest.crt'
 #broker_ssl_cert_path: '~/.cloudify/certs/broker.crt'
 
 #############################

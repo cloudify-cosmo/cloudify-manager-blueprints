@@ -26,10 +26,16 @@ PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 MANAGER_RESOURCES_HOME = '/opt/manager/resources'
 AGENT_ARCHIVES_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
-SSL_CERTS_SOURCE_DIR = 'resources/ssl'
+
 SSL_CERTS_TARGET_DIR = '/root/cloudify/ssl'
-AGENT_SSL_CERT_FILENAME = 'cloudify-agent-cert.pem'
-AGENT_SSL_KEY_FILENAME = 'cloudify-agent-key.pem'
+INTERNAL_SSL_CERT_FILENAME = 'cloudify_internal_cert.pem'
+INTERNAL_SSL_KEY_FILENAME = 'cloudify_internal_key.pem'
+DEFAULT_INTERNAL_REST_PORT = 53333
+
+EXTERNAL_SSL_CERTS_SOURCE_DIR = 'resources/ssl'
+EXTERNAL_SSL_CERT_FILENAME = 'cloudify_external_cert.pem'
+EXTERNAL_SSL_KEY_FILENAME = 'cloudify_external_key.pem'
+
 NGINX_SERVICE_NAME = 'nginx'
 DEFAULT_BUFFER_SIZE = 8192
 SINGLE_TAR_PREFIX = 'cloudify-manager-resources'
@@ -186,103 +192,102 @@ def remove(path, ignore_failure=False):
             'Path does not exist: {0}. Skipping...'.format(path))
 
 
-def generate_certificate():
+def _generate_ssl_certificate(cert_filename, key_filename, ip):
+    """Generate a public SSL certificate and a private SSL key
+
+    :return: The path to the cert and key files on the manager
+    """
     mkdir(SSL_CERTS_TARGET_DIR)
+
+    cert_path = os.path.join(SSL_CERTS_TARGET_DIR, cert_filename)
+    key_path = os.path.join(SSL_CERTS_TARGET_DIR, key_filename)
+
+    with tempfile.NamedTemporaryFile(delete=False) as conf_file:
+        conf_file.write("""
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions=SAN
+[ req_distinguished_name ]
+commonName={ip}
+[SAN]
+subjectAltName=IP:{ip},DNS:{ip}
+""".format(ip=ip))
+
     sudo([
         'openssl', 'req', '-x509', '-newkey', 'rsa:2048',
-        '-keyout', os.path.join(SSL_CERTS_TARGET_DIR, AGENT_SSL_KEY_FILENAME),
-        '-out', os.path.join(SSL_CERTS_TARGET_DIR, AGENT_SSL_CERT_FILENAME),
-        '-days', '36500', '-batch', '-nodes'
+        '-keyout', key_path, '-out', cert_path,
+        '-days', '36500', '-batch', '-nodes', '-subj',
+        '/CN={0}'.format(ip), '-config', conf_file.name
     ])
+    ctx.logger.info('Generated SSL certificate: {0} and key: {1}'.format(
+        cert_filename, key_filename
+    ))
+    os.remove(conf_file.name)
+    return cert_path, key_path
 
 
-def _generate_ssl_cert(cert_filename, key_filename, cn):
-
-    alt_name = 'IP:{0}'.format(cn)
-
-    fd, conf_file = tempfile.mkstemp()
-    os.close(fd)
-    with open(conf_file, 'w') as f:
-        f.write('subjectAltName={0}\n'
-                'distinguished_name = req_distinguished_name\n'
-                '[ req_distinguished_name ]'
-                'commonName={1}'.format(alt_name, cn))
-
-    # building openssl command
-    command_arr = shlex.split('openssl req -x509 -nodes -newkey rsa:2048 '
-                              '-out {0} -keyout {1} -days 3650 -batch '
-                              '-subj \'/CN={2}\' -config {3}'.
-                              format(cert_filename, key_filename, cn,
-                                     conf_file))
-    sudo(command_arr)
-    os.remove(conf_file)
+def generate_internal_ssl_cert(ip):
+    return _generate_ssl_certificate(
+        INTERNAL_SSL_CERT_FILENAME,
+        INTERNAL_SSL_KEY_FILENAME,
+        ip
+    )
 
 
-def deploy_ssl_cert_and_key(cert_filename, key_filename, cn):
-    """
-    SSL certificate and keys can be supplied by the user in the
-    manager-blueprint 'resources/ssl' directory.
-    If SSL certs were supplied - Cloudify will use them,
-    otherwise - they will be generated
-    :param cert_filename: the name of the certificate file (e.g. rest.crt)
-    :param key_filename: the name of the key file (e.g. rest.key)
-    :param cn: the common name to use for certificates creation (e.g.
-        myserver.com)
-    """
-    mkdir(SSL_CERTS_TARGET_DIR)
-    user_supplied_cert_path = \
-        os.path.join(SSL_CERTS_SOURCE_DIR, cert_filename)
-    user_supplied_key_path = \
-        os.path.join(SSL_CERTS_SOURCE_DIR, key_filename)
-    cert_target_path = os.path.join(SSL_CERTS_TARGET_DIR, cert_filename)
-    key_target_path = os.path.join(SSL_CERTS_TARGET_DIR, key_filename)
+def deploy_or_generate_external_ssl_cert(ip):
+    user_provided_cert_path = os.path.join(
+        EXTERNAL_SSL_CERTS_SOURCE_DIR,
+        EXTERNAL_SSL_CERT_FILENAME
+    )
+    user_provided_key_path = os.path.join(
+        EXTERNAL_SSL_CERTS_SOURCE_DIR,
+        EXTERNAL_SSL_KEY_FILENAME
+    )
+    cert_target_path = os.path.join(
+        SSL_CERTS_TARGET_DIR,
+        EXTERNAL_SSL_CERT_FILENAME
+    )
+    key_target_path = os.path.join(
+        SSL_CERTS_TARGET_DIR,
+        EXTERNAL_SSL_KEY_FILENAME
+    )
     try:
-        # trying to deploy pre-existing certificates
-        ctx.logger.info(
-            'Deploying SSL certificate "{0}" and SSL private '
-            'key "{1}"...'.format(cert_filename, key_filename))
-        deploy_blueprint_resource(user_supplied_cert_path,
+        # Try to deploy user provided certificates
+        deploy_blueprint_resource(user_provided_cert_path,
                                   cert_target_path,
                                   NGINX_SERVICE_NAME,
                                   user_resource=True,
                                   load_ctx=False)
-        deploy_blueprint_resource(user_supplied_key_path,
+        deploy_blueprint_resource(user_provided_key_path,
                                   key_target_path,
                                   NGINX_SERVICE_NAME,
                                   user_resource=True,
                                   load_ctx=False)
-    except subprocess.CalledProcessError as e:
-        if "No such file or directory" in e.stderr:
+        ctx.logger.info(
+            'Deployed user-proved SSL certificate `{0}` and SSL private '
+            'key `{1}`'.format(
+                EXTERNAL_SSL_CERT_FILENAME,
+                EXTERNAL_SSL_KEY_FILENAME
+            )
+        )
+        return cert_target_path, key_target_path
+    except Exception as e:
+        if "No such file or directory" in str(e):
             # pre-existing cert not found, generating new cert
             ctx.logger.info(
-                'Generating SSL certificate "{0}" and SSL private '
-                'key "{1}" for CN "{2}"...'.format(
-                    cert_filename, key_filename, cn))
-            _generate_ssl_cert(cert_target_path, key_target_path, cn)
+                'Generating SSL certificate `{0}` and SSL private '
+                'key `{1}`'.format(
+                    EXTERNAL_SSL_CERT_FILENAME,
+                    EXTERNAL_SSL_KEY_FILENAME
+                )
+            )
+            return _generate_ssl_certificate(
+                EXTERNAL_SSL_CERT_FILENAME,
+                EXTERNAL_SSL_KEY_FILENAME,
+                ip
+            )
         else:
             raise
-
-
-def deploy_rest_certificates(internal_rest_host, external_rest_host):
-    deploy_ssl_cert_and_key(cert_filename='internal_rest_host.crt',
-                            key_filename='internal_rest_host.key',
-                            cn=internal_rest_host)
-    if internal_rest_host != external_rest_host:
-        deploy_ssl_cert_and_key(cert_filename='external_rest_host.crt',
-                                key_filename='external_rest_host.key',
-                                cn=external_rest_host)
-    else:
-        # use the same certificate for both internal and external access
-        internal_cert_path = \
-            os.path.join(SSL_CERTS_TARGET_DIR, 'internal_rest_host.crt')
-        internal_key_path = \
-            os.path.join(SSL_CERTS_TARGET_DIR, 'internal_rest_host.key')
-        external_cert_path = \
-            os.path.join(SSL_CERTS_TARGET_DIR, 'external_rest_host.crt')
-        external_key_path = \
-            os.path.join(SSL_CERTS_TARGET_DIR, 'external_rest_host.key')
-        copy(internal_cert_path, external_cert_path)
-        copy(internal_key_path, external_key_path)
 
 
 def install_python_package(source, venv=''):
@@ -1391,13 +1396,11 @@ def get_auth_headers(upgrade_props):
     else:
         manager_config = ctx_factory.load_rollback_props('manager-config')
 
-    security_enabled = manager_config['security']['enabled']
-    if security_enabled:
-        username = manager_config['security'].get('admin_username')
-        password = manager_config['security'].get('admin_password')
-        headers.update({'Authorization':
-                        'Basic ' + base64.b64encode('{0}:{1}'.format(
-                            username, password))})
+    username = manager_config['security'].get('admin_username')
+    password = manager_config['security'].get('admin_password')
+    headers.update({'Authorization':
+                    'Basic ' + base64.b64encode('{0}:{1}'.format(
+                        username, password))})
     return headers
 
 

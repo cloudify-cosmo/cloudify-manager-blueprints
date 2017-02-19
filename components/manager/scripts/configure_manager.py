@@ -14,7 +14,6 @@
 #  * See the License for the specific language governing permissions and
 #  * limitations under the License.
 
-
 from os.path import join, dirname
 
 from cloudify import ctx
@@ -47,40 +46,30 @@ def _disable_requiretty():
 
 
 def _configure_security_properties():
-
-    agent_config = ctx_properties['cloudify']['cloudify_agent']
     security_config = ctx_properties['security']
-    security_enabled = security_config['enabled']
-    ssl_enabled = security_config['ssl']['enabled']
-    ctx.instance.runtime_properties['security_enabled'] = security_enabled
-    ctx.instance.runtime_properties['ssl_enabled'] = ssl_enabled
-    ctx.instance.runtime_properties['agent_rest_cert_path'] = \
-        security_config['agent_rest_cert_path']
-    ctx.instance.runtime_properties['broker_ssl_cert_path'] = \
-        security_config['broker_ssl_cert_path']
+    runtime_props = ctx.instance.runtime_properties
 
-    if security_enabled and ssl_enabled:
+    runtime_props['broker_ssl_cert_path'] = \
+        security_config['broker_ssl_cert_path']
+    runtime_props['internal_rest_port'] = utils.DEFAULT_INTERNAL_REST_PORT
+
+    if security_config['ssl']['enabled']:
         # manager SSL settings
         ctx.logger.info('SSL is enabled, setting rest port to 443 and '
                         'rest protocol to https...')
-        ctx.instance.runtime_properties['rest_port'] = 443
-        ctx.instance.runtime_properties['rest_protocol'] = 'https'
-        # agent SSL settings
-        agent_verify_rest_certificate = agent_config['verify_rest_certificate']
-        ctx.instance.runtime_properties['agent_verify_rest_certificate'] = \
-            agent_verify_rest_certificate
-        ctx.logger.debug('agent_verify_rest_certificate: {0}'
-                         .format(agent_verify_rest_certificate))
+        external_rest_port = 443
+        external_rest_protocol = 'https'
     else:
-        ctx.logger.info('Security is off or SSL disabled, setting rest port '
+        ctx.logger.info('SSL is disabled, setting rest port '
                         'to 80 and rest protocols to http...')
-        ctx.instance.runtime_properties['rest_port'] = 80
-        ctx.instance.runtime_properties['rest_protocol'] = 'http'
+        external_rest_port = 80
+        external_rest_protocol = 'http'
 
-    # set file-server protocol and port
-    ctx.instance.runtime_properties['file_server_protocol'] = \
-        ctx.instance.runtime_properties['rest_protocol']
-    ctx.instance.runtime_properties['file_server_port'] = 53229
+    runtime_props['external_rest_port'] = external_rest_port
+    runtime_props['external_rest_protocol'] = external_rest_protocol
+
+    runtime_props['file_server_port'] = 53229
+    runtime_props['file_server_protocol'] = external_rest_protocol
 
 
 def main():
