@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+# source: nginx -> target: manager_configuration
 
 from os.path import join, dirname
+from collections import namedtuple
 
 from cloudify import ctx
 
@@ -9,78 +11,113 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-CONFIG_PATH = 'components/nginx/config'
-EXTERNAL_REST_CERT_PATH = '/root/cloudify/ssl/external_rest_host.crt'
+NGINX_CONF_PATH = 'components/nginx/config'
 
-NGINX_SERVICE_NAME = 'nginx'
-ctx_properties = {'service_name': NGINX_SERVICE_NAME}
+
+def _deploy_nginx_config_files(external_rest_protocol, file_server_protocol):
+    resource = namedtuple('Resource', 'src dst')
+    ctx.logger.info('Deploying Nginx configuration files...')
+
+    resources = [
+        resource(
+            src='{0}/{1}-external-rest-server.cloudify'.format(
+                NGINX_CONF_PATH,
+                external_rest_protocol
+            ),
+            dst='/etc/nginx/conf.d/{0}-external-rest-server.cloudify'.format(
+                external_rest_protocol
+            )
+        ),
+        resource(
+            src='{0}/https-internal-rest-server.cloudify'.format(
+                NGINX_CONF_PATH
+            ),
+            dst='/etc/nginx/conf.d/https-internal-rest-server.cloudify'
+        ),
+        resource(
+            src='{0}/{1}-file-server.cloudify'.format(
+                NGINX_CONF_PATH,
+                file_server_protocol
+            ),
+            dst='/etc/nginx/conf.d/{0}-file-server.cloudify'.format(
+                file_server_protocol
+            )
+        ),
+        resource(
+            src='{0}/nginx.conf'.format(NGINX_CONF_PATH),
+            dst='/etc/nginx/nginx.conf'
+        ),
+        resource(
+            src='{0}/default.conf'.format(NGINX_CONF_PATH),
+            dst='/etc/nginx/conf.d/default.conf',
+        ),
+        resource(
+            src='{0}/rest-location.cloudify'.format(NGINX_CONF_PATH),
+            dst='/etc/nginx/conf.d/rest-location.cloudify',
+        ),
+        resource(
+            src='{0}/fileserver-location.cloudify'.format(NGINX_CONF_PATH),
+            dst='/etc/nginx/conf.d/fileserver-location.cloudify',
+        ),
+        resource(
+            src='{0}/redirect-to-fileserver.cloudify'.format(NGINX_CONF_PATH),
+            dst='/etc/nginx/conf.d/redirect-to-fileserver.cloudify',
+        ),
+        resource(
+            src='{0}/ui-locations.cloudify'.format(NGINX_CONF_PATH),
+            dst='/etc/nginx/conf.d/ui-locations.cloudify',
+        ),
+        resource(
+            src='{0}/logs-conf.cloudify'.format(NGINX_CONF_PATH),
+            dst='/etc/nginx/conf.d/logs-conf.cloudify',
+        )
+    ]
+
+    for resource in resources:
+        utils.deploy_blueprint_resource(
+            resource.src,
+            resource.dst,
+            utils.NGINX_SERVICE_NAME,
+            load_ctx=False
+        )
 
 
 def preconfigure_nginx():
 
     target_runtime_props = ctx.target.instance.runtime_properties
-    # this is used by nginx's default.conf to select the relevant configuration
-    rest_protocol = target_runtime_props['rest_protocol']
+    src_runtime_props = ctx.source.instance.runtime_properties
+
+    # This is used by nginx's default.conf to select the relevant configuration
+    external_rest_protocol = target_runtime_props['external_rest_protocol']
     file_server_protocol = target_runtime_props['file_server_protocol']
+    internal_cert_path, internal_key_path = utils.generate_internal_ssl_cert(
+        target_runtime_props['internal_rest_host']
+    )
 
-    # TODO: NEED TO IMPLEMENT THIS IN CTX UTILS
-    ctx.source.instance.runtime_properties['rest_protocol'] = rest_protocol
-    ctx.source.instance.runtime_properties['file_server_protocol'] = \
-        file_server_protocol
-    utils.generate_certificate()
-    if rest_protocol == 'https':
-        utils.deploy_rest_certificates(
-            internal_rest_host=target_runtime_props['internal_rest_host'],
-            external_rest_host=target_runtime_props['external_rest_host'])
+    src_runtime_props['external_rest_protocol'] = external_rest_protocol
+    src_runtime_props['file_server_protocol'] = file_server_protocol
+    src_runtime_props['internal_cert_path'] = internal_cert_path
+    src_runtime_props['internal_key_path'] = internal_key_path
 
-        # get rest public certificate for output later
-        external_rest_cert_content = \
-            utils.get_file_content(EXTERNAL_REST_CERT_PATH)
+    # Pass on the the path to the certificate to manager_configuration
+    target_runtime_props['internal_cert_path'] = internal_cert_path
+
+    if external_rest_protocol == 'https':
+        external_cert_path, external_key_path = \
+            utils.deploy_or_generate_external_ssl_cert(
+                target_runtime_props['external_rest_host']
+            )
+
+        src_runtime_props['external_cert_path'] = external_cert_path
+        src_runtime_props['external_key_path '] = external_key_path
+
+        # The public cert content is used in the outputs later
+        external_rest_cert_content = utils.get_file_content(external_cert_path)
         target_runtime_props['external_rest_cert_content'] = \
             external_rest_cert_content
 
-    ctx.logger.info('Deploying Nginx configuration files...')
-    utils.deploy_blueprint_resource(
-        '{0}/{1}-rest-server.cloudify'.format(CONFIG_PATH, rest_protocol),
-        '/etc/nginx/conf.d/{0}-rest-server.cloudify'.format(rest_protocol),
-        NGINX_SERVICE_NAME, load_ctx=False)
-    utils.deploy_blueprint_resource(
-        '{0}/{1}-file-server.cloudify'
-        .format(CONFIG_PATH, file_server_protocol),
-        '/etc/nginx/conf.d/{0}-file-server.cloudify'
-        .format(file_server_protocol),
-        NGINX_SERVICE_NAME, load_ctx=False)
-    utils.deploy_blueprint_resource(
-        '{0}/nginx.conf'.format(CONFIG_PATH),
-        '/etc/nginx/nginx.conf',
-        NGINX_SERVICE_NAME, load_ctx=False)
-    utils.deploy_blueprint_resource(
-        '{0}/default.conf'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/default.conf',
-        NGINX_SERVICE_NAME, load_ctx=False)
-    utils.deploy_blueprint_resource(
-        '{0}/rest-location.cloudify'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/rest-location.cloudify',
-        NGINX_SERVICE_NAME, load_ctx=False)
-    utils.deploy_blueprint_resource(
-        '{0}/fileserver-location.cloudify'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/fileserver-location.cloudify',
-        NGINX_SERVICE_NAME, load_ctx=False)
-    utils.deploy_blueprint_resource(
-        '{0}/redirect-to-fileserver.cloudify'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/redirect-to-fileserver.cloudify',
-        NGINX_SERVICE_NAME, load_ctx=False)
-    utils.deploy_blueprint_resource(
-        '{0}/ui-locations.cloudify'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/ui-locations.cloudify',
-        NGINX_SERVICE_NAME, load_ctx=False)
-    utils.deploy_blueprint_resource(
-        '{0}/logs-conf.cloudify'.format(CONFIG_PATH),
-        '/etc/nginx/conf.d/logs-conf.cloudify',
-        NGINX_SERVICE_NAME, load_ctx=False)
-
-    utils.systemd.enable(NGINX_SERVICE_NAME,
-                         append_prefix=False)
+    _deploy_nginx_config_files(external_rest_protocol, file_server_protocol)
+    utils.systemd.enable(utils.NGINX_SERVICE_NAME, append_prefix=False)
 
 
 preconfigure_nginx()

@@ -89,7 +89,6 @@ node_types:
         description: >
           Security Configuration for Cloudify Manager
         default:
-          enabled: true
           #########################################################################
           # These credentials are used by the scripts during bootstrap,
           # upgrade, and rollback.
@@ -106,7 +105,6 @@ node_types:
           ssl:
             enabled: { get_input: ssl_enabled }
 
-          agent_rest_cert_path: { get_input: agent_rest_cert_path }
           broker_ssl_cert_path: { get_input: broker_ssl_cert_path }
       use_existing_on_upgrade:
         description: Use existing manager configuration on upgrade

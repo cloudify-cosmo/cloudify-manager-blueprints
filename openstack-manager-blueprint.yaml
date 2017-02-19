@@ -217,7 +217,6 @@ node_templates:
           broker_pass: { get_input: rabbitmq_password }
           broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
           broker_ssl_cert: { get_input: rabbitmq_cert_public }
-          verify_rest_certificate: { get_input: agent_verify_rest_certificate }
           env:
             OPENSTACK_CONFIG_PATH: { get_property: [SELF, cloudify, plugins, openstack_config_path] }
 
