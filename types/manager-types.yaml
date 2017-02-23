@@ -640,6 +640,10 @@ node_types:
         description: Disables insecure REST endpoints
         type: boolean
         default: { get_input: insecure_endpoints_disabled }
+      use_existing_on_upgrade:
+        description: Use existing rest service configuration on upgrade
+        type: string
+        default: true       
       gunicorn_worker_count:
         description: |
           The number of worker processes for handling requests.

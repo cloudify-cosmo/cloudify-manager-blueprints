@@ -280,6 +280,8 @@ node_templates:
         target: manager_configuration
       - type: cloudify.relationships.depends_on
         target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: java_runtime       
       - type: logstash_to_postgresql
         target: postgresql
       - type: logstash_to_rabbitmq

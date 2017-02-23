@@ -10,7 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__),
 import utils  # NOQA
 
 
-TEST_SERVICE_NAME = 'es'
+TEST_SERVICE_NAME = 'service'
 TEST_RESOURCE_NAME = 'test_resource'
 
 
@@ -35,8 +35,10 @@ def mock_resource_download():
 
 
 def mock_install_ctx():
-    install_node_props = {'es_rpm_source_url': 'http://www.mock.com/es.tar.gz',
-                          'test_property': 'test'}
+    install_node_props = {
+        'service_rpm_source_url': 'http://www.mock.com/es.tar.gz',
+        'test_property': 'test'
+    }
     return _create_mock_context(install_node_props)
 
 
@@ -51,7 +53,7 @@ def _create_mock_context(install_node_props,
 
 def mock_upgrade_ctx(use_existing_on_upgrade=False):
     upgrade_node_props = \
-        {'es_rpm_source_url': 'http://www.mock.com/new-es.tar.gz',
+        {'service_rpm_source_url': 'http://www.mock.com/new-es.tar.gz',
          'use_existing_on_upgrade': use_existing_on_upgrade,
          'test_property': 'new_value',
          'new_property': 'value'}
@@ -167,7 +169,7 @@ class TestUpgrade(unittest.TestCase):
         self._assert_rpm_url_overridden(ctx_props)
 
     def _assert_rpm_url_overridden(self, ctx_properties):
-        self.assertEqual(ctx_properties['es_rpm_source_url'],
+        self.assertEqual(ctx_properties['service_rpm_source_url'],
                          'http://www.mock.com/new-es.tar.gz')
 
     def test_archive_properties(self):
@@ -178,8 +180,8 @@ class TestUpgrade(unittest.TestCase):
             utils.ctx_factory.load_rollback_props(TEST_SERVICE_NAME)
 
         upgrade_props = utils.ctx_factory.get(TEST_SERVICE_NAME)
-        self.assertNotEqual(upgrade_props['es_rpm_source_url'],
-                            install_props['es_rpm_source_url'])
+        self.assertNotEqual(upgrade_props['service_rpm_source_url'],
+                            install_props['service_rpm_source_url'])
 
     def test_restore_properties(self):
         _, install_path = create_install_props_file(TEST_SERVICE_NAME)
@@ -189,10 +191,10 @@ class TestUpgrade(unittest.TestCase):
         _, rollback_path = create_rollback_props_file(TEST_SERVICE_NAME)
         rollback_props = utils.ctx_factory.get(TEST_SERVICE_NAME)
 
-        self.assertNotEqual(upgrade_props['es_rpm_source_url'],
-                            install_props['es_rpm_source_url'])
-        self.assertEqual(install_props['es_rpm_source_url'],
-                         rollback_props['es_rpm_source_url'])
+        self.assertNotEqual(upgrade_props['service_rpm_source_url'],
+                            install_props['service_rpm_source_url'])
+        self.assertEqual(install_props['service_rpm_source_url'],
+                         rollback_props['service_rpm_source_url'])
 
     def test_resource_file_create_on_install(self):
         resource_file_dest = '/opt/manager/{0}'.format(TEST_RESOURCE_NAME)
