@@ -243,26 +243,6 @@ node_templates:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
-  elasticsearch:
-    type: manager.nodes.Elasticsearch
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: java_runtime
-      - type: elasticsearch_to_manager_configuration
-        target: manager_configuration
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/elasticsearch/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-
   syncthing:
     type: manager.nodes.Syncthing
     relationships:
@@ -300,10 +280,6 @@ node_templates:
         target: manager_configuration
       - type: cloudify.relationships.depends_on
         target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: java_runtime
-      - type: logstash_to_elasticsearch
-        target: elasticsearch
       - type: logstash_to_postgresql
         target: postgresql
       - type: logstash_to_rabbitmq
@@ -390,8 +366,6 @@ node_templates:
         target: python_runtime
       - type: rest_to_manager_configuration
         target: manager_configuration
-      - type: restservice_to_elasticsearch
-        target: elasticsearch
       - type: restservice_to_postgresql
         target: postgresql
       - type: restservice_to_rabbitmq
@@ -477,8 +451,6 @@ node_templates:
         target: python_runtime
       - type: cloudify.relationships.depends_on
         target: java_runtime
-      - type: cloudify.relationships.depends_on
-        target: elasticsearch
       - type: cloudify.relationships.depends_on
         target: postgresql
       - type: cloudify.relationships.depends_on

@@ -91,7 +91,6 @@ aws_secret_access_key: ''
 # what you're doing.
 #minimum_required_total_physical_memory_in_mb: 3792
 #minimum_required_available_disk_space_in_gb: 5
-#allowed_heap_size_gap_in_mb: 1000
 
 #############################
 # Manager Resources Package
@@ -154,10 +153,6 @@ aws_secret_access_key: ''
 #erlang_source_url: ''
 #rabbitmq_source_url: ''
 
-#elasticsearch_source_url: ''
-#elasticsearch_curator_rpm_source_url: ''
-
-#logstash_source_url: ''
 #nginx_source_url: ''
 #influxdb_source_url: ''
 
@@ -233,36 +228,6 @@ aws_secret_access_key: ''
 # user name/pass and SSL certs if you plan on using RabbitMQ's security
 # features.
 #rabbitmq_endpoint_ip: ''
-
-#############################
-# Elasticsearch Configuration
-#############################
-# bootstrap.mlockall is set to true by default.
-# This allows to set the heapsize for your cluster.
-# https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
-#elasticsearch_heap_size: 2g
-
-# This allows to provide any JAVA_OPTS to Elasticsearch.
-#elasticsearch_java_opts: ''
-
-# The index for events will be named `logstash-YYYY.mm.dd`.
-# A new index corresponding with today's date will be added each day.
-# Elasticsearch Curator is used to rotate the indices on a daily basis
-# via a cronjob. This allows to determine the number of days to keep.
-#elasticsearch_index_rotation_interval: 30
-
-# You can configure an external endpoint of an Elasticsearch Cluster to use
-# instead of the built in one. The built in Elasticsearch cluster will not run.
-# You need to provide an IP (defaults to localhost) and Port (defaults to 9200) of your Elasticsearch Cluster.
-#elasticsearch_endpoint_ip: ''
-#elasticsearch_endpoint_port: 9200
-
-# You can enable automatic clustering of elasticsearch nodes and choose the port in which multicast discovery
-# is performed. Note that when bootstrapping two managers on the same network, if enabling clustering, you must
-# use a different port as to prevent clustering. This can be either 'true' or 'false'.
-# Must be quoted to be passed as a string.
-#elasticsearch_clustering_enabled: 'false'
-#elasticsearch_clustering_discovery_port: 54329
 
 #############################
 # PostgreSQL Configuration

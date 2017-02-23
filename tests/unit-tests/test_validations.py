@@ -20,11 +20,9 @@ os_distro = ('distro', '1')
 class TestValidations(testtools.TestCase):
     node_properties = {
         'ignore_bootstrap_validations': False,
-        'es_heap_size': '2g',
         'manager_resources_package': 'http://non-existing-domain.com/package',
         'minimum_required_total_physical_memory_in_mb': 3792,
-        'minimum_required_available_disk_space_in_gb': 5,
-        'allowed_heap_size_gap_in_mb': 1024
+        'minimum_required_available_disk_space_in_gb': 5
     }
     CTX = _create_mock_context(node_properties, node_id='node', service='test')
     node_properties.update({'ignore_bootstrap_validations': 'True'})
@@ -63,9 +61,6 @@ class TestValidations(testtools.TestCase):
             str(ex))
         self.assertIn(
             validate._error('The provided host does not have enough disk'),
-            str(ex))
-        self.assertIn(
-            validate._error('The heapsize provided for Elasticsearch'),
             str(ex))
         self.assertIn(
             validate._error(
@@ -134,27 +129,6 @@ class TestValidations(testtools.TestCase):
     @patch('validate.ctx', CTX)
     def test_validate_available_disk_space(self):
         error = validate._validate_sufficient_disk_space(1)
-        self.assertIsNone(error)
-
-    @patch('validate.ctx', CTX)
-    @patch('validate._get_host_total_memory', return_value=100)
-    def test_fail_validate_es_heap_size_large_gap(self, _):
-        error = validate._validate_es_heap_size('90m', 11)
-        desired_error = validate._error(
-            'The heapsize provided for Elasticsearch')
-        self.assertIn(desired_error, error)
-
-    @patch('validate.ctx', CTX)
-    @patch('validate._get_host_total_memory', return_value=100)
-    def test_fail_validate_es_heap_size(self, _):
-        error = validate._validate_es_heap_size('101m', 1)
-        desired_error = validate._error(
-            'The heapsize provided for Elasticsearch')
-        self.assertIn(desired_error, error)
-
-    @patch('validate.ctx', CTX)
-    def test_validate_es_heap_size(self):
-        error = validate._validate_es_heap_size('512m', 512)
         self.assertIsNone(error)
 
     @patch('validate.ctx', CTX)

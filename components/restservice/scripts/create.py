@@ -67,12 +67,6 @@ def deploy_broker_configuration():
     broker_port_no_ssl = 5672
 
     # injected as an input to the script
-    ctx.instance.runtime_properties['es_endpoint_ip'] = \
-        os.environ['ES_ENDPOINT_IP']
-
-    es_props = utils.ctx_factory.get('elasticsearch')
-    ctx.instance.runtime_properties['es_endpoint_port'] = \
-        es_props['es_endpoint_port']
     rabbit_props = utils.ctx_factory.get('rabbitmq')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip(
