@@ -135,7 +135,7 @@ def _assert_logs_and_events(execution_id):
                      'headers: {1}'.format(url, headers))
     resp = utils.http_request(url, method='GET', headers=headers, timeout=30)
     if not resp:
-        ctx.abort_operation("Can't connect to elasticsearch")
+        ctx.abort_operation("Can't connect to Cloudify's rest service")
     if resp.code != 200:
         ctx.abort_operation('Failed to retrieve logs/events')
 

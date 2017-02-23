@@ -103,41 +103,6 @@ def _validate_sufficient_disk_space(min_disk_space_required_in_gb):
                 available_disk_space_in_gb, min_disk_space_required_in_gb))
 
 
-def _validate_es_heap_size(es_heap_size, allowed_gap_in_mb):
-    """
-    If the heapsize exceeds the hosts memory minus an allowed gap, fail.
-    The allowed gap is the memory we require to be available for all other
-    services.
-    """
-    if es_heap_size.endswith('g'):
-        multiplier = 10**3
-    elif es_heap_size.endswith('m'):
-        multiplier = 1
-    else:
-        return _error(
-            'elasticsearch_heap_size input is invalid. '
-            'The input size can be one of `Xm` or `Xg` formats. '
-            'Provided: {0}'.format(es_heap_size))
-    es_heap_size_in_mb = int(es_heap_size[:-1]) * multiplier
-
-    current_memory = _get_host_total_memory()
-    available_memory_for_heap = \
-        abs(int(current_memory) - int(allowed_gap_in_mb))
-    ctx.logger.info('Validating Elasticsearch heap size requirement...')
-    if int(es_heap_size_in_mb) > available_memory_for_heap:
-        additional_required_memory = \
-            abs(available_memory_for_heap - int(es_heap_size_in_mb))
-        return _error(
-            'The heapsize provided for Elasticsearch ({0}MB) exceeds the '
-            'host\'s memory minus the allowed gap of {1}MB. '
-            'Cloudify Manager (Current: {2}MB, Additional required memory: '
-            '{3}MB).'.format(
-                es_heap_size_in_mb,
-                allowed_gap_in_mb,
-                current_memory,
-                additional_required_memory))
-
-
 def _validate_supported_distros(supported_distros, supported_versions):
     distro, version = _get_os_distro()
 
@@ -181,7 +146,6 @@ def validate():
         ctx.node.properties['minimum_required_total_physical_memory_in_mb']
     disk_space = \
         ctx.node.properties['minimum_required_available_disk_space_in_gb']
-    heap_size_gap = ctx.node.properties['allowed_heap_size_gap_in_mb']
 
     error_summary = []
 
@@ -194,12 +158,6 @@ def validate():
         min_memory_required_in_mb=physical_memory))
     error_summary.append(_validate_sufficient_disk_space(
         min_disk_space_required_in_gb=disk_space))
-    # memory validation for es is only relevant during bootstrap for now.
-    if _is_bootstrap():
-        # remove last character as it contains the `g` or `m`.
-        es_heap_size = ctx.node.properties['es_heap_size']
-        error_summary.append(_validate_es_heap_size(
-            es_heap_size=es_heap_size, allowed_gap_in_mb=heap_size_gap))
     if resources_package_url:
         error_summary.append(_validate_resources_package_url(
             resources_package_url))

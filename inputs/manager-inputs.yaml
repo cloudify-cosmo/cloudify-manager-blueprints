@@ -71,11 +71,6 @@ inputs:
     type: integer
     default: 5
 
-  allowed_heap_size_gap_in_mb:
-    description: Gap between heap size and total Manager host's memory in MB.
-    type: integer
-    default: 1000
-
   #############################
   # Execute Before Bootstrap
   #############################
@@ -168,14 +163,6 @@ inputs:
   rabbitmq_source_url:
     type: string
     default: rabbitmq-server-3.5.3-1.noarch.rpm
-
-  elasticsearch_source_url:
-    type: string
-    default: elasticsearch-1.6.0.noarch.rpm
-
-  elasticsearch_curator_rpm_source_url:
-    type: string
-    default: elasticsearch-curator-3.2.3-1.x86_64.rpm
 
   libxslt_rpm_url:
     type: string
@@ -373,60 +360,7 @@ inputs:
       Not used if an external endpoint is used.
     type: integer
     default: 102400
-
-  #############################
-  # Elasticsearch Inputs
-  #############################
-  # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
-  elasticsearch_heap_size:
-    type: string
-    default: "2g"
-
-  elasticsearch_java_opts:
-    description: >
-      Provide any JAVA_OPTS to Elasticsearch.
-    type: string
-    default: ''
-
-  # The index for events/logs will be named `logstash-YYYY.mm.dd` and
-  # A new index corresponding with today's date will be added each day.
-  # Elasticsearch Curator is used to rotate the indices on a daily basis
-  # via a cronjob.
-  # https://www.elastic.co/blog/curator-tending-your-time-series-indices
-  elasticsearch_index_rotation_interval:
-    description: >
-      Determines the number of days to keep.
-    type: integer
-    default: 30
-
-  elasticsearch_endpoint_ip:
-    description: >
-      An IP Endpoint of your Elasticsearch Cluster.
-    type: string
-    default: ''
-
-  elasticsearch_endpoint_port:
-    description: >
-      The Port of your Elasticsearch Cluster.
-    type: integer
-    default: 9200
-
-  elasticsearch_clustering_enabled:
-    description: >
-      Whether to enable automatic clustering of elasticsearch nodes via multicast discovery.
-      This can be either 'true' or 'false'
-    type: string
-    default: 'false'
-
-  elasticsearch_clustering_discovery_port:
-    description: >
-      The port used to discover other elasticsearch nodes on the same network.
-      Note that the default in elasticsearch's configuration is 54328. Here we default to
-      another port to prevent accidental discovery of already installed node within the
-      same network.
-    type: integer
-    default: 54329
-
+  
   #############################
   # PostgreSQL Inputs
   #############################

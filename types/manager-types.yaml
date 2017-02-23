@@ -17,14 +17,10 @@ node_types:
         default: { get_input: skip_checksum_validation }
       ignore_bootstrap_validations:
         default: { get_input: ignore_bootstrap_validations }
-      es_heap_size:
-        default: { get_input: elasticsearch_heap_size }
       minimum_required_total_physical_memory_in_mb:
         default: { get_input: minimum_required_total_physical_memory_in_mb }
       minimum_required_available_disk_space_in_gb:
         default: { get_input: minimum_required_available_disk_space_in_gb }
-      allowed_heap_size_gap_in_mb:
-        default: { get_input: allowed_heap_size_gap_in_mb }
       execute_before_bootstrap:
         default: { get_input: execute_before_bootstrap }
     interfaces:
@@ -288,78 +284,6 @@ node_types:
           inputs:
             script_path:
               default: components/rabbitmq/scripts/stop.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-
-  manager.nodes.Elasticsearch:
-    derived_from: cloudify.nodes.DBMS
-    properties:
-      es_rpm_source_url:
-        description: Elasticsearch RPM Source URL
-        type: string
-        default: { get_input: elasticsearch_source_url }
-      es_curator_rpm_source_url:
-        description: Elasticsearch Curator RPM Source URL
-        default: { get_input: elasticsearch_curator_rpm_source_url}
-      es_heap_size:
-        description: >
-          This is crucial when scaling up as it
-          allows to set the amount of memory allocated and affects
-          indexing and searching performance. See
-          https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
-          for more info.
-        type: string
-        default: { get_input: elasticsearch_heap_size }
-      es_java_opts:
-        description: >
-          ES_JAVA_OPTS Env Var. Allows to provide arguments
-          to Elasticsearch.
-        type: string
-        default: { get_input: elasticsearch_java_opts }
-      es_index_rotation_interval:
-        description: >
-          Defines how many days of indices you want to keep in Elasticsearch.
-          This is only relevant to the Events/Logs indices and does not
-          interfere with the data model.
-        type: integer
-        default: { get_input: elasticsearch_index_rotation_interval }
-      es_endpoint_ip:
-        type: string
-        default: { get_input: elasticsearch_endpoint_ip }
-      es_endpoint_port:
-        type: integer
-        default: { get_input: elasticsearch_endpoint_port }
-      use_existing_on_upgrade:
-        description: Use existing elasticsearch configuration
-        type: string
-        default: true
-      es_clustering_enabled:
-        type: string
-        default: { get_input: elasticsearch_clustering_enabled }
-      es_clustering_discovery_port:
-        type: integer
-        default: { get_input: elasticsearch_clustering_discovery_port }
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/elasticsearch/scripts/create.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-        start:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/elasticsearch/scripts/start.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-        stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/elasticsearch/scripts/stop.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -702,9 +626,6 @@ node_types:
       cloudify:
         description: Security settings from the manager configuration
         default: {}
-      es_endpoint_port:
-        type: integer
-        default: { get_input: elasticsearch_endpoint_port }
       # valid values: public_ip, private_ip
       rest_host_external_endpoint_type:
         description: the type of endpoint used to identify the REST host for external requests
@@ -720,9 +641,9 @@ node_types:
         type: boolean
         default: { get_input: insecure_endpoints_disabled }
       use_existing_on_upgrade:
-        description: Use existing elasticsearch configuration
+        description: Use existing rest service configuration on upgrade
         type: string
-        default: true
+        default: true       
       gunicorn_worker_count:
         description: |
           The number of worker processes for handling requests.
@@ -744,8 +665,6 @@ node_types:
               default: components/restservice/scripts/create.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
-            ES_ENDPOINT_IP:
-              default: { get_attribute: [elasticsearch, es_endpoint_ip] }
         configure:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
@@ -1074,17 +993,6 @@ node_types:
 ######################################################################
 relationships:
 
-  logstash_to_elasticsearch:
-    derived_from: cloudify.relationships.connected_to
-    source_interfaces:
-      cloudify.interfaces.relationship_lifecycle:
-        preconfigure:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/logstash/scripts/preconfigure_elasticsearch_properties.py
-            fabric_env: *simple_fabric_env
-
   logstash_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to
     source_interfaces:
@@ -1106,9 +1014,6 @@ relationships:
             script_path:
               default: components/logstash/scripts/preconfigure_postgresql_properties.py
             fabric_env: *simple_fabric_env
-
-  restservice_to_elasticsearch:
-    derived_from: cloudify.relationships.connected_to
 
   restservice_to_postgresql:
     derived_from: cloudify.relationships.connected_to
@@ -1156,18 +1061,6 @@ relationships:
           inputs:
             script_path:
               default: components/nginx/scripts/preconfigure.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-
-  elasticsearch_to_manager_configuration:
-    derived_from: cloudify.relationships.depends_on
-    source_interfaces:
-      cloudify.interfaces.relationship_lifecycle:
-        preconfigure:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/elasticsearch/scripts/preconfigure.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
