@@ -27,7 +27,7 @@ CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 MANAGER_RESOURCES_HOME = '/opt/manager/resources'
 AGENT_ARCHIVES_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
 
-SSL_CERTS_TARGET_DIR = '/root/cloudify/ssl'
+SSL_CERTS_TARGET_DIR = '/etc/cloudify/ssl'
 INTERNAL_SSL_CERT_FILENAME = 'cloudify_internal_cert.pem'
 INTERNAL_SSL_KEY_FILENAME = 'cloudify_internal_key.pem'
 DEFAULT_INTERNAL_REST_PORT = 53333
