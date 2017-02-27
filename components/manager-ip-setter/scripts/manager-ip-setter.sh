@@ -28,6 +28,11 @@ function set_manager_ip() {
   echo "Updating broker_ip in provider context.."
   /opt/cloudify/manager-ip-setter/update-provider-context.py ${ip}
 
+  echo "Creating internal SSL certificates.."
+  rm -f /etc/cloudify/ssl/cloudify_internal_*.pem
+  /opt/cfy/embedded/bin/python /opt/cloudify/manager-ip-setter/create-internal-ssl-certs.py ${ip}
+  systemctl restart nginx
+
   echo "Done!"
 
 }
