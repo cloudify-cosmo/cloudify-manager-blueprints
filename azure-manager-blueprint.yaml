@@ -387,7 +387,7 @@ node_templates:
             description: Internal REST access
             protocol: Tcp
             sourcePortRange: '*'
-            destinationPortRange: 8101
+            destinationPortRange: 53333
             sourceAddressPrefix: { get_input: subnet_private_cidr }
             destinationAddressPrefix: '*'
             priority: 300
