@@ -12,6 +12,8 @@ if [ "z$status" == 'zactive' ]; then
     sudo firewall-cmd --zone=public --add-port=8086/tcp --permanent
     # port for agent download
     sudo firewall-cmd --zone=public --add-port=53229/tcp --permanent
+    # port for internal rest
+    sudo firewall-cmd --zone=public --add-port=53333/tcp --permanent
     # port for AQMP
     sudo firewall-cmd --zone=public --add-port=5672/tcp --permanent
     # port for diamond

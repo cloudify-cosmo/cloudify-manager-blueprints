@@ -376,6 +376,8 @@ node_templates:
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
         - port: 53229
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
+        - port: 53333
+          remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
         # Cluster-related ports, only used in a manager cluster
         - port: 8300
           remote_ip_prefix: 0.0.0.0/0

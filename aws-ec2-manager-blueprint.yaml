@@ -274,6 +274,10 @@ node_templates:
           from_port: 53229
           to_port: 53229
           src_group_id: { get_property: [agents_security_group, resource_id] }
+        - ip_protocol: tcp
+          from_port: 53333
+          to_port: 53333
+          src_group_id: { get_property: [agents_security_group, resource_id] }
         # Cluster-related ports, only used in a manager cluster
         - ip_protocol: tcp
           from_port: 8300
