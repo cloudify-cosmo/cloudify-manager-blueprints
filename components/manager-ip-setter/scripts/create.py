@@ -18,6 +18,7 @@ ctx_properties = utils.ctx_factory.create(MANAGER_IP_SETTER_SERVICE_NAME)
 
 MANAGER_IP_SETTER_SCRIPT_NAME = 'manager-ip-setter.sh'
 UPDATE_PROVIDER_CONTEXT_SCRIPT_NAME = 'update-provider-context.py'
+CREATE_INTERNAL_SSL_CERTS_SCRIPT_NAME = 'create-internal-ssl-certs.py'
 
 MANAGER_IP_SETTER_DIR = '/opt/cloudify/manager-ip-setter'
 
@@ -37,6 +38,7 @@ def install_manager_ip_setter():
     utils.mkdir(dirname(MANAGER_IP_SETTER_DIR))
     deploy_script(MANAGER_IP_SETTER_SCRIPT_NAME)
     deploy_script(UPDATE_PROVIDER_CONTEXT_SCRIPT_NAME)
+    deploy_script(CREATE_INTERNAL_SSL_CERTS_SCRIPT_NAME)
 
 
 if os.environ.get('set_manager_ip_on_boot').lower() == 'true':
