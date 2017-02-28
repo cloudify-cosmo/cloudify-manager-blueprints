@@ -3,7 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
   - http://www.getcloudify.org/spec/cloudify/4.0m15/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.4.2/plugin.yaml
-  - http://www.getcloudify.org/spec/aws-plugin/1.4.3/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-aws-plugin/AWS-79-1.4.4/plugin.yaml
   - types/manager-types.yaml
   - inputs/manager-inputs.yaml
 
