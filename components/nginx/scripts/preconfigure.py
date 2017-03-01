@@ -14,7 +14,7 @@ import utils  # NOQA
 NGINX_CONF_PATH = 'components/nginx/config'
 
 
-def _deploy_nginx_config_files(external_rest_protocol, file_server_protocol):
+def _deploy_nginx_config_files(external_rest_protocol):
     resource = namedtuple('Resource', 'src dst')
     ctx.logger.info('Deploying Nginx configuration files...')
 
@@ -35,13 +35,8 @@ def _deploy_nginx_config_files(external_rest_protocol, file_server_protocol):
             dst='/etc/nginx/conf.d/https-internal-rest-server.cloudify'
         ),
         resource(
-            src='{0}/{1}-file-server.cloudify'.format(
-                NGINX_CONF_PATH,
-                file_server_protocol
-            ),
-            dst='/etc/nginx/conf.d/{0}-file-server.cloudify'.format(
-                file_server_protocol
-            )
+            src='{0}/https-file-server.cloudify'.format(NGINX_CONF_PATH),
+            dst='/etc/nginx/conf.d/https-file-server.cloudify'
         ),
         resource(
             src='{0}/nginx.conf'.format(NGINX_CONF_PATH),
@@ -89,15 +84,14 @@ def preconfigure_nginx():
 
     # This is used by nginx's default.conf to select the relevant configuration
     external_rest_protocol = target_runtime_props['external_rest_protocol']
-    file_server_protocol = target_runtime_props['file_server_protocol']
     internal_cert_path, internal_key_path = utils.generate_internal_ssl_cert(
         target_runtime_props['internal_rest_host']
     )
 
     src_runtime_props['external_rest_protocol'] = external_rest_protocol
-    src_runtime_props['file_server_protocol'] = file_server_protocol
     src_runtime_props['internal_cert_path'] = internal_cert_path
     src_runtime_props['internal_key_path'] = internal_key_path
+    src_runtime_props['file_server_root'] = utils.MANAGER_RESOURCES_HOME
 
     # Pass on the the path to the certificate to manager_configuration
     target_runtime_props['internal_cert_path'] = internal_cert_path
@@ -109,14 +103,14 @@ def preconfigure_nginx():
             )
 
         src_runtime_props['external_cert_path'] = external_cert_path
-        src_runtime_props['external_key_path '] = external_key_path
+        src_runtime_props['external_key_path'] = external_key_path
 
         # The public cert content is used in the outputs later
         external_rest_cert_content = utils.get_file_content(external_cert_path)
         target_runtime_props['external_rest_cert_content'] = \
             external_rest_cert_content
 
-    _deploy_nginx_config_files(external_rest_protocol, file_server_protocol)
+    _deploy_nginx_config_files(external_rest_protocol)
     utils.systemd.enable(utils.NGINX_SERVICE_NAME, append_prefix=False)
 
 

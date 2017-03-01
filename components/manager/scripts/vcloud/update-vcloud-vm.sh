@@ -16,8 +16,6 @@ if [ "z$status" == 'zactive' ]; then
     sudo firewall-cmd --zone=public --add-port=443/tcp --permanent
     # add influxdb connection
     sudo firewall-cmd --zone=public --add-port=8086/tcp --permanent
-    # port for agent download
-    sudo firewall-cmd --zone=public --add-port=53229/tcp --permanent
     # port for internal rest communications
     sudo firewall-cmd --zone=public --add-port=53333/tcp --permanent
     # port for AQMP

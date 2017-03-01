@@ -32,6 +32,7 @@ import utils  # NOQA
 # TODO: change to /opt/cloudify-rest-service
 REST_SERVICE_HOME = '/opt/manager'
 REST_SERVICE_NAME = 'restservice'
+CONFIG_PATH = 'components/restservice/config'
 
 
 def _deploy_security_configuration():
@@ -104,7 +105,18 @@ def _log_results(result):
             ctx.logger.error(line)
 
 
+def _deploy_rest_configuration():
+    ctx.logger.info('Deploying REST Service Configuration file...')
+    runtime_props = ctx.instance.runtime_properties
+    runtime_props['file_server_root'] = utils.MANAGER_RESOURCES_HOME
+    utils.deploy_blueprint_resource(
+            os.path.join(CONFIG_PATH, 'cloudify-rest.conf'),
+            os.path.join(REST_SERVICE_HOME, 'cloudify-rest.conf'),
+            REST_SERVICE_NAME)
+
+
 def configure_restservice():
+    _deploy_rest_configuration()
     _deploy_security_configuration()
     utils.systemd.configure(REST_SERVICE_NAME)
     _create_db_tables_and_add_users()

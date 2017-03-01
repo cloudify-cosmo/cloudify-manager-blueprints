@@ -51,7 +51,7 @@ def _configure_security_properties():
 
     runtime_props['broker_ssl_cert_path'] = \
         security_config['broker_ssl_cert_path']
-    runtime_props['internal_rest_port'] = utils.DEFAULT_INTERNAL_REST_PORT
+    runtime_props['internal_rest_port'] = utils.INTERNAL_REST_PORT
 
     if security_config['ssl']['enabled']:
         # manager SSL settings
@@ -67,9 +67,6 @@ def _configure_security_properties():
 
     runtime_props['external_rest_port'] = external_rest_port
     runtime_props['external_rest_protocol'] = external_rest_protocol
-
-    runtime_props['file_server_port'] = 53229
-    runtime_props['file_server_protocol'] = external_rest_protocol
 
 
 def main():

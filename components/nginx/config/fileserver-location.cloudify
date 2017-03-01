@@ -1,5 +1,5 @@
 location / {
-    root              /opt/manager/resources;
+    root              {{ ctx.source.instance.runtime_properties.file_server_root }};
     autoindex on;
     auth_request /auth;
     allow             all;
@@ -7,6 +7,6 @@ location / {
 }
 
 location /auth {
-    proxy_pass http://localhost:80/api/v3/file-server-auth;
+    proxy_pass http://cloudify-rest/api/v3/file-server-auth;
     proxy_set_header X-Original-URI $request_uri;
 }
