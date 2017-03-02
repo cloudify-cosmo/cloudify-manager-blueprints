@@ -1165,7 +1165,8 @@ class BlueprintResourceFactory(object):
 
     @staticmethod
     def _download_source_resource(source, local_resource_path):
-        is_url = source.startswith(('http', 'https', 'ftp'))
+        is_url = source.startswith(('http://', 'https://', 'ftp://',
+                                    'file://'))
         filename = get_file_name_from_url(source) if is_url else source
         is_manager_package = filename.startswith(SINGLE_TAR_PREFIX)
         if is_manager_package:
