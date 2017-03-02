@@ -16,10 +16,12 @@
 
 
 import os
-import base64
-from os.path import join, dirname
-import tempfile
 import json
+import random
+import string
+import base64
+import tempfile
+from os.path import join, dirname
 
 from cloudify import ctx
 
@@ -35,13 +37,24 @@ REST_SERVICE_NAME = 'restservice'
 CONFIG_PATH = 'components/restservice/config'
 
 
+def _random_alphanumeric(result_len=31):
+    """
+    :return: random string of unique alphanumeric characters
+    """
+    ascii_alphanumeric = string.ascii_letters + string.digits
+    return ''.join(random.sample(ascii_alphanumeric, result_len))
+
+
 def _deploy_security_configuration():
     ctx.logger.info('Deploying REST Security configuration file...')
 
     # Generating random hash salt and secret key
     security_configuration = {
         'hash_salt': base64.b64encode(os.urandom(32)),
-        'secret_key': base64.b64encode(os.urandom(32))
+        'secret_key': base64.b64encode(os.urandom(32)),
+        'encoding_alphabet': _random_alphanumeric(),
+        'encoding_block_size': 24,
+        'encoding_min_length': 5
     }
 
     # Update the runtime properties with the new values. The conversion to
