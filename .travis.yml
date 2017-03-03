@@ -21,7 +21,6 @@ install:
 env:
     - OP="validate-blueprints"
     - OP="flake8"
-    - OP="bootstrap-sanity"
     - OP="unit-tests"
 
 script:
@@ -35,15 +34,6 @@ script:
           done
         elif [ "${OP}" == "flake8" ]; then
           flake8 .
-        elif [ "${OP}" == "bootstrap-sanity" ]; then
-          if [ "${TRAVIS_TAG}" == "bootstrap-sanity" ]; then
-            cd tests
-            pip install -r bootstrap-sanity-requirements.txt
-            python sanity.py
-            exit $?
-          else
-            echo "Not bootstrap-sanity tag, skipping bootstrap sanity test."
-          fi;
         elif [ "${OP}" == "unit-tests" ]; then
           cd tests/unit-tests
           nosetests --with-cov --cov-report term-missing --cov .
