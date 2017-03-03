@@ -109,7 +109,7 @@ def preconfigure_nginx():
             )
 
         src_runtime_props['external_cert_path'] = external_cert_path
-        src_runtime_props['external_key_path '] = external_key_path
+        src_runtime_props['external_key_path'] = external_key_path
 
         # The public cert content is used in the outputs later
         external_rest_cert_content = utils.get_file_content(external_cert_path)

@@ -11,8 +11,8 @@ server {
       return 301 https://$server_name$request_uri;
   }
 
-  ssl_certificate     {{ ctx.target.instance.runtime_properties.external_cert_path }};
-  ssl_certificate_key {{ ctx.target.instance.runtime_properties.external_key_path }};
+  ssl_certificate     {{ ctx.source.instance.runtime_properties.external_cert_path }};
+  ssl_certificate_key {{ ctx.source.instance.runtime_properties.external_key_path }};
 
   include "/etc/nginx/conf.d/logs-conf.cloudify";
 
