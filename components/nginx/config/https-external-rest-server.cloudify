@@ -2,14 +2,8 @@
 server {
   # server listening for external requests
   # listens on both 443 and 80, but http will be redirected to https (below)
-  listen              80;
   listen              443 ssl;
   server_name         {{ ctx.target.instance.runtime_properties.external_rest_host }};
-
-  # force http redirect to https
-  if ($scheme = http) {
-      return 301 https://$server_name$request_uri;
-  }
 
   ssl_certificate     {{ ctx.target.instance.runtime_properties.external_cert_path }};
   ssl_certificate_key {{ ctx.target.instance.runtime_properties.external_key_path }};
@@ -24,4 +18,18 @@ server {
 
   # Serves the File Server (backed by the cloudify-resources upstream).
   include "/etc/nginx/conf.d/redirect-to-fileserver.cloudify";
+}
+
+# force http redirect to https
+server {
+  listen 80;
+  server_name       {{ ctx.target.instance.runtime_properties.external_rest_host }};
+
+  # use the 308 status code - handled correctly by requests - unlike 301,
+  # when received 308, requests will also resend the request body.
+
+  # the nginx version shipped with centos has no native 308 support - we need
+  # to add the header manually.
+  add_header Location https://$server_name$request_uri always;
+  return 308;
 }
