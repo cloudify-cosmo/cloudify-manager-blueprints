@@ -17,7 +17,7 @@ BLUEPRINT_ID = 'sanity_bp'
 DEPLOYMENT_ID = 'sanity_deployment'
 SANITY_SERVICE_NAME = 'sanity'
 
-manager_ip = os.environ.get('manager_ip')
+manager_ip = os.environ.get('manager_private_ip')
 manager_user = os.environ.get('manager_user')
 manager_remote_key_path = \
     ctx.instance.runtime_properties['manager_remote_key_path']
