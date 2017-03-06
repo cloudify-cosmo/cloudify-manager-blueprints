@@ -11,12 +11,10 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-CONFIG_PATH = 'components/restservice/config'
 REST_RESOURCES_PATH = 'resources/rest'
 
 # TODO: change to /opt/cloudify-rest-service
 REST_SERVICE_HOME = '/opt/manager'
-MANAGER_RESOURCES_HOME = '/opt/manager/resources'
 REST_SERVICE_NAME = 'restservice'
 
 ctx_properties = utils.ctx_factory.create(REST_SERVICE_NAME)
@@ -58,7 +56,9 @@ def install_optional(rest_venv):
         utils.install_python_package('/tmp/rest-service', rest_venv)
         ctx.logger.info('Deploying Required Manager Resources...')
         utils.move(
-            '/tmp/resources/rest-service/cloudify/', MANAGER_RESOURCES_HOME)
+            '/tmp/resources/rest-service/cloudify/',
+            utils.MANAGER_RESOURCES_HOME
+        )
 
 
 def deploy_broker_configuration():
@@ -128,9 +128,7 @@ def _configure_dbus(rest_venv):
 
 
 def install_restservice():
-
-    rest_service_rpm_source_url = \
-        ctx_properties['rest_service_rpm_source_url']
+    rest_service_rpm_source_url = ctx_properties['rest_service_rpm_source_url']
 
     rest_venv = os.path.join(REST_SERVICE_HOME, 'env')
     rest_service_log_path = '/var/log/cloudify/rest'
@@ -141,7 +139,7 @@ def install_restservice():
     utils.copy_notice(REST_SERVICE_NAME)
     utils.mkdir(REST_SERVICE_HOME)
     utils.mkdir(rest_service_log_path)
-    utils.mkdir(MANAGER_RESOURCES_HOME)
+    utils.mkdir(utils.MANAGER_RESOURCES_HOME)
 
     deploy_broker_configuration()
     utils.yum_install(rest_service_rpm_source_url,
@@ -149,15 +147,6 @@ def install_restservice():
     _configure_dbus(rest_venv)
     install_optional(rest_venv)
     utils.logrotate(REST_SERVICE_NAME)
-
-    ctx.logger.info('Deploying REST Service Configuration file...')
-    # rest ports are set as runtime properties in nginx/scripts/create.py
-    # cloudify-rest.conf currently contains localhost for fileserver endpoint.
-    # We need to change that if we want to deploy nginx on another machine.
-    utils.deploy_blueprint_resource(
-            os.path.join(CONFIG_PATH, 'cloudify-rest.conf'),
-            os.path.join(REST_SERVICE_HOME, 'cloudify-rest.conf'),
-            REST_SERVICE_NAME)
 
 
 install_restservice()

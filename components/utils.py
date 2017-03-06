@@ -21,7 +21,7 @@ from distutils.version import LooseVersion
 from cloudify import ctx
 
 
-REST_VERSION = 'v2.1'
+REST_VERSION = 'v3'
 PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 MANAGER_RESOURCES_HOME = '/opt/manager/resources'
@@ -30,7 +30,7 @@ AGENT_ARCHIVES_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
 SSL_CERTS_TARGET_DIR = '/etc/cloudify/ssl'
 INTERNAL_SSL_CERT_FILENAME = 'cloudify_internal_cert.pem'
 INTERNAL_SSL_KEY_FILENAME = 'cloudify_internal_key.pem'
-DEFAULT_INTERNAL_REST_PORT = 53333
+INTERNAL_REST_PORT = 53333
 
 EXTERNAL_SSL_CERTS_SOURCE_DIR = 'resources/ssl'
 EXTERNAL_SSL_CERT_FILENAME = 'cloudify_external_cert.pem'

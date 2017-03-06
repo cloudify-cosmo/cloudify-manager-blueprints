@@ -1,7 +1,6 @@
 location ~ ^/resources {
-    internal;
     rewrite            /resources/(.*) /$1 break;
-    proxy_pass         {{ ctx.source.instance.runtime_properties.file_server_protocol }}://cloudify-resources;
+    proxy_pass         https://cloudify-resources;
     proxy_redirect     off;
 
     proxy_set_header   Host             $http_host;

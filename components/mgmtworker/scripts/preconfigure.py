@@ -23,32 +23,20 @@ source_runtime_props = ctx.source.instance.runtime_properties
 
 rest_host = target_runtime_props['internal_rest_host']
 rest_port = target_runtime_props['internal_rest_port']
+file_server_url = target_runtime_props['file_server_url']
 broker_ssl_cert_path = target_runtime_props['broker_ssl_cert_path']
 local_rest_cert_file = target_runtime_props['internal_cert_path']
-
-# the file server is accessed through the same host and protocol as the rest
-# service (externally), but on a different port
-file_server_host = target_runtime_props['file_server_host']
-file_server_port = target_runtime_props['file_server_port']
-file_server_protocol = target_runtime_props['file_server_protocol']
-
 
 debug_message = 'mgmtworker configuration: \n' \
              'rest_host: {0}\n'\
              'rest_protocol: HTTPS\n' \
              'rest_port: {1}\n' \
              'local_rest_cert_file: {2}\n' \
-             'file_server_host: {3}\n' \
-             'file_server_port: {4}\n' \
-             'file_server_protocol: {5}\n' \
-             .format(rest_host, rest_port, local_rest_cert_file,
-                     file_server_host, file_server_port, file_server_protocol)
+             .format(rest_host, rest_port, local_rest_cert_file)
 ctx.logger.debug(debug_message)
 
-source_runtime_props['file_server_host'] = file_server_host
-source_runtime_props['file_server_port'] = file_server_port
-source_runtime_props['file_server_protocol'] = file_server_protocol
 source_runtime_props['rest_host'] = rest_host
 source_runtime_props['rest_port'] = rest_port
+source_runtime_props['file_server_url'] = file_server_url
 source_runtime_props['local_rest_cert_file'] = local_rest_cert_file
 source_runtime_props['broker_ssl_cert_path'] = broker_ssl_cert_path

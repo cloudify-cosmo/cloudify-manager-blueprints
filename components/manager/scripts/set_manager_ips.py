@@ -67,10 +67,13 @@ else:
 ctx.logger.debug('internal_rest_host set to: {0}'.format(
     source_runtime_props['internal_rest_host']))
 
-# set the internal rest host as the file-server host
-source_runtime_props['file_server_host'] = \
-    source_runtime_props['internal_rest_host']
-
+# Set the file server url
+file_server_url = 'https://{0}:{1}/resources'.format(
+        source_runtime_props['internal_rest_host'],
+        source_runtime_props['internal_rest_port']
+    )
+source_runtime_props['file_server_url'] = file_server_url
+ctx.logger.debug('file_server_url set to: {0}'.format(file_server_url))
 
 # set the external REST host according to the REST external endpoint type
 # (public ip / private ip)
