@@ -24,7 +24,6 @@ source_runtime_props = ctx.source.instance.runtime_properties
 rest_host = target_runtime_props['internal_rest_host']
 rest_port = target_runtime_props['internal_rest_port']
 file_server_url = target_runtime_props['file_server_url']
-broker_ssl_cert_path = target_runtime_props['broker_ssl_cert_path']
 local_rest_cert_file = target_runtime_props['internal_cert_path']
 
 debug_message = 'mgmtworker configuration: \n' \
@@ -39,4 +38,3 @@ source_runtime_props['rest_host'] = rest_host
 source_runtime_props['rest_port'] = rest_port
 source_runtime_props['file_server_url'] = file_server_url
 source_runtime_props['local_rest_cert_file'] = local_rest_cert_file
-source_runtime_props['broker_ssl_cert_path'] = broker_ssl_cert_path

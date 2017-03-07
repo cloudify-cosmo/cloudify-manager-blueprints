@@ -45,40 +45,6 @@ def _create_user_and_set_permissions(rabbitmq_username,
                     'administrator'])
 
 
-def _set_security(rabbitmq_ssl_enabled,
-                  rabbitmq_cert_private,
-                  rabbitmq_cert_public):
-    # Deploy certificates if both have been provided.
-    # Complain loudly if one has been provided and the other hasn't.
-    if rabbitmq_ssl_enabled:
-        if rabbitmq_cert_private and rabbitmq_cert_public:
-            utils.deploy_ssl_certificate(
-                'private', '/etc/rabbitmq/rabbit-priv.pem',
-                'rabbitmq', rabbitmq_cert_private)
-            utils.deploy_ssl_certificate(
-                'public', '/etc/rabbitmq/rabbit-pub.pem',
-                'rabbitmq', rabbitmq_cert_public)
-            # Configure for SSL
-
-            utils.deploy_blueprint_resource(
-                '{0}/rabbitmq.config-ssl'.format(CONFIG_PATH),
-                '/etc/rabbitmq/rabbitmq.config',
-                RABBITMQ_SERVICE_NAME, user_resource=True)
-        else:
-            ctx.abort_operation('When providing a certificate for rabbitmq, '
-                                'both public and private certificates must be '
-                                'supplied.')
-    else:
-
-        utils.deploy_blueprint_resource(
-            '{0}/rabbitmq.config-nossl'.format(CONFIG_PATH),
-            '/etc/rabbitmq/rabbitmq.config',
-            RABBITMQ_SERVICE_NAME, user_resource=True)
-        if rabbitmq_cert_private or rabbitmq_cert_public:
-            ctx.logger.warn('Broker SSL cert supplied but SSL not enabled '
-                            '(broker_ssl_enabled is False).')
-
-
 def _install_rabbitmq():
     erlang_rpm_source_url = ctx_properties['erlang_rpm_source_url']
     rabbitmq_rpm_source_url = ctx_properties['rabbitmq_rpm_source_url']
@@ -88,9 +54,6 @@ def _install_rabbitmq():
     rabbitmq_log_path = '/var/log/cloudify/rabbitmq'
     rabbitmq_username = ctx_properties['rabbitmq_username']
     rabbitmq_password = ctx_properties['rabbitmq_password']
-    rabbitmq_cert_public = ctx_properties['rabbitmq_cert_public']
-    rabbitmq_ssl_enabled = ctx_properties['rabbitmq_ssl_enabled']
-    rabbitmq_cert_private = ctx_properties['rabbitmq_cert_private']
 
     ctx.logger.info('Installing RabbitMQ...')
     utils.set_selinux_permissive()
@@ -137,26 +100,18 @@ def _install_rabbitmq():
 
     _clear_guest_permissions_if_guest_exists()
     _create_user_and_set_permissions(rabbitmq_username, rabbitmq_password)
-    _set_security(
-        rabbitmq_ssl_enabled,
-        rabbitmq_cert_private,
-        rabbitmq_cert_public)
+
+    utils.deploy_blueprint_resource(
+        '{0}/rabbitmq.config'.format(CONFIG_PATH),
+        '/etc/rabbitmq/rabbitmq.config',
+        RABBITMQ_SERVICE_NAME, user_resource=True)
 
     utils.systemd.stop(RABBITMQ_SERVICE_NAME, retries=5)
 
 
 def main():
-
-    rabbitmq_endpoint_ip = ctx_properties['rabbitmq_endpoint_ip']
-
-    if not rabbitmq_endpoint_ip:
-        broker_ip = ctx.instance.host_ip
-        _install_rabbitmq()
-    else:
-        ctx.logger.info('External RabbitMQ Endpoint provided: '
-                        '{0}...'.format(rabbitmq_endpoint_ip))
-        broker_ip = rabbitmq_endpoint_ip
-
+    broker_ip = ctx.instance.host_ip
+    _install_rabbitmq()
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = broker_ip
 
 

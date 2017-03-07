@@ -232,11 +232,9 @@ node_templates:
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: ssh_user }
-          broker_ip: { get_input: rabbitmq_endpoint_ip }
           broker_user: { get_input: rabbitmq_username }
           broker_pass: { get_input: rabbitmq_password }
-          broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
-          broker_ssl_cert: { get_input: rabbitmq_cert_public }
+          broker_ssl_enabled: true
           env:
             CFY_AZURE_CONFIG_PATH: { get_property: [SELF, cloudify, plugins, azure_config_path] }
 
@@ -398,7 +396,7 @@ node_templates:
             description: RabbitMQ access
             protocol: Tcp
             sourcePortRange: '*'
-            destinationPortRange: 5672
+            destinationPortRange: 5671
             sourceAddressPrefix: { get_input: subnet_private_cidr }
             destinationAddressPrefix: '*'
             priority: 400

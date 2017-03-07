@@ -19,7 +19,7 @@ if [ "z$status" == 'zactive' ]; then
     # port for internal rest communications
     sudo firewall-cmd --zone=public --add-port=53333/tcp --permanent
     # port for AQMP
-    sudo firewall-cmd --zone=public --add-port=5672/tcp --permanent
+    sudo firewall-cmd --zone=public --add-port=5671/tcp --permanent
     # port for diamond
     sudo firewall-cmd --zone=public --add-port=8100/tcp --permanent
 

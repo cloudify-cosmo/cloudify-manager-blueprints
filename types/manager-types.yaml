@@ -105,7 +105,6 @@ node_types:
           ssl:
             enabled: { get_input: ssl_enabled }
 
-          broker_ssl_cert_path: { get_input: broker_ssl_cert_path }
       use_existing_on_upgrade:
         description: Use existing manager configuration on upgrade
         type: string
@@ -203,10 +202,6 @@ node_types:
   manager.nodes.RabbitMQ:
     derived_from: cloudify.nodes.MessageBusServer
     properties:
-      rabbitmq_endpoint_ip:
-        description: Location of the endpoint.
-        type: string
-        default: { get_input: rabbitmq_endpoint_ip }
       erlang_rpm_source_url:
         description: Erlang RPM to install.
         type: string
@@ -245,18 +240,6 @@ node_types:
         description: RabbitMQ password for access to queues.
         type: string
         default: { get_input: rabbitmq_password }
-      rabbitmq_ssl_enabled:
-        description: Set whether SSL should be enabled for Rabbit.
-        type: boolean
-        default: { get_input: rabbitmq_ssl_enabled }
-      rabbitmq_cert_private:
-        description: PEM formatted private cert for rabbit SSL.
-        type: string
-        default: { get_input: rabbitmq_cert_private }
-      rabbitmq_cert_public:
-        description: PEM formatted public cert for rabbit SSL.
-        type: string
-        default: { get_input: rabbitmq_cert_public }
       use_existing_on_upgrade:
         description: Use existing rabbit configuration
         type: string
@@ -519,10 +502,6 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: cloudify_resources_url }
-      rabbitmq_endpoint_ip:
-        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
-        type: string
-        default: { get_input: rabbitmq_endpoint_ip }
       rabbitmq_username:
         description: RabbitMQ username for access to queues.
         type: string
@@ -583,18 +562,6 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: rest_service_source_url }
-      rabbitmq_endpoint_ip:
-        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
-        type: string
-        default: { get_input: rabbitmq_endpoint_ip }
-      rabbitmq_ssl_enabled:
-        description: Set whether SSL should be enabled for Rabbit.
-        type: boolean
-        default: { get_input: rabbitmq_ssl_enabled }
-      rabbitmq_cert_public:
-        description: PEM formatted public cert for rabbit SSL.
-        type: string
-        default: { get_input: rabbitmq_cert_public }
       rabbitmq_username:
         description: RabbitMQ username for access to queues.
         type: string
@@ -712,10 +679,6 @@ node_types:
         description: Agent module Source URL
         type: string
         default: { get_input: agent_source_url }
-      rabbitmq_endpoint_ip:
-        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
-        type: string
-        default: { get_input: rabbitmq_endpoint_ip }
       rabbitmq_username:
         description: RabbitMQ username for access to queues.
         type: string
@@ -724,14 +687,6 @@ node_types:
         description: RabbitMQ password for access to queues.
         type: string
         default: { get_input: rabbitmq_password }
-      rabbitmq_ssl_enabled:
-        description: Set whether SSL should be enabled for Rabbit.
-        type: boolean
-        default: { get_input: rabbitmq_ssl_enabled }
-      rabbitmq_cert_public:
-        description: PEM formatted public cert for rabbit SSL.
-        type: string
-        default: { get_input: rabbitmq_cert_public }
       log_level:
         description: Logging level for Celery worker.
         type: string
@@ -796,10 +751,6 @@ node_types:
         description: AMQP to InfluxDB Broker Source URL
         type: string
         default: { get_input: amqpinflux_source_url }
-      rabbitmq_endpoint_ip:
-        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
-        type: string
-        default: { get_input: rabbitmq_endpoint_ip }
       rabbitmq_username:
         description: RabbitMQ username for access to queues.
         type: string
@@ -808,14 +759,6 @@ node_types:
         description: RabbitMQ password for access to queues.
         type: string
         default: { get_input: rabbitmq_password }
-      rabbitmq_ssl_enabled:
-        description: Set whether SSL should be enabled for Rabbit.
-        type: boolean
-        default: { get_input: rabbitmq_ssl_enabled }
-      rabbitmq_cert_public:
-        description: RabbitMQ public certificate for SSL. SSL not used if this is an empty string.
-        type: string
-        default: { get_input: rabbitmq_cert_public }
       use_existing_on_upgrade:
         description: Use existing amqp influx configuration
         type: string

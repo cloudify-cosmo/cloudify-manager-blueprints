@@ -41,8 +41,7 @@ def install_riemann():
 
     rabbit_props = utils.ctx_factory.get('rabbitmq')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip(
-                rabbit_props.get('rabbitmq_endpoint_ip'))
+        utils.get_rabbitmq_endpoint_ip()
     ctx.instance.runtime_properties['rabbitmq_username'] = \
         rabbit_props.get('rabbitmq_username')
     ctx.instance.runtime_properties['rabbitmq_password'] = \

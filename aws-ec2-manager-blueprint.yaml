@@ -162,11 +162,9 @@ node_templates:
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: agents_user }
-          broker_ip: { get_input: rabbitmq_endpoint_ip }
           broker_user: { get_input: rabbitmq_username }
           broker_pass: { get_input: rabbitmq_password }
-          broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
-          broker_ssl_cert: { get_input: rabbitmq_cert_public }
+          broker_ssl_enabled: true
           env:
             AWS_CONFIG_PATH: { get_property: [SELF, cloudify, plugins, aws_config_path] }
 
@@ -267,8 +265,8 @@ node_templates:
           to_port: 443
           cidr_ip: 0.0.0.0/0
         - ip_protocol: tcp
-          from_port: 5672
-          to_port: 5672
+          from_port: 5671
+          to_port: 5671
           src_group_id: { get_property: [agents_security_group, resource_id] }
         - ip_protocol: tcp
           from_port: 53333
