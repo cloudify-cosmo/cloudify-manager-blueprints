@@ -45,6 +45,11 @@ UPGRADE_METADATA_FILE = '/opt/cloudify/upgrade_meta/metadata.json'
 AGENTS_ROLLBACK_PATH = '/opt/cloudify/manager-resources/agents_rollback'
 ES_UPGRADE_DUMP_PATH = '/tmp/es_upgrade_dump/'
 
+INTERNAL_CERT_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
+                                  INTERNAL_SSL_CERT_FILENAME)
+INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
+                                 INTERNAL_SSL_KEY_FILENAME)
+
 
 def retry(exception, tries=4, delay=3, backoff=2):
     """Retry calling the decorated function using an exponential backoff.

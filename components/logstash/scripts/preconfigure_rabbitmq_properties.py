@@ -8,7 +8,6 @@ def main():
     source = ctx.source.instance.runtime_properties
     target = ctx.target.node.properties
     props = [
-        'rabbitmq_endpoint_ip',
         'rabbitmq_username',
         'rabbitmq_password',
     ]

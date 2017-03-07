@@ -327,11 +327,9 @@ node_templates:
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: agents_user }
-          broker_ip: { get_input: rabbitmq_endpoint_ip }
           broker_user: { get_input: rabbitmq_username }
           broker_pass: { get_input: rabbitmq_password }
-          broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
-          broker_ssl_cert: { get_input: rabbitmq_cert_public }
+          broker_ssl_enabled: true
         workflows:
           task_retries: -1  # this means forever
           task_retry_interval: 30

@@ -20,10 +20,6 @@ inputs:
     type: boolean
     default: true
 
-  broker_ssl_cert_path:
-    description: Location of the broker certificate on the agent
-    default: ~/.cloudify/certs/broker.crt
-
   #################################
   # REST Configuration
   #################################
@@ -244,17 +240,6 @@ inputs:
   # RabbitMQ Inputs
   #############################
 
-  rabbitmq_endpoint_ip:
-    description: >
-      Location of the rabbit server. If blank, the manager IP will be used.
-      Note that if this is set, the external rabbit service must already exist with the appropriate
-      credentials and configuration.
-      If this is set, rabbit will not be installed on the manager. This may have security implications
-      if you are using SSL for rabbit as some normally internal (to the manager) traffic is not currently
-      encrypted.
-    type: string
-    default: ''
-
   rabbitmq_events_queue_message_ttl:
     description: >
       Sets the number of milliseconds to wait before a message expires
@@ -292,32 +277,6 @@ inputs:
       It is recommended that you set both the username and password to something reasonably secure.
     type: string
     default: c10udify
-
-  rabbitmq_ssl_enabled:
-    description: >
-      Whether SSL should be enabled for RabbitMQ. If this is set to true then the public and private
-      certs must be supplied (rabbitmq_cert_private, rabbitmq_cert_public inputs).
-    type: boolean
-    default: false
-
-  rabbitmq_cert_private:
-    description: >
-      The private certificate for RabbitMQ to use for SSL. This must be PEM formatted.
-      It is expected to begin with a line containing 'PRIVATE KEY' in the middle.
-      Not used if an external endpoint is used.
-    type: string
-    default: ''
-
-  rabbitmq_cert_public:
-    description: >
-      The public certificate for RabbitMQ to use for SSL. This does not need to be signed by any CA,
-      as it will be deployed and explicitly used for all other components.
-      It may be self-signed. It must be PEM formatted.
-      It is expected to begin with a line of dashes with 'BEGIN CERTIFICATE' in the middle.
-      If an external endpoint is used, this must be the public certificate associated with the private
-      certificate that has already been configured for use by that rabbit endpoint.
-    type: string
-    default: ''
 
   # note that for each of the queue length limit properties, new messages
   # will be queued in RabbitMQ and old messages will be deleted once the

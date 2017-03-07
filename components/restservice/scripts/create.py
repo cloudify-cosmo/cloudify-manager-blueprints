@@ -62,21 +62,12 @@ def install_optional(rest_venv):
 
 
 def deploy_broker_configuration():
-    # Set broker port for rabbit
-    broker_port_ssl = 5671
-    broker_port_no_ssl = 5672
-
     # injected as an input to the script
     rabbit_props = utils.ctx_factory.get('rabbitmq')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip(
-                rabbit_props.get('rabbitmq_endpoint_ip'))
+        utils.get_rabbitmq_endpoint_ip()
 
-    rabbitmq_ssl_enabled = rabbit_props['rabbitmq_ssl_enabled']
-    rabbitmq_cert_public = rabbit_props['rabbitmq_cert_public']
-
-    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = \
-        rabbitmq_ssl_enabled
+    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = True
     ctx.instance.runtime_properties['rabbitmq_username'] = \
         rabbit_props.get('rabbitmq_username')
     ctx.instance.runtime_properties['rabbitmq_password'] = \
@@ -90,19 +81,10 @@ def deploy_broker_configuration():
         postgresql_props.get('postgresql_host')
 
     # Add certificate and select port, as applicable
-    if rabbitmq_ssl_enabled:
-        broker_cert_path = os.path.join(REST_SERVICE_HOME, 'amqp_pub.pem')
-        utils.deploy_ssl_certificate(
-            'public', broker_cert_path, 'root', rabbitmq_cert_public)
-        ctx.instance.runtime_properties['broker_cert_path'] = broker_cert_path
-        # Use SSL port
-        ctx.instance.runtime_properties['broker_port'] = broker_port_ssl
-    else:
-        # No SSL, don't use SSL port
-        ctx.instance.runtime_properties['broker_port'] = broker_port_no_ssl
-        if rabbitmq_cert_public is not None:
-            ctx.logger.warn('Broker SSL cert supplied but SSL not enabled '
-                            '(broker_ssl_enabled is False).')
+    ctx.instance.runtime_properties['broker_cert_path'] = \
+        utils.INTERNAL_CERT_PATH
+    # Use SSL port
+    ctx.instance.runtime_properties['broker_port'] = 5671
 
 
 def _configure_dbus(rest_venv):

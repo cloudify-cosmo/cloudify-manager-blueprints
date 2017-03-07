@@ -49,8 +49,6 @@ def _configure_security_properties():
     security_config = ctx_properties['security']
     runtime_props = ctx.instance.runtime_properties
 
-    runtime_props['broker_ssl_cert_path'] = \
-        security_config['broker_ssl_cert_path']
     runtime_props['internal_rest_port'] = utils.INTERNAL_REST_PORT
 
     if security_config['ssl']['enabled']:

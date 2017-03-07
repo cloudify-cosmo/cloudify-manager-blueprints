@@ -212,11 +212,9 @@ node_templates:
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: agents_user }
-          broker_ip: { get_input: rabbitmq_endpoint_ip }
           broker_user: { get_input: rabbitmq_username }
           broker_pass: { get_input: rabbitmq_password }
-          broker_ssl_enabled: { get_input: rabbitmq_ssl_enabled }
-          broker_ssl_cert: { get_input: rabbitmq_cert_public }
+          broker_ssl_enabled: true
           env:
             OPENSTACK_CONFIG_PATH: { get_property: [SELF, cloudify, plugins, openstack_config_path] }
 
@@ -372,7 +370,7 @@ node_templates:
           remote_ip_prefix: 0.0.0.0/0
         - port: 22
           remote_ip_prefix: 0.0.0.0/0
-        - port: 5672
+        - port: 5671
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }
         - port: 53333
           remote_ip_prefix: { get_property: [management_subnet, subnet, cidr] }

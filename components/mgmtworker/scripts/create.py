@@ -70,16 +70,8 @@ def install_mgmtworker():
     celery_work_dir = '{0}/work'.format(mgmtworker_home)
     celery_log_dir = "/var/log/cloudify/mgmtworker"
 
-    broker_port_ssl = '5671'
-    broker_port_no_ssl = '5672'
-    rabbit_props = utils.ctx_factory.get('rabbitmq')
-    rabbitmq_ssl_enabled = rabbit_props['rabbitmq_ssl_enabled']
-    ctx.logger.info("rabbitmq_ssl_enabled: {0}".format(rabbitmq_ssl_enabled))
-    rabbitmq_cert_public = rabbit_props['rabbitmq_cert_public']
-
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip(
-                rabbit_props.get('rabbitmq_endpoint_ip'))
+        utils.get_rabbitmq_endpoint_ip()
 
     # Fix possible injections in json of rabbit credentials
     # See json.org for string spec
@@ -94,8 +86,7 @@ def install_mgmtworker():
     # Make the ssl enabled flag work with json (boolean in lower case)
     # TODO: check if still needed:
     # broker_ssl_enabled = "$(echo ${rabbitmq_ssl_enabled} | tr '[:upper:]' '[:lower:]')"  # NOQA
-    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = \
-        rabbitmq_ssl_enabled
+    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = True
 
     ctx.logger.info('Installing Management Worker...')
     utils.set_selinux_permissive()
@@ -113,19 +104,10 @@ def install_mgmtworker():
     _install_optional(mgmtworker_venv)
 
     # Add certificate and select port, as applicable
-    if rabbitmq_ssl_enabled:
-        broker_cert_path = '{0}/amqp_pub.pem'.format(mgmtworker_home)
-        utils.deploy_ssl_certificate(
-            'public', broker_cert_path, 'root', rabbitmq_cert_public)
-        ctx.instance.runtime_properties['broker_cert_path'] = broker_cert_path
-        # Use SSL port
-        ctx.instance.runtime_properties['broker_port'] = broker_port_ssl
-    else:
-        # No SSL, don't use SSL port
-        ctx.instance.runtime_properties['broker_port'] = broker_port_no_ssl
-        if rabbitmq_cert_public is not None:
-            ctx.logger.warn('Broker SSL cert supplied but SSL not enabled '
-                            '(broker_ssl_enabled is False).')
+    ctx.instance.runtime_properties['broker_cert_path'] = \
+        utils.INTERNAL_CERT_PATH
+    # Use SSL port
+    ctx.instance.runtime_properties['broker_port'] = '5671'
 
     ctx.logger.info("broker_port: {0}".format(
         ctx.instance.runtime_properties['broker_port']))

@@ -72,9 +72,6 @@ client_secret: ''
 
 #insecure_endpoints_disabled: true
 
-# Default locations for certificates on agents
-#broker_ssl_cert_path: '~/.cloudify/certs/broker.crt'
-
 #############################
 # Bootstrap Validations
 #############################
@@ -184,24 +181,7 @@ client_secret: ''
 #rabbitmq_username: 'cloudify'
 #rabbitmq_password: 'c10udify'
 
-# Enable SSL for RabbitMQ. If this is set to true then the public and private
-# certs must be supplied (`rabbitmq_cert_private`, `rabbitmq_cert_public` inputs).
-#rabbitmq_ssl_enabled: false
-
-# The private certificate for RabbitMQ to use for SSL. This must be PEM formatted.
-# It is expected to begin with a line containing 'PRIVATE KEY' in the middle.
-#rabbitmq_cert_private: ''
-
-# The public certificate for RabbitMQ to use for SSL. This does not need to be signed by any CA,
-# as it will be deployed and explicitly used for all other components.
-# It may be self-signed. It must be PEM formatted.
-# It is expected to begin with a line of dashes with 'BEGIN CERTIFICATE' in the middle.
-# If an external endpoint is used, this must be the public certificate associated with the private
-# certificate that has already been configured for use by that rabbit endpoint.
-#rabbitmq_cert_public: ''
-
 # Allows to define the message-ttl for the different types of queues (in milliseconds).
-# These are not used if `rabbitmq_endpoint_ip` is provided.
 # https://www.rabbitmq.com/ttl.html
 #rabbitmq_events_queue_message_ttl: 60000
 #rabbitmq_logs_queue_message_ttl: 60000
@@ -210,7 +190,6 @@ client_secret: ''
 # This will set the queue length limit. Note that while new messages
 # will be queued in RabbitMQ, old messages will be deleted once the
 # limit is reached!
-# These are not used if `rabbitmq_endpoint_ip` is provided.
 # Note this is NOT the message byte length!
 # https://www.rabbitmq.com/maxlength.html
 #rabbitmq_events_queue_length_limit: 1000000
@@ -219,14 +198,6 @@ client_secret: ''
 
 # RabbitMQ File Descriptors Limit
 #rabbitmq_fd_limit: 102400
-
-# You can configure an external endpoint of a RabbitMQ Cluster to use
-# instead of the built in one.
-# If one is provided, the built in RabbitMQ cluster will not run.
-# Also note that your external cluster must be preconfigured with any
-# user name/pass and SSL certs if you plan on using RabbitMQ's security
-# features.
-#rabbitmq_endpoint_ip: ''
 
 #############################
 # PostgreSQL Configuration

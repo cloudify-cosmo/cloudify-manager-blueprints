@@ -26,23 +26,6 @@ def _install_optional(amqpinflux_venv):
         utils.install_python_package(amqpinflux_source_url, amqpinflux_venv)
 
 
-def _deploy_broker_configuration(amqpinflux_group):
-    rabbit_props = utils.ctx_factory.get('rabbitmq')
-    rabbitmq_cert_enabled = rabbit_props['rabbitmq_ssl_enabled']
-    rabbitmq_cert_public = rabbit_props['rabbitmq_cert_public']
-
-    if rabbitmq_cert_enabled:
-        broker_cert_path = os.path.join(AMQPINFLUX_HOME, 'amqp_pub.pem')
-        # If no certificate was supplied, the deploy function will raise
-        # an error.
-        utils.deploy_ssl_certificate(
-            'public', broker_cert_path, amqpinflux_group, rabbitmq_cert_public)
-        ctx.instance.runtime_properties['broker_cert_path'] = broker_cert_path
-    elif rabbitmq_cert_public is not None:
-        ctx.logger.warn('Broker SSL cert supplied but SSL not enabled '
-                        '(broker_ssl_enabled is False).')
-
-
 def install_amqpinflux():
 
     amqpinflux_rpm_source_url = \
@@ -53,14 +36,12 @@ def install_amqpinflux():
         os.environ['INFLUXDB_ENDPOINT_IP']
     rabbit_props = utils.ctx_factory.get('rabbitmq')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip(
-            rabbit_props.get('rabbitmq_endpoint_ip'))
+        utils.get_rabbitmq_endpoint_ip()
     ctx.instance.runtime_properties['rabbitmq_username'] = \
         rabbit_props.get('rabbitmq_username')
     ctx.instance.runtime_properties['rabbitmq_password'] = \
         rabbit_props.get('rabbitmq_password')
-    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = \
-        rabbit_props.get('rabbitmq_ssl_enabled')
+    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = True
 
     amqpinflux_user = 'amqpinflux'
     amqpinflux_group = 'amqpinflux'
@@ -78,7 +59,8 @@ def install_amqpinflux():
 
     ctx.logger.info('Configuring AMQPInflux...')
     utils.create_service_user(amqpinflux_user, AMQPINFLUX_HOME)
-    _deploy_broker_configuration(amqpinflux_group)
+    ctx.instance.runtime_properties['broker_cert_path'] = \
+        utils.INTERNAL_CERT_PATH
     utils.chown(amqpinflux_user, amqpinflux_group, AMQPINFLUX_HOME)
     utils.systemd.configure(AMQPINFLUX_SERVICE_NAME)
 
