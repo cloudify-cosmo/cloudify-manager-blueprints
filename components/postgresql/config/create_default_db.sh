@@ -9,6 +9,7 @@ if [ $# -lt 3 ]; then
 fi
 
 db_name=$1
+stage_db_name="stage"
 user=$2
 password=$3
 
@@ -40,6 +41,15 @@ function create_admin_user() {
     run_psql "ALTER DATABASE $db OWNER TO $user;"
 }
 
+function create_stage_database() {
+    db=$1
+    user=$2
+    run_psql "CREATE DATABASE $db"
+    run_psql "GRANT ALL PRIVILEGES ON DATABASE $db TO $user;"
+    run_psql "ALTER DATABASE $db OWNER TO $user;"
+}
+
 clean_database_and_user ${db_name} ${user}
 create_database ${db_name}
 create_admin_user ${db_name} ${user} ${password}
+create_stage_database ${stage_db_name} ${user}
