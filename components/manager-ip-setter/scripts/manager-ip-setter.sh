@@ -17,7 +17,7 @@ function set_manager_ip() {
 
   echo "Updating cloudify-mgmtworker.."
   /usr/bin/sed -i -e "s/REST_HOST=.*/REST_HOST="'"'"${ip}"'"'"/" /etc/sysconfig/cloudify-mgmtworker
-  /usr/bin/sed -i -e "s#MANAGER_FILE_SERVER_URL="'"'"http://.*:53333/resources"'"'"#MANAGER_FILE_SERVER_URL="'"'"http://${ip}:53333/resources"'"'"#" /etc/sysconfig/cloudify-mgmtworker
+  /usr/bin/sed -i -e "s#MANAGER_FILE_SERVER_URL="'"'"https://.*:53333/resources"'"'"#MANAGER_FILE_SERVER_URL="'"'"https://${ip}:53333/resources"'"'"#" /etc/sysconfig/cloudify-mgmtworker
 
   echo "Updating broker_config.json.."
   /usr/bin/sed -i -e "s/"'"'"broker_hostname"'"'": "'"'".*"'"'"/"'"'"broker_hostname"'"'": "'"'"${ip}"'"'"/" /opt/mgmtworker/work/broker_config.json
