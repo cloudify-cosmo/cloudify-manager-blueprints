@@ -128,8 +128,8 @@ node_templates:
           broker_ssl_enabled: true
 
         workflows:
-          task_retries: -1  # this means forever
-          task_retry_interval: 30
+          task_retries: { get_input: workflow_task_retries }
+          task_retry_interval: { get_input: workflow_task_retry_interval }
 
         policy_engine:
           start_timeout: 30
