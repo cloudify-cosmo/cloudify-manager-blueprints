@@ -18,7 +18,7 @@ ctx_properties = utils.ctx_factory.create(CONSUL_SERVICE_NAME)
 
 
 def install_consul():
-    consul_binary = '/opt/cloudify/consul/consul'
+    consul_binary = '/opt/consul/consul'
     consul_config_dir = '/etc/consul.d'
 
     utils.mkdir(dirname(consul_binary))
