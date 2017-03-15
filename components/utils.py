@@ -277,7 +277,7 @@ def deploy_or_generate_external_ssl_cert(ip):
         )
         return cert_target_path, key_target_path
     except Exception as e:
-        if "No such file or directory" in str(e):
+        if "No such file or directory" in e.stderr:
             # pre-existing cert not found, generating new cert
             ctx.logger.info(
                 'Generating SSL certificate `{0}` and SSL private '
