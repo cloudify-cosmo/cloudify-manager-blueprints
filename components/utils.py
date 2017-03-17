@@ -30,6 +30,7 @@ AGENT_ARCHIVES_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
 SSL_CERTS_TARGET_DIR = '/etc/cloudify/ssl'
 INTERNAL_SSL_CERT_FILENAME = 'cloudify_internal_cert.pem'
 INTERNAL_SSL_KEY_FILENAME = 'cloudify_internal_key.pem'
+INTERNAL_PKCS12_FILENAME = 'cloudify_internal.p12'
 INTERNAL_REST_PORT = 53333
 
 EXTERNAL_SSL_CERTS_SOURCE_DIR = 'resources/ssl'
@@ -197,7 +198,10 @@ def remove(path, ignore_failure=False):
             'Path does not exist: {0}. Skipping...'.format(path))
 
 
-def _generate_ssl_certificate(cert_filename, key_filename, ip):
+def _generate_ssl_certificate(ip,
+                              cert_filename,
+                              key_filename,
+                              pkcs12_filename=None):
     """Generate a public SSL certificate and a private SSL key
 
     :return: The path to the cert and key files on the manager
@@ -215,7 +219,7 @@ x509_extensions=SAN
 [ req_distinguished_name ]
 commonName={ip}
 [SAN]
-subjectAltName=IP:{ip},DNS:{ip}
+subjectAltName=IP:{ip},DNS:{ip},IP:127.0.0.1,DNS:127.0.0.1,DNS:localhost
 """.format(ip=ip))
 
     sudo([
@@ -224,6 +228,21 @@ subjectAltName=IP:{ip},DNS:{ip}
         '-days', '36500', '-batch', '-nodes', '-subj',
         '/CN={0}'.format(ip), '-config', conf_file.name
     ])
+    # PKCS12 file required for riemann due to JVM
+    # While we don't really want the private key in there, not having it
+    # causes failures
+    # The password is also a bit pointless here since it's in the same place
+    # as a readable copy of the certificate and if this path can be written to
+    # maliciously then all is lost already.
+    if pkcs12_filename:
+        pkcs12_path = os.path.join(SSL_CERTS_TARGET_DIR, pkcs12_filename)
+        sudo([
+            'openssl', 'pkcs12', '-export',
+            '-out', pkcs12_path,
+            '-in', cert_path,
+            '-inkey', key_path,
+            '-password', 'pass:cloudify',
+        ])
     ctx.logger.info('Generated SSL certificate: {0} and key: {1}'.format(
         cert_filename, key_filename
     ))
@@ -233,9 +252,10 @@ subjectAltName=IP:{ip},DNS:{ip}
 
 def generate_internal_ssl_cert(ip):
     return _generate_ssl_certificate(
+        ip,
         INTERNAL_SSL_CERT_FILENAME,
         INTERNAL_SSL_KEY_FILENAME,
-        ip
+        INTERNAL_PKCS12_FILENAME,
     )
 
 
@@ -287,9 +307,9 @@ def deploy_or_generate_external_ssl_cert(ip):
                 )
             )
             return _generate_ssl_certificate(
+                ip,
                 EXTERNAL_SSL_CERT_FILENAME,
                 EXTERNAL_SSL_KEY_FILENAME,
-                ip
             )
         else:
             raise
