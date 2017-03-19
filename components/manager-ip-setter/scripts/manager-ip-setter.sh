@@ -26,7 +26,7 @@ function set_manager_ip() {
   /opt/cloudify/manager-ip-setter/update-provider-context.py ${ip}
 
   echo "Creating internal SSL certificates.."
-  /opt/cfy/embedded/bin/python /opt/cloudify/manager-ip-setter/create-internal-ssl-certs.py ${ip}
+  /opt/cloudify/manager-ip-setter/create-internal-ssl-certs.py ${ip}
   
   echo "Restarting nginx.."
   systemctl restart nginx
