@@ -16,6 +16,7 @@ REST_RESOURCES_PATH = 'resources/rest'
 # TODO: change to /opt/cloudify-rest-service
 REST_SERVICE_HOME = '/opt/manager'
 REST_SERVICE_NAME = 'restservice'
+CLOUDIFY_AGENT_DIR = 'cloudify_agent'
 
 ctx_properties = utils.ctx_factory.create(REST_SERVICE_NAME)
 
@@ -114,6 +115,7 @@ def install_restservice():
 
     rest_venv = os.path.join(REST_SERVICE_HOME, 'env')
     rest_service_log_path = '/var/log/cloudify/rest'
+    agent_dir = os.path.join(utils.MANAGER_RESOURCES_HOME, CLOUDIFY_AGENT_DIR)
 
     ctx.logger.info('Installing REST Service...')
     utils.set_selinux_permissive()
@@ -122,6 +124,7 @@ def install_restservice():
     utils.mkdir(REST_SERVICE_HOME)
     utils.mkdir(rest_service_log_path)
     utils.mkdir(utils.MANAGER_RESOURCES_HOME)
+    utils.mkdir(agent_dir)
 
     deploy_broker_configuration()
     utils.yum_install(rest_service_rpm_source_url,
