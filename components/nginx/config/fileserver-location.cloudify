@@ -4,6 +4,11 @@ location / {
     auth_request /auth;
     allow             all;
     deny              all;
+
+    # A special location that doesn't require authentication for agents upgrade
+    location /cloudify_agent {
+        auth_request off;
+    }
 }
 
 location /auth {

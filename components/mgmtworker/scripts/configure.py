@@ -38,6 +38,9 @@ def configure_mgmtworker():
     mgmtworker_venv = '{0}/env'.format(mgmtworker_home)
     celery_work_dir = '{0}/work'.format(mgmtworker_home)
 
+    ctx.instance.runtime_properties['file_server_root'] = \
+        utils.MANAGER_RESOURCES_HOME
+
     ctx.logger.info('Configuring Management worker...')
     # Deploy the broker configuration
     # TODO: This will break interestingly if mgmtworker_venv is empty.
