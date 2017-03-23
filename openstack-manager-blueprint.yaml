@@ -321,7 +321,7 @@ node_templates:
       openstack_config: *openstack_configuration
       resource_id: { get_input: manager_port_name }
     relationships:
-      - type: cloudify.relationships.contained_in
+      - type: cloudify.relationships.connected_to
         target: management_network
       - type: cloudify.relationships.depends_on
         target: management_subnet
