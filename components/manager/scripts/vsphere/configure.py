@@ -13,10 +13,12 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
-import tempfile
 import json
+from os.path import split
+from StringIO import StringIO
+from warnings import warn
 
-import fabric
+from fabric.api import put, sudo
 
 import vsphere_plugin_common
 
@@ -26,8 +28,25 @@ def configure(vsphere_config):
 
 
 def _copy_vsphere_configuration_to_manager(vsphere_config):
-    tmp = tempfile.mktemp()
-    with open(tmp, 'w') as f:
-        json.dump(vsphere_config, f)
-    fabric.api.put(tmp,
-                   vsphere_plugin_common.Config.CONNECTION_CONFIG_PATH_DEFAULT)
+    if hasattr(vsphere_plugin_common, 'DEFAULT_CONFIG_PATH'):
+        conf_path = vsphere_plugin_common.DEFAULT_CONFIG_PATH
+    else:
+        # Maintaining compatibility with pre-2.3.0 vsphere plugin.
+        conf_path = vsphere_plugin_common.Config.CONNECTION_CONFIG_PATH_DEFAULT
+    conf_dir, conf_name = split(conf_path)
+    conf_file = StringIO(json.dumps(vsphere_config))
+    sudo('mkdir -p "{}"'.format(conf_dir))
+    if '/etc/cloudify/vsphere_plugin' in conf_path:
+        sudo('chmod 750 /etc/cloudify')
+        sudo('chmod 750 /etc/cloudify/vsphere_plugin')
+    else:
+        warn(
+            "this script expects the connection_config to be located in "
+            "/etc/cloudify/vsphere_plugin and it isn't. You may need to "
+            "fix the file permissions manually.",
+            RuntimeWarning)
+    put(conf_file,
+        conf_path,
+        mode=0o640,
+        use_sudo=True,
+        )
