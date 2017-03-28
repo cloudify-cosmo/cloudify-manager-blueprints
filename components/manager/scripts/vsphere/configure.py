@@ -28,7 +28,11 @@ def configure(vsphere_config):
 
 
 def _copy_vsphere_configuration_to_manager(vsphere_config):
-    conf_path = vsphere_plugin_common.Config.CONNECTION_CONFIG_PATH_DEFAULT
+    if hasattr(vsphere_plugin_common, 'DEFAULT_CONFIG_PATH'):
+        conf_path = vsphere_plugin_common.DEFAULT_CONFIG_PATH
+    else:
+        # Maintaining compatibility with pre-2.3.0 vsphere plugin.
+        conf_path = vsphere_plugin_common.Config.CONNECTION_CONFIG_PATH_DEFAULT
     conf_dir, conf_name = split(conf_path)
     conf_file = StringIO(json.dumps(vsphere_config))
     sudo('mkdir -p "{}"'.format(conf_dir))
