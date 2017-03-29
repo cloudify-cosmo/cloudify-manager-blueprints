@@ -91,8 +91,20 @@ inputs:
     default: cloudify-management-network
     type: string
 
+  use_existing_management_network:
+    default: false
+    type: boolean
+
   management_subnet_name:
     default: cloudify-management-network-subnet
+    type: string
+
+  use_existing_management_subnet:
+    default: false
+    type: boolean
+
+  management_subnet_cidr:
+    default: 172.16.0.0/16
     type: string
 
   management_subnet_dns_nameservers:
@@ -102,13 +114,25 @@ inputs:
     default: cloudify-management-router
     type: string
 
+  use_existing_management_router:
+    default: false
+    type: boolean
+
   manager_security_group_name:
     default: cloudify-sg-manager
     type: string
 
+  use_existing_management_security_group:
+    default: false
+    type: boolean
+
   agents_security_group_name:
     default: cloudify-sg-agents
     type: string
+
+  use_existing_agents_security_group:
+    default: false
+    type: boolean
 
   manager_port_name:
     default: cloudify-manager-port
@@ -741,16 +765,18 @@ node_templates:
   management_network:
     type: cloudify.openstack.nodes.Network
     properties:
+      use_external_resource: { get_input: use_existing_management_network }
       resource_id: { get_input: management_network_name }
       openstack_config: *openstack_configuration
 
   management_subnet:
     type: cloudify.openstack.nodes.Subnet
     properties:
+      use_external_resource: { get_input: use_existing_management_subnet }
       resource_id: { get_input: management_subnet_name }
       subnet:
         ip_version: 4
-        cidr: 172.16.0.0/16
+        cidr: { get_input: management_subnet_cidr }
         dns_nameservers: { get_input: management_subnet_dns_nameservers }
       openstack_config: *openstack_configuration
     relationships:
@@ -775,6 +801,7 @@ node_templates:
   router:
     type: cloudify.openstack.nodes.Router
     properties:
+      use_external_resource: { get_input: use_existing_management_router }
       resource_id: { get_input: management_router }
       openstack_config: *openstack_configuration
     relationships:
@@ -791,6 +818,7 @@ node_templates:
   agents_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
     properties:
+      use_external_resource: { get_input: use_existing_agents_security_group }
       resource_id: { get_input: agents_security_group_name }
       security_group:
         description: Security group for Cloudify agent VMs
@@ -804,6 +832,7 @@ node_templates:
   management_security_group:
     type: cloudify.openstack.nodes.SecurityGroup
     properties:
+      use_external_resource: { get_input: use_existing_management_security_group }
       resource_id: { get_input: manager_security_group_name }
       security_group:
         description: Security group for Cloudify Manager VM
