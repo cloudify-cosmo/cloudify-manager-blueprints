@@ -43,10 +43,15 @@ external_network_name: ''
 # Names of the openstack components
 #manager_server_name: cloudify-manager-server
 #management_network_name: cloudify-management-network
+#use_existing_management_network: false
 #management_subnet_name: cloudify-management-network-subnet
+#use_existing_management_subnet: false
 #management_router: cloudify-management-router
+#use_existing_management_router: false
 #manager_security_group_name: cloudify-sg-manager
+#use_existing_management_security_group: false
 #agents_security_group_name: cloudify-sg-agents
+#use_existing_agents_security_group: false
 #manager_port_name: cloudify-manager-port
 
 # DNS entries to add to subnet. Defaults to none.
