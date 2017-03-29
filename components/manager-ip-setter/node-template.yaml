@@ -5,3 +5,5 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
