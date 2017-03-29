@@ -11,7 +11,7 @@ import utils  # NOQA
 
 STAGE_SERVICE_NAME = 'stage'
 
-if [ ctx.instance.runtime_properties['ignore_ui'] != 'True' ];then
+ignore_ui = ctx.instance.runtime_properties['ignore_ui']
+if ignore_ui != 'True':
     ctx.logger.info('Starting Stage (UI) Service...')
     utils.start_service(STAGE_SERVICE_NAME)
-fi

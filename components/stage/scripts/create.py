@@ -22,10 +22,12 @@ def install_stage():
 
     nodejs_source_url = ctx_properties['nodejs_tar_source_url']
     stage_source_url = ctx_properties['stage_tar_source_url']
-    if [ -z "$stage_source_url" ]; then
-        ctx.instance.runtime_properties['ignore_ui']='True'
-    fi
-    if [ ctx.instance.runtime_properties['ignore_ui'] != 'True' ];then
+
+    if not stage_source_url:
+        ctx.instance.runtime_properties['ignore_ui'] = 'True'
+
+    ignore_ui = ctx.instance.runtime_properties['ignore_ui']
+    if ignore_ui != 'True':
         # injected as an input to the script
         ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
             os.environ.get('INFLUXDB_ENDPOINT_IP')
@@ -64,7 +66,7 @@ def install_stage():
 
         utils.logrotate(STAGE_SERVICE_NAME)
         utils.systemd.configure(STAGE_SERVICE_NAME)
-    fi
+
 
 def main():
     install_stage()
