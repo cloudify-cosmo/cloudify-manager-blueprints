@@ -405,7 +405,7 @@ def get_file_name_from_url(url):
         return os.path.basename(disassembled.path)
 
 
-def download_cloudify_resource(url, service_name, destination=None):
+def download_cloudify_resource(url, service_name, destination=None, avoid_exception=None):
     """Downloads a resource and saves it as a cloudify resource.
 
     The resource will be saved under the appropriate service resource path and
@@ -425,7 +425,10 @@ def download_cloudify_resource(url, service_name, destination=None):
                                                      service_name,
                                                      source_resource=True,
                                                      render=False)
-    return source_res_path
+    if avoid_exception:
+        return None
+    else:
+        return source_res_path
 
 
 def deploy_blueprint_resource(source, destination, service_name,

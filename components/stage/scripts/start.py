@@ -13,6 +13,6 @@ STAGE_SERVICE_NAME = 'stage'
 
 ignore_ui = ctx.instance.runtime_properties['ignore_ui']
 print "ignore_ui={0}".format(ignore_ui)
-if not ignore_ui:
+if ignore_ui != 'True':
     ctx.logger.info('Starting Stage (UI) Service...')
     utils.start_service(STAGE_SERVICE_NAME)

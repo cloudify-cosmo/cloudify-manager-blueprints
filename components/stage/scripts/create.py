@@ -23,6 +23,7 @@ def install_stage():
     nodejs_source_url = ctx_properties['nodejs_tar_source_url']
     stage_source_url = ctx_properties['stage_tar_source_url']
     print "stage_source_url={0}".format(stage_source_url)
+    ctx.instance.runtime_properties['ignore_ui'] = 'False'
 
     # injected as an input to the script
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
@@ -43,16 +44,18 @@ def install_stage():
     utils.mkdir(stage_home)
     utils.mkdir(stage_log_path)
 
-    utils.create_service_user(stage_user, stage_home)
-    try:
-        ctx.logger.info('Installing Cloudify Stage (UI)...')
-        stage = utils.download_cloudify_resource(
-                stage_source_url, STAGE_SERVICE_NAME)
-    except Exception:
-        ctx.instance.runtime_properties['ignore_ui'] = True
+    ctx.logger.info('Installing Cloudify Stage (UI)...')
+    stage = utils.download_cloudify_resource(
+            stage_source_url, STAGE_SERVICE_NAME, avoid_exception=True)
+    if not stage:
+        ctx.instance.runtime_properties['ignore_ui'] = 'True'
+        print "***ignore ui***"
     ignore_ui = ctx.instance.runtime_properties['ignore_ui']
+    print ctx.instance.runtime_properties['ignore_ui'].__class__
     print "ignore_ui={0}".format(ignore_ui)
-    if not ignore_ui:
+    if ignore_ui != 'True':
+        print "**inside if**"
+        utils.create_service_user(stage_user, stage_home)
         ctx.logger.info('Installing NodeJS...')
         nodejs = utils.download_cloudify_resource(nodejs_source_url,
                                                   STAGE_SERVICE_NAME)
