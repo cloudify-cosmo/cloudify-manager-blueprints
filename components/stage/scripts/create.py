@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import sys
 from os.path import join, dirname
 
 from cloudify import ctx

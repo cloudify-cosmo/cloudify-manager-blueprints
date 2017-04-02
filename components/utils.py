@@ -576,8 +576,8 @@ def get_filepath_from_pkg_name(filename):
             ctx.instance.runtime_properties['ignore_ui'] = True
             sys.exit(0)
         else:
-            ctx.abort_operation("File: {0} does not exist in sources path: {1}".
-                                format(filename, CLOUDIFY_SOURCES_PATH))
+            ctx.abort_operation("File: {0} does not exist in sources path: "
+                                "{1}".format(filename, CLOUDIFY_SOURCES_PATH))
     if len(local_filepath_list) > 1:
         ctx.abort_operation("More than one file: {0} found in sources path:"
                             " {1}".format(filename, CLOUDIFY_SOURCES_PATH))
