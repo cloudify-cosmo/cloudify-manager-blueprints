@@ -3,7 +3,6 @@
 import re
 import os
 import pwd
-import sys
 import time
 import glob
 import json
@@ -1195,11 +1194,6 @@ class BlueprintResourceFactory(object):
                                     'file://'))
         filename = get_file_name_from_url(source) if is_url else source
 
-        is_stage_package = filename.startswith('cloudify-stage')
-        is_community_manager_package = filename.startswith(SINGLE_TAR_PREFIX) and filename.endswith('community.tar.gz')
-        if is_community_manager_package and is_stage_package:
-            print "this is stage package: {0}".format(filename)
-            sys.exit(0)
         is_manager_package = filename.startswith(SINGLE_TAR_PREFIX)
         if is_manager_package:
             local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
