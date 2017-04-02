@@ -44,18 +44,19 @@ def install_stage():
     utils.mkdir(stage_log_path)
 
     utils.create_service_user(stage_user, stage_home)
-
-    ctx.logger.info('Installing NodeJS...')
-    nodejs = utils.download_cloudify_resource(nodejs_source_url,
-                                              STAGE_SERVICE_NAME)
-    utils.untar(nodejs, nodejs_home)
-
-    ctx.logger.info('Installing Cloudify Stage (UI)...')
-    stage = utils.download_cloudify_resource(stage_source_url,
-                                             STAGE_SERVICE_NAME)
+    try:
+        ctx.logger.info('Installing Cloudify Stage (UI)...')
+        stage = utils.download_cloudify_resource(stage_source_url,
+                                                STAGE_SERVICE_NAME)
+    except Exception:
+        ctx.instance.runtime_properties['ignore_ui'] = True
     ignore_ui = ctx.instance.runtime_properties['ignore_ui']
     print "ignore_ui={0}".format(ignore_ui)
     if not ignore_ui:
+        ctx.logger.info('Installing NodeJS...')
+        nodejs = utils.download_cloudify_resource(nodejs_source_url,
+                                                STAGE_SERVICE_NAME)
+        utils.untar(nodejs, nodejs_home)
         utils.untar(stage, stage_home)
         ctx.logger.info('Fixing permissions...')
         utils.chown(stage_user, stage_group, stage_home)
