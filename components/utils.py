@@ -3,6 +3,7 @@
 import re
 import os
 import pwd
+import sys
 import time
 import glob
 import json
@@ -564,12 +565,19 @@ def yum_install(source, service_name):
 
 
 def get_filepath_from_pkg_name(filename):
+    if "cloudify-stage" in filename:
+        ctx.instance.runtime_properties['ignore_ui'] = False
+
     local_filepath_list = \
         [fn for fn in glob.glob(os.path.join(CLOUDIFY_SOURCES_PATH, filename))
          if not os.path.basename(fn).startswith(SINGLE_TAR_PREFIX)]
     if not local_filepath_list:
-        ctx.abort_operation("File: {0} does not exist in sources path: {1}".
-                            format(filename, CLOUDIFY_SOURCES_PATH))
+        if "cloudify-stage" in filename:
+            ctx.instance.runtime_properties['ignore_ui'] = True
+            sys.exit(0)
+        else:
+            ctx.abort_operation("File: {0} does not exist in sources path: {1}".
+                                format(filename, CLOUDIFY_SOURCES_PATH))
     if len(local_filepath_list) > 1:
         ctx.abort_operation("More than one file: {0} found in sources path:"
                             " {1}".format(filename, CLOUDIFY_SOURCES_PATH))
