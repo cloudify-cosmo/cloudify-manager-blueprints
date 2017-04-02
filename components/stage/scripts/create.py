@@ -46,8 +46,8 @@ def install_stage():
     utils.create_service_user(stage_user, stage_home)
     try:
         ctx.logger.info('Installing Cloudify Stage (UI)...')
-        stage = utils.download_cloudify_resource(stage_source_url,
-                                                STAGE_SERVICE_NAME)
+        stage = utils.download_cloudify_resource(
+                stage_source_url, STAGE_SERVICE_NAME)
     except Exception:
         ctx.instance.runtime_properties['ignore_ui'] = True
     ignore_ui = ctx.instance.runtime_properties['ignore_ui']
@@ -55,7 +55,7 @@ def install_stage():
     if not ignore_ui:
         ctx.logger.info('Installing NodeJS...')
         nodejs = utils.download_cloudify_resource(nodejs_source_url,
-                                                STAGE_SERVICE_NAME)
+                                                  STAGE_SERVICE_NAME)
         utils.untar(nodejs, nodejs_home)
         utils.untar(stage, stage_home)
         ctx.logger.info('Fixing permissions...')
