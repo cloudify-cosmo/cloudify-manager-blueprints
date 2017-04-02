@@ -54,6 +54,7 @@ INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
 
 def retry(exception, tries=4, delay=3, backoff=2):
     """Retry calling the decorated function using an exponential backoff.
+
     http://www.saltycrane.com/blog/2009/11/trying-out-retry-decorator-python/
     original from: http://wiki.python.org/moin/PythonDecoratorLibrary#Retry
     """
@@ -202,6 +203,7 @@ def _generate_ssl_certificate(ip,
                               key_filename,
                               pkcs12_filename=None):
     """Generate a public SSL certificate and a private SSL key
+
     :return: The path to the cert and key files on the manager
     """
     mkdir(SSL_CERTS_TARGET_DIR)
@@ -347,11 +349,13 @@ def get_file_content(file_path):
 
 def curl_download_with_retries(source, destination):
     """Download file using the curl command.
+
     :param source: Source URL for the file to download
     :typ source: str
     :param destination:
         Path to the directory where the file should be downloaded
     :type destination: str
+
     """
     curl_cmd = [
         'curl',
@@ -403,6 +407,7 @@ def get_file_name_from_url(url):
 
 def download_cloudify_resource(url, service_name, destination=None):
     """Downloads a resource and saves it as a cloudify resource.
+
     The resource will be saved under the appropriate service resource path and
     will be used in case of operation execution failure after the resource has
     already been downloaded.
@@ -495,18 +500,22 @@ def wait_for_port(port, host='localhost'):
 
 def yum_install(source, service_name):
     """Installs a package using yum.
+
     yum supports installing from URL, path and the default yum repo
     configured within your image.
     you can specify one of the following:
     [yum install -y] mylocalfile.rpm
     [yum install -y] mypackagename
+
     If the source is a package name, it will check whether it is already
     installed. If it is, it will do nothing. It not, it will install it.
+
     If the source is a url to an rpm and the file doesn't already exist
     in a predesignated archives file path (${CLOUDIFY_SOURCES_PATH}/),
     it will download it. It will then use that file to check if the
     package is already installed. If it is, it will do nothing. If not,
     it will install it.
+
     NOTE: This will currently not take into considerations situations
     in which a file was partially downloaded. If a file is partially
     downloaded, a re-download will not take place and rather an
@@ -630,6 +639,7 @@ class SystemD(object):
 
     def configure(self, service_name, render=True):
         """This configures systemd for a specific service.
+
         It requires that two files are present for each service one containing
         the environment variables and one contains the systemd config.
         All env files will be named "cloudify-SERVICENAME".
@@ -769,6 +779,7 @@ def get_rabbitmq_endpoint_ip(endpoint=None):
 
 def create_service_user(user, home):
     """Creates a user.
+
     It will not create the home dir for it and assume that it already exists.
     This user will only be created if it didn't already exist.
     """
@@ -785,6 +796,7 @@ def create_service_user(user, home):
 
 def logrotate(service):
     """Deploys a logrotate config for a service.
+
     Note that this is not idempotent in the sense that if a logrotate
     file is already copied to /etc/logrotate.d, it will copy it again
     and override it. This is done as such so that if a service deploys
@@ -934,6 +946,7 @@ class CtxPropertyFactory(object):
         upon deployment. This copy will allows to later reuse the properties
         for upgrade/rollback purposes. The node ctx properties will be set
         according to the node property named 'use_existing_on_upgrade'.
+
         :param service_name: The service name
         :return: The relevant ctx node properties dict.
         """
@@ -952,6 +965,7 @@ class CtxPropertyFactory(object):
 
     def get(self, service_name):
         """Get node properties by service name.
+
         :param service_name: The service name.
         :return: The relevant ctx node properties dict.
         """
@@ -1059,6 +1073,7 @@ class BlueprintResourceFactory(object):
         """A Factory used to create a local copy of a resource upon deployment.
         This copy allows to later reuse the resource for upgrade/rollback
         purposes.
+
         :param source: The resource source url
         :param destination: Resource destination path
         :param service_name: used to retrieve node properties to be rendered
@@ -1207,6 +1222,7 @@ class BlueprintResourceFactory(object):
 
     def _is_cloudify_pkg(self,  filename):
         """Cloudify packages start with 'cloudify' or include '-agent_'
+
         and end with one of the suffix '.rpm', '.tar.gz', '.tgz', '.exe'.
         The function who calls this function wish to gel all cloudify
         packages except of single tar package.
@@ -1544,6 +1560,7 @@ def parse_jvm_heap_size(heap_size):
 
 def changed_upgrade_properties(service_name):
     """Delta of the service's upgrade and install properties.
+
     Look up the upgrade and install properties for the service, return a dict
     of {property_name: (original_value, upgrade_value)}
     """
@@ -1561,6 +1578,7 @@ def changed_upgrade_properties(service_name):
 
 def verify_immutable_properties(service_name, properties):
     """Check that the given properties didn't change in service upgrade.
+
     Some properties must not change during a manager upgrade. Verify that
     properties named by the given list didn't change between the install
     and upgrade inputs.
