@@ -22,7 +22,7 @@ def install_stage():
 
     nodejs_source_url = ctx_properties['nodejs_tar_source_url']
     stage_source_url = ctx_properties['stage_tar_source_url']
-
+    print "test"
     # injected as an input to the script
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         os.environ.get('INFLUXDB_ENDPOINT_IP')
