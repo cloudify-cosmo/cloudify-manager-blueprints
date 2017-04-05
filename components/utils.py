@@ -405,26 +405,33 @@ def get_file_name_from_url(url):
         return os.path.basename(disassembled.path)
 
 
-def download_cloudify_resource(url, service_name, destination=None):
+def download_cloudify_resource(
+        url, service_name, destination=None, avoid_failure=False):
     """Downloads a resource and saves it as a cloudify resource.
 
     The resource will be saved under the appropriate service resource path and
     will be used in case of operation execution failure after the resource has
     already been downloaded.
     """
-    if destination:
-        source_res_path, _ = resource_factory.create(url,
-                                                     destination,
-                                                     service_name,
-                                                     source_resource=True,
-                                                     render=False)
-        copy(source_res_path, destination)
-    else:
-        res_name = os.path.basename(url)
-        source_res_path, _ = resource_factory.create(url, res_name,
-                                                     service_name,
-                                                     source_resource=True,
-                                                     render=False)
+    try:
+        if destination:
+            source_res_path, _ = resource_factory.create(url,
+                                                         destination,
+                                                         service_name,
+                                                         source_resource=True,
+                                                         render=False)
+            copy(source_res_path, destination)
+        else:
+            res_name = os.path.basename(url)
+            source_res_path, _ = resource_factory.create(url, res_name,
+                                                         service_name,
+                                                         source_resource=True,
+                                                         render=False)
+    except Exception:
+        print "source_res_path={0}".format(source_res_path)
+        if avoid_failure:
+            return None
+
     return source_res_path
 
 
