@@ -715,6 +715,8 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
       - type: stage_to_restservice
         target: rest_service
       - type: stage_to_influxdb
