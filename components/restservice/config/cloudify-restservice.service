@@ -1,6 +1,6 @@
 [Unit]
 Description=Cloudify REST Service
-Wants=network-online.target
+Wants=network-online.target dbus.service
 After=network-online.target
 
 [Service]
