@@ -31,6 +31,9 @@ function set_manager_ip() {
   echo "Restarting nginx.."
   systemctl restart nginx
 
+  echo "Restarting rabbitmq.."
+  systemctl restart cloudify-rabbitmq
+
   echo "Done!"
 
 }
