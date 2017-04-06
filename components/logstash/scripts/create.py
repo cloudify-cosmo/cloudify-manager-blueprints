@@ -20,26 +20,36 @@ LOGSTASH_SERVICE_NAME = 'logstash'
 ctx_properties = utils.ctx_factory.create(LOGSTASH_SERVICE_NAME)
 
 
-def install_logstash_filter_json_encode_plugin():
-    """"Install filter plugin needed to encode json data."""
-    ctx.logger.info('Installing logstash-filter-json_encode plugin...')
-    utils.run([
-        'sudo', '-u', 'logstash',
-        '/opt/logstash/bin/plugin', 'install', 'logstash-filter-json_encode',
-    ])
+def install_plugin(name, plugin_url):
+    """Install plugin.
 
+    :param name: Plugin name
+    :type name: str
+    :param plugin_url: Plugin file location
+    :type plugin_path: str
 
-def install_logstash_output_jdbc_plugin():
-    """"Install output plugin needed to write to SQL databases."""
-    plugin_url = ctx_properties['logstash_output_jdbc_plugin_url']
-
-    ctx.logger.info('Installing logstash-output-jdbc plugin...')
+    """
+    ctx.logger.info('Installing {} plugin...'.format(name))
     plugin_path = utils.download_cloudify_resource(
         plugin_url, service_name=LOGSTASH_SERVICE_NAME)
     utils.run([
         'sudo', '-u', 'logstash',
         '/opt/logstash/bin/plugin', 'install', plugin_path,
     ])
+
+
+def install_logstash_filter_json_encode_plugin():
+    """"Install filter plugin needed to encode json data."""
+    name = 'logstash-filter-json_encode'
+    plugin_url = ctx_properties['logstash_filter_json_encode_plugin_url']
+    install_plugin(name, plugin_url)
+
+
+def install_logstash_output_jdbc_plugin():
+    """"Install output plugin needed to write to SQL databases."""
+    name = 'logstash-output-jdbc'
+    plugin_url = ctx_properties['logstash_output_jdbc_plugin_url']
+    install_plugin(name, plugin_url)
 
 
 def install_postgresql_jdbc_driver():
