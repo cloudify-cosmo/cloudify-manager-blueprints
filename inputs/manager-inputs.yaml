@@ -95,7 +95,7 @@ inputs:
   manager_resources_package:
     description: A URL to a tar files containing all of the manager's resources
     type: string
-    default: http://repository.cloudifysource.org/cloudify/16.12.1/release/cloudify-manager-resources_16.12.1-community.tar.gz
+    default: http://repository.cloudifysource.org/cloudify/17.3.31/release/cloudify-manager-resources_17.3.31-community.tar.gz
 
   manager_resources_package_checksum_file:
     description: >

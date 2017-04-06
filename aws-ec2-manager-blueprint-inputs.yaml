@@ -87,7 +87,7 @@ aws_secret_access_key: ''
 #############################
 # Manager Resources Package
 #############################
-#manager_resources_package: http://repository.cloudifysource.org/cloudify/16.12.1/release/cloudify-manager-resources_16.12.1-community.tar.gz
+#manager_resources_package: http://repository.cloudifysource.org/cloudify/17.3.31/release/cloudify-manager-resources_17.3.31-community.tar.gz
 
 # Providing a checksum file url will allow validating the resources package.
 # By default, no validation is performed. Providing a checksum file will use
