@@ -20,6 +20,15 @@ LOGSTASH_SERVICE_NAME = 'logstash'
 ctx_properties = utils.ctx_factory.create(LOGSTASH_SERVICE_NAME)
 
 
+def install_logstash_filter_json_encode_plugin():
+    """"Install filter plugin needed to encode json data."""
+    ctx.logger.info('Installing logstash-filter-json_encode plugin...')
+    utils.run([
+        'sudo', '-u', 'logstash',
+        '/opt/logstash/bin/plugin', 'install', 'logstash-filter-json_encode',
+    ])
+
+
 def install_logstash_output_jdbc_plugin():
     """"Install output plugin needed to write to SQL databases."""
     plugin_url = ctx_properties['logstash_output_jdbc_plugin_url']
@@ -65,6 +74,7 @@ def install_logstash():
 
     utils.yum_install(logstash_source_url, service_name=LOGSTASH_SERVICE_NAME)
 
+    install_logstash_filter_json_encode_plugin()
     install_logstash_output_jdbc_plugin()
     install_postgresql_jdbc_driver()
 
