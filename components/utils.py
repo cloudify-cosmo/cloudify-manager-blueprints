@@ -428,7 +428,7 @@ def download_cloudify_resource(
                                                          source_resource=True,
                                                          render=False)
     except Exception:
-        print "source_res_path={0}".format(source_res_path)
+        # print "source_res_path={0}".format(source_res_path)
         if avoid_failure:
             return None
 
