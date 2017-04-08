@@ -13,6 +13,9 @@ import utils  # NOQA
 MGMT_WORKER_SERVICE_NAME = 'mgmtworker'
 
 ctx_properties = utils.ctx_factory.create(MGMT_WORKER_SERVICE_NAME)
+MGMTWORKER_USER = ctx_properties['os_user']
+MGMTWORKER_GROUP = ctx_properties['os_group']
+HOMEDIR = ctx_properties['os_homedir']
 
 
 def _install_optional(mgmtworker_venv):
@@ -108,6 +111,13 @@ def install_mgmtworker():
         utils.INTERNAL_CERT_PATH
     # Use SSL port
     ctx.instance.runtime_properties['broker_port'] = '5671'
+
+    utils.create_service_user(MGMTWORKER_USER, HOMEDIR)
+    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, mgmtworker_home)
+    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, celery_log_dir)
+    # Changing perms on workdir and venv in case they are put outside homedir
+    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, mgmtworker_venv)
+    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, celery_work_dir)
 
     ctx.logger.info("broker_port: {0}".format(
         ctx.instance.runtime_properties['broker_port']))
