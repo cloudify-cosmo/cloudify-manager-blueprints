@@ -563,11 +563,13 @@ def yum_install(source, service_name):
     sudo(['yum', 'install', '-y', source_path])
 
 
-def get_filepath_from_pkg_name(filename):
+def get_filepath_from_pkg_name(filename, raise_if_not_found=False):
     local_filepath_list = \
         [fn for fn in glob.glob(os.path.join(CLOUDIFY_SOURCES_PATH, filename))
          if not os.path.basename(fn).startswith(SINGLE_TAR_PREFIX)]
     if not local_filepath_list:
+        if raise_if_not_found:
+            raise IOError('Local resource not found: {0}'.format(filename))
         ctx.abort_operation("File: {0} does not exist in sources path: {1}".
                             format(filename, CLOUDIFY_SOURCES_PATH))
     if len(local_filepath_list) > 1:
@@ -1129,6 +1131,14 @@ class BlueprintResourceFactory(object):
                 resources_props[resource_name] = destination
                 self._set_resources_json(resources_props, service_name)
         return local_resource_path, destination
+
+    @staticmethod
+    def local_resource_exists(filename):
+        try:
+            get_filepath_from_pkg_name(filename, raise_if_not_found=True)
+            return True
+        except IOError:
+            return False
 
     @staticmethod
     def _is_download_required(local_resource_path, is_render):
