@@ -352,6 +352,9 @@ node_types:
         description: Logstash tar.gz Source URL
         type: string
         default: { get_input: logstash_source_url }
+      logstash_filter_json_encode_plugin_url:
+        description: logstash-filter-json_encode location
+        default: { get_input: logstash_filter_json_encode_plugin_url }
       logstash_output_jdbc_plugin_url:
         description: logstash-output-jdbc-plugin location
         default: { get_input: logstash_output_jdbc_plugin_url }
@@ -608,7 +611,7 @@ node_types:
       use_existing_on_upgrade:
         description: Use existing rest service configuration on upgrade
         type: string
-        default: true       
+        default: true
       gunicorn_worker_count:
         description: |
           The number of worker processes for handling requests.

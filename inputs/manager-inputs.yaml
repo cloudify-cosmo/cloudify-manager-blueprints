@@ -210,8 +210,13 @@ inputs:
     type: string
     default: logstash-1.5.0-1.noarch.rpm
 
+  logstash_filter_json_encode_plugin_url:
+    description: logstash-filter-json_encode plugin location
+    type: string
+    default: logstash-filter-json_encode-0.1.5.gem
+
   logstash_output_jdbc_plugin_url:
-    description: logstash-output-jdbc-plugin location
+    description: logstash-output-jdbc plugin location
     type: string
     default: logstash-output-jdbc-0.2.10.gem
 
@@ -333,7 +338,7 @@ inputs:
       Not used if an external endpoint is used.
     type: integer
     default: 102400
-  
+
   #############################
   # PostgreSQL Inputs
   #############################
