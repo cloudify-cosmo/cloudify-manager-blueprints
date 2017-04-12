@@ -11,6 +11,8 @@ import utils  # NOQA
 
 STAGE_SERVICE_NAME = 'stage'
 
-
-ctx.logger.info('Stopping Stage (UI) Service...')
-utils.systemd.stop(STAGE_SERVICE_NAME)
+ignore_ui = ctx.instance.runtime_properties['ignore_ui']
+print "ignore_ui={0}".format(ignore_ui)
+if ignore_ui != 'True':
+    ctx.logger.info('Stopping Stage (UI) Service...')
+    utils.systemd.stop(STAGE_SERVICE_NAME)
