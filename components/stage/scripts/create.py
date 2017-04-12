@@ -22,8 +22,7 @@ def install_stage():
 
     nodejs_source_url = ctx_properties['nodejs_tar_source_url']
     stage_source_url = ctx_properties['stage_tar_source_url']
-    print "stage_source_url={0}".format(stage_source_url)
-    ctx.instance.runtime_properties['ignore_ui'] = 'False'
+    ctx.instance.runtime_properties['skip_stage_installation'] = 'False'
 
     # injected as an input to the script
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
@@ -36,38 +35,32 @@ def install_stage():
     stage_user = 'stage'
     stage_group = 'stage'
 
+    ctx.logger.info('Installing Cloudify Stage (UI)...')
+    stage = utils.download_cloudify_resource(
+            stage_source_url, STAGE_SERVICE_NAME, skip_stage_installation=True)
+    if stage is None:
+        ctx.instance.runtime_properties['skip_stage_installation'] = 'True'
+        ctx.logger.info("Skipping Stage installation")
+        return
+
     utils.set_selinux_permissive()
-
     utils.copy_notice(STAGE_SERVICE_NAME)
-
     utils.mkdir(nodejs_home)
     utils.mkdir(stage_home)
     utils.mkdir(stage_log_path)
+    utils.create_service_user(stage_user, stage_home)
+    ctx.logger.info('Installing NodeJS...')
+    nodejs = utils.download_cloudify_resource(nodejs_source_url,
+                                              STAGE_SERVICE_NAME)
+    utils.untar(nodejs, nodejs_home)
+    utils.untar(stage, stage_home)
+    ctx.logger.info('Fixing permissions...')
+    utils.chown(stage_user, stage_group, stage_home)
+    utils.chown(stage_user, stage_group, nodejs_home)
+    utils.chown(stage_user, stage_group, stage_log_path)
 
-    ctx.logger.info('Installing Cloudify Stage (UI)...')
-    stage = utils.download_cloudify_resource(
-            stage_source_url, STAGE_SERVICE_NAME, avoid_failure=True)
-    if not stage:
-        ctx.instance.runtime_properties['ignore_ui'] = 'True'
-        print "***ignore ui***"
-    ignore_ui = ctx.instance.runtime_properties['ignore_ui']
-    print ctx.instance.runtime_properties['ignore_ui'].__class__
-    print "ignore_ui={0}".format(ignore_ui)
-    if ignore_ui != 'True':
-        print "**inside if**"
-        utils.create_service_user(stage_user, stage_home)
-        ctx.logger.info('Installing NodeJS...')
-        nodejs = utils.download_cloudify_resource(nodejs_source_url,
-                                                  STAGE_SERVICE_NAME)
-        utils.untar(nodejs, nodejs_home)
-        utils.untar(stage, stage_home)
-        ctx.logger.info('Fixing permissions...')
-        utils.chown(stage_user, stage_group, stage_home)
-        utils.chown(stage_user, stage_group, nodejs_home)
-        utils.chown(stage_user, stage_group, stage_log_path)
-
-        utils.logrotate(STAGE_SERVICE_NAME)
-        utils.systemd.configure(STAGE_SERVICE_NAME)
+    utils.logrotate(STAGE_SERVICE_NAME)
+    utils.systemd.configure(STAGE_SERVICE_NAME)
 
 
 def main():

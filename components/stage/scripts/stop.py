@@ -11,8 +11,8 @@ import utils  # NOQA
 
 STAGE_SERVICE_NAME = 'stage'
 
-ignore_ui = ctx.instance.runtime_properties['ignore_ui']
-print "ignore_ui={0}".format(ignore_ui)
-if ignore_ui != 'True':
+skip_stage_installation = ctx.instance.runtime_properties['skip_stage_installation']
+print "skip_stage_installation={0}".format(skip_stage_installation)
+if skip_stage_installation != 'True':
     ctx.logger.info('Stopping Stage (UI) Service...')
     utils.systemd.stop(STAGE_SERVICE_NAME)

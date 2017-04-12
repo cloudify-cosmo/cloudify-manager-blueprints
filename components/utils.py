@@ -406,31 +406,31 @@ def get_file_name_from_url(url):
 
 
 def download_cloudify_resource(
-        url, service_name, destination=None, avoid_failure=False):
+        url, service_name, destination=None, skip_stage_installation=False):
     """Downloads a resource and saves it as a cloudify resource.
 
     The resource will be saved under the appropriate service resource path and
     will be used in case of operation execution failure after the resource has
     already been downloaded.
     """
-    try:
-        if destination:
-            source_res_path, _ = resource_factory.create(url,
-                                                         destination,
-                                                         service_name,
-                                                         source_resource=True,
-                                                         render=False)
-            copy(source_res_path, destination)
-        else:
-            res_name = os.path.basename(url)
-            source_res_path, _ = resource_factory.create(url, res_name,
-                                                         service_name,
-                                                         source_resource=True,
-                                                         render=False)
-    except Exception:
-        # print "source_res_path={0}".format(source_res_path)
-        if avoid_failure:
+    if destination:
+
+        source_res_path, _ = resource_factory.create(url,
+                                                     destination,
+                                                     service_name,
+                                                     skip_stage_installation,
+                                                     source_resource=True,
+                                                     render=False)
+        if source_res_path is None and skip_stage_installation:
             return None
+        copy(source_res_path, destination)
+    else:
+
+        res_name = os.path.basename(url)
+        source_res_path, _ = resource_factory.create(url, res_name,
+                                                     service_name,
+                                                     source_resource=True,
+                                                     render=False)
 
     return source_res_path
 
@@ -570,13 +570,16 @@ def yum_install(source, service_name):
     sudo(['yum', 'install', '-y', source_path])
 
 
-def get_filepath_from_pkg_name(filename):
+def get_filepath_from_pkg_name(filename, skip_stage_installation=False):
     local_filepath_list = \
         [fn for fn in glob.glob(os.path.join(CLOUDIFY_SOURCES_PATH, filename))
          if not os.path.basename(fn).startswith(SINGLE_TAR_PREFIX)]
     if not local_filepath_list:
-        ctx.abort_operation("File: {0} does not exist in sources path: {1}".
-                            format(filename, CLOUDIFY_SOURCES_PATH))
+        if skip_stage_installation:
+            return None
+        else:
+            ctx.abort_operation("File: {0} does not exist in sources path: {1}".
+                                format(filename, CLOUDIFY_SOURCES_PATH))
     if len(local_filepath_list) > 1:
         ctx.abort_operation("More than one file: {0} found in sources path:"
                             " {1}".format(filename, CLOUDIFY_SOURCES_PATH))
@@ -1076,7 +1079,8 @@ class BlueprintResourceFactory(object):
     RESOURCES_JSON_FILE = '__resources.json'
 
     def create(self, source, destination, service_name, user_resource=False,
-               source_resource=False, render=True, load_ctx=True):
+               source_resource=False, skip_stage_installation=False,
+               render=True, load_ctx=True):
         """A Factory used to create a local copy of a resource upon deployment.
         This copy allows to later reuse the resource for upgrade/rollback
         purposes.
@@ -1096,6 +1100,9 @@ class BlueprintResourceFactory(object):
         context of the script.
         :return: The local resource file path and destination.
         """
+        print "***source={0}, destination={1}, service_name={2}, user_resource=={3}," \
+              "source_resource={4}, render={5}, load_ctx={6}".format(
+                source, destination, service_name, user_resource, source_resource, render, load_ctx)
         resource_name = os.path.basename(destination)
         if is_upgrade:
             self._archive_resources(service_name)
@@ -1110,7 +1117,7 @@ class BlueprintResourceFactory(object):
         # The local path is decided according to whether we are in upgrade
         local_resource_path = self._get_local_file_path(service_name,
                                                         resource_name)
-
+        print "***local_resource_path={0}".format(local_resource_path)
         if self._is_download_required(local_resource_path, render):
             mkdir(os.path.dirname(local_resource_path))
             if user_resource:
@@ -1121,8 +1128,12 @@ class BlueprintResourceFactory(object):
                                              render=render,
                                              load_ctx=load_ctx)
             elif source_resource:
-                self._download_source_resource(source,
-                                               local_resource_path)
+                res = True
+                res = self._download_source_resource(source,
+                                                     local_resource_path,
+                                                     skip_stage_installation)
+                if not res:
+                    return None, None
             elif render:
                 self._download_resource_and_render(source,
                                                    local_resource_path,
@@ -1196,7 +1207,8 @@ class BlueprintResourceFactory(object):
         move(tmp_file, dest)
 
     @staticmethod
-    def _download_source_resource(source, local_resource_path):
+    def _download_source_resource(source, local_resource_path,
+                                  skip_stage_installation=False):
         is_url = source.startswith(('http://', 'https://', 'ftp://',
                                     'file://'))
         filename = get_file_name_from_url(source) if is_url else source
@@ -1204,7 +1216,10 @@ class BlueprintResourceFactory(object):
         if is_manager_package:
             local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
         else:
-            local_filepath = get_filepath_from_pkg_name(filename)
+            local_filepath = get_filepath_from_pkg_name(
+                    filename, skip_stage_installation)
+            if local_filepath is None and skip_stage_installation:
+                return None
 
         if is_url:
             if not os.path.isfile(local_filepath):
