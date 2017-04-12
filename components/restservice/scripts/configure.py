@@ -128,7 +128,7 @@ def _deploy_rest_configuration():
 def configure_restservice():
     _deploy_rest_configuration()
     _deploy_security_configuration()
-    utils.systemd.configure(REST_SERVICE_NAME)
+    utils.systemd.configure(REST_SERVICE_NAME, tmpfiles=True)
     _create_db_tables_and_add_users()
 
 

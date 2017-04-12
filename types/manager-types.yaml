@@ -636,6 +636,9 @@ node_types:
         description: Number of log files to keep when rotating.
         type: integer
         default: { get_input: rest_service_log_files_backup_count }
+      service_user:
+        description: User that systemd will launch the restservice as
+        default: { get_input: rest_service_system_user }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

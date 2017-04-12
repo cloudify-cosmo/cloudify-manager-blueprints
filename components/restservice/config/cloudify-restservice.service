@@ -4,11 +4,13 @@ Wants=network-online.target dbus.service
 After=network-online.target
 
 [Service]
+User={{ node.properties.service_user }}
+Group={{ node.properties.service_user }}
 TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-restservice
 ExecStart=/bin/sh -c '/opt/manager/env/bin/gunicorn \
-    --pid /var/run/gunicorn.pid \
+    --pid /run/gunicorn/pid \
     -w {{ node.properties.gunicorn_worker_count or '$((${WORKER_COUNT} > ${MAX_WORKER_COUNT} ? ${MAX_WORKER_COUNT} : ${WORKER_COUNT}))' }} \
     --max-requests {{ node.properties.gunicorn_max_requests }} \
     -b 0.0.0.0:${REST_PORT} \

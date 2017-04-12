@@ -745,7 +745,7 @@ class SystemD(object):
         return sudo(systemctl_cmd, retries=retries,
                     ignore_failures=ignore_failure)
 
-    def configure(self, service_name, render=True):
+    def configure(self, service_name, render=True, tmpfiles=False):
         """This configures systemd for a specific service.
 
         It requires that two files are present for each service one containing
@@ -767,6 +767,16 @@ class SystemD(object):
                                   render=render)
         ctx.logger.debug('Enabling systemd .service...')
         self.systemctl('enable', '{0}.service'.format(sid))
+
+        if tmpfiles:
+            tmp_dst = "/usr/lib/tmpfiles.d/{0}.conf".format(sid)
+            tmp_src = "components/{0}/config/tmpfiles.d/{1}.conf".format(
+                service_name, sid)
+
+            ctx.logger.debug('Copying to tmpfiles.d if needed')
+            deploy_blueprint_resource(
+                tmp_src, tmp_dst, service_name, render=render)
+
         self.systemctl('daemon-reload')
 
     @staticmethod

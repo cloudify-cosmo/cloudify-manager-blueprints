@@ -62,6 +62,12 @@ inputs:
     type: integer
     default: 20
 
+  rest_service_system_user:
+    description: >
+      The user that the rest service will run as
+    type: string
+    default: cloudify-restservice
+
   #############################
   # Bootstrap Validations
   #############################
