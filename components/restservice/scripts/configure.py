@@ -57,13 +57,10 @@ def _deploy_security_configuration():
         'encoding_min_length': 5
     }
 
-    # Update the runtime properties with the new values. The conversion to
-    # and from a JSON string is necessary due to how __getitem__ and
-    # __setitem__ are implemented in ctx-py.py
     runtime_props = ctx.instance.runtime_properties
-    current_props = json.loads(runtime_props['security_configuration'])
+    current_props = runtime_props['security_configuration']
     current_props.update(security_configuration)
-    runtime_props['security_configuration'] = json.dumps(current_props)
+    runtime_props['security_configuration'] = current_props
 
     fd, path = tempfile.mkstemp()
     os.close(fd)
@@ -85,7 +82,7 @@ def _create_db_tables_and_add_users():
     python_path = '{0}/env/bin/python'.format(REST_SERVICE_HOME)
     runtime_props = ctx.instance.runtime_properties
 
-    args_dict = json.loads(runtime_props['security_configuration'])
+    args_dict = runtime_props['security_configuration']
     args_dict['postgresql_host'] = runtime_props['postgresql_host']
 
     # The script won't have access to the ctx, so we dump the relevant args
