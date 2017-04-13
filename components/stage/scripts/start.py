@@ -12,5 +12,6 @@ import utils  # NOQA
 STAGE_SERVICE_NAME = 'stage'
 
 
-ctx.logger.info('Starting Stage (UI) Service...')
-utils.start_service(STAGE_SERVICE_NAME)
+if 'skip_installation' not in ctx.instance.runtime_properties:
+    ctx.logger.info('Starting Stage (UI) Service...')
+    utils.start_service(STAGE_SERVICE_NAME)

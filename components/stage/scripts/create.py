@@ -23,6 +23,12 @@ def install_stage():
     nodejs_source_url = ctx_properties['nodejs_tar_source_url']
     stage_source_url = ctx_properties['stage_tar_source_url']
 
+    if not utils.resource_factory.local_resource_exists(stage_source_url):
+        ctx.logger.info('Stage package not found in manager resources '
+                        'package. Stage will not be installed.')
+        ctx.instance.runtime_properties['skip_installation'] = 'true'
+        return
+
     # injected as an input to the script
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         os.environ.get('INFLUXDB_ENDPOINT_IP')
