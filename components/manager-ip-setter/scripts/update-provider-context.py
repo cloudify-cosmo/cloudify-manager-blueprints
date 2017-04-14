@@ -1,4 +1,4 @@
-#!/bin/python
+#!/opt/manager/env/bin/python
 
 import json
 import sys

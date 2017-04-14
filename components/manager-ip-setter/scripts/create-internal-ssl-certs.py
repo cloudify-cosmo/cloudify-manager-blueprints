@@ -1,7 +1,4 @@
-
-# This script has to run using the Python executable found in:
-# /opt/cfy/embedded/bin/python in order to properly load the manager
-# blueprints utils.py module.
+#!/opt/manager/env/bin/python
 
 import imp
 import logging
