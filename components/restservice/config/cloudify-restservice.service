@@ -10,7 +10,7 @@ TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-restservice
 ExecStart=/bin/sh -c '/opt/manager/env/bin/gunicorn \
-    --pid /run/gunicorn/pid \
+    --pid /run/cloudify-restservice/pid \
     -w {{ node.properties.gunicorn_worker_count or '$((${WORKER_COUNT} > ${MAX_WORKER_COUNT} ? ${MAX_WORKER_COUNT} : ${WORKER_COUNT}))' }} \
     --max-requests {{ node.properties.gunicorn_max_requests }} \
     -b 0.0.0.0:${REST_PORT} \

@@ -773,9 +773,10 @@ class SystemD(object):
             tmp_src = "components/{0}/config/tmpfiles.d/{1}.conf".format(
                 service_name, sid)
 
-            ctx.logger.debug('Copying to tmpfiles.d if needed')
+            ctx.logger.debug('Deploying tmpfiles.d file...')
             deploy_blueprint_resource(
                 tmp_src, tmp_dst, service_name, render=render)
+            sudo(['systemd-tmpfiles', '--create'])
 
         self.systemctl('daemon-reload')
 
