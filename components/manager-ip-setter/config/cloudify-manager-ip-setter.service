@@ -5,8 +5,10 @@ After=network.target cloudify-restservice.service
 
 [Service]
 TimeoutStartSec=0
+User={{ node.properties.os_user }}
+Group={{ node.properties.os_group }}
 EnvironmentFile=-/etc/sysconfig/cloudify-manager-ip-setter
-ExecStart=/opt/cloudify/manager-ip-setter/manager-ip-setter.sh
+ExecStart=/bin/sudo /opt/cloudify/manager-ip-setter/manager-ip-setter.sh
 
 [Install]
 WantedBy=default.target

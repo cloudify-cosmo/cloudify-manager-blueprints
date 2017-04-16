@@ -15,7 +15,7 @@ function _disable_requiretty() {
         # http://0pointer.de/blog/projects/os-release.html
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
         ###
-        if grep -i 'centoss' /proc/version > /dev/null; then
+        if grep -i 'centos' /proc/version > /dev/null; then
             echo 'supported'
         elif grep -i 'ubuntu' /proc/version > /dev/null; then
             echo 'supported'
