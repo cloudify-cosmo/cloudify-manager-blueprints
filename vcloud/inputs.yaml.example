@@ -1,0 +1,22 @@
+vcloud_username: some_user
+vcloud_password: some_password
+vcloud_url: https://iam.vchs.vmware.com
+vcloud_service: VDC
+vcloud_org: VDC
+vcloud_vdc: VDC
+vcloud_service_type: ondemand
+vcloud_instance: 00000000-0000-0000-0000-000000000000
+edge_gateway: gateway
+manager_server_name: some-server
+manager_server_catalog: default-catalog
+manager_server_template: Ubuntu Server 12.04 LTS (amd64 20150127)
+manager_server_public_ip:
+management_network_use_existing: true
+management_network_public_nat_use_existing: true
+management_network_name: some-net
+management_network_public_ip:
+manager_private_key_path: ~/.ssh/manager.pem
+agent_private_key_path: ~/.ssh/manager.pem
+manager_public_key: some_key
+agent_public_key: some_key
+management_port_ip_allocation_mode: pool
