@@ -3,19 +3,16 @@
 # /opt/cfy/embedded/bin/python in order to properly load the manager
 # blueprints utils.py module.
 
-import imp
 import logging
 import sys
 
-
-UTILS_MODULE_PATH = '/opt/cfy/cloudify-manager-blueprints/components/utils.py'
+import utils
 
 
 class CtxWithLogger(object):
     logger = logging.getLogger('internal-ssl-certs-logger')
 
 
-utils = imp.load_source('utils', UTILS_MODULE_PATH)
 utils.ctx = CtxWithLogger()
 
 
@@ -24,4 +21,15 @@ if __name__ == '__main__':
         print('Expected 1 argument - <manager-ip>')
         print('Provided args: {0}'.format(sys.argv[1:]))
         sys.exit(1)
-    utils.generate_internal_ssl_cert(sys.argv[1])
+    ip = sys.argv[1]
+    utils._generate_ssl_certificate(
+        ip,
+        utils.INTERNAL_SSL_CERT_FILENAME,
+        utils.INTERNAL_SSL_KEY_FILENAME,
+        utils.INTERNAL_PKCS12_FILENAME,
+    )
+    utils._generate_ssl_certificate(
+        ip,
+        utils.EXTERNAL_SSL_CERT_FILENAME,
+        utils.EXTERNAL_SSL_KEY_FILENAME,
+    )

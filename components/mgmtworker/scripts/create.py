@@ -112,7 +112,11 @@ def install_mgmtworker():
     # Use SSL port
     ctx.instance.runtime_properties['broker_port'] = '5671'
 
-    utils.create_service_user(MGMTWORKER_USER, HOMEDIR)
+    utils.create_service_user(
+        user=MGMTWORKER_USER,
+        home=HOMEDIR,
+        group=MGMTWORKER_GROUP,
+    )
     utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, mgmtworker_home)
     utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, celery_log_dir)
     # Changing perms on workdir and venv in case they are put outside homedir

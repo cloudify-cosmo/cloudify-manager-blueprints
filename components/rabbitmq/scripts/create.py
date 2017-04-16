@@ -81,6 +81,18 @@ def _install_rabbitmq():
         '/etc/rabbitmq/definitions.json',
         RABBITMQ_SERVICE_NAME)
 
+    # This stops rabbit from failing if the host name changes, e.g. when
+    # a manager is deployed from an image but given a new hostname.
+    # This is likely to cause problems with clustering of rabbitmq if this is
+    # done at any point, so at that point a change to the file and cleaning of
+    # mnesia would likely be necessary.
+    utils.deploy_blueprint_resource(
+        '{0}/rabbitmq-env.conf'.format(CONFIG_PATH),
+        '/etc/rabbitmq/rabbitmq-env.conf',
+        RABBITMQ_SERVICE_NAME)
+    # Delete old mnesia node
+    utils.sudo(['rm', '-rf', '/var/lib/rabbitmq/mnesia'])
+
     utils.systemd.systemctl('daemon-reload')
 
     utils.chown('rabbitmq', 'rabbitmq', rabbitmq_log_path)
