@@ -1,0 +1,144 @@
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.2m7/types.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.2m7/plugin.yaml
+
+
+inputs:
+
+  host_pool_public_address:
+    type: string
+
+  host_pool_ssh_user:
+    type: string
+    default: ubuntu
+
+  host_pool_ssh_key_path:
+    type: string
+    default: /home/ubuntu/.ssh/id_rsa
+
+  host_pool_directory:
+    type: string
+    default: /home/ubuntu/host_pool
+
+
+node_types:
+  cloudify.nodes.HostPoolService:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      directory:
+        type: string
+        default: /home/ubuntu/host_pool
+      environment:
+        # Accepted environment variables:
+        # * HOST_POOL_CONFIG,
+        # * NUM_WORKERS,
+        # * PID_FILE,
+        # * LOG_LEVEL,
+        # * LOG_FILE,
+        # * BIND_INTERFACE.
+        default: {}
+      ssh_host:
+        type: string
+      ssh_user:
+        type: string
+        default: ubuntu
+      ssh_key_path:
+        type: string
+        default: /home/ubuntu/.ssh/id_rsa
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file:
+              default: scripts/tasks.py
+            task_name:
+              default: create
+            task_properties:
+              default:
+                directory: { get_property: [ SELF, directory ] }
+            fabric_env:
+              default:
+                host_string: { get_property: [ SELF, ssh_host ] }
+                user: { get_property: [ SELF, ssh_user ] }
+                key_filename: { get_property: [ SELF, ssh_key_path ] }
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file:
+              default: scripts/tasks.py
+            task_name:
+              default: configure
+            task_properties:
+              default:
+                directory: { get_property: [ SELF, directory ] }
+                environment: { get_property: [ SELF, environment ] }
+            fabric_env:
+              default:
+                host_string: { get_property: [ SELF, ssh_host ] }
+                user: { get_property: [ SELF, ssh_user ] }
+                key_filename: { get_property: [ SELF, ssh_key_path ] }
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: scripts/start.sh
+            process:
+              default:
+                cwd: { get_property: [ SELF, directory ] }
+                env: { get_property: [ SELF, environment ] }
+            fabric_env:
+              default:
+                host_string: { get_property: [ SELF, ssh_host ] }
+                user: { get_property: [ SELF, ssh_user ] }
+                key_filename: { get_property: [ SELF, ssh_key_path ] }
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default:
+                scripts/stop.sh
+            process:
+              default:
+                cwd: { get_property: [ SELF, directory ] }
+                env: { get_property: [ SELF, environment ] }
+            fabric_env:
+              default:
+                host_string: { get_property: [ SELF, ssh_host ] }
+                user: { get_property: [ SELF, ssh_user ] }
+                key_filename: { get_property: [ SELF, ssh_key_path ] }
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: scripts/delete.sh
+            process:
+              default:
+                env: { get_property: [ SELF, environment ] }
+                args: [ { get_property: [ SELF, directory ] } ]
+            fabric_env:
+              default:
+                host_string: { get_property: [ SELF, ssh_host ] }
+                user: { get_property: [ SELF, ssh_user ] }
+                key_filename: { get_property: [ SELF, ssh_key_path ] }
+
+
+node_templates:
+  host_pool_host:
+    type: cloudify.nodes.Compute
+    properties:
+      install_agent: false
+      ip: { get_input: host_pool_public_address }
+
+  host_pool_server:
+    type: cloudify.nodes.HostPoolService
+    properties:
+      directory: { get_input: host_pool_directory }
+      ssh_host: { get_input: host_pool_public_address }
+      ssh_user: { get_input: host_pool_ssh_user }
+      ssh_key_path: { get_input: host_pool_ssh_key_path }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: host_pool_host
