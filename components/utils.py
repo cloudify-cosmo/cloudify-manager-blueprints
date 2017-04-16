@@ -125,6 +125,112 @@ def sudo_write_to_file(contents, destination):
     return move(path, destination)
 
 
+def check_sudoers_includes_dir(include_dir):
+    includedirs = sudo(
+        ['grep', '#includedir', '/etc/sudoers'],
+        ignore_failures=True
+    ).aggr_stdout.splitlines()
+
+    for line in includedirs:
+        if line.strip().endswith(include_dir):
+            return True
+
+    # Not found
+    return False
+
+
+def add_entry_to_sudoers(entry, filename, sudoers_include_dir):
+    destination = os.path.join(sudoers_include_dir, filename)
+
+    # Make sure we're including the expected includedir
+    if not check_sudoers_includes_dir(sudoers_include_dir):
+        ctx.abort_operation(
+            "/etc/sudoers does not #includedir {path}.".format(
+                path=sudoers_include_dir,
+            )
+        )
+
+    # Confirm target filename won't be ignored by sudoers include
+    if '.' in filename or '~' in filename:
+        ctx.abort_operation(
+            "{filename} is invalid. "
+            "Sudoers filenames must not contain . or ~".format(
+                filename=filename,
+            )
+        )
+
+    # Confirm that our target filename does not already exist
+    # We have to sudo ls because we (hopefully) don't have access to the
+    # sudoers includedir.
+    existing = sudo(
+        ['ls', sudoers_include_dir]
+    ).aggr_stdout.splitlines()
+    if filename in existing:
+        ctx.abort_operation(
+            "{file_path} already exists for sudoers."
+            "Found {files} in {path}.".format(
+                file_path=destination,
+                files=', '.join(existing),
+                path=sudoers_include_dir,
+            )
+        )
+
+    # Generate the new entry and confirm it is valid
+    fd, tmp_path = tempfile.mkstemp()
+    with os.fdopen(fd, 'w') as tmp_handle:
+        tmp_handle.write(entry)
+    chown('root', 'root', tmp_path)
+    chmod('440', tmp_path)
+    valid = sudo(
+        ['visudo', '-cf', tmp_path],
+        ignore_failures=True,
+    )
+    if valid.returncode != 0:
+        ctx.abort_operation(
+            "Generated sudoers entry containing \"{entry}\" was "
+            "invalid.".format(
+                entry=entry,
+            )
+        )
+
+    # Now we will copy the file in and run a final check on sudoers
+    result = sudo(
+        [
+            'bash', '-c',
+            # We bash -c the following line because if for whatever reason our
+            # new entry breaks sudo we will not be able to fix it with sudo,
+            # and will thus make any post-mortem much harder.
+            'mv {tmp} {dst} && visudo -c || (mv {dst} {tmp}; false)'.format(
+                tmp=tmp_path,
+                dst=destination,
+            ),
+        ],
+        ignore_failures=True,
+    )
+    if result.returncode != 0:
+        ctx.abort_operation(
+            "Moving {tmp} to {dst} resulted in sudo being broken.".format(
+                tmp=tmp_path,
+                dst=destination,
+            )
+        )
+
+
+def allow_user_to_sudo_command(user, full_command, description,
+                               sudoers_include_dir, allow_as='root'):
+    entry = '{user}    ALL=({allow_as}) NOPASSWD:{full_command}\n'.format(
+        user=user,
+        allow_as=allow_as,
+        full_command=full_command,
+    )
+    filename = '{user}_{allow_as}_{description}'.format(
+        user=user,
+        allow_as=allow_as,
+        description=description,
+    )
+    add_entry_to_sudoers(entry, filename, sudoers_include_dir)
+
+
 def deploy_ssl_certificate(private_or_public, destination, group, cert):
     # Root owner, with permissions set below,
     # allow anyone to read a public cert,
@@ -613,8 +719,8 @@ class RpmPackageHandler(object):
         return self._is_package_installed(source_name)
 
     def get_rpm_package_name(self):
-        """Returns the package name according to the info provided in the source
-        file.
+        """Returns the package name according to the info provided in the
+        source file.
         """
         split_index = ' : '
         package_details = {}
@@ -779,21 +885,38 @@ def get_rabbitmq_endpoint_ip(endpoint=None):
     return ctx.instance.host_ip
 
 
-def create_service_user(user, home):
+def create_service_user(user, home, group=None):
     """Creates a user.
 
     It will not create the home dir for it and assume that it already exists.
     This user will only be created if it didn't already exist.
     """
+    if not group:
+        group = user
+
     ctx.logger.info('Checking whether user {0} exists...'.format(user))
     try:
         pwd.getpwnam(user)
         ctx.logger.debug('User {0} already exists...'.format(user))
     except KeyError:
+        ctx.logger.info('Creating group {group} if it does not exist'.format(
+            group=group,
+        ))
+        # --force in groupadd causes it to return true if the group exists.
+        # Other behaviour changes don't affect this basic use of the command.
+        sudo(['groupadd', '--force', group])
+
         ctx.logger.info('Creating user {0}, home: {1}...'.format(
             user, home))
-        sudo(['useradd', '--shell', '/sbin/nologin', '--home-dir', home,
-              '--no-create-home', '--system', user])
+        sudo([
+            'useradd',
+            '--shell', '/sbin/nologin',
+            '--home-dir', home, '--no-create-home',
+            '--system',
+            '--no-user-group',
+            '--gid', group,
+            user,
+        ])
 
 
 def logrotate(service):
@@ -1241,8 +1364,7 @@ class BlueprintResourceFactory(object):
         if (filename.startswith('cloudify')
             or filename.find('-agent_') != -1) \
                 and not filename.startswith(SINGLE_TAR_PREFIX) \
-                and filename.endswith((
-                        '.rpm', '.tar.gz', '.tgz', '.exe')):
+                and filename.endswith(('.rpm', '.tar.gz', '.tgz', '.exe')):
             return True
         else:
             return False
