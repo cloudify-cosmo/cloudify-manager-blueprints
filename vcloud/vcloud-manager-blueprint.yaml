@@ -1,0 +1,407 @@
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+    - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/tosca-vcloud-plugin/1.2/plugin.yaml
+    - http://www.getcloudify.org/spec/fabric-plugin/1.2/plugin.yaml
+
+inputs:
+    vcloud_username:
+        type: string
+
+    vcloud_password:
+        type: string
+
+    vcloud_token:
+        type: string
+        default: ''
+
+    vcloud_url:
+        type: string
+
+    vcloud_service:
+        type: string
+
+    vcloud_service_type:
+        type: string
+        default: 'subscription'
+
+    vcloud_instance:
+        type: string
+        default: ''
+        description: >
+            Only required for ondemand service type.
+
+    vcloud_api_version:
+        type: string
+        default: '5.6'
+
+    vcloud_org_url:
+        type: string
+        default: ''
+        description: >
+            Only required if using token based login on a private vcloud
+            director. This can be obtained by following the vcloud API
+            example docs. If you are unsure of how to obtain this, you will
+            need to use password based login.
+
+    vcloud_org:
+        type: string
+
+    vcloud_vdc:
+        type: string
+
+    manager_server_name:
+        type: string
+
+    manager_server_catalog:
+        type: string
+
+    manager_server_template:
+        type: string
+
+    manager_server_cpus:
+        type: string
+        default: 2
+
+    manager_server_memory:
+        type: string
+        default: 4096
+
+    management_network_use_existing:
+        type: boolean
+        default: false
+
+    management_network_name:
+        type: string
+
+    management_port_ip_allocation_mode:
+        type: string
+        default: pool
+
+    management_port_ip_address:
+        type: string
+        default: ''
+
+    management_network_public_nat_use_existing:
+        type: boolean
+        default: false
+
+    management_network_public_ip:
+        type: string
+        default: ''
+
+    edge_gateway:
+        type: string
+        default: gateway
+        description: >
+            For 'ondemand' service type, the value of edge_gateway
+            is always 'gateway'
+
+    manager_server_public_ip:
+        type: string
+        default: ''
+        description: >
+            For 'ondemand' service type, the value of
+            floating_ip_public_ip can be empty
+
+    agents_user:
+        type: string
+        default: ubuntu
+
+    manager_server_user:
+        default: ubuntu
+        type: string
+
+    manager_private_key_path:
+        default: ~/.ssh/cloudify-manager-kp.pem
+        type: string
+
+    agent_private_key_path:
+        default: ~/.ssh/cloudify-agent-kp.pem
+        type: string
+
+    manager_public_key:
+        type: string
+        default: ''
+
+    agent_public_key:
+        type: string
+        default: ''
+
+    resources_prefix:
+        type: string
+        default: ''
+
+
+node_types:
+    vcloud_configuration:
+        derived_from: cloudify.nodes.Root
+        properties:
+            vcloud_config: {}
+
+node_templates:
+
+    node_security_group:
+        type: cloudify.vcloud.nodes.SecurityGroup
+        properties:
+            security_group:
+                name: nodevcloud_security_group
+                edge_gateway: { get_input: edge_gateway }
+            rules:
+                - source: external
+                  destination: internal
+                  destination_port: 22
+                  action: allow
+                  description: >
+                        ssh to management node
+                  protocol: TCP
+                - source: external
+                  destination: internal
+                  destination_port: 80
+                  action: allow
+                  description: >
+                        http to management node
+                  protocol: TCP
+                - source: host
+                  destination: any
+                  action: allow
+                  description: >
+                         backward network connection for host updates
+                  protocol: any
+                - source: external
+                  destination: internal
+                  action: allow
+                  description: >
+                         Allow ping
+                  protocol: ICMP
+            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+
+    manager_server:
+        type: cloudify.vcloud.nodes.Server
+        properties:
+            install_agent: false
+            server:
+                name: { get_input: manager_server_name }
+                catalog: { get_input: manager_server_catalog }
+                template: { get_input: manager_server_template }
+                guest_customization:
+                    public_keys:
+                        - { get_property: [manager_keypair, public_key] }
+                        - { get_property: [agent_keypair, public_key] }
+                    computer_name: { get_input: manager_server_name }
+                hardware:
+                    cpu: { get_input: manager_server_cpus }
+                    memory: { get_input: manager_server_memory }
+            management_network: { get_input: management_network_name }
+            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+        relationships:
+            - target: management_port
+              type: cloudify.vcloud.server_connected_to_port
+            - target: management_server_nat
+              type: cloudify.vcloud.server_connected_to_public_nat
+            - target: node_security_group
+              type: cloudify.vcloud.server_connected_to_security_group
+
+    management_port:
+        type: cloudify.vcloud.nodes.Port
+        properties:
+            port:
+                network: { get_input: management_network_name }
+                ip_allocation_mode: { get_input: management_port_ip_allocation_mode }
+                ip_address: { get_input: management_port_ip_address }
+                primary_interface: true
+            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+        relationships:
+            - target: management_network
+              type: cloudify.vcloud.port_connected_to_network
+
+    management_network:
+        type: cloudify.vcloud.nodes.Network
+        properties:
+            use_external_resource: { get_input: management_network_use_existing }
+            resource_id: { get_input: management_network_name }
+            network:
+                name: { get_input: management_network_name }
+                edge_gateway: { get_input: edge_gateway }
+                static_range: 10.67.79.129-10.67.79.254
+                netmask: 255.255.255.0
+                gateway_ip: 10.67.79.1
+                dns:
+                    - 10.67.79.1
+                    - 8.8.8.8
+                dhcp:
+                    dhcp_range: 10.67.79.2-10.67.79.128
+            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+        relationships:
+            - target: management_network_nat
+              type: cloudify.vcloud.net_connected_to_public_nat
+
+    management_network_nat:
+        type: cloudify.vcloud.nodes.PublicNAT
+        properties:
+            use_external_resource: { get_input: management_network_public_nat_use_existing }
+            nat:
+                edge_gateway: { get_input: edge_gateway }
+                public_ip: { get_input: management_network_public_ip }
+            rules:
+                - type: SNAT
+            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+
+    management_server_nat:
+        type: cloudify.vcloud.nodes.PublicNAT
+        properties:
+            nat:
+                edge_gateway: { get_input: edge_gateway }
+                public_ip: { get_input: manager_server_public_ip }
+            rules:
+             - type: DNAT
+               protocol: tcp
+               original_port: 80
+               translated_port: 80
+             - type: DNAT
+               protocol: tcp
+               original_port: 8086
+               translated_port: 8086
+             - type:  DNAT
+               protocol: tcp
+               original_port: 443
+               translated_port: 443
+             - type: DNAT
+               protocol: tcp
+               original_port: 22
+               translated_port: 22
+            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+
+    vcloud_configuration:
+        type: vcloud_configuration
+        properties:
+            vcloud_config:
+                username: { get_input: vcloud_username }
+                password: { get_input: vcloud_password }
+                token: { get_input: vcloud_token }
+                url: { get_input: vcloud_url }
+                service: { get_input: vcloud_service }
+                org: { get_input: vcloud_org }
+                vdc: { get_input: vcloud_vdc }
+                service_type: { get_input: vcloud_service_type }
+                instance: { get_input: vcloud_instance }
+                api_version: { get_input: vcloud_api_version }
+                org_url: { get_input: vcloud_org_url }
+                edge_gateway: { get_input: edge_gateway }
+
+    manager_keypair:
+        type: cloudify.vcloud.nodes.KeyPair
+        properties:
+            private_key_path: { get_input: manager_private_key_path }
+            public_key:
+                key: { get_input: manager_public_key }
+                user: { get_input: manager_server_user }
+
+    agent_keypair:
+        type: cloudify.vcloud.nodes.KeyPair
+        properties:
+            private_key_path: { get_input: agent_private_key_path }
+            public_key:
+                key: { get_input: agent_public_key }
+                user: { get_input: agents_user }
+
+    manager:
+        type: cloudify.nodes.CloudifyManager
+        properties:
+            cloudify_packages:
+                agents:
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-ubuntu-agent_3.2.0-ga-b200_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-centos-final-agent_3.2.0-ga-b200_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-windows-agent_3.2.0-ga-b200_amd64.deb
+                docker:
+                    docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/ga-RELEASE/cloudify-docker_3.2.0-ga-b200.tar
+
+            cloudify:
+                resources_prefix: { get_input: resources_prefix }
+
+                cloudify_agent:
+                    min_workers: 0
+                    max_workers: 5
+                    remote_execution_port: 22
+                    user: { get_input: agents_user }
+
+                workflows:
+                    task_retries: -1  # this means forever
+                    task_retry_interval: 30
+
+                policy_engine:
+                    start_timeout: 30
+
+        relationships:
+            - target: manager_server
+              type: cloudify.relationships.contained_in
+
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                create:
+                    implementation: fabric.fabric_plugin.tasks.run_task
+                    inputs:
+                        tasks_file: scripts/configure.py
+                        task_name: configure
+                        task_properties:
+                            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [management_server_nat, public_ip] }
+                configure:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
+                        task_properties:
+                            cloudify_packages: { get_property: [manager, cloudify_packages] }
+                            agent_local_key_path: { get_property: [agent_keypair, private_key_path] }
+                            provider_context: { get_attribute: [manager, provider_context] }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [management_server_nat, public_ip] }
+                start:
+                    implementation: fabric.fabric_plugin.tasks.run_task
+                    inputs:
+                        tasks_file: scripts/configure_docker.py
+                        task_name: configure
+                        task_properties:
+                            vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_input: manager_private_key_path }
+                            host_string: { get_attribute: [management_server_nat, public_ip] }
+                stop:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_property: [manager_keypair, private_key_path] }
+                            host_string: { get_attribute: [management_server_nat, public_ip] }
+                delete:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
+                        fabric_env:
+                            user: { get_input: manager_server_user }
+                            key_filename: { get_property: [manager_keypair, private_key_path] }
+                            host_string: { get_attribute: [management_server_nat, public_ip] }
+            cloudify.interfaces.validation:
+                creation:
+                    implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
+                    inputs:
+                        cloudify_packages: { get_property: [manager, cloudify_packages] }
+
+
+plugins:
+    cli:
+        install: false
+        executor: central_deployment_agent
+
+
+outputs:
+    manager_ip:
+        value: { get_attribute: [management_server_nat, public_ip] }
