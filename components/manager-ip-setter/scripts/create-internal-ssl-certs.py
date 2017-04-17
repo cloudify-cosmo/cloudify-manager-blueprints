@@ -3,19 +3,16 @@
 # /opt/cfy/embedded/bin/python in order to properly load the manager
 # blueprints utils.py module.
 
-import imp
 import logging
 import sys
 
-
-UTILS_MODULE_PATH = '/opt/cfy/cloudify-manager-blueprints/components/utils.py'
+import utils
 
 
 class CtxWithLogger(object):
     logger = logging.getLogger('internal-ssl-certs-logger')
 
 
-utils = imp.load_source('utils', UTILS_MODULE_PATH)
 utils.ctx = CtxWithLogger()
 
 

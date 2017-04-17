@@ -28,6 +28,9 @@ import utils  # NOQA
 
 MGMT_WORKER_SERVICE_NAME = 'mgmtworker'
 CONFIG_PATH = "components/mgmtworker/config"
+ctx_properties = utils.ctx_factory.create(MGMT_WORKER_SERVICE_NAME)
+MGMTWORKER_USER = ctx_properties['os_user']
+MGMTWORKER_GROUP = ctx_properties['os_group']
 
 
 def configure_mgmtworker():
@@ -55,6 +58,7 @@ def configure_mgmtworker():
             MGMT_WORKER_SERVICE_NAME)
         # The config contains credentials, do not let the world read it
         utils.sudo(['chmod', '440', broker_conf_path])
+        utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, broker_conf_path)
     utils.systemd.configure(MGMT_WORKER_SERVICE_NAME)
     utils.logrotate(MGMT_WORKER_SERVICE_NAME)
 

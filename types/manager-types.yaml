@@ -670,6 +670,18 @@ node_types:
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      os_user:
+        description: Management worker OS username. Will be created if not existing, and used to run the service.
+        type: string
+        default: mgmtworker
+      os_group:
+        description: Management worker OS group. Will be created if not existing, and used to run the service.
+        type: string
+        default: mgmtworker
+      os_homedir:
+        description: Management worker OS user's home directory. Will not be created if missing.
+        type: string
+        default: /etc/cloudify
       management_worker_rpm_source_url:
         description: Management Worker RPM Source URL
         type: string
@@ -807,6 +819,22 @@ node_types:
   manager.nodes.ManagerIPSetter:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      os_user:
+        description: IP setter's OS username. Will be created if not existing, and used to run the service.
+        type: string
+        default: cfyipsetter
+      os_group:
+        description: IP setter's OS group. Will be created if not existing, and used to run the service.
+        type: string
+        default: cfyipsetter
+      os_homedir:
+        description: IP setter's OS user's home directory. Will not be created if missing.
+        type: string
+        default: /etc/cloudify
+      sudoers_include_dir:
+        description: Path to sudoers includedir.
+        type: string
+        default: /etc/sudoers.d
       admin_username:
         default: { get_input: admin_username }
       admin_password:
