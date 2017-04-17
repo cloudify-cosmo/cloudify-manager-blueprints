@@ -362,6 +362,10 @@ node_types:
         description: PostgreSQL JDBC driver
         type: string
         default: { get_input: postgresql_jdbc_driver_url }
+      haveged_rpm_source_url:
+        description: haveged rpm source url
+        type: string
+        default: { get_input: haveged_source_url }
       use_existing_on_upgrade:
         description: Use existing logstash configuration
         type: string
