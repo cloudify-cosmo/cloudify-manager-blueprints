@@ -220,6 +220,10 @@ inputs:
     type: string
     default: logstash-output-jdbc-0.2.10.gem
 
+  haveged_source_url:
+    type: string
+    default: haveged-1.9.1-1.el7.x86_64.rpm
+
   nginx_source_url:
     type: string
     default: nginx-1.8.0-1.el7.ngx.x86_64.rpm

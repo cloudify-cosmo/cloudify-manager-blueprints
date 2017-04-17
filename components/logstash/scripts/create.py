@@ -84,14 +84,17 @@ def install_logstash():
 
     utils.yum_install(logstash_source_url, service_name=LOGSTASH_SERVICE_NAME)
 
-    # Make sure there's enough entropy in /dev/random
-    # before installing plugins
-    utils.run(['sudo', 'yum', 'install', '-y', 'rng-tools'])
-    utils.run(['sudo', 'rngd', '-r', '/dev/urandom'])
+    # Make sure there's enough entropy in /dev/random before installing plugins
+    haveged_source_url = ctx_properties['haveged_rpm_source_url']
+    utils.yum_install(haveged_source_url, service_name='haveged')
 
-    install_logstash_filter_json_encode_plugin()
-    install_logstash_output_jdbc_plugin()
-    install_postgresql_jdbc_driver()
+    utils.systemd.start('haveged', append_prefix=False)
+    try:
+        install_logstash_filter_json_encode_plugin()
+        install_logstash_output_jdbc_plugin()
+        install_postgresql_jdbc_driver()
+    finally:
+        utils.systemd.stop('haveged', append_prefix=False)
 
     utils.mkdir(logstash_log_path)
     utils.chown('logstash', 'logstash', logstash_log_path)
