@@ -6,6 +6,8 @@ After=cloudify-rabbitmq.service
 [Service]
 TimeoutStartSec=0
 Restart=always
+User={{ node.properties.os_user }}
+Group={{ node.properties.os_group }}
 EnvironmentFile=-/etc/sysconfig/cloudify-riemann
 ExecStart=/usr/bin/riemann -a ${RIEMANN_CONFIG_PATH}/main.clj
 

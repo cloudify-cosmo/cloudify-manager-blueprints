@@ -552,6 +552,18 @@ node_types:
   manager.nodes.Riemann:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
+      os_user:
+        description: Riemann OS username. Will be created if not existing, and used to run the service.
+        type: string
+        default: riemann
+      os_group:
+        description: Riemann OS group. Will be created if not existing, and used to run the service.
+        type: string
+        default: riemann
+      os_homedir:
+        description: Riemann OS user's home directory. Will not be created if missing.
+        type: string
+        default: /etc/cloudify
       langohr_jar_source_url:
         description: Langohr JAR Source URL
         type: string
@@ -1123,6 +1135,9 @@ relationships:
 
   riemann_to_nginx:
     derived_from: cloudify.relationships.connected_to
+
+  riemann_to_mgmtworker:
+    derived_from: cloudify.relationships.depends_on
 
   mgmtworker_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to
