@@ -32,9 +32,15 @@ def install_plugin(name, plugin_url):
     ctx.logger.info('Installing {} plugin...'.format(name))
     plugin_path = utils.download_cloudify_resource(
         plugin_url, service_name=LOGSTASH_SERVICE_NAME)
+
+    # Use /dev/urandom to get entropy faster while installing plugins
     utils.run([
         'sudo', '-u', 'logstash',
-        '/opt/logstash/bin/plugin', 'install', plugin_path,
+        'sh', '-c',
+        (
+            'export JRUBY_OPTS=-J-Djava.security.egd=file:/dev/urandom; '
+            '/opt/logstash/bin/plugin install {0}'.format(plugin_path)
+        )
     ])
 
 
@@ -83,11 +89,6 @@ def install_logstash():
     utils.copy_notice(LOGSTASH_SERVICE_NAME)
 
     utils.yum_install(logstash_source_url, service_name=LOGSTASH_SERVICE_NAME)
-
-    # Make sure there's enough entropy in /dev/random
-    # before installing plugins
-    utils.run(['sudo', 'yum', 'install', '-y', 'rng-tools'])
-    utils.run(['sudo', 'rngd', '-r', '/dev/urandom'])
 
     install_logstash_filter_json_encode_plugin()
     install_logstash_output_jdbc_plugin()
