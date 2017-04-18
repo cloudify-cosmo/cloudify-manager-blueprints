@@ -9,8 +9,9 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-MGMT_WORKER_SERVICE_NAME = 'mgmtworker'
+runtime_props = ctx.instance.runtime_properties
 
 if utils.is_upgrade:
-    utils.validate_upgrade_directories(MGMT_WORKER_SERVICE_NAME)
-    utils.systemd.verify_alive(MGMT_WORKER_SERVICE_NAME)
+    SERVICE_NAME = runtime_props['service_name']
+    utils.validate_upgrade_directories(SERVICE_NAME)
+    utils.systemd.verify_alive(SERVICE_NAME)

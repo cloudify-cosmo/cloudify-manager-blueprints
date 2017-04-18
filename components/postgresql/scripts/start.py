@@ -38,6 +38,7 @@ def _create_default_db(db_name, username, password):
     utils.sudo('su - postgres -c "{cmd} {db} {user} {password}"'
                .format(cmd=ps_config_destination, db=db_name,
                        user=username, password=password))
+    utils.remove(ps_config_destination)
 
 
 def _create_postgres_pass_file(host, db_name, username, password):

@@ -9,13 +9,13 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-INFLUX_SERVICE_NAME = 'influxdb'
+runtime_props = ctx.instance.runtime_properties
+SERVICE_NAME = runtime_props.get('service_name')
 
 
-ctx_properties = utils.ctx_factory.get(INFLUX_SERVICE_NAME)
-
-INFLUXDB_ENDPOINT_IP = ctx_properties['influxdb_endpoint_ip']
-
-if not INFLUXDB_ENDPOINT_IP:
-    ctx.logger.info('Stopping InfluxDB Service...')
-    utils.systemd.stop(INFLUX_SERVICE_NAME)
+# This makes sure that the `create` script already ran
+if SERVICE_NAME:
+    ctx_properties = utils.ctx_factory.get(SERVICE_NAME)
+    if not ctx_properties['influxdb_endpoint_ip']:
+        ctx.logger.info('Stopping InfluxDB Service...')
+        utils.systemd.stop(SERVICE_NAME)

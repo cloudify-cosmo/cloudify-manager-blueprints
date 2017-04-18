@@ -9,6 +9,9 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+runtime_props = ctx.instance.runtime_properties
+SERVICE_NAME = runtime_props['service_name']
+
 
 def check_response(response):
     """Check if the response looks like a correct REST service response.
@@ -20,15 +23,19 @@ def check_response(response):
     return response.code in {200, 401}
 
 
-utils.start_service(utils.NGINX_SERVICE_NAME, append_prefix=False)
-utils.systemd.verify_alive(utils.NGINX_SERVICE_NAME, append_prefix=False)
+utils.start_service(SERVICE_NAME, append_prefix=False)
+utils.systemd.verify_alive(SERVICE_NAME, append_prefix=False)
 
 nginx_url = '{0}://127.0.0.1/api/v2.1/version'.format(
-    ctx.instance.runtime_properties['external_rest_protocol'])
+    runtime_props['external_rest_protocol'])
 
 headers = {}
 if utils.is_upgrade or utils.is_rollback:
     headers = utils.create_maintenance_headers()
 
-utils.verify_service_http(utils.NGINX_SERVICE_NAME, nginx_url, check_response,
-                          headers=headers)
+utils.verify_service_http(
+    SERVICE_NAME,
+    nginx_url,
+    check_response,
+    headers=headers
+)

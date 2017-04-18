@@ -1,6 +1,6 @@
 # REST Service's config files
-MANAGER_REST_CONFIG_PATH="/opt/manager/cloudify-rest.conf"
-MANAGER_REST_SECURITY_CONFIG_PATH="/opt/manager/rest-security.conf"
+MANAGER_REST_CONFIG_PATH="{{ ctx.instance.runtime_properties.home_dir }}/cloudify-rest.conf"
+MANAGER_REST_SECURITY_CONFIG_PATH="{{ ctx.instance.runtime_properties.home_dir }}/rest-security.conf"
 
 # REST Service port
 REST_PORT=8100

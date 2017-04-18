@@ -9,9 +9,10 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-LOGSTASH_SERVICE_NAME = 'logstash'
+runtime_props = ctx.instance.runtime_properties
+SERVICE_NAME = runtime_props['service_name']
 
 ctx.logger.info('Starting Logstash Service...')
-utils.start_service(LOGSTASH_SERVICE_NAME, append_prefix=False)
+utils.start_service(SERVICE_NAME, append_prefix=False)
 
-utils.systemd.verify_alive(LOGSTASH_SERVICE_NAME, append_prefix=False)
+utils.systemd.verify_alive(SERVICE_NAME, append_prefix=False)

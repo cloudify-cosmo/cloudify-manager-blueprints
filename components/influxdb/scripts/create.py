@@ -11,10 +11,19 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-CONFIG_PATH = "components/influxdb/config"
-INFLUX_SERVICE_NAME = 'influxdb'
+SERVICE_NAME = 'influxdb'
 
-ctx_properties = utils.ctx_factory.create(INFLUX_SERVICE_NAME)
+# Some runtime properties to be used in teardown
+runtime_props = ctx.instance.runtime_properties
+runtime_props['service_name'] = SERVICE_NAME
+
+HOME_DIR = join('/opt', SERVICE_NAME)
+LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
+INIT_D_PATH = join('/etc', 'init.d', SERVICE_NAME)
+runtime_props['files_to_remove'] = [HOME_DIR, LOG_DIR, INIT_D_PATH]
+
+ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 
 def _configure_influxdb(host, port):
@@ -48,7 +57,7 @@ def _configure_influxdb(host, port):
     try:
         utils.deploy_blueprint_resource(
             '{0}/retention.json'.format(CONFIG_PATH),
-            '/tmp/retention.json', INFLUX_SERVICE_NAME)
+            '/tmp/retention.json', SERVICE_NAME)
         with open('/tmp/retention.json') as policy_file:
             retention_policy = policy_file.read()
         ctx.logger.debug(
@@ -85,32 +94,29 @@ def _install_influxdb():
 
     influxdb_user = 'influxdb'
     influxdb_group = 'influxdb'
-    influxdb_home = '/opt/influxdb'
-    influxdb_log_path = '/var/log/cloudify/influxdb'
 
     ctx.logger.info('Installing InfluxDB...')
     utils.set_selinux_permissive()
 
-    utils.copy_notice(INFLUX_SERVICE_NAME)
-    utils.mkdir(influxdb_home)
-    utils.mkdir(influxdb_log_path)
+    utils.copy_notice(SERVICE_NAME)
+    utils.mkdir(HOME_DIR)
+    utils.mkdir(LOG_DIR)
 
-    utils.yum_install(influxdb_source_url, service_name=INFLUX_SERVICE_NAME)
-    utils.sudo(['rm', '-rf', '/etc/init.d/influxdb'])
+    utils.yum_install(influxdb_source_url, service_name=SERVICE_NAME)
 
     ctx.logger.info('Deploying InfluxDB configuration...')
     utils.deploy_blueprint_resource(
         '{0}/config.toml'.format(CONFIG_PATH),
-        '{0}/shared/config.toml'.format(influxdb_home),
-        INFLUX_SERVICE_NAME)
+        '{0}/shared/config.toml'.format(HOME_DIR),
+        SERVICE_NAME)
 
-    utils.chown(influxdb_user, influxdb_group, influxdb_home)
-    utils.chown(influxdb_user, influxdb_group, influxdb_log_path)
+    utils.chown(influxdb_user, influxdb_group, HOME_DIR)
+    utils.chown(influxdb_user, influxdb_group, LOG_DIR)
 
-    utils.systemd.configure(INFLUX_SERVICE_NAME)
+    utils.systemd.configure(SERVICE_NAME)
     # Provided with InfluxDB's package. Will be removed if it exists.
-    utils.remove('/etc/init.d/influxdb')
-    utils.logrotate(INFLUX_SERVICE_NAME)
+    utils.remove(INIT_D_PATH)
+    utils.logrotate(SERVICE_NAME)
 
 
 def main():
@@ -129,12 +135,12 @@ def main():
         influxdb_endpoint_ip = ctx.instance.host_ip
         _install_influxdb()
 
-        utils.systemd.restart(INFLUX_SERVICE_NAME)
+        utils.systemd.restart(SERVICE_NAME)
 
         utils.wait_for_port(influxdb_endpoint_port, influxdb_endpoint_ip)
         _configure_influxdb(influxdb_endpoint_ip, influxdb_endpoint_port)
 
-        utils.systemd.stop(INFLUX_SERVICE_NAME)
+        utils.systemd.stop(SERVICE_NAME)
 
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         influxdb_endpoint_ip

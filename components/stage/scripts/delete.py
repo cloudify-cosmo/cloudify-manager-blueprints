@@ -10,10 +10,8 @@ ctx.download_resource(
 import utils  # NOQA
 
 runtime_props = ctx.instance.runtime_properties
-SERVICE_NAME = runtime_props.get('service_name')
 
 
 # This makes sure that the `create` script already ran
-if SERVICE_NAME and 'skip_installation' not in runtime_props:
-    ctx.logger.info('Stopping Stage (UI) Service...')
-    utils.systemd.stop(SERVICE_NAME)
+if runtime_props.get('service_name'):
+    utils.remove_component(runtime_props)

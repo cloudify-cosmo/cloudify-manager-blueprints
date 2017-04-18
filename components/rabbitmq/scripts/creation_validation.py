@@ -9,8 +9,7 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-
-RABBITMQ_SERVICE_NAME = 'rabbitmq'
+runtime_props = ctx.instance.runtime_properties
 
 IMMUTABLE_PROPERTIES = [
     'rabbitmq_username',
@@ -22,6 +21,6 @@ IMMUTABLE_PROPERTIES = [
 ]
 
 if utils.is_upgrade:
-    utils.validate_upgrade_directories(RABBITMQ_SERVICE_NAME)
-    utils.verify_immutable_properties(RABBITMQ_SERVICE_NAME,
-                                      IMMUTABLE_PROPERTIES)
+    SERVICE_NAME = runtime_props['service_name']
+    utils.validate_upgrade_directories(SERVICE_NAME)
+    utils.verify_immutable_properties(SERVICE_NAME, IMMUTABLE_PROPERTIES)

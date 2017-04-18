@@ -11,16 +11,16 @@ import utils  # NOQA
 
 RIEMANN_SERVICE_NAME = 'riemann'
 
-
 ctx_properties = utils.ctx_factory.create(RIEMANN_SERVICE_NAME)
+runtime_props = ctx.instance.runtime_properties
+runtime_props['service_name'] = RIEMANN_SERVICE_NAME
 
 
 def install_riemann():
     langohr_source_url = ctx_properties['langohr_jar_source_url']
     daemonize_source_url = ctx_properties['daemonize_rpm_source_url']
     riemann_source_url = ctx_properties['riemann_rpm_source_url']
-    # Needed for Riemann's config
-    cloudify_resources_url = ctx_properties['cloudify_resources_url']
+
     rabbitmq_username = ctx_properties['rabbitmq_username']
     rabbitmq_password = ctx_properties['rabbitmq_password']
 
@@ -40,12 +40,9 @@ def install_riemann():
             'and at least 1 character long in the manager blueprint inputs.')
 
     rabbit_props = utils.ctx_factory.get('rabbitmq')
-    ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip()
-    ctx.instance.runtime_properties['rabbitmq_username'] = \
-        rabbit_props.get('rabbitmq_username')
-    ctx.instance.runtime_properties['rabbitmq_password'] = \
-        rabbit_props.get('rabbitmq_password')
+    runtime_props['rabbitmq_endpoint_ip'] = utils.get_rabbitmq_endpoint_ip()
+    runtime_props['rabbitmq_username'] = rabbit_props.get('rabbitmq_username')
+    runtime_props['rabbitmq_password'] = rabbit_props.get('rabbitmq_password')
 
     ctx.logger.info('Installing Riemann...')
     utils.set_selinux_permissive()
@@ -66,11 +63,10 @@ def install_riemann():
 
     utils.logrotate(RIEMANN_SERVICE_NAME)
 
-    ctx.logger.info('Downloading cloudify-manager Repository...')
-    manager_repo = utils.download_cloudify_resource(cloudify_resources_url,
-                                                    RIEMANN_SERVICE_NAME)
-    ctx.logger.info('Extracting Manager Repository...')
-    utils.untar(manager_repo, '/tmp')
+    files_to_remove = [riemann_config_path,
+                       riemann_log_path,
+                       extra_classpath]
+    runtime_props['files_to_remove'] = files_to_remove
 
 
 install_riemann()

@@ -9,9 +9,10 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+runtime_props = ctx.instance.runtime_properties
 
-NGINX_SERVICE_NAME = 'nginx'
 
 if utils.is_upgrade:
-    utils.validate_upgrade_directories(NGINX_SERVICE_NAME)
-    utils.systemd.verify_alive(NGINX_SERVICE_NAME, append_prefix=False)
+    SERVICE_NAME = runtime_props['service_name']
+    utils.validate_upgrade_directories(SERVICE_NAME)
+    utils.systemd.verify_alive(SERVICE_NAME, append_prefix=False)

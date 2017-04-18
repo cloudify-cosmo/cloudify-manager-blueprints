@@ -33,6 +33,8 @@ INTERNAL_SSL_KEY_FILENAME = 'cloudify_internal_key.pem'
 INTERNAL_PKCS12_FILENAME = 'cloudify_internal.p12'
 INTERNAL_REST_PORT = 53333
 
+BASE_LOG_DIR = '/var/log/cloudify'
+
 EXTERNAL_SSL_CERTS_SOURCE_DIR = 'resources/ssl'
 EXTERNAL_SSL_CERT_FILENAME = 'cloudify_external_cert.pem'
 EXTERNAL_SSL_KEY_FILENAME = 'cloudify_external_key.pem'
@@ -578,6 +580,12 @@ def copy_notice(service):
     copy(resource_file, dest)
 
 
+def remove_notice(service):
+    """Remove the notice file /opt/SERVICENAME_NOTICE.txt"""
+    path = os.path.join('/opt', '{0}_NOTICE.txt'.format(service))
+    remove(path)
+
+
 def is_port_open(port, host='localhost'):
     """Try to connect to (host, port), return if the port was listening."""
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -667,6 +675,18 @@ def yum_install(source, service_name):
             return
     ctx.logger.info('yum installing {0}...'.format(source_path))
     sudo(['yum', 'install', '-y', source_path])
+
+
+def yum_remove(package, ignore_failures=False):
+    ctx.logger.info('yum removing {0}...'.format(package))
+    try:
+        sudo(['yum', 'remove', '-y', package])
+    except BaseException:
+        msg = 'Package `{0}` may not been removed successfully!'
+        if not ignore_failures:
+            ctx.logger.error(msg)
+            raise
+        ctx.logger.warn(msg)
 
 
 def get_filepath_from_pkg_name(filename, raise_if_not_found=False):
@@ -785,6 +805,14 @@ class SystemD(object):
 
         self.systemctl('daemon-reload')
 
+    def remove(self, service_name):
+        """Stop and disable the service, and then delete its data
+        """
+        self.stop(service_name, ignore_failure=True)
+        self.disable(service_name, ignore_failure=True)
+        remove(self.get_service_file_path(service_name))
+        remove(self.get_vars_file_path(service_name))
+
     @staticmethod
     def get_vars_file_path(service_name):
         """Returns the path to a systemd environment variables file
@@ -808,6 +836,15 @@ class SystemD(object):
         ctx.logger.debug('Enabling systemd service {0}...'.format(
             full_service_name))
         self.systemctl('enable', full_service_name, retries)
+
+    def disable(self, service_name, retries=0, append_prefix=True,
+                ignore_failure=False):
+        full_service_name = self._get_full_service_name(service_name,
+                                                        append_prefix)
+        ctx.logger.debug('Disabling systemd service {0}...'.format(
+            full_service_name))
+        self.systemctl('disable', full_service_name, retries,
+                       ignore_failure=ignore_failure)
 
     def start(self, service_name, retries=0, append_prefix=True):
         full_service_name = self._get_full_service_name(service_name,
@@ -961,6 +998,13 @@ def logrotate(service):
     chown('root', 'root', config_file_destination)
 
 
+def remove_logrotate(service_name):
+    ctx.logger.debug('Removing logrotate config...')
+    logrotated_path = '/etc/logrotate.d'
+    config_file_destination = os.path.join(logrotated_path, service_name)
+    remove(config_file_destination)
+
+
 def chmod(mode, path):
     ctx.logger.debug('chmoding {0}: {1}'.format(path, mode))
     sudo(['chmod', mode, path])
@@ -990,15 +1034,20 @@ def clean_var_log_dir(service):
     pass
 
 
-def untar(source, destination='/tmp', strip=1, skip_old_files=False):
+def untar(source,
+          destination=None,
+          skip_old_files=False,
+          unique_tmp_dir=False):
     # TODO: use tarfile instead
+    if not destination:
+        destination = tempfile.mkdtemp() if unique_tmp_dir else '/tmp'
     ctx.logger.debug('Extracting {0} to {1}...'.format(
         source, destination))
-    tar_command = ['tar', '-xzvf', source, '-C', destination,
-                   '--strip={0}'.format(strip)]
+    tar_command = ['tar', '-xzvf', source, '-C', destination, '--strip=1']
     if skip_old_files:
         tar_command.append('--skip-old-files')
     sudo(tar_command)
+    return destination
 
 
 def validate_md5_checksum(resource_path, md5_checksum_file_path):
@@ -1806,3 +1855,37 @@ def _clean_rollback_data():
 
 def set_upgrade_success_in_upgrade_meta():
     _set_upgrade_data(upgrade_success=True)
+
+
+def remove_component(runtime_props):
+    service_name = runtime_props['service_name']
+    ctx.logger.info('Uninstalling {0}'.format(service_name))
+
+    systemd.remove(service_name)
+    remove_notice(service_name)
+    remove_logrotate(service_name)
+
+    packages_to_remove = runtime_props.get('packages_to_remove', [])
+    for package in packages_to_remove:
+        yum_remove(package, ignore_failures=True)
+
+    files_to_remove = runtime_props.get('files_to_remove', [])
+    for f in files_to_remove:
+        remove(f)
+
+    group = runtime_props.get('service_group')
+    if group:
+        sudo(['groupdel', group], ignore_failures=True)
+
+    user = runtime_props.get('service_user')
+    if user:
+        sudo(['userdel', '--force', user], ignore_failures=True)
+
+
+def extend_runtime_properties_list(runtime_props, key_name, new_list):
+    """Extend a list in the runtime properties
+    list.extend doen't call __setitem__, so we need to do it explicitly
+    """
+    list_to_extend = runtime_props[key_name]
+    list_to_extend.extend(new_list)
+    runtime_props[key_name] = list_to_extend

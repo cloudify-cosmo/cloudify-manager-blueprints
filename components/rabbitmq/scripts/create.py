@@ -11,11 +11,19 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+SERVICE_NAME = 'rabbitmq'
 
-CONFIG_PATH = 'components/rabbitmq/config'
-RABBITMQ_SERVICE_NAME = 'rabbitmq'
+# Some runtime properties to be used in teardown
+runtime_props = ctx.instance.runtime_properties
+runtime_props['service_name'] = SERVICE_NAME
 
-ctx_properties = utils.ctx_factory.create(RABBITMQ_SERVICE_NAME)
+HOME_DIR = join('/etc', SERVICE_NAME)
+LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
+FD_LIMIT_PATH = '/etc/security/limits.d/rabbitmq.conf'
+runtime_props['files_to_remove'] = [HOME_DIR, LOG_DIR, FD_LIMIT_PATH]
+
+ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 
 def check_if_user_exists(username):
@@ -49,37 +57,33 @@ def _install_rabbitmq():
     erlang_rpm_source_url = ctx_properties['erlang_rpm_source_url']
     rabbitmq_rpm_source_url = ctx_properties['rabbitmq_rpm_source_url']
     # TODO: maybe we don't need this env var
-    os.putenv('RABBITMQ_FD_LIMIT',
-              str(ctx_properties['rabbitmq_fd_limit']))
-    rabbitmq_log_path = '/var/log/cloudify/rabbitmq'
+    os.putenv('RABBITMQ_FD_LIMIT', str(ctx_properties['rabbitmq_fd_limit']))
     rabbitmq_username = ctx_properties['rabbitmq_username']
     rabbitmq_password = ctx_properties['rabbitmq_password']
 
     ctx.logger.info('Installing RabbitMQ...')
     utils.set_selinux_permissive()
 
-    utils.copy_notice(RABBITMQ_SERVICE_NAME)
-    utils.mkdir(rabbitmq_log_path)
+    utils.copy_notice(SERVICE_NAME)
+    utils.mkdir(LOG_DIR)
 
-    utils.yum_install(erlang_rpm_source_url,
-                      service_name=RABBITMQ_SERVICE_NAME)
-    utils.yum_install(rabbitmq_rpm_source_url,
-                      service_name=RABBITMQ_SERVICE_NAME)
+    utils.yum_install(erlang_rpm_source_url, service_name=SERVICE_NAME)
+    utils.yum_install(rabbitmq_rpm_source_url, service_name=SERVICE_NAME)
 
-    utils.logrotate(RABBITMQ_SERVICE_NAME)
+    utils.logrotate(SERVICE_NAME)
 
-    utils.systemd.configure(RABBITMQ_SERVICE_NAME)
+    utils.systemd.configure(SERVICE_NAME)
 
     ctx.logger.info('Configuring File Descriptors Limit...')
     utils.deploy_blueprint_resource(
         '{0}/rabbitmq_ulimit.conf'.format(CONFIG_PATH),
-        '/etc/security/limits.d/rabbitmq.conf',
-        RABBITMQ_SERVICE_NAME)
+        FD_LIMIT_PATH,
+        SERVICE_NAME)
 
     utils.deploy_blueprint_resource(
         '{0}/rabbitmq-definitions.json'.format(CONFIG_PATH),
-        '/etc/rabbitmq/definitions.json',
-        RABBITMQ_SERVICE_NAME)
+        join(HOME_DIR, 'definitions.json'),
+        SERVICE_NAME)
 
     # This stops rabbit from failing if the host name changes, e.g. when
     # a manager is deployed from an image but given a new hostname.
@@ -89,16 +93,16 @@ def _install_rabbitmq():
     utils.deploy_blueprint_resource(
         '{0}/rabbitmq-env.conf'.format(CONFIG_PATH),
         '/etc/rabbitmq/rabbitmq-env.conf',
-        RABBITMQ_SERVICE_NAME)
+        SERVICE_NAME)
     # Delete old mnesia node
     utils.sudo(['rm', '-rf', '/var/lib/rabbitmq/mnesia'])
 
     utils.systemd.systemctl('daemon-reload')
 
-    utils.chown('rabbitmq', 'rabbitmq', rabbitmq_log_path)
+    utils.chown('rabbitmq', 'rabbitmq', LOG_DIR)
 
     # rabbitmq restart exits with 143 status code that is valid in this case.
-    utils.systemd.restart(RABBITMQ_SERVICE_NAME, ignore_failure=True)
+    utils.systemd.restart(SERVICE_NAME, ignore_failure=True)
 
     time.sleep(10)
     utils.wait_for_port(5672)
@@ -115,10 +119,10 @@ def _install_rabbitmq():
 
     utils.deploy_blueprint_resource(
         '{0}/rabbitmq.config'.format(CONFIG_PATH),
-        '/etc/rabbitmq/rabbitmq.config',
-        RABBITMQ_SERVICE_NAME, user_resource=True)
+        join(HOME_DIR, 'rabbitmq.config'),
+        SERVICE_NAME, user_resource=True)
 
-    utils.systemd.stop(RABBITMQ_SERVICE_NAME, retries=5)
+    utils.systemd.stop(SERVICE_NAME, retries=5)
 
 
 def main():

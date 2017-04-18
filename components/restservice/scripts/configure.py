@@ -31,10 +31,9 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-# TODO: change to /opt/cloudify-rest-service
-REST_SERVICE_HOME = '/opt/manager'
-REST_SERVICE_NAME = 'restservice'
-CONFIG_PATH = 'components/restservice/config'
+runtime_props = ctx.instance.runtime_properties
+SERVICE_NAME = runtime_props['service_name']
+CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 
 def _random_alphanumeric(result_len=31):
@@ -74,7 +73,7 @@ def _deploy_security_configuration():
     os.close(fd)
     with open(path, 'w') as f:
         json.dump(security_configuration, f)
-    rest_security_path = join(REST_SERVICE_HOME, 'rest-security.conf')
+    rest_security_path = join(runtime_props['home_dir'], 'rest-security.conf')
     utils.move(path, rest_security_path)
     utils.chown(os_user, os_group, rest_security_path)
 
@@ -89,8 +88,7 @@ def _create_db_tables_and_add_users():
                           destination=create_script_destination)
     # Directly calling with this python bin, in order to make sure it's run
     # in the correct venv
-    python_path = '{0}/env/bin/python'.format(REST_SERVICE_HOME)
-    runtime_props = ctx.instance.runtime_properties
+    python_path = join(runtime_props['home_dir'], 'env', 'bin', 'python')
 
     args_dict = runtime_props['security_configuration']
     args_dict['postgresql_host'] = runtime_props['postgresql_host']
@@ -107,6 +105,7 @@ def _create_db_tables_and_add_users():
 
     _log_results(result)
     utils.remove(args_file_location)
+    utils.remove(create_script_destination)
 
 
 def _log_results(result):
@@ -127,18 +126,17 @@ def _log_results(result):
 
 def _deploy_rest_configuration():
     ctx.logger.info('Deploying REST Service Configuration file...')
-    runtime_props = ctx.instance.runtime_properties
     runtime_props['file_server_root'] = utils.MANAGER_RESOURCES_HOME
     utils.deploy_blueprint_resource(
-            os.path.join(CONFIG_PATH, 'cloudify-rest.conf'),
-            os.path.join(REST_SERVICE_HOME, 'cloudify-rest.conf'),
-            REST_SERVICE_NAME)
+            join(CONFIG_PATH, 'cloudify-rest.conf'),
+            join(runtime_props['home_dir'], 'cloudify-rest.conf'),
+            SERVICE_NAME)
 
 
 def configure_restservice():
     _deploy_rest_configuration()
     _deploy_security_configuration()
-    utils.systemd.configure(REST_SERVICE_NAME, tmpfiles=True)
+    utils.systemd.configure(SERVICE_NAME, tmpfiles=True)
     _create_db_tables_and_add_users()
 
 

@@ -10,8 +10,15 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+SERVICE_NAME = 'java'
 
-ctx_properties = utils.ctx_factory.create('java')
+# Some runtime properties to be used in teardown
+runtime_props = ctx.instance.runtime_properties
+runtime_props['service_name'] = SERVICE_NAME
+LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
+runtime_props['files_to_remove'] = [LOG_DIR]
+
+ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 
 
 def install_java():
@@ -19,18 +26,17 @@ def install_java():
 
     ctx.logger.info('Installing Java...')
     utils.set_selinux_permissive()
-    utils.copy_notice('java')
+    utils.copy_notice(SERVICE_NAME)
 
-    utils.yum_install(java_source_url, service_name='java')
+    utils.yum_install(java_source_url, SERVICE_NAME)
 
-    # Make sure the cloudify logs dir exists before we try moving the java log
-    # there -p will cause it not to error if the dir already exists
-    utils.mkdir('/var/log/cloudify')
+    utils.mkdir(LOG_DIR)
 
     # Java install log is dropped in /var/log.
     # Move it to live with the rest of the cloudify logs
-    if os.path.isfile('/var/log/java_install.log'):
-        utils.sudo('mv /var/log/java_install.log /var/log/cloudify')
+    java_install_log = '/var/log/java_install.log'
+    if os.path.isfile(java_install_log):
+        utils.move(java_install_log, LOG_DIR)
 
 
 install_java()

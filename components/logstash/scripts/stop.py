@@ -9,9 +9,11 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-LOGSTASH_SERVICE_NAME = 'logstash'
+runtime_props = ctx.instance.runtime_properties
+SERVICE_NAME = runtime_props.get('service_name')
 
 
-ctx.logger.info('Stopping Logstash Service...')
-utils.systemd.stop(LOGSTASH_SERVICE_NAME,
-                   append_prefix=False)
+# This makes sure that the `create` script already ran
+if SERVICE_NAME:
+    ctx.logger.info('Stopping Logstash Service...')
+    utils.systemd.stop(SERVICE_NAME, append_prefix=False)
