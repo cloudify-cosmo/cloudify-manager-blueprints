@@ -57,6 +57,13 @@ def _deploy_security_configuration():
         'encoding_min_length': 5
     }
 
+    rest_service_user = ctx.node.properties['service_user']
+
+    utils.chown(
+        rest_service_user, rest_service_user,
+        utils.MANAGER_RESOURCES_HOME)
+    utils.sudo(['ls', '-la', '/opt/manager'])
+
     runtime_props = ctx.instance.runtime_properties
     current_props = runtime_props['security_configuration']
     current_props.update(security_configuration)
@@ -66,7 +73,9 @@ def _deploy_security_configuration():
     os.close(fd)
     with open(path, 'w') as f:
         json.dump(security_configuration, f)
-    utils.move(path, join(REST_SERVICE_HOME, 'rest-security.conf'))
+    rest_security_path = join(REST_SERVICE_HOME, 'rest-security.conf')
+    utils.move(path, rest_security_path)
+    utils.chown(rest_service_user, rest_service_user, rest_security_path)
 
 
 def _create_db_tables_and_add_users():
