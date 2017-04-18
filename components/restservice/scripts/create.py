@@ -121,10 +121,7 @@ def install_restservice():
     ctx.logger.info('Installing REST Service...')
     utils.set_selinux_permissive()
 
-    utils.create_service_user(
-        ctx.node.properties['service_user'],
-        REST_SERVICE_HOME,
-    )
+    utils.create_service_user(rest_service_user, REST_SERVICE_HOME)
 
     utils.copy_notice(REST_SERVICE_NAME)
     utils.mkdir(REST_SERVICE_HOME)
