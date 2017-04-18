@@ -9,14 +9,14 @@ Group={{ node.properties.os_group }}
 TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-restservice
-ExecStart=/bin/sh -c '/opt/manager/env/bin/gunicorn \
+ExecStart=/bin/sh -c '{{ ctx.instance.runtime_properties.home_dir }}/env/bin/gunicorn \
     --pid /run/cloudify-restservice/pid \
     -w {{ node.properties.gunicorn_worker_count or '$((${WORKER_COUNT} > ${MAX_WORKER_COUNT} ? ${MAX_WORKER_COUNT} : ${WORKER_COUNT}))' }} \
     --max-requests {{ node.properties.gunicorn_max_requests }} \
     -b 0.0.0.0:${REST_PORT} \
     --timeout 300 manager_rest.server:app \
-    --log-file /var/log/cloudify/rest/gunicorn.log \
-    --access-logfile /var/log/cloudify/rest/gunicorn-access.log'
+    --log-file {{ ctx.instance.runtime_properties.log_dir }}/gunicorn.log \
+    --access-logfile {{ ctx.instance.runtime_properties.log_dir }}/gunicorn-access.log'
 
 [Install]
 WantedBy=multi-user.target

@@ -10,12 +10,19 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-STAGE_SERVICE_NAME = 'stage'
+SERVICE_NAME = 'stage'
 
+# Some runtime properties to be used in teardown
+runtime_props = ctx.instance.runtime_properties
+runtime_props['service_name'] = SERVICE_NAME
 
-CONFIG_PATH = 'components/stage/config'
+HOME_DIR = join('/opt', 'cloudify-{0}'.format(SERVICE_NAME))
+NODEJS_DIR = join('/opt', 'nodejs')
+LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
+runtime_props['files_to_remove'] = [HOME_DIR, NODEJS_DIR, LOG_DIR]
 
-ctx_properties = utils.ctx_factory.create(STAGE_SERVICE_NAME)
+ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 
 def install_stage():
@@ -33,40 +40,38 @@ def install_stage():
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         os.environ.get('INFLUXDB_ENDPOINT_IP')
 
-    nodejs_home = '/opt/nodejs'
-    stage_home = '/opt/cloudify-stage'
-    stage_log_path = '/var/log/cloudify/stage'
-
     stage_user = 'stage'
     stage_group = 'stage'
+    runtime_props['service_user'] = stage_user
+    runtime_props['service_group'] = stage_group
 
     utils.set_selinux_permissive()
 
-    utils.copy_notice(STAGE_SERVICE_NAME)
+    utils.copy_notice(SERVICE_NAME)
 
-    utils.mkdir(nodejs_home)
-    utils.mkdir(stage_home)
-    utils.mkdir(stage_log_path)
+    utils.mkdir(NODEJS_DIR)
+    utils.mkdir(HOME_DIR)
+    utils.mkdir(LOG_DIR)
 
-    utils.create_service_user(stage_user, stage_home)
+    utils.create_service_user(stage_user, HOME_DIR)
 
     ctx.logger.info('Installing NodeJS...')
-    nodejs = utils.download_cloudify_resource(nodejs_source_url,
-                                              STAGE_SERVICE_NAME)
-    utils.untar(nodejs, nodejs_home)
+    nodejs = utils.download_cloudify_resource(nodejs_source_url, SERVICE_NAME)
+    utils.untar(nodejs, NODEJS_DIR)
+    utils.remove(nodejs)
 
     ctx.logger.info('Installing Cloudify Stage (UI)...')
-    stage = utils.download_cloudify_resource(stage_source_url,
-                                             STAGE_SERVICE_NAME)
-    utils.untar(stage, stage_home)
+    stage = utils.download_cloudify_resource(stage_source_url, SERVICE_NAME)
+    utils.untar(stage, HOME_DIR)
+    utils.remove(stage)
 
     ctx.logger.info('Fixing permissions...')
-    utils.chown(stage_user, stage_group, stage_home)
-    utils.chown(stage_user, stage_group, nodejs_home)
-    utils.chown(stage_user, stage_group, stage_log_path)
+    utils.chown(stage_user, stage_group, HOME_DIR)
+    utils.chown(stage_user, stage_group, NODEJS_DIR)
+    utils.chown(stage_user, stage_group, LOG_DIR)
 
-    utils.logrotate(STAGE_SERVICE_NAME)
-    utils.systemd.configure(STAGE_SERVICE_NAME)
+    utils.logrotate(SERVICE_NAME)
+    utils.systemd.configure(SERVICE_NAME)
 
 
 def main():

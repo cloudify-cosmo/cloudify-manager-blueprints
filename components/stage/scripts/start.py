@@ -9,9 +9,9 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-STAGE_SERVICE_NAME = 'stage'
+runtime_props = ctx.instance.runtime_properties
 
 
-if 'skip_installation' not in ctx.instance.runtime_properties:
+if 'skip_installation' not in runtime_props:
     ctx.logger.info('Starting Stage (UI) Service...')
-    utils.start_service(STAGE_SERVICE_NAME)
+    utils.start_service(runtime_props['service_name'])

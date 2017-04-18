@@ -9,10 +9,11 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-INFLUX_SERVICE_NAME = 'influxdb'
+runtime_props = ctx.instance.runtime_properties
+SERVICE_NAME = runtime_props['service_name']
 
 
-ctx_properties = utils.ctx_factory.get(INFLUX_SERVICE_NAME)
+ctx_properties = utils.ctx_factory.get(SERVICE_NAME)
 
 INFLUXDB_ENDPOINT_IP = ctx_properties['influxdb_endpoint_ip']
 INFLUXDB_ENDPOINT_PORT = 8086
@@ -29,15 +30,14 @@ def check_influxdb_response(response):
 
 if not INFLUXDB_ENDPOINT_IP:
     ctx.logger.info('Starting InfluxDB Service...')
-    utils.start_service(INFLUX_SERVICE_NAME)
+    utils.start_service(SERVICE_NAME)
 
     INFLUXDB_ENDPOINT_IP = '127.0.0.1'
 
-    utils.systemd.verify_alive(INFLUX_SERVICE_NAME)
+    utils.systemd.verify_alive(SERVICE_NAME)
 
 influxdb_url = 'http://{0}:{1}'.format(
     INFLUXDB_ENDPOINT_IP, INFLUXDB_ENDPOINT_PORT)
 
 
-utils.verify_service_http(INFLUX_SERVICE_NAME, influxdb_url,
-                          check_influxdb_response)
+utils.verify_service_http(SERVICE_NAME, influxdb_url, check_influxdb_response)

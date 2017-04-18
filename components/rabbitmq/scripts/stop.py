@@ -9,8 +9,11 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-RABBITMQ_SERVICE_NAME = 'rabbitmq'
+runtime_props = ctx.instance.runtime_properties
+SERVICE_NAME = runtime_props.get('service_name')
 
 
-ctx.logger.info("Stopping RabbitMQ Service...")
-utils.systemd.stop(RABBITMQ_SERVICE_NAME, ignore_failure=True)
+# This makes sure that the `create` script already ran
+if SERVICE_NAME:
+    ctx.logger.info("Stopping RabbitMQ Service...")
+    utils.systemd.stop(SERVICE_NAME, ignore_failure=True)

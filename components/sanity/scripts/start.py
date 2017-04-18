@@ -12,10 +12,14 @@ ctx.download_resource(
         join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-REST_VERSION = 'v2.1'
+REST_VERSION = 'v3'
 BLUEPRINT_ID = 'sanity_bp'
 DEPLOYMENT_ID = 'sanity_deployment'
-SANITY_SERVICE_NAME = 'sanity'
+SERVICE_NAME = 'sanity'
+
+# Some runtime properties to be used in teardown
+runtime_props = ctx.instance.runtime_properties
+runtime_props['service_name'] = SERVICE_NAME
 
 manager_ip = os.environ.get('manager_ip')
 ssh_user = os.environ.get('ssh_user')
@@ -23,14 +27,14 @@ manager_remote_key_path = \
     ctx.instance.runtime_properties['manager_remote_key_path']
 rest_protocol = ctx.instance.runtime_properties['rest_protocol']
 rest_port = ctx.instance.runtime_properties['rest_port']
-ctx_properties = utils.ctx_factory.create(SANITY_SERVICE_NAME)
+ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 
 
 def _prepare_sanity_app():
     sanity_app_source_url = ctx_properties['sanity_app_source_url']
     app_tar = utils.download_cloudify_resource(
               url=sanity_app_source_url,
-              service_name=SANITY_SERVICE_NAME)
+              service_name=SERVICE_NAME)
 
     _upload_app_blueprint(app_tar)
     _deploy_app()

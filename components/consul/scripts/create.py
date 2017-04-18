@@ -12,21 +12,27 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+SERVICE_NAME = 'consul'
 
-CONSUL_SERVICE_NAME = 'consul'
-ctx_properties = utils.ctx_factory.create(CONSUL_SERVICE_NAME)
+# Some runtime properties to be used in teardown
+runtime_props = ctx.instance.runtime_properties
+runtime_props['service_name'] = SERVICE_NAME
+HOME_DIR = join('/opt', SERVICE_NAME)
+CONFIG_DIR = '/etc/consul.d'
+runtime_props['files_to_remove'] = [HOME_DIR, CONFIG_DIR]
+
+ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 
 
 def install_consul():
-    consul_binary = '/opt/consul/consul'
-    consul_config_dir = '/etc/consul.d'
+    consul_binary = join(HOME_DIR, 'consul')
 
     utils.mkdir(dirname(consul_binary))
-    utils.mkdir(consul_config_dir)
+    utils.mkdir(CONFIG_DIR)
 
     consul_package = \
         utils.download_cloudify_resource(ctx_properties['consul_package_url'],
-                                         CONSUL_SERVICE_NAME)
+                                         SERVICE_NAME)
 
     temp_dir = tempfile.mkdtemp()
     try:

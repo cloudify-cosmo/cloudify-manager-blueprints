@@ -14,7 +14,9 @@ import utils  # NOQA
 
 
 MANAGER_IP_SETTER_SERVICE_NAME = 'manager-ip-setter'
+runtime_props = ctx.instance.runtime_properties
 ctx_properties = utils.ctx_factory.create(MANAGER_IP_SETTER_SERVICE_NAME)
+
 MANAGER_IP_SETTER_USER = ctx_properties['os_user']
 MANAGER_IP_SETTER_GROUP = ctx_properties['os_group']
 HOMEDIR = ctx_properties['os_homedir']
@@ -23,8 +25,12 @@ SUDOERS_INCLUDE_DIR = ctx_properties['sudoers_include_dir']
 MANAGER_IP_SETTER_SCRIPT_NAME = 'manager-ip-setter.sh'
 UPDATE_PROVIDER_CONTEXT_SCRIPT_NAME = 'update-provider-context.py'
 CREATE_INTERNAL_SSL_CERTS_SCRIPT_NAME = 'create-internal-ssl-certs.py'
-
 MANAGER_IP_SETTER_DIR = '/opt/cloudify/manager-ip-setter'
+
+runtime_props['files_to_remove'] = [MANAGER_IP_SETTER_DIR]
+runtime_props['service_name'] = MANAGER_IP_SETTER_SERVICE_NAME
+runtime_props['service_user'] = MANAGER_IP_SETTER_USER
+runtime_props['service_group'] = MANAGER_IP_SETTER_GROUP
 
 
 def deploy_script(script_name, description):

@@ -12,8 +12,9 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-RABBITMQ_SERVICE_NAME = 'rabbitmq'
-ctx_properties = utils.ctx_factory.get(RABBITMQ_SERVICE_NAME)
+runtime_props = ctx.instance.runtime_properties
+SERVICE_NAME = runtime_props['service_name']
+ctx_properties = utils.ctx_factory.get(SERVICE_NAME)
 PORT = 5671
 
 
@@ -49,7 +50,7 @@ def set_rabbitmq_policy(name, expression, policy):
 
 ctx.logger.info("Starting RabbitMQ Service...")
 # rabbitmq restart exits with 143 status code that is valid in this case.
-utils.systemd.restart(RABBITMQ_SERVICE_NAME, ignore_failure=True)
+utils.systemd.restart(SERVICE_NAME, ignore_failure=True)
 # This should be done in the create script.
 # For some reason, it fails. Need to check.
 
@@ -108,11 +109,10 @@ set_rabbitmq_policy(
     policy=riemann_deployment_queues_message_ttl
 )
 
-# rabbitmq restart exits with 143 status code that is valid in this case.
-utils.start_service(RABBITMQ_SERVICE_NAME, ignore_restart_fail=True)
+utils.systemd.restart(SERVICE_NAME)
 rabbitmq_endpoint_ip = '127.0.0.1'
 
-utils.systemd.verify_alive(RABBITMQ_SERVICE_NAME)
+utils.systemd.verify_alive(SERVICE_NAME)
 try:
     check_rabbit_running()
 except ValueError:
@@ -122,4 +122,4 @@ try:
     check_port_accessible(rabbitmq_endpoint_ip, PORT)
 except ValueError:
     ctx.abort_operation('{0} error: port {1}:{2} was not open'.format(
-        RABBITMQ_SERVICE_NAME, rabbitmq_endpoint_ip, PORT))
+        SERVICE_NAME, rabbitmq_endpoint_ip, PORT))

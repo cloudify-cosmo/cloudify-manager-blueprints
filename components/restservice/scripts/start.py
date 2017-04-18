@@ -12,8 +12,8 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-REST_SERVICE_NAME = 'restservice'
-REST_SERVICE_HOME = '/opt/manager'
+runtime_props = ctx.instance.runtime_properties
+SERVICE_NAME = runtime_props['service_name']
 
 
 def verify_restservice(url):
@@ -31,7 +31,7 @@ def verify_restservice(url):
         headers = utils.get_auth_headers(True)
         headers['tenant'] = 'default_tenant'
 
-    utils.verify_service_http(REST_SERVICE_NAME, url, headers=headers)
+    utils.verify_service_http(SERVICE_NAME, url, headers=headers)
 
     blueprints_url = urlparse.urljoin(url, 'api/v2.1/blueprints')
     req = urllib2.Request(blueprints_url, headers=headers)
@@ -61,10 +61,10 @@ def verify_restservice(url):
 
 
 ctx.logger.info('Starting Cloudify REST Service...')
-utils.start_service(REST_SERVICE_NAME)
+utils.start_service(SERVICE_NAME)
 
 ctx.logger.info('Verifying Rest service is running...')
-utils.systemd.verify_alive(REST_SERVICE_NAME)
+utils.systemd.verify_alive(SERVICE_NAME)
 
 ctx.logger.info('Verifying Rest service is working as expected...')
 restservice_url = 'http://{0}:{1}'.format('127.0.0.1', 8100)

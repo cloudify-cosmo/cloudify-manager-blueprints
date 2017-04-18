@@ -9,8 +9,8 @@ Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-mgmtworker
 User={{ node.properties.os_user }}
 Group={{ node.properties.os_group }}
-WorkingDirectory=/opt/mgmtworker/work
-ExecStart=/opt/mgmtworker/env/bin/celery worker \
+WorkingDirectory={{ ctx.instance.runtime_properties.home_dir }}/work
+ExecStart={{ ctx.instance.runtime_properties.home_dir }}/env/bin/celery worker \
     -Ofair \
     --include=cloudify.dispatch \
     --hostname cloudify.management \

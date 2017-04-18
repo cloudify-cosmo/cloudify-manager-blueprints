@@ -1,4 +1,4 @@
-/var/log/cloudify/rest/*.log {
+{{ ctx.instance.runtime_properties.log_dir }}/*.log {
         hourly
         missingok
         rotate 7

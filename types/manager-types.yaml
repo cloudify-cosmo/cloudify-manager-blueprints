@@ -47,6 +47,13 @@ node_types:
               default: components/manager/scripts/create.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/manager/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
 
   cloudify.nodes.MyCloudifyManager:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -168,6 +175,13 @@ node_types:
               default: components/java/scripts/validate.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/java/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
 
   manager.nodes.Consul:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -183,6 +197,13 @@ node_types:
               default: components/consul/scripts/create.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/consul/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
 
   manager.nodes.Syncthing:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -196,6 +217,13 @@ node_types:
           inputs:
             script_path:
               default: components/syncthing/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/syncthing/scripts/delete.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -265,6 +293,13 @@ node_types:
           inputs:
             script_path:
               default: components/rabbitmq/scripts/stop.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/rabbitmq/scripts/delete.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -344,6 +379,13 @@ node_types:
               default: components/postgresql/scripts/stop.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/postgresql/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
 
   manager.nodes.Logstash:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -396,6 +438,13 @@ node_types:
               default: components/logstash/scripts/stop.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/logstash/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
 
   manager.nodes.InfluxDB:
     derived_from: cloudify.nodes.DBMS
@@ -432,6 +481,13 @@ node_types:
           inputs:
             script_path:
               default: components/influxdb/scripts/stop.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/influxdb/scripts/delete.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -483,6 +539,13 @@ node_types:
           inputs:
             script_path:
               default: components/nginx/scripts/stop.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/nginx/scripts/delete.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -544,6 +607,13 @@ node_types:
           inputs:
             script_path:
               default: components/riemann/scripts/stop.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/riemann/scripts/delete.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -674,6 +744,13 @@ node_types:
               default: components/restservice/scripts/stop.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/restservice/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
 
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -774,6 +851,13 @@ node_types:
               default: components/mgmtworker/scripts/stop.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/mgmtworker/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
 
   manager.nodes.AmqpInfluxBroker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -823,6 +907,13 @@ node_types:
               default: components/amqpinflux/scripts/stop.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/amqpinflux/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
 
   manager.nodes.ManagerIPSetter:
     derived_from: cloudify.nodes.ApplicationModule
@@ -858,6 +949,13 @@ node_types:
             fabric_env: *simple_fabric_env
             set_manager_ip_on_boot:
               default: { get_input: set_manager_ip_on_boot }
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/manager-ip-setter/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
 
   manager.nodes.Stage:
     derived_from: cloudify.nodes.ApplicationModule
@@ -901,6 +999,13 @@ node_types:
           inputs:
             script_path:
               default: components/stage/scripts/stop.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/stage/scripts/delete.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -957,7 +1062,7 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_task
           inputs:
             tasks_file:
-              default: components/manager/scripts/sanity/create_sanity.py
+              default: components/sanity/scripts/create.py
             task_name:
               default: upload_keypair
             task_properties:
@@ -969,7 +1074,7 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/manager/scripts/sanity/sanity.py
+              default: components/sanity/scripts/start.py
             ssh_user:
               default: { get_input: ssh_user }
             manager_ip:
@@ -1084,7 +1189,7 @@ relationships:
     source_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         postconfigure:
-         implementation: components/manager/scripts/sanity/get_rest_protocol.py
+         implementation: components/sanity/scripts/postconfigure.py
 
   amqpinflux_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to

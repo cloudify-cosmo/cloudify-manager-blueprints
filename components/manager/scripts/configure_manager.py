@@ -43,6 +43,7 @@ def _disable_requiretty():
 
     utils.sudo('chmod +x {0}'.format(script_dest))
     utils.sudo(script_dest)
+    utils.remove(script_dest)
 
 
 def _configure_security_properties():

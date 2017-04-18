@@ -10,12 +10,15 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-AMQPINFLUX_SERVICE_NAME = 'amqpinflux'
+SERVICE_NAME = 'amqpinflux'
 
+# Some runtime properties to be used in teardown
+runtime_props = ctx.instance.runtime_properties
+runtime_props['service_name'] = SERVICE_NAME
+HOME_DIR = join('/opt', SERVICE_NAME)
+runtime_props['files_to_remove'] = [HOME_DIR]
 
-AMQPINFLUX_HOME = '/opt/amqpinflux'
-
-ctx_properties = utils.ctx_factory.create(AMQPINFLUX_SERVICE_NAME)
+ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 
 
 def _install_optional(amqpinflux_venv):
@@ -45,24 +48,26 @@ def install_amqpinflux():
 
     amqpinflux_user = 'amqpinflux'
     amqpinflux_group = 'amqpinflux'
-    amqpinflux_venv = '{0}/env'.format(AMQPINFLUX_HOME)
+    amqpinflux_venv = '{0}/env'.format(HOME_DIR)
+    runtime_props['service_user'] = amqpinflux_user
+    runtime_props['service_group'] = amqpinflux_group
 
     ctx.logger.info('Installing AQMPInflux...')
     utils.set_selinux_permissive()
 
-    utils.copy_notice(AMQPINFLUX_SERVICE_NAME)
-    utils.mkdir(AMQPINFLUX_HOME)
+    utils.copy_notice(SERVICE_NAME)
+    utils.mkdir(HOME_DIR)
 
     utils.yum_install(amqpinflux_rpm_source_url,
-                      service_name=AMQPINFLUX_SERVICE_NAME)
+                      service_name=SERVICE_NAME)
     _install_optional(amqpinflux_venv)
 
     ctx.logger.info('Configuring AMQPInflux...')
-    utils.create_service_user(amqpinflux_user, AMQPINFLUX_HOME)
+    utils.create_service_user(amqpinflux_user, HOME_DIR)
     ctx.instance.runtime_properties['broker_cert_path'] = \
         utils.INTERNAL_CERT_PATH
-    utils.chown(amqpinflux_user, amqpinflux_group, AMQPINFLUX_HOME)
-    utils.systemd.configure(AMQPINFLUX_SERVICE_NAME)
+    utils.chown(amqpinflux_user, amqpinflux_group, HOME_DIR)
+    utils.systemd.configure(SERVICE_NAME)
 
 
 install_amqpinflux()

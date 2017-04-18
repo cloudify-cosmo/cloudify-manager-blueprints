@@ -16,7 +16,7 @@
 
 import tempfile
 
-from os.path import join, isfile, dirname
+from os.path import join, dirname
 
 from cloudify import ctx
 
@@ -25,42 +25,29 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+runtime_props = ctx.instance.runtime_properties
+SERVICE_NAME = runtime_props['service_name']
+CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
-MGMT_WORKER_SERVICE_NAME = 'mgmtworker'
-CONFIG_PATH = "components/mgmtworker/config"
-ctx_properties = utils.ctx_factory.create(MGMT_WORKER_SERVICE_NAME)
+ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 MGMTWORKER_USER = ctx_properties['os_user']
 MGMTWORKER_GROUP = ctx_properties['os_group']
 
 
 def configure_mgmtworker():
-    # these must all be exported as part of the start operation.
-    # they will not persist, so we should use the new agent
-    # don't forget to change all localhosts to the relevant ips
-    mgmtworker_home = '/opt/mgmtworker'
-    mgmtworker_venv = '{0}/env'.format(mgmtworker_home)
-    celery_work_dir = '{0}/work'.format(mgmtworker_home)
-
-    ctx.instance.runtime_properties['file_server_root'] = \
-        utils.MANAGER_RESOURCES_HOME
+    celery_work_dir = '{0}/work'.format(runtime_props['home_dir'])
+    runtime_props['file_server_root'] = utils.MANAGER_RESOURCES_HOME
 
     ctx.logger.info('Configuring Management worker...')
-    # Deploy the broker configuration
-    # TODO: This will break interestingly if mgmtworker_venv is empty.
-    # Some sort of check for that would be sensible.
-    # To sandy: I don't quite understand this check...
-    # there is no else here..
-    # for python_path in ${mgmtworker_venv}/lib/python*; do
-    if isfile(join(mgmtworker_venv, 'bin/python')):
-        broker_conf_path = join(celery_work_dir, 'broker_config.json')
-        utils.deploy_blueprint_resource(
-            '{0}/broker_config.json'.format(CONFIG_PATH), broker_conf_path,
-            MGMT_WORKER_SERVICE_NAME)
-        # The config contains credentials, do not let the world read it
-        utils.sudo(['chmod', '440', broker_conf_path])
-        utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, broker_conf_path)
-    utils.systemd.configure(MGMT_WORKER_SERVICE_NAME)
-    utils.logrotate(MGMT_WORKER_SERVICE_NAME)
+    broker_conf_path = join(celery_work_dir, 'broker_config.json')
+    utils.deploy_blueprint_resource(
+        '{0}/broker_config.json'.format(CONFIG_PATH), broker_conf_path,
+        SERVICE_NAME)
+    # The config contains credentials, do not let the world read it
+    utils.sudo(['chmod', '440', broker_conf_path])
+    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, broker_conf_path)
+    utils.systemd.configure(SERVICE_NAME)
+    utils.logrotate(SERVICE_NAME)
 
 
 def configure_logging():

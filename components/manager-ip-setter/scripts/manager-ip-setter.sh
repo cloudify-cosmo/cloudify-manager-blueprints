@@ -41,6 +41,9 @@ function set_manager_ip() {
   systemctl restart cloudify-restservice
   systemctl restart cloudify-mgmtworker
 
+  echo "Restarting rabbitmq.."
+  systemctl restart cloudify-rabbitmq
+
   echo "Done!"
 
 }

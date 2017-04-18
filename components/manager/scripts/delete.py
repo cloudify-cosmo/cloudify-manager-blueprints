@@ -9,7 +9,9 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-runtime_props = ctx.instance.runtime_properties
 
-ctx.logger.info('Starting AMQP-Influx Broker Service...')
-utils.start_service(runtime_props['service_name'])
+ctx.logger.info('Removing manager resources')
+for path in ['/opt/cloudify',
+             '/etc/cloudify',
+             '/var/log/cloudify']:
+    utils.remove(path)

@@ -19,11 +19,15 @@ ctx_properties = utils.ctx_factory.create(NODE_NAME)
 def execute_before_bootstrap():
     exec_paths = ctx_properties['execute_before_bootstrap']
     for path in exec_paths:
+        delete_tmp_path = False
         # TODO: Upon moving to Python 3, convert to urllib2.urlparse
         if '://' in path and path.split('://', 1)[0] in ('http', 'https'):
             path = utils.download_file(path)
             utils.chmod('744', path)
+            delete_tmp_path = True
         utils.run(path)
+        if delete_tmp_path:
+            utils.remove(path)
 
 
 def deploy_manager_sources():
@@ -33,8 +37,7 @@ def deploy_manager_sources():
     archive_checksum_path = \
         ctx_properties['manager_resources_package_checksum_file']
     skip_checksum_validation = ctx_properties['skip_checksum_validation']
-    agent_archives_path = utils.AGENT_ARCHIVES_PATH
-    utils.mkdir(agent_archives_path)
+    utils.mkdir(utils.AGENT_ARCHIVES_PATH)
     if archive_path:
         sources_agents_path = os.path.join(
             utils.CLOUDIFY_SOURCES_PATH, 'agents')
@@ -123,15 +126,15 @@ def deploy_manager_sources():
         manager_templates_path = os.path.join(
             utils.MANAGER_RESOURCES_HOME, 'packages', 'templates')
         if utils.is_upgrade:
-            backup_agent_resources(agent_archives_path)
-            utils.remove(agent_archives_path)
-            utils.mkdir(agent_archives_path)
+            backup_agent_resources(utils.AGENT_ARCHIVES_PATH)
+            utils.remove(utils.AGENT_ARCHIVES_PATH)
+            utils.mkdir(utils.AGENT_ARCHIVES_PATH)
             utils.remove(manager_scripts_path)
             utils.remove(manager_templates_path)
             ctx.logger.info('Upgrading agents...')
         elif utils.is_rollback:
             ctx.logger.info('Restoring agents...')
-            restore_agent_resources(agent_archives_path)
+            restore_agent_resources(utils.AGENT_ARCHIVES_PATH)
 
         for agent_file in os.listdir(sources_agents_path):
 
@@ -139,7 +142,9 @@ def deploy_manager_sources():
             agent_extension = splitext(agent_file)
             utils.move(
                 os.path.join(sources_agents_path, agent_file),
-                os.path.join(agent_archives_path, agent_id + agent_extension))
+                os.path.join(utils.AGENT_ARCHIVES_PATH,
+                             agent_id + agent_extension)
+            )
 
 
 execute_before_bootstrap()
