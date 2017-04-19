@@ -1,7 +1,6 @@
 [Unit]
 Description=Cloudify Manager IP Setter
-Before=cloudify-rabbitmq.service cloudify-mgmtworker.service cloudify-amqpinflux.service cloudify-riemann.service logstash.service
-After=network.target cloudify-restservice.service
+After=network.target cloudify-amqpinflux.service cloudify-influxdb.service cloudify-mgmtworker.service cloudify-restservice.service cloudify-riemann.service cloudify-stage.service nginx.service
 
 [Service]
 TimeoutStartSec=0
