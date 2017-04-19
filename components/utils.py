@@ -752,6 +752,11 @@ class SystemD(object):
         the environment variables and one contains the systemd config.
         All env files will be named "cloudify-SERVICENAME".
         All systemd config files will be named "cloudify-SERVICENAME.service".
+
+        If `tmpfiles` is True, the directory
+        `components/{service_name}/tmpfiles.d` must exist and contain the file
+        `cloudify-{service_name}.conf`. This will be deployed to
+        `/usr/lib/tmpfiles.d`.
         """
         sid = 'cloudify-{0}'.format(service_name)
         env_dst = "/etc/sysconfig/{0}".format(sid)
