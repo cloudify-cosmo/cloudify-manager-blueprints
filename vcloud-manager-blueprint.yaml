@@ -65,7 +65,8 @@ inputs:
 
   manager_server_memory:
     type: string
-    default: 4096
+    # 4.5 GB, 4GB- > only 3775 user memory < 3792
+    default: 4608
     description: >
       Manager host memory allocation
 
