@@ -675,6 +675,18 @@ node_types:
           If this is set to zero then the automatic worker restarts are disabled.
         type: integer
         default: { get_input: rest_service_gunicorn_max_requests }
+      log_level:
+        description: Logging level for the REST service.
+        type: string
+        default: { get_input: rest_service_log_level }
+      log_file_size:
+        description: Size, in MB, of the REST service log file before it's rotated.
+        type: integer
+        default: { get_input: rest_service_log_file_size }
+      log_files_backup_count:
+        description: Number of log files to keep when rotating.
+        type: integer
+        default: { get_input: rest_service_log_files_backup_count }
 
     interfaces:
       cloudify.interfaces.lifecycle:

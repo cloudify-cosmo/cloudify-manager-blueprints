@@ -573,6 +573,25 @@ inputs:
     type: integer
     default: 1000
 
+  rest_service_log_level:
+    description: |
+      Logging level for the REST service. Defaults to 'INFO', as 'DEBUG' may end up
+      logging sensitive information.
+    type: string
+    default: INFO
+
+  rest_service_log_file_size:
+    description: |
+      The size, in MB, that the REST service log file may grow to before it's rotated.
+    type: integer
+    default: 100
+
+  rest_service_log_files_backup_count:
+    description: |
+      Number of historical log files to keep when rotating the REST service logs.
+    type: integer
+    default: 20
+
   #############################
   # InfluxDB Inputs
   #############################

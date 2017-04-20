@@ -316,6 +316,16 @@ user_public_key: ssh-rsa...
 # If this is set to zero then the automatic worker restarts are disabled.
 #rest_service_gunicorn_max_requests: 1000
 
+# Logging level for the REST service. Defaults to 'INFO', as 'DEBUG' may end up
+# logging sensitive information.
+#rest_service_log_level: INFO
+
+# The size, in MB, that the REST service log file may grow to before it's rotated.
+#rest_service_log_file_size: 100
+
+# Number of historical log files to keep when rotating the REST service logs.
+#rest_service_log_files_backup_count: 20
+
 #############################
 # Offline Resources Upload
 #############################
