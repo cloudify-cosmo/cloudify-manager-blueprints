@@ -5,7 +5,7 @@ After=network-online.target
 
 [Service]
 User={{ node.properties.os_user }}
-Group={{ node.properties.os_user }}
+Group={{ node.properties.os_group }}
 TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-restservice

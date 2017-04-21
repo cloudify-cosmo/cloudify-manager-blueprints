@@ -112,7 +112,8 @@ def _configure_dbus(rest_venv):
 
 def install_restservice():
     rest_service_rpm_source_url = ctx_properties['rest_service_rpm_source_url']
-    rest_service_user = ctx_properties['os_user']
+    os_user = ctx_properties['os_user']
+    os_group = ctx_properties['os_group']
 
     rest_venv = os.path.join(REST_SERVICE_HOME, 'env')
     rest_service_log_path = '/var/log/cloudify/rest'
@@ -121,12 +122,12 @@ def install_restservice():
     ctx.logger.info('Installing REST Service...')
     utils.set_selinux_permissive()
 
-    utils.create_service_user(rest_service_user, REST_SERVICE_HOME)
+    utils.create_service_user(os_user, REST_SERVICE_HOME, group=os_group)
 
     utils.copy_notice(REST_SERVICE_NAME)
     utils.mkdir(REST_SERVICE_HOME)
     utils.mkdir(rest_service_log_path)
-    utils.chown(rest_service_user, rest_service_user, rest_service_log_path)
+    utils.chown(os_user, os_group, rest_service_log_path)
     utils.mkdir(utils.MANAGER_RESOURCES_HOME)
     utils.mkdir(agent_dir)
 

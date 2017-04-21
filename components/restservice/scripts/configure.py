@@ -57,10 +57,11 @@ def _deploy_security_configuration():
         'encoding_min_length': 5
     }
 
-    rest_service_user = ctx.node.properties['os_user']
+    os_user = ctx.node.properties['os_user']
+    os_group = ctx.node.properties['os_group']
 
     utils.chown(
-        rest_service_user, rest_service_user,
+        os_user, os_group,
         utils.MANAGER_RESOURCES_HOME)
     utils.sudo(['ls', '-la', '/opt/manager'])
 
@@ -75,7 +76,7 @@ def _deploy_security_configuration():
         json.dump(security_configuration, f)
     rest_security_path = join(REST_SERVICE_HOME, 'rest-security.conf')
     utils.move(path, rest_security_path)
-    utils.chown(rest_service_user, rest_service_user, rest_security_path)
+    utils.chown(os_user, os_group, rest_security_path)
 
 
 def _create_db_tables_and_add_users():
