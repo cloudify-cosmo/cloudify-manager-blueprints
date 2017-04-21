@@ -745,13 +745,18 @@ class SystemD(object):
         return sudo(systemctl_cmd, retries=retries,
                     ignore_failures=ignore_failure)
 
-    def configure(self, service_name, render=True):
+    def configure(self, service_name, render=True, tmpfiles=False):
         """This configures systemd for a specific service.
 
         It requires that two files are present for each service one containing
         the environment variables and one contains the systemd config.
         All env files will be named "cloudify-SERVICENAME".
         All systemd config files will be named "cloudify-SERVICENAME.service".
+
+        If `tmpfiles` is True, the directory
+        `components/{service_name}/tmpfiles.d` must exist and contain the file
+        `cloudify-{service_name}.conf`. This will be deployed to
+        `/usr/lib/tmpfiles.d`.
         """
         sid = 'cloudify-{0}'.format(service_name)
         env_dst = "/etc/sysconfig/{0}".format(sid)
@@ -767,6 +772,17 @@ class SystemD(object):
                                   render=render)
         ctx.logger.debug('Enabling systemd .service...')
         self.systemctl('enable', '{0}.service'.format(sid))
+
+        if tmpfiles:
+            tmp_dst = "/usr/lib/tmpfiles.d/{0}.conf".format(sid)
+            tmp_src = "components/{0}/config/tmpfiles.d/{1}.conf".format(
+                service_name, sid)
+
+            ctx.logger.debug('Deploying tmpfiles.d file...')
+            deploy_blueprint_resource(
+                tmp_src, tmp_dst, service_name, render=render)
+            sudo(['systemd-tmpfiles', '--create'])
+
         self.systemctl('daemon-reload')
 
     @staticmethod
