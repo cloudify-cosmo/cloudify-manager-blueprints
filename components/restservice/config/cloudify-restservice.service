@@ -4,8 +4,8 @@ Wants=network-online.target dbus.service
 After=network-online.target
 
 [Service]
-User={{ node.properties.service_user }}
-Group={{ node.properties.service_user }}
+User={{ node.properties.os_user }}
+Group={{ node.properties.os_user }}
 TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-restservice

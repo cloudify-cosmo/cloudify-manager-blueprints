@@ -57,7 +57,7 @@ def _deploy_security_configuration():
         'encoding_min_length': 5
     }
 
-    rest_service_user = ctx.node.properties['service_user']
+    rest_service_user = ctx.node.properties['os_user']
 
     utils.chown(
         rest_service_user, rest_service_user,

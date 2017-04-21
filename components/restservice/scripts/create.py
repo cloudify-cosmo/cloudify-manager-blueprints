@@ -112,7 +112,7 @@ def _configure_dbus(rest_venv):
 
 def install_restservice():
     rest_service_rpm_source_url = ctx_properties['rest_service_rpm_source_url']
-    rest_service_user = ctx_properties['service_user']
+    rest_service_user = ctx_properties['os_user']
 
     rest_venv = os.path.join(REST_SERVICE_HOME, 'env')
     rest_service_log_path = '/var/log/cloudify/rest'
