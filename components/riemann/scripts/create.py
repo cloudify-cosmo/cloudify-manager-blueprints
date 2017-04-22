@@ -63,7 +63,7 @@ def install_riemann():
     utils.mkdir(riemann_config_path)
     utils.mkdir('{0}/conf.d'.format(riemann_config_path))
 
-    # utils.chown cannot be used as it will change both user and password
+    # utils.chown cannot be used as it will change both user and group
     utils.sudo(['chown', RIEMANN_USER, riemann_dir])
 
     langohr = utils.download_cloudify_resource(langohr_source_url,
