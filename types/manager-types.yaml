@@ -973,7 +973,7 @@ node_types:
             ssh_user:
               default: { get_input: ssh_user }
             manager_ip:
-              default: { get_attribute: [manager_host, public_ip] }
+              default: { get_property: [manager_host, ip] }
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
