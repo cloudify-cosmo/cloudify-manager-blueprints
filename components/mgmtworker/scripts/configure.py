@@ -32,6 +32,7 @@ CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 MGMTWORKER_USER = ctx_properties['os_user']
 MGMTWORKER_GROUP = ctx_properties['os_group']
+HOMEDIR = ctx_properties['os_homedir']
 
 
 def configure_mgmtworker():
@@ -62,5 +63,18 @@ def configure_logging():
     utils.move(config_file_temp_destination, config_file_destination)
 
 
+def prepare_snapshot_permissions():
+    pgpass_location = '/root/.pgpass'
+    destination = join(HOMEDIR, '.pgpass')
+    utils.chmod('400', pgpass_location)
+    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, pgpass_location)
+    utils.sudo(['mv', pgpass_location, destination])
+    utils.sudo(['chgrp', MGMTWORKER_GROUP, '/opt/manager'])
+    utils.sudo(['chmod', 'g+rw', '/opt/manager'])
+
+    utils.sudo(['/opt/cloudify/snapshot_permissions_fixer'])
+
+
 configure_mgmtworker()
 configure_logging()
+prepare_snapshot_permissions()
