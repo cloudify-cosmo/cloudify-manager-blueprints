@@ -64,7 +64,6 @@ def _deploy_security_configuration():
         utils.MANAGER_RESOURCES_HOME)
     utils.sudo(['ls', '-la', '/opt/manager'])
 
-    runtime_props = ctx.instance.runtime_properties
     current_props = runtime_props['security_configuration']
     current_props.update(security_configuration)
     runtime_props['security_configuration'] = current_props
@@ -78,20 +77,24 @@ def _deploy_security_configuration():
     utils.chown(os_user, os_group, rest_security_path)
 
 
-def _create_db_tables_and_add_users():
-    ctx.logger.info('Creating SQL tables and adding admin users...')
-    create_script_path = 'components/restservice/config' \
-                         '/create_tables_and_add_users.py'
-    create_script_destination = join(tempfile.gettempdir(),
-                                     'create_tables_and_add_users.py')
-    ctx.download_resource(source=create_script_path,
-                          destination=create_script_destination)
+def _create_db_tables_and_add_defaults():
+    ctx.logger.info('Creating SQL tables and adding default values...')
+    script_name = 'create_tables_and_add_defaults.py'
+    source_script_path = join('components/restservice/config', script_name)
+    destination_script_path = join(tempfile.gettempdir(), script_name)
+    ctx.download_resource(source_script_path, destination_script_path)
+
     # Directly calling with this python bin, in order to make sure it's run
     # in the correct venv
     python_path = join(runtime_props['home_dir'], 'env', 'bin', 'python')
 
     args_dict = runtime_props['security_configuration']
     args_dict['postgresql_host'] = runtime_props['postgresql_host']
+    args_dict['db_migrate_dir'] = join(
+        utils.MANAGER_RESOURCES_HOME,
+        'cloudify',
+        'migrations'
+    )
 
     # The script won't have access to the ctx, so we dump the relevant args
     # to a JSON file, and pass its path to the script
@@ -100,12 +103,12 @@ def _create_db_tables_and_add_users():
         json.dump(args_dict, f)
 
     result = utils.sudo(
-        [python_path, create_script_destination, args_file_location]
+        [python_path, destination_script_path, args_file_location]
     )
 
     _log_results(result)
     utils.remove(args_file_location)
-    utils.remove(create_script_destination)
+    utils.remove(destination_script_path)
 
 
 def _log_results(result):
@@ -140,7 +143,7 @@ def configure_restservice():
     _deploy_rest_configuration()
     _deploy_security_configuration()
     utils.systemd.configure(SERVICE_NAME, tmpfiles=True)
-    _create_db_tables_and_add_users()
+    _create_db_tables_and_add_defaults()
 
 
 configure_restservice()
