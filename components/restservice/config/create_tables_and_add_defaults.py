@@ -17,13 +17,14 @@
 import sys
 import json
 
-from manager_rest.storage import db
+from flask_migrate import upgrade
+
 from manager_rest.flask_utils import setup_flask_app
 from manager_rest.storage.storage_utils import \
     create_default_user_tenant_and_roles
 
 
-def _create_db_and_defaults(config):
+def _init_db_tables(config):
     print 'Setting up a Flask app'
     setup_flask_app(
         manager_ip=config['postgresql_host'],
@@ -32,8 +33,10 @@ def _create_db_and_defaults(config):
     )
 
     print 'Creating tables in the DB'
-    db.create_all()
+    upgrade(directory=config['db_migrate_dir'])
 
+
+def _add_default_user_and_tenant(config):
     print 'Creating bootstrap admin, default tenant and security roles'
     create_default_user_tenant_and_roles(
         admin_username=config['admin_username'],
@@ -46,4 +49,5 @@ if __name__ == '__main__':
     assert len(sys.argv) == 2, 'No config file path was provided'
     with open(sys.argv[1], 'r') as f:
         config = json.load(f)
-    _create_db_and_defaults(config)
+    _init_db_tables(config)
+    _add_default_user_and_tenant(config)
