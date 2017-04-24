@@ -345,6 +345,8 @@ node_templates:
         target: rabbitmq
       - type: riemann_to_nginx
         target: nginx
+      - type: riemann_to_mgmtworker
+        target: mgmt_worker
     interfaces:
       cloudify.interfaces.validation:
         creation:

@@ -73,6 +73,8 @@ def _install_optional(mgmtworker_venv):
 
 def install_mgmtworker():
 
+    riemann_dir = '/opt/riemann'
+
     management_worker_rpm_source_url = \
         ctx_properties['management_worker_rpm_source_url']
 
@@ -98,6 +100,7 @@ def install_mgmtworker():
     utils.mkdir(join(HOME_DIR, 'config'))
     utils.mkdir(join(HOME_DIR, 'work'))
     utils.mkdir(LOG_DIR)
+    utils.mkdir(riemann_dir)
 
     mgmtworker_venv = join(HOME_DIR, 'env')
 
@@ -122,6 +125,10 @@ def install_mgmtworker():
     # Changing perms on workdir and venv in case they are put outside homedir
     utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, mgmtworker_venv)
     utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, LOG_DIR)
+    # Prepare riemann dir. We will change the owner to riemann later, but the
+    # management worker will still need access to it
+    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, riemann_dir)
+    utils.chmod('770', riemann_dir)
 
     ctx.logger.info("Using broker port: {0}".format(
         ctx.instance.runtime_properties['broker_port']))

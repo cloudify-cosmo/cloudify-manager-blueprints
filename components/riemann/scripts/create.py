@@ -14,6 +14,9 @@ RIEMANN_SERVICE_NAME = 'riemann'
 ctx_properties = utils.ctx_factory.create(RIEMANN_SERVICE_NAME)
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = RIEMANN_SERVICE_NAME
+RIEMANN_USER = ctx_properties['os_user']
+RIEMANN_GROUP = ctx_properties['os_group']
+HOMEDIR = ctx_properties['os_homedir']
 
 
 def install_riemann():
@@ -24,10 +27,17 @@ def install_riemann():
     rabbitmq_username = ctx_properties['rabbitmq_username']
     rabbitmq_password = ctx_properties['rabbitmq_password']
 
+    utils.create_service_user(
+        user=RIEMANN_USER,
+        home=HOMEDIR,
+        group=RIEMANN_GROUP,
+    )
+
     riemann_config_path = '/etc/riemann'
     riemann_log_path = '/var/log/cloudify/riemann'
     langohr_home = '/opt/lib'
     extra_classpath = '{0}/langohr.jar'.format(langohr_home)
+    riemann_dir = '/opt/riemann'
 
     # Confirm username and password have been supplied for broker before
     # continuing.
@@ -53,6 +63,9 @@ def install_riemann():
     utils.mkdir(riemann_config_path)
     utils.mkdir('{0}/conf.d'.format(riemann_config_path))
 
+    # utils.chown cannot be used as it will change both user and group
+    utils.sudo(['chown', RIEMANN_USER, riemann_dir])
+
     langohr = utils.download_cloudify_resource(langohr_source_url,
                                                RIEMANN_SERVICE_NAME)
     utils.sudo(['cp', langohr, extra_classpath])
@@ -60,6 +73,8 @@ def install_riemann():
     utils.sudo(['chmod', '644', extra_classpath])
     utils.yum_install(daemonize_source_url, service_name=RIEMANN_SERVICE_NAME)
     utils.yum_install(riemann_source_url, service_name=RIEMANN_SERVICE_NAME)
+
+    utils.chown(RIEMANN_USER, RIEMANN_GROUP, riemann_log_path)
 
     utils.logrotate(RIEMANN_SERVICE_NAME)
 

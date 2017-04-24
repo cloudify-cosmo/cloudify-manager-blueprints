@@ -12,6 +12,10 @@ import utils  # NOQA
 
 runtime_props = ctx.instance.runtime_properties
 SERVICE_NAME = runtime_props['service_name']
+CONFIG_PATH = 'components/riemann/config'
+ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+RIEMANN_USER = ctx_properties['os_user']
+RIEMANN_GROUP = ctx_properties['os_group']
 
 ctx_properties = utils.ctx_factory.get(SERVICE_NAME)
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
@@ -49,6 +53,8 @@ def configure_riemann():
         '{0}/main.clj'.format(CONFIG_PATH),
         '{0}/main.clj'.format(RIEMANN_CONFIG_PATH),
         SERVICE_NAME)
+
+    utils.chown(RIEMANN_USER, RIEMANN_GROUP, RIEMANN_CONFIG_PATH)
 
     # our riemann configuration will (by default) try to read these environment
     # variables. If they don't exist, it will assume
