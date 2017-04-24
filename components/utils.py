@@ -62,6 +62,8 @@ INTERNAL_CERT_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                   INTERNAL_SSL_CERT_FILENAME)
 INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                  INTERNAL_SSL_KEY_FILENAME)
+CERT_METADATA_FILE_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
+                                       'certificate_metadata')
 
 
 def retry(exception, tries=4, delay=3, backoff=2):
@@ -326,6 +328,11 @@ def _generate_ssl_certificate(ip,
     """
     mkdir(SSL_CERTS_TARGET_DIR)
 
+    cert_metadata = \
+        'IP:{0},DNS:{0},IP:127.0.0.1,DNS:127.0.0.1,DNS:localhost'.format(ip)
+    sudo_write_to_file(cert_metadata, CERT_METADATA_FILE_PATH)
+    chmod('664', CERT_METADATA_FILE_PATH)
+
     cert_path = os.path.join(SSL_CERTS_TARGET_DIR, cert_filename)
     key_path = os.path.join(SSL_CERTS_TARGET_DIR, key_filename)
 
@@ -337,8 +344,8 @@ x509_extensions=SAN
 [ req_distinguished_name ]
 commonName={ip}
 [SAN]
-subjectAltName=IP:{ip},DNS:{ip},IP:127.0.0.1,DNS:127.0.0.1,DNS:localhost
-""".format(ip=ip))
+subjectAltName={metadata}
+""".format(ip=ip, metadata=cert_metadata))
 
     sudo([
         'openssl', 'req', '-x509', '-newkey', 'rsa:2048',
