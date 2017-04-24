@@ -131,6 +131,9 @@ def _deploy_rest_configuration():
             join(CONFIG_PATH, 'cloudify-rest.conf'),
             join(runtime_props['home_dir'], 'cloudify-rest.conf'),
             SERVICE_NAME)
+    utils.chown(ctx.node.properties['os_user'],
+                ctx.node.properties['os_group'],
+                join(runtime_props['home_dir'], 'cloudify-rest.conf'))
 
 
 def configure_restservice():
