@@ -395,6 +395,10 @@ node_templates:
         target: rabbitmq
       - type: mgmtworker_to_manager_configuration
         target: manager_configuration
+      - type: mgmtworker_to_postgres
+        target: postgresql
+      - type: mgmtworker_to_restservice
+        target: rest_service
     interfaces:
       cloudify.interfaces.validation:
         creation:

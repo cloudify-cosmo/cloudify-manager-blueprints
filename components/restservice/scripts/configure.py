@@ -59,6 +59,10 @@ def _deploy_security_configuration():
     os_user = ctx.node.properties['os_user']
     os_group = ctx.node.properties['os_group']
 
+    # Pre-creating paths so permissions fix can work correctly
+    # in mgmtworker
+    for path in utils.MANAGER_RESOURCES_SNAPSHOT_PATHS:
+        utils.mkdir(path)
     utils.chown(
         os_user, os_group,
         utils.MANAGER_RESOURCES_HOME)

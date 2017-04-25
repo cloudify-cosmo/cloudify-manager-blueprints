@@ -54,8 +54,8 @@ def _create_postgres_pass_file(host, db_name, username, password):
         password=password
     )
     # .pgpass file used by mgmtworker in snapshot workflow,
-    # and need to be under th home directory of the user who run the snapshot
-    # (currently root)
+    # and will be moved and have correct ownership assigned by the
+    # management worker
     if os.path.isfile(pgpass_path):
         ctx.logger.debug('Deleting {0} file..'.format(
             pgpass_path

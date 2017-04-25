@@ -1,0 +1,3 @@
+#! /usr/bin/env bash
+chown -R {{ctx.instance.runtime_properties.rest_service_user}}.{{ctx.node.properties.os_group}} /opt/manager/resources
+chmod -R g+rw /opt/manager/resources

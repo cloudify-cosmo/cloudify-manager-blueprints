@@ -779,6 +779,10 @@ node_types:
         description: Management worker OS user's home directory. Will not be created if missing.
         type: string
         default: /etc/cloudify
+      sudoers_include_dir:
+        description: Path to sudoers includedir.
+        type: string
+        default: /etc/sudoers.d
       management_worker_rpm_source_url:
         description: Management Worker RPM Source URL
         type: string
@@ -1220,3 +1224,9 @@ relationships:
 
   stage_to_restservice:
     derived_from: cloudify.relationships.connected_to
+
+  mgmtworker_to_postgres:
+    derived_from: cloudify.relationships.depends_on
+
+  mgmtworker_to_restservice:
+    derived_from: cloudify.relationships.depends_on

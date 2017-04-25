@@ -26,6 +26,16 @@ PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 MANAGER_RESOURCES_HOME = '/opt/manager/resources'
 AGENT_ARCHIVES_PATH = '{0}/packages/agents'.format(MANAGER_RESOURCES_HOME)
+MANAGER_RESOURCES_SNAPSHOT_PATHS = [
+    os.path.join(MANAGER_RESOURCES_HOME, path)
+    for path in (
+        'blueprints',
+        'deployments',
+        'uploaded-blueprints',
+        'snapshots',
+        'plugins',
+    )
+]
 
 SSL_CERTS_TARGET_DIR = '/etc/cloudify/ssl'
 INTERNAL_SSL_CERT_FILENAME = 'cloudify_internal_cert.pem'
