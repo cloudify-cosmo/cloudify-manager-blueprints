@@ -121,7 +121,7 @@ inputs:
 
   manager_server_memory:
     type: string
-    default: 4096
+    default: 4352
     description: >
       Manager host memory allocation
 
