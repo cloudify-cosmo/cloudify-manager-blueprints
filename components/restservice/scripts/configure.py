@@ -30,10 +30,12 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-
 runtime_props = ctx.instance.runtime_properties
 SERVICE_NAME = runtime_props['service_name']
+ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
+SUDOERS_INCLUDE_DIR = ctx_properties['sudoers_include_dir']
 
 
 def _random_alphanumeric(result_len=31):
@@ -143,9 +145,33 @@ def _deploy_rest_configuration():
                 join(runtime_props['home_dir'], 'cloudify-rest.conf'))
 
 
+def _allow_creating_cluster():
+    env = os.path.join(runtime_props['home_dir'], 'env')
+    systemd_run = '/usr/bin/systemd-run'
+    journalctl = '/usr/bin/journalctl'
+    create_cluster_node = os.path.join(env, 'bin/create_cluster_node')
+    cluster_unit_name = 'cloudify-ha-cluster'
+    utils.allow_user_to_sudo_command(
+        ctx.node.properties['os_user'],
+        '{0} --unit {1} {2} --config *'
+        .format(systemd_run, cluster_unit_name, create_cluster_node),
+        description='cluster_start',
+        sudoers_include_dir=SUDOERS_INCLUDE_DIR,
+    )
+
+    utils.allow_user_to_sudo_command(
+        ctx.node.properties['os_user'],
+        '{0} --unit {1}*'
+        .format(journalctl, cluster_unit_name),
+        description='cluster_logs',
+        sudoers_include_dir=SUDOERS_INCLUDE_DIR
+    )
+
+
 def configure_restservice():
     _deploy_rest_configuration()
     _deploy_security_configuration()
+    _allow_creating_cluster()
     utils.systemd.configure(SERVICE_NAME, tmpfiles=True)
     _create_db_tables_and_add_defaults()
 
