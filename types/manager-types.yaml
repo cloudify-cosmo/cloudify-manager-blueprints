@@ -726,6 +726,10 @@ node_types:
         description: Rest service OS group. Will be created if not existing, and used to run the service.
         type: string
         default: cloudify-restservice
+      sudoers_include_dir:
+        description: Path to sudoers includedir.
+        type: string
+        default: /etc/sudoers.d
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
