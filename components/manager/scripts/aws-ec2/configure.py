@@ -58,6 +58,15 @@ def _upload_credentials(aws_config, manager_config_path):
         credentials.set('Boto', 'ec2_region_endpoint',
                         region.endpoint)
 
+    if aws_config.get('elb_region_name'):
+        region = get_region(aws_config['elb_region_name'])
+        if not credentials.has_section('Boto'):
+            credentials.add_section('Boto')
+        credentials.set('Boto', 'elb_region_name',
+                        aws_config['elb_region_name'])
+        credentials.set('Boto', 'elb_region_endpoint',
+                        region.endpoint)
+
     with open(temp_config, 'w') as temp_config_file:
         credentials.write(temp_config_file)
 
