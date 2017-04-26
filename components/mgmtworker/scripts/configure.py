@@ -71,6 +71,11 @@ def prepare_snapshot_permissions():
     utils.sudo(['mv', pgpass_location, destination])
     utils.sudo(['chgrp', MGMTWORKER_GROUP, '/opt/manager'])
     utils.sudo(['chmod', 'g+rw', '/opt/manager'])
+    utils.sudo(['chgrp', '-R', MGMTWORKER_GROUP, utils.SSL_CERTS_TARGET_DIR])
+    utils.sudo([
+        'chgrp', MGMTWORKER_GROUP, dirname(utils.SSL_CERTS_TARGET_DIR)])
+    utils.sudo(['chmod', '-R', 'g+rw', utils.SSL_CERTS_TARGET_DIR])
+    utils.sudo(['chmod', 'g+rw', dirname(utils.SSL_CERTS_TARGET_DIR)])
 
     utils.sudo(['/opt/cloudify/snapshot_permissions_fixer'])
 
