@@ -30,7 +30,7 @@ def update_provider_context(manager_ip):
         attempt += 1
 
     r = requests.get(
-        'http://localhost/api/v3/provider/context', auth=auth, headers=headers)
+        'http://localhost/api/v3.1/provider/context', auth=auth, headers=headers)
     if r.status_code != 200:
         print("Failed getting provider context.")
         print(r.text)
@@ -42,7 +42,7 @@ def update_provider_context(manager_ip):
     print('- Updating provider context...')
     data = {'name': name, 'context': context}
     r = requests.post(
-        'http://localhost/api/v3/provider/context',
+        'http://localhost/api/v3.1/provider/context',
         auth=auth, headers=headers,
         params={'update': 'true'},
         data=json.dumps(data))
