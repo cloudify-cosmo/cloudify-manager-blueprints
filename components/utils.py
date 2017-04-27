@@ -236,11 +236,13 @@ def allow_user_to_sudo_command(runtime_props,
                                description,
                                sudoers_include_dir,
                                allow_as='root'):
-    entry = '{user}    ALL=({allow_as}) NOPASSWD:{full_command}\n'.format(
-        user=user,
-        allow_as=allow_as,
-        full_command=full_command,
-    )
+    entry = ('{user}    ALL=({allow_as}) NOPASSWD:{full_command}\n'
+             'Defaults:{user} !requiretty\n'
+             .format(
+                 user=user,
+                 allow_as=allow_as,
+                 full_command=full_command,
+             ))
     filename = '{user}_{allow_as}_{description}'.format(
         user=user,
         allow_as=allow_as,
