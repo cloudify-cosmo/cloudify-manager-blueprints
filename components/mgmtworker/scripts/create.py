@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from os.path import join, dirname
-import tempfile
 
 from cloudify import ctx
 
@@ -39,27 +38,14 @@ def deploy_snapshot_permissions_fixer():
     ctx.instance.runtime_properties['rest_service_user'] = (
         rest_props['os_user']
     )
-    script_name = 'snapshot_permissions_fixer'
-    script_temp_destination = join(tempfile.gettempdir(), script_name)
-    ctx.download_resource_and_render(
-        join('components', 'mgmtworker', 'scripts', script_name),
-        script_temp_destination)
-    remote_script_path = join('/opt/cloudify', script_name)
-    utils.move(script_temp_destination, remote_script_path)
-
-    utils.chmod('550', remote_script_path)
-    utils.chown('root', MGMTWORKER_GROUP, remote_script_path)
-    utils.allow_user_to_sudo_command(
-        runtime_props,
-        user=MGMTWORKER_USER,
-        full_command=remote_script_path,
-        description=script_name,
-        sudoers_include_dir=SUDOERS_INCLUDE_DIR,
-    )
+    utils.deploy_sudo_command_script(runtime_props=runtime_props,
+                                     component='mgmtworker',
+                                     script_name='snapshot_permissions_fixer',
+                                     user=MGMTWORKER_USER,
+                                     group=MGMTWORKER_GROUP)
 
 
 def _install_optional(mgmtworker_venv):
-
     rest_props = utils.ctx_factory.get('restservice')
     rest_client_source_url = rest_props['rest_client_module_source_url']
     plugins_common_source_url = rest_props['plugins_common_module_source_url']
@@ -98,7 +84,6 @@ def _install_optional(mgmtworker_venv):
 
 
 def install_mgmtworker():
-
     riemann_dir = '/opt/riemann'
 
     management_worker_rpm_source_url = \

@@ -33,26 +33,6 @@ runtime_props['service_user'] = MANAGER_IP_SETTER_USER
 runtime_props['service_group'] = MANAGER_IP_SETTER_GROUP
 
 
-def deploy_script(script_name, description):
-    config_file_temp_destination = join(tempfile.gettempdir(), script_name)
-    ctx.download_resource_and_render(
-        join('components', 'manager-ip-setter', 'scripts', script_name),
-        config_file_temp_destination)
-    remote_script_path = join(MANAGER_IP_SETTER_DIR, script_name)
-    utils.move(config_file_temp_destination, remote_script_path)
-
-    utils.chmod('550', remote_script_path)
-    utils.chown('root', MANAGER_IP_SETTER_GROUP, remote_script_path)
-    utils.allow_user_to_sudo_command(
-        runtime_props,
-        user=MANAGER_IP_SETTER_USER,
-        full_command=remote_script_path,
-        description=description,
-        sudoers_include_dir=SUDOERS_INCLUDE_DIR,
-    )
-    utils.systemd.configure(MANAGER_IP_SETTER_SERVICE_NAME)
-
-
 def deploy_utils():
     temp_destination = join(tempfile.gettempdir(), 'utils.py')
     ctx.download_resource_and_render(
@@ -74,9 +54,18 @@ def install_manager_ip_setter():
     )
     utils.mkdir(dirname(MANAGER_IP_SETTER_DIR))
     deploy_utils()
-    deploy_script(MANAGER_IP_SETTER_SCRIPT_NAME, 'ip_setter')
-    deploy_script(UPDATE_PROVIDER_CONTEXT_SCRIPT_NAME, 'update_context')
-    deploy_script(CREATE_INTERNAL_SSL_CERTS_SCRIPT_NAME, 'internal_ssl')
+    service_name = 'manager-ip-setter'
+    user = MANAGER_IP_SETTER_USER
+    group = MANAGER_IP_SETTER_GROUP
+    utils.deploy_sudo_command_script(runtime_props, service_name, user, group,
+                                     MANAGER_IP_SETTER_SCRIPT_NAME,
+                                     'ip_setter')
+    utils.deploy_sudo_command_script(runtime_props, service_name, user, group,
+                                     UPDATE_PROVIDER_CONTEXT_SCRIPT_NAME,
+                                     'update_context')
+    utils.deploy_sudo_command_script(runtime_props, service_name, user, group,
+                                     CREATE_INTERNAL_SSL_CERTS_SCRIPT_NAME,
+                                     'internal_ssl')
 
 
 if os.environ.get('set_manager_ip_on_boot').lower() == 'true':
