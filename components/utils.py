@@ -153,7 +153,7 @@ def check_sudoers_includes_dir(include_dir):
     return False
 
 
-def add_entry_to_sudoers(entry, filename, sudoers_include_dir):
+def _add_entry_to_sudoers(entry, filename, sudoers_include_dir):
     destination = os.path.join(sudoers_include_dir, filename)
 
     # Make sure we're including the expected includedir
@@ -230,8 +230,12 @@ def add_entry_to_sudoers(entry, filename, sudoers_include_dir):
         )
 
 
-def allow_user_to_sudo_command(user, full_command, description,
-                               sudoers_include_dir, allow_as='root'):
+def allow_user_to_sudo_command(runtime_props,
+                               user,
+                               full_command,
+                               description,
+                               sudoers_include_dir,
+                               allow_as='root'):
     entry = '{user}    ALL=({allow_as}) NOPASSWD:{full_command}\n'.format(
         user=user,
         allow_as=allow_as,
@@ -242,7 +246,12 @@ def allow_user_to_sudo_command(user, full_command, description,
         allow_as=allow_as,
         description=description,
     )
-    add_entry_to_sudoers(entry, filename, sudoers_include_dir)
+    _add_entry_to_sudoers(entry, filename, sudoers_include_dir)
+    extend_runtime_properties_list(
+        runtime_props,
+        'files_to_remove',
+        [os.path.join(sudoers_include_dir, filename)]
+    )
 
 
 def deploy_ssl_certificate(private_or_public, destination, group, cert):
@@ -310,12 +319,8 @@ def copy(source, destination):
 
 
 def remove(path, ignore_failure=False):
-    if os.path.exists(path):
-        ctx.logger.debug('Removing {0}...'.format(path))
-        sudo(['rm', '-rf', path], ignore_failures=ignore_failure)
-    else:
-        ctx.logger.debug(
-            'Path does not exist: {0}. Skipping...'.format(path))
+    ctx.logger.debug('Removing {0}...'.format(path))
+    sudo(['rm', '-rf', path], ignore_failures=ignore_failure)
 
 
 def _generate_ssl_certificate(ip,
@@ -1903,6 +1908,6 @@ def extend_runtime_properties_list(runtime_props, key_name, new_list):
     """Extend a list in the runtime properties
     list.extend doen't call __setitem__, so we need to do it explicitly
     """
-    list_to_extend = runtime_props[key_name]
+    list_to_extend = runtime_props.get(key_name, [])
     list_to_extend.extend(new_list)
     runtime_props[key_name] = list_to_extend

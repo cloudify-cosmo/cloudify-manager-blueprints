@@ -44,6 +44,7 @@ def deploy_script(script_name, description):
     utils.chmod('550', remote_script_path)
     utils.chown('root', MANAGER_IP_SETTER_GROUP, remote_script_path)
     utils.allow_user_to_sudo_command(
+        runtime_props,
         user=MANAGER_IP_SETTER_USER,
         full_command=remote_script_path,
         description=description,

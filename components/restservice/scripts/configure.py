@@ -152,6 +152,7 @@ def _allow_creating_cluster():
     create_cluster_node = os.path.join(env, 'bin/create_cluster_node')
     cluster_unit_name = 'cloudify-ha-cluster'
     utils.allow_user_to_sudo_command(
+        runtime_props,
         ctx.node.properties['os_user'],
         '{0} --unit {1} {2} --config *'
         .format(systemd_run, cluster_unit_name, create_cluster_node),
@@ -160,6 +161,7 @@ def _allow_creating_cluster():
     )
 
     utils.allow_user_to_sudo_command(
+        runtime_props,
         ctx.node.properties['os_user'],
         '{0} --unit {1}*'
         .format(journalctl, cluster_unit_name),

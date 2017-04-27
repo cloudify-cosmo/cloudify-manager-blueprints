@@ -50,6 +50,7 @@ def deploy_snapshot_permissions_fixer():
     utils.chmod('550', remote_script_path)
     utils.chown('root', MGMTWORKER_GROUP, remote_script_path)
     utils.allow_user_to_sudo_command(
+        runtime_props,
         user=MGMTWORKER_USER,
         full_command=remote_script_path,
         description=script_name,
