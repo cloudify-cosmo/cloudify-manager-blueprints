@@ -34,18 +34,6 @@ utils.clean_rollback_resources_if_necessary()
 ctx_properties = utils.ctx_factory.create(NODE_NAME)
 
 
-def _disable_requiretty():
-    script_dest = '/tmp/disable_requiretty.sh'
-    utils.deploy_blueprint_resource('components/manager/scripts'
-                                    '/disable_requiretty.sh',
-                                    script_dest,
-                                    NODE_NAME)
-
-    utils.sudo('chmod +x {0}'.format(script_dest))
-    utils.sudo(script_dest)
-    utils.remove(script_dest)
-
-
 def _configure_security_properties():
     security_config = ctx_properties['security']
     runtime_props = ctx.instance.runtime_properties
@@ -73,8 +61,6 @@ def main():
         utils.create_upgrade_snapshot()
     # TTY has already been disabled. Rollback may not have the script to
     # disable TTY since it has been introduced only on 3.4.1
-    if not utils.is_rollback:
-        _disable_requiretty()
     _configure_security_properties()
 
 
