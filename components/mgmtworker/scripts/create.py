@@ -43,6 +43,8 @@ def deploy_snapshot_permissions_fixer():
                                      script='snapshot_permissions_fixer',
                                      user=MGMTWORKER_USER,
                                      group=MGMTWORKER_GROUP)
+    utils.disable_sudo_requiretty_for_user(runtime_props, MGMTWORKER_USER,
+                                           SUDOERS_INCLUDE_DIR)
 
 
 def _install_optional(mgmtworker_venv):

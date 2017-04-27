@@ -236,18 +236,27 @@ def allow_user_to_sudo_command(runtime_props,
                                description,
                                sudoers_include_dir,
                                allow_as='root'):
-    entry = ('{user}    ALL=({allow_as}) NOPASSWD:{full_command}\n'
-             'Defaults:{user} !requiretty\n'
-             .format(
-                 user=user,
-                 allow_as=allow_as,
-                 full_command=full_command,
-             ))
+    entry = '{user}    ALL=({allow_as}) NOPASSWD:{full_command}\n'.format(
+        user=user,
+        allow_as=allow_as,
+        full_command=full_command,
+    )
     filename = '{user}_{allow_as}_{description}'.format(
         user=user,
         allow_as=allow_as,
         description=description,
     )
+    _add_entry_to_sudoers(entry, filename, sudoers_include_dir)
+    extend_runtime_properties_list(
+        runtime_props,
+        'files_to_remove',
+        [os.path.join(sudoers_include_dir, filename)]
+    )
+
+
+def disable_sudo_requiretty_for_user(runtime_props, user, sudoers_include_dir):
+    entry = 'Defaults:{user} !requiretty\n'.format(user=user)
+    filename = '{user}_disable_requiretty'
     _add_entry_to_sudoers(entry, filename, sudoers_include_dir)
     extend_runtime_properties_list(
         runtime_props,

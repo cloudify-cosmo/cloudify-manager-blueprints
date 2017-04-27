@@ -151,9 +151,11 @@ def _allow_creating_cluster():
     journalctl = '/usr/bin/journalctl'
     create_cluster_node = os.path.join(env, 'bin/create_cluster_node')
     cluster_unit_name = 'cloudify-ha-cluster'
+    os_user = ctx.node.properties['os_user']
+
     utils.allow_user_to_sudo_command(
         runtime_props,
-        ctx.node.properties['os_user'],
+        os_user,
         '{0} --unit {1} {2} --config *'
         .format(systemd_run, cluster_unit_name, create_cluster_node),
         description='cluster_start',
@@ -162,12 +164,15 @@ def _allow_creating_cluster():
 
     utils.allow_user_to_sudo_command(
         runtime_props,
-        ctx.node.properties['os_user'],
+        os_user,
         '{0} --unit {1}*'
         .format(journalctl, cluster_unit_name),
         description='cluster_logs',
         sudoers_include_dir=SUDOERS_INCLUDE_DIR
     )
+
+    utils.disable_sudo_requiretty_for_user(runtime_props, os_user,
+                                           SUDOERS_INCLUDE_DIR)
 
 
 def configure_restservice():
