@@ -254,6 +254,17 @@ def allow_user_to_sudo_command(runtime_props,
     )
 
 
+def disable_sudo_requiretty_for_user(runtime_props, user, sudoers_include_dir):
+    entry = 'Defaults:{user} !requiretty\n'.format(user=user)
+    filename = '{user}_disable_requiretty'
+    _add_entry_to_sudoers(entry, filename, sudoers_include_dir)
+    extend_runtime_properties_list(
+        runtime_props,
+        'files_to_remove',
+        [os.path.join(sudoers_include_dir, filename)]
+    )
+
+
 def deploy_sudo_command_script(runtime_props,
                                component,
                                user,

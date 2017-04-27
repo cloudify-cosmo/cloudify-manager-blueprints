@@ -67,6 +67,9 @@ def install_manager_ip_setter():
                                      CREATE_INTERNAL_SSL_CERTS_SCRIPT_NAME,
                                      'internal_ssl')
 
+    utils.disable_sudo_requiretty_for_user(runtime_props, user,
+                                           SUDOERS_INCLUDE_DIR)
+
 
 if os.environ.get('set_manager_ip_on_boot').lower() == 'true':
     install_manager_ip_setter()
