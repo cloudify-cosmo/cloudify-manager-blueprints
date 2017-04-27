@@ -24,6 +24,8 @@ runtime_props['home_dir'] = HOME_DIR
 runtime_props['log_dir'] = LOG_DIR
 
 ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+OS_USER = ctx_properties['os_user']
+OS_GROUP = ctx_properties['os_group']
 
 
 def install_optional(rest_venv):
@@ -118,8 +120,8 @@ def _configure_dbus(rest_venv):
 
 def install_restservice():
     rest_service_rpm_source_url = ctx_properties['rest_service_rpm_source_url']
-    os_user = ctx_properties['os_user']
-    os_group = ctx_properties['os_group']
+    os_user = OS_USER
+    os_group = OS_GROUP
     runtime_props['service_user'] = os_user
     runtime_props['service_group'] = os_group
 
