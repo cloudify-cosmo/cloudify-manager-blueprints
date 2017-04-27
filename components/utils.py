@@ -258,26 +258,33 @@ def deploy_sudo_command_script(runtime_props,
                                component,
                                user,
                                group,
-                               script_name,
+                               script,
                                description=None):
-    description = description if description else script_name
-    config_file_temp_destination = os.path.join(tempfile.gettempdir(),
-                                                script_name)
-    ctx.download_resource_and_render(
-        os.path.join('components', component, 'scripts', script_name),
-        config_file_temp_destination)
-    destination_script_path = os.path.join('/opt/cloudify/', component,
-                                           script_name)
-    move(config_file_temp_destination, destination_script_path)
-    chmod('550', destination_script_path)
-    chown('root', group, destination_script_path)
+    if script.startswith('/usr/bin'):
+        # script is a path to some command
+        description = description if description else \
+            script.lstrip('/usr/bin/')
+    else:
+        # script is a path to package script
+        description = description if description else script
+        config_file_temp_destination = os.path.join(tempfile.gettempdir(),
+                                                    script)
+        ctx.download_resource_and_render(
+            os.path.join('components', component, 'scripts', script),
+            config_file_temp_destination)
+        destination_script_path = os.path.join('/opt/cloudify/', component,
+                                               script)
+        move(config_file_temp_destination, destination_script_path)
+        chmod('550', destination_script_path)
+        chown('root', group, destination_script_path)
+        script = destination_script_path
     sudoers_include_dir = '/etc/sudoers.d'
     ctx.logger.info('Allowing user `{0}` to run `{1}`'
-                    .format(user, destination_script_path))
+                    .format(user, script))
     allow_user_to_sudo_command(
         runtime_props=runtime_props,
         user=user,
-        full_command=destination_script_path,
+        full_command=script,
         description=description,
         sudoers_include_dir=sudoers_include_dir,
     )
