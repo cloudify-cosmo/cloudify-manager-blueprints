@@ -118,6 +118,14 @@ def _configure_dbus(rest_venv):
                 'Could not find dbus install, cfy status will not work')
 
 
+def _allow_sudo_systemctl():
+    utils.deploy_sudo_command_script(runtime_props=runtime_props,
+                                     component='restservice',
+                                     user=OS_USER,
+                                     group=OS_GROUP,
+                                     script='/usr/bin/systemctl')
+
+
 def install_restservice():
     rest_service_rpm_source_url = ctx_properties['rest_service_rpm_source_url']
     os_user = OS_USER
@@ -146,6 +154,8 @@ def install_restservice():
     _configure_dbus(rest_venv)
     install_optional(rest_venv)
     utils.logrotate(SERVICE_NAME)
+
+    _allow_sudo_systemctl()
 
 
 install_restservice()
