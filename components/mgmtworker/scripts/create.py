@@ -40,7 +40,7 @@ def deploy_snapshot_permissions_fixer():
     )
     utils.deploy_sudo_command_script(runtime_props=runtime_props,
                                      component='mgmtworker',
-                                     script_name='snapshot_permissions_fixer',
+                                     script='snapshot_permissions_fixer',
                                      user=MGMTWORKER_USER,
                                      group=MGMTWORKER_GROUP)
 
