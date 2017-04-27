@@ -120,6 +120,8 @@ def install_restservice():
     rest_service_rpm_source_url = ctx_properties['rest_service_rpm_source_url']
     os_user = ctx_properties['os_user']
     os_group = ctx_properties['os_group']
+    runtime_props['service_user'] = os_user
+    runtime_props['service_group'] = os_group
 
     rest_venv = join(HOME_DIR, 'env')
     agent_dir = join(utils.MANAGER_RESOURCES_HOME, 'cloudify_agent')
