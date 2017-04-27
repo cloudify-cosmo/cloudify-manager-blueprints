@@ -254,6 +254,36 @@ def allow_user_to_sudo_command(runtime_props,
     )
 
 
+def deploy_sudo_command_script(runtime_props,
+                               component,
+                               user,
+                               group,
+                               script_name,
+                               description=None):
+    description = description if description else script_name
+    config_file_temp_destination = os.path.join(tempfile.gettempdir(),
+                                                script_name)
+    ctx.download_resource_and_render(
+        os.path.join('components', component, 'scripts', script_name),
+        config_file_temp_destination)
+    destination_script_path = os.path.join('/opt/cloudify/', component,
+                                           script_name)
+    move(config_file_temp_destination, destination_script_path)
+    chmod('550', destination_script_path)
+    chown('root', group, destination_script_path)
+    sudoers_include_dir = '/etc/sudoers.d'
+    ctx.logger.info('Allowing user `{0}` to run `{1}`'
+                    .format(user, destination_script_path))
+    allow_user_to_sudo_command(
+        runtime_props=runtime_props,
+        user=user,
+        full_command=destination_script_path,
+        description=description,
+        sudoers_include_dir=sudoers_include_dir,
+    )
+    systemd.configure(component)
+
+
 def deploy_ssl_certificate(private_or_public, destination, group, cert):
     # Root owner, with permissions set below,
     # allow anyone to read a public cert,

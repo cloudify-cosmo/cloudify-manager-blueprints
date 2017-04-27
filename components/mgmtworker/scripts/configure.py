@@ -77,7 +77,7 @@ def prepare_snapshot_permissions():
     utils.sudo(['chmod', '-R', 'g+rw', utils.SSL_CERTS_TARGET_DIR])
     utils.sudo(['chmod', 'g+rw', dirname(utils.SSL_CERTS_TARGET_DIR)])
 
-    utils.sudo(['/opt/cloudify/snapshot_permissions_fixer'])
+    utils.sudo(['/opt/cloudify/mgmtworker/snapshot_permissions_fixer'])
 
 
 configure_mgmtworker()
