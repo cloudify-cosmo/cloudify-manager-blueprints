@@ -47,6 +47,18 @@ def deploy_snapshot_permissions_fixer():
                                            SUDOERS_INCLUDE_DIR)
 
 
+def allow_snapshot_db_secrets_fixer():
+    rest_props = utils.ctx_factory.get('restservice')
+    utils.allow_user_to_sudo_command(
+        runtime_props=runtime_props,
+        user='mgmtworker',
+        full_command='/opt/mgmtworker/resources/cloudify/fix_snapshot_ssh_db',
+        description='snapshot_ssh_db_fix',
+        sudoers_include_dir=SUDOERS_INCLUDE_DIR,
+        allow_as=rest_props['os_user'],
+    )
+
+
 def _install_optional(mgmtworker_venv):
     rest_props = utils.ctx_factory.get('restservice')
     rest_client_source_url = rest_props['rest_client_module_source_url']
@@ -149,3 +161,4 @@ def install_mgmtworker():
 
 install_mgmtworker()
 deploy_snapshot_permissions_fixer()
+allow_snapshot_db_secrets_fixer()
