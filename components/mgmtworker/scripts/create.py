@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import tempfile
 
 from os.path import join, dirname
 
@@ -38,11 +39,29 @@ def deploy_snapshot_permissions_fixer():
     ctx.instance.runtime_properties['rest_service_user'] = (
         rest_props['os_user']
     )
-    utils.deploy_sudo_command_script(runtime_props=runtime_props,
-                                     component='mgmtworker',
-                                     script='snapshot_permissions_fixer',
-                                     user=MGMTWORKER_USER,
-                                     group=MGMTWORKER_GROUP)
+    # utils.deploy_sudo_command_script(runtime_props=runtime_props,
+    #                                  component='mgmtworker',
+    #                                  script='snapshot_permissions_fixer',
+    #                                  user=MGMTWORKER_USER,
+    #                                  group=MGMTWORKER_GROUP)
+    script_name = 'snapshot_permissions_fixer'
+    script_temp_destination = join(tempfile.gettempdir(), script_name)
+    ctx.download_resource_and_render(
+        join('components', 'mgmtworker', 'scripts', script_name),
+        script_temp_destination)
+    remote_script_path = join('/opt/cloudify/mgmtworker', script_name)
+    utils.move(script_temp_destination, remote_script_path)
+
+    utils.chmod('550', remote_script_path)
+    utils.chown('root', MGMTWORKER_GROUP, remote_script_path)
+    utils.allow_user_to_sudo_command(
+        runtime_props,
+        user=MGMTWORKER_USER,
+        full_command=remote_script_path,
+        description=script_name,
+        sudoers_include_dir=SUDOERS_INCLUDE_DIR,
+    )
+
     utils.disable_sudo_requiretty_for_user(runtime_props, MGMTWORKER_USER,
                                            SUDOERS_INCLUDE_DIR)
 

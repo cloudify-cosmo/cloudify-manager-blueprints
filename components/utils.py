@@ -275,6 +275,7 @@ def deploy_sudo_command_script(runtime_props,
         # script is a path to some command
         description = description if description else \
             script.lstrip('/usr/bin/')
+        remote_script_path = script
     else:
         # script is a path to package script
         description = description if description else script
@@ -288,14 +289,14 @@ def deploy_sudo_command_script(runtime_props,
         move(config_file_temp_destination, destination_script_path)
         chmod('550', destination_script_path)
         chown('root', group, destination_script_path)
-        script = destination_script_path
+        remote_script_path = destination_script_path
     sudoers_include_dir = '/etc/sudoers.d'
     ctx.logger.info('Allowing user `{0}` to run `{1}`'
-                    .format(user, script))
+                    .format(user, remote_script_path))
     allow_user_to_sudo_command(
         runtime_props=runtime_props,
         user=user,
-        full_command=script,
+        full_command=remote_script_path,
         description=description,
         sudoers_include_dir=sudoers_include_dir,
     )
