@@ -10,10 +10,6 @@ import utils  # NOQA
 runtime_props = ctx.instance.runtime_properties
 
 
-def main():
-    utils.remove_component(runtime_props)
-
-
 # This makes sure that the `create` script already ran
 if runtime_props.get('service_name'):
-    main()
+    utils.remove_component(runtime_props)

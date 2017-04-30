@@ -552,18 +552,6 @@ node_types:
   manager.nodes.Riemann:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      os_user:
-        description: Riemann OS username. Will be created if not existing, and used to run the service.
-        type: string
-        default: riemann
-      os_group:
-        description: Riemann OS group. Will be created if not existing, and used to run the service.
-        type: string
-        default: riemann
-      os_homedir:
-        description: Riemann OS user's home directory. Will not be created if missing.
-        type: string
-        default: /etc/cloudify
       langohr_jar_source_url:
         description: Langohr JAR Source URL
         type: string
@@ -718,18 +706,6 @@ node_types:
         description: Number of log files to keep when rotating.
         type: integer
         default: { get_input: rest_service_log_files_backup_count }
-      os_user:
-        description: Rest service OS username. Will be created if not existing, and used to run the service.
-        type: string
-        default: cloudify-restservice
-      os_group:
-        description: Rest service OS group. Will be created if not existing, and used to run the service.
-        type: string
-        default: cloudify-restservice
-      sudoers_include_dir:
-        description: Path to sudoers includedir.
-        type: string
-        default: /etc/sudoers.d
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -771,22 +747,6 @@ node_types:
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
-      os_user:
-        description: Management worker OS username. Will be created if not existing, and used to run the service.
-        type: string
-        default: mgmtworker
-      os_group:
-        description: Management worker OS group. Will be created if not existing, and used to run the service.
-        type: string
-        default: mgmtworker
-      os_homedir:
-        description: Management worker OS user's home directory. Will not be created if missing.
-        type: string
-        default: /etc/cloudify
-      sudoers_include_dir:
-        description: Path to sudoers includedir.
-        type: string
-        default: /etc/sudoers.d
       management_worker_rpm_source_url:
         description: Management Worker RPM Source URL
         type: string
@@ -938,22 +898,6 @@ node_types:
   manager.nodes.ManagerIPSetter:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
-      os_user:
-        description: IP setter's OS username. Will be created if not existing, and used to run the service.
-        type: string
-        default: cfyipsetter
-      os_group:
-        description: IP setter's OS group. Will be created if not existing, and used to run the service.
-        type: string
-        default: cfyipsetter
-      os_homedir:
-        description: IP setter's OS user's home directory. Will not be created if missing.
-        type: string
-        default: /etc/cloudify
-      sudoers_include_dir:
-        description: Path to sudoers includedir.
-        type: string
-        default: /etc/sudoers.d
       admin_username:
         default: { get_input: admin_username }
       admin_password:

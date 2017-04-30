@@ -28,11 +28,8 @@ import utils  # NOQA
 runtime_props = ctx.instance.runtime_properties
 SERVICE_NAME = runtime_props['service_name']
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
-
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
-MGMTWORKER_USER = ctx_properties['os_user']
-MGMTWORKER_GROUP = ctx_properties['os_group']
-HOMEDIR = ctx_properties['os_homedir']
+CLOUDIFY_USER = utils.CLOUDIFY_USER
+CLOUDIFY_GROUP = utils.CLOUDIFY_GROUP
 
 
 def configure_mgmtworker():
@@ -46,7 +43,7 @@ def configure_mgmtworker():
         SERVICE_NAME)
     # The config contains credentials, do not let the world read it
     utils.sudo(['chmod', '440', broker_conf_path])
-    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, broker_conf_path)
+    utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, broker_conf_path)
     utils.systemd.configure(SERVICE_NAME)
     utils.logrotate(SERVICE_NAME)
 
@@ -64,20 +61,19 @@ def configure_logging():
 
 
 def prepare_snapshot_permissions():
+    # TODO: See if all of this is necessary
     pgpass_location = '/root/.pgpass'
-    destination = join(HOMEDIR, '.pgpass')
+    destination = join(utils.CLOUDIFY_HOME_DIR, '.pgpass')
     utils.chmod('400', pgpass_location)
-    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, pgpass_location)
+    utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, pgpass_location)
     utils.sudo(['mv', pgpass_location, destination])
-    utils.sudo(['chgrp', MGMTWORKER_GROUP, '/opt/manager'])
+    utils.sudo(['chgrp', CLOUDIFY_GROUP, '/opt/manager'])
     utils.sudo(['chmod', 'g+rw', '/opt/manager'])
-    utils.sudo(['chgrp', '-R', MGMTWORKER_GROUP, utils.SSL_CERTS_TARGET_DIR])
+    utils.sudo(['chgrp', '-R', CLOUDIFY_GROUP, utils.SSL_CERTS_TARGET_DIR])
     utils.sudo([
-        'chgrp', MGMTWORKER_GROUP, dirname(utils.SSL_CERTS_TARGET_DIR)])
+        'chgrp', CLOUDIFY_GROUP, dirname(utils.SSL_CERTS_TARGET_DIR)])
     utils.sudo(['chmod', '-R', 'g+rw', utils.SSL_CERTS_TARGET_DIR])
     utils.sudo(['chmod', 'g+rw', dirname(utils.SSL_CERTS_TARGET_DIR)])
-
-    utils.sudo(['/opt/cloudify/mgmtworker/snapshot_permissions_fixer'])
 
 
 configure_mgmtworker()
