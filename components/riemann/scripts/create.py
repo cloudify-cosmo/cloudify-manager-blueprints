@@ -14,9 +14,10 @@ RIEMANN_SERVICE_NAME = 'riemann'
 ctx_properties = utils.ctx_factory.create(RIEMANN_SERVICE_NAME)
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = RIEMANN_SERVICE_NAME
-RIEMANN_USER = ctx_properties['os_user']
-RIEMANN_GROUP = ctx_properties['os_group']
-HOMEDIR = ctx_properties['os_homedir']
+runtime_props['service_user'] = RIEMANN_SERVICE_NAME
+runtime_props['service_group'] = RIEMANN_SERVICE_NAME
+RIEMANN_USER = RIEMANN_SERVICE_NAME
+RIEMANN_GROUP = RIEMANN_SERVICE_NAME
 
 
 def install_riemann():
@@ -29,8 +30,8 @@ def install_riemann():
 
     utils.create_service_user(
         user=RIEMANN_USER,
-        home=HOMEDIR,
         group=RIEMANN_GROUP,
+        home=utils.CLOUDIFY_HOME_DIR
     )
 
     riemann_config_path = '/etc/riemann'
@@ -80,7 +81,8 @@ def install_riemann():
 
     files_to_remove = [riemann_config_path,
                        riemann_log_path,
-                       extra_classpath]
+                       extra_classpath,
+                       riemann_dir]
     runtime_props['files_to_remove'] = files_to_remove
 
 

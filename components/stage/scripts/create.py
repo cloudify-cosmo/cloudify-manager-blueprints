@@ -16,6 +16,11 @@ SERVICE_NAME = 'stage'
 # Some runtime properties to be used in teardown
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
+STAGE_USER = '{0}_user'.format(SERVICE_NAME)
+STAGE_GROUP = '{0}_group'.format(SERVICE_NAME)
+runtime_props['service_user'] = STAGE_USER
+runtime_props['service_group'] = STAGE_GROUP
+
 
 HOME_DIR = join('/opt', 'cloudify-{0}'.format(SERVICE_NAME))
 NODEJS_DIR = join('/opt', 'nodejs')
@@ -27,7 +32,6 @@ CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 
 def _install_stage():
-
     nodejs_source_url = ctx_properties['nodejs_tar_source_url']
     stage_source_url = ctx_properties['stage_tar_source_url']
 
@@ -41,20 +45,14 @@ def _install_stage():
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         os.environ.get('INFLUXDB_ENDPOINT_IP')
 
-    stage_user = 'stage'
-    stage_group = 'stage'
-    runtime_props['service_user'] = stage_user
-    runtime_props['service_group'] = stage_group
-
     utils.set_selinux_permissive()
-
     utils.copy_notice(SERVICE_NAME)
 
     utils.mkdir(NODEJS_DIR)
     utils.mkdir(HOME_DIR)
     utils.mkdir(LOG_DIR)
 
-    utils.create_service_user(stage_user, HOME_DIR)
+    utils.create_service_user(STAGE_USER, STAGE_GROUP, HOME_DIR)
 
     ctx.logger.info('Installing NodeJS...')
     nodejs = utils.download_cloudify_resource(nodejs_source_url, SERVICE_NAME)
@@ -62,14 +60,15 @@ def _install_stage():
     utils.remove(nodejs)
 
     ctx.logger.info('Installing Cloudify Stage (UI)...')
-    stage = utils.download_cloudify_resource(stage_source_url, SERVICE_NAME)
-    utils.untar(stage, HOME_DIR)
-    utils.remove(stage)
+    stage_tar = utils.download_cloudify_resource(stage_source_url,
+                                                 SERVICE_NAME)
+    utils.untar(stage_tar, HOME_DIR)
+    utils.remove(stage_tar)
 
     ctx.logger.info('Fixing permissions...')
-    utils.chown(stage_user, stage_group, HOME_DIR)
-    utils.chown(stage_user, stage_group, NODEJS_DIR)
-    utils.chown(stage_user, stage_group, LOG_DIR)
+    utils.chown(STAGE_USER, STAGE_GROUP, HOME_DIR)
+    utils.chown(STAGE_USER, STAGE_GROUP, NODEJS_DIR)
+    utils.chown(STAGE_USER, STAGE_GROUP, LOG_DIR)
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)

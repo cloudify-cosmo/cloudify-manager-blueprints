@@ -10,13 +10,7 @@ import utils  # NOQA
 runtime_props = ctx.instance.runtime_properties
 
 
-def main():
-    runtime_props['packages_to_remove'] = ['riemann']
-    runtime_props['service_user'] = 'riemann'
-    runtime_props['service_group'] = 'riemann'
-    utils.remove_component(runtime_props)
-
-
 # This makes sure that the `create` script already ran
 if runtime_props.get('service_name'):
-    main()
+    runtime_props['packages_to_remove'] = ['riemann']
+    utils.remove_component(runtime_props)

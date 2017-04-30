@@ -24,8 +24,6 @@ runtime_props['home_dir'] = HOME_DIR
 runtime_props['log_dir'] = LOG_DIR
 
 ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
-OS_USER = ctx_properties['os_user']
-OS_GROUP = ctx_properties['os_group']
 
 
 def install_optional(rest_venv):
@@ -118,20 +116,9 @@ def _configure_dbus(rest_venv):
                 'Could not find dbus install, cfy status will not work')
 
 
-def _allow_sudo_systemctl():
-    utils.deploy_sudo_command_script(runtime_props=runtime_props,
-                                     component='restservice',
-                                     user=OS_USER,
-                                     group=OS_GROUP,
-                                     script='/usr/bin/systemctl')
-
-
 def install_restservice():
+    utils.set_service_as_cloudify_service(runtime_props)
     rest_service_rpm_source_url = ctx_properties['rest_service_rpm_source_url']
-    os_user = OS_USER
-    os_group = OS_GROUP
-    runtime_props['service_user'] = os_user
-    runtime_props['service_group'] = os_group
 
     rest_venv = join(HOME_DIR, 'env')
     agent_dir = join(utils.MANAGER_RESOURCES_HOME, 'cloudify_agent')
@@ -139,12 +126,10 @@ def install_restservice():
     ctx.logger.info('Installing REST Service...')
     utils.set_selinux_permissive()
 
-    utils.create_service_user(os_user, HOME_DIR, group=os_group)
-
     utils.copy_notice(SERVICE_NAME)
     utils.mkdir(HOME_DIR)
     utils.mkdir(LOG_DIR)
-    utils.chown(os_user, os_group, LOG_DIR)
+    utils.chown(utils.CLOUDIFY_USER, utils.CLOUDIFY_GROUP, LOG_DIR)
     utils.mkdir(utils.MANAGER_RESOURCES_HOME)
     utils.mkdir(agent_dir)
 
@@ -155,7 +140,10 @@ def install_restservice():
     install_optional(rest_venv)
     utils.logrotate(SERVICE_NAME)
 
-    _allow_sudo_systemctl()
+    utils.deploy_sudo_command_script(
+        script='/usr/bin/systemctl',
+        description='Run systemctl'
+    )
 
 
 install_restservice()
