@@ -786,14 +786,14 @@ class RpmPackageHandler(object):
         source path.
         """
         package_name = self.get_rpm_package_name()
-        if self._is_package_installed(package_name):
+        if self.is_package_installed(package_name):
             ctx.logger.debug(
                 'Removing existing package sources for package '
                 'with name: {0}'.format(package_name))
             sudo(['rpm', '--noscripts', '-e', package_name])
 
     @staticmethod
-    def _is_package_installed(name):
+    def is_package_installed(name):
         installed = run(['rpm', '-q', name], ignore_failures=True)
         if installed.returncode == 0:
             return True
@@ -805,7 +805,7 @@ class RpmPackageHandler(object):
         src_query = run(['rpm', '-qp', self.source_path])
         source_name = src_query.aggr_stdout.rstrip('\n\r')
 
-        return self._is_package_installed(source_name)
+        return self.is_package_installed(source_name)
 
     def get_rpm_package_name(self):
         """Returns the package name according to the info provided in the
@@ -1812,6 +1812,15 @@ def validate_upgrade_directories(service_name):
     if not os.path.exists(resource_factory.get_resources_dir(service_name)):
         ctx.abort_operation('Resources directory does not exist for '
                             'service {0}'.format(service_name))
+
+
+def validate_prerequisite_rpms(rpms):
+    missing_rpms = []
+    for rpm in rpms:
+        if not RpmPackageHandler.is_package_installed(rpm):
+            missing_rpms.append(rpm)
+    if missing_rpms:
+        ctx.abort_operation("Prerequisite RPM's not installed: {0}".format(missing_rpms))
 
 
 def parse_jvm_heap_size(heap_size):
