@@ -193,6 +193,15 @@ node_templates:
   # #####################################################################
   python_runtime:
     type: manager.nodes.PythonRuntime
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/python/scripts/creation_validation.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
