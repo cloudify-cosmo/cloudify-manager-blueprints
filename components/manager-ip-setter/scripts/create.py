@@ -66,7 +66,7 @@ def install_manager_ip_setter():
     utils.deploy_sudo_command_script(runtime_props, service_name, user, group,
                                      CREATE_INTERNAL_SSL_CERTS_SCRIPT_NAME,
                                      'internal_ssl')
-
+    utils.systemd.configure(MANAGER_IP_SETTER_SERVICE_NAME)
     utils.disable_sudo_requiretty_for_user(runtime_props, user,
                                            SUDOERS_INCLUDE_DIR)
 

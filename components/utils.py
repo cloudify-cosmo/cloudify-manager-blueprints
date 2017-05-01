@@ -299,7 +299,6 @@ def deploy_sudo_command_script(runtime_props,
         description=description,
         sudoers_include_dir=sudoers_include_dir,
     )
-    systemd.configure(component)
 
 
 def deploy_ssl_certificate(private_or_public, destination, group, cert):
