@@ -274,7 +274,7 @@ def deploy_sudo_command_script(runtime_props,
     if script.startswith('/usr/bin'):
         # script is a path to some command
         description = description if description else \
-            script.lstrip('/usr/bin/')
+            script[len('/usr/bin/'):]
     else:
         # script is a path to package script
         description = description if description else script
