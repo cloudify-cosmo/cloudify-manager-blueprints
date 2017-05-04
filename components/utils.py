@@ -1836,13 +1836,13 @@ def remove_component(runtime_props):
     for f in files_to_remove:
         remove(f)
 
-    group = runtime_props.get('service_group')
-    if group:
-        sudo(['groupdel', group], ignore_failures=True)
-
     user = runtime_props.get('service_user')
     if user:
         sudo(['userdel', '--force', user], ignore_failures=True)
+
+    group = runtime_props.get('service_group')
+    if group:
+        sudo(['groupdel', group], ignore_failures=True)
 
 
 def extend_runtime_properties_list(runtime_props, key_name, new_list):
