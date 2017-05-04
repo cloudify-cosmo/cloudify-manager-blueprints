@@ -446,6 +446,46 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
+  manager.nodes.RabbitHole:
+    derived_from: cloudify.nodes.SoftwareComponent
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/rabbithole/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/rabbithole/scripts/configure.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/rabbithole/scripts/start.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/rabbithole/scripts/stop.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/rabbithole/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
   manager.nodes.InfluxDB:
     derived_from: cloudify.nodes.DBMS
     properties:
