@@ -59,7 +59,7 @@ AGENTS_ROLLBACK_PATH = '/opt/cloudify/manager-resources/agents_rollback'
 ES_UPGRADE_DUMP_PATH = '/tmp/es_upgrade_dump/'
 
 CLOUDIFY_USER = 'cfyuser'
-CLOUDIFY_GROUP = 'cfygroup'
+CLOUDIFY_GROUP = 'cfyuser'
 CLOUDIFY_HOME_DIR = '/etc/cloudify'
 SUDOERS_INCLUDE_DIR = '/etc/sudoers.d'
 CLOUDIFY_SUDOERS_FILE = os.path.join(SUDOERS_INCLUDE_DIR, CLOUDIFY_USER)
