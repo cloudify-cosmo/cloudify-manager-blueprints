@@ -1,0 +1,52 @@
+size_limit: 5
+time_limit: 15
+blocks:
+  - name: input
+    type: amqp
+    kwargs:
+      url: 'ampq://{{ ctx.instance.runtime_properties.rabbitmq_username }}:{{ ctx.instance.runtime_properties.rabbitmq_password }}@localhost:5672'
+  - name: output
+    type: sql
+    kwargs:
+      url: 'postgres://{{ ctx.instance.runtime_properties.postgresql_username }}:{{ ctx.instance.runtime_properties.postgresql_password }}@{{ ctx.instance.runtime_properties.postgresql_host }}:5432/{{ ctx.instance.runtime_properties.postgresql_db_name }}'
+flows:
+  - - name: input
+      kwargs:
+        exchange: cloudify-logs
+        exchange_type: fanout
+        durable: true
+    - name: output
+      kwargs:
+        query:
+          INSERT INTO logs (reported_timestamp, _execution_fk, _tenant_id, _creator_id, logger, level, message, message_code, operation, node_id)
+          SELECT CAST (:timestamp AS TIMESTAMP), _storage_id, _tenant_id, _creator_id, :logger, :level, :message, :message_code, :operation, :node_id
+          FROM executions WHERE id = :execution_id
+        parameters:
+          timestamp: timestamp
+          logger: logger
+          level: level
+          message: message.text
+          message_code: message_code
+          operation: context.operation
+          node_id: context.node_id
+          execution_id: context.execution_id
+  - - name: input
+      kwargs:
+        exchange: cloudify-events
+        exchange_type: fanout
+        durable: true
+    - name: output
+      kwargs:
+        query:
+          INSERT INTO events (reported_timestamp, _execution_fk, _tenant_id, _creator_id, event_type, message, message_code, operation, node_id, error_causes)
+          SELECT CAST (:timestamp AS TIMESTAMP), _storage_id, _tenant_id, _creator_id, :event_type, :message, :message_code, :operation, :node_id, :task_error_causes
+          FROM executions WHERE id = :execution_id
+        parameters:
+          timestamp: timestamp
+          event_type: event_type
+          message: message.text
+          message_code: message_code
+          operation: context.operation
+          node_id: context.node_id
+          task_error_causes: context.task_error_causes
+          execution_id: context.execution_id
