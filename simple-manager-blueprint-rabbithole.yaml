@@ -1,0 +1,497 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/4.0.1/types.yaml
+  - http://www.getcloudify.org/spec/fabric-plugin/1.4.2/plugin.yaml
+  - types/manager-types.yaml
+  - inputs/manager-inputs.yaml
+  - components/manager-ip-setter/node-template.yaml
+
+inputs:
+
+  #############################
+  # Provider specific Inputs
+  #############################
+  public_ip:
+    type: string
+
+  private_ip:
+    type: string
+
+  ssh_user:
+    type: string
+
+  ssh_port:
+    type: string
+    default: 22
+    description: >
+      Manager SSH port
+
+  ssh_key_filename:
+    type: string
+
+  agents_user:
+    default: ubuntu
+    type: string
+
+  resources_prefix:
+    default: ''
+    type: string
+
+  #############################
+  # Upload Resources Inputs
+  #############################
+  dsl_resources:
+    description: >
+      Holds a set of dsl required resources
+    default:
+      - {'source_path': 'http://www.getcloudify.org/spec/openstack-plugin/2.0.1/plugin.yaml', 'destination_path': '/spec/openstack-plugin/2.0.1/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/aws-plugin/1.4.3/plugin.yaml', 'destination_path': '/spec/aws-plugin/1.4.3/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/vsphere-plugin/2.0.1/plugin.yaml', 'destination_path': '/spec/vsphere-plugin/2.0.1/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.4.2/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.4.2/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.5/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.5/plugin.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.0.1/types.yaml', 'destination_path': '/spec/cloudify/4.0.1/types.yaml'}
+
+  #############################
+  # Dev Inputs
+  #############################
+
+  # Some plugins installed from sources require compilation - installs a
+  # compiler and the python headers to allow that.
+  install_python_compilers:
+    type: boolean
+    default: false
+
+  #############################
+  # Telecom Edition
+  #############################
+  telecom_edition:
+    description: >
+      Set this to true if you want Telecom Edition
+    type: boolean
+    default: false
+
+######################################################################
+# This is a simple blueprint specific node_type to allow us to define
+# The public_ip of the machine is an accessible property of the host.
+# By default, the `ip` property is the private ip.
+######################################################################
+node_types:
+  cloudify.nodes.ManagerHost:
+    derived_from: cloudify.nodes.Compute
+    properties:
+      public_ip:
+        type: string
+        default: { get_input: public_ip }
+
+
+######################################################################
+# These nodes comprise the manager's infrastructure and components
+######################################################################
+node_templates:
+  manager_host:
+    type: cloudify.nodes.ManagerHost
+    properties:
+      install_agent: false
+      ip: { get_input: private_ip }
+
+  # #####################################################################
+  # The manager_configuration node is meant to be read by Cloudify to
+  # provide runtime configuration and information for the CLI and the
+  # Manager.
+  # #####################################################################
+  manager_resources:
+    type: cloudify.nodes.ManagerResources
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+
+  manager_configuration:
+    type: cloudify.nodes.MyCloudifyManager
+    properties:
+      ssh_user: { get_input: ssh_user }
+      ssh_port: { get_input: ssh_port }
+      ssh_key_filename: { get_input: ssh_key_filename }
+      cloudify:
+        resources_prefix: { get_input: resources_prefix }
+
+        cloudify_agent:
+          min_workers: 0
+          max_workers: 5
+          remote_execution_port: 22
+          user: { get_input: agents_user }
+          broker_user: { get_input: rabbitmq_username }
+          broker_pass: { get_input: rabbitmq_password }
+          broker_ssl_enabled: true
+
+        workflows:
+          task_retries: { get_input: workflow_task_retries }
+          task_retry_interval: { get_input: workflow_task_retry_interval }
+
+        policy_engine:
+          start_timeout: 30
+
+        # Declare rules for the default import resolver
+        # which enables using the manager in offline mode.
+        # The resolver replaces an import's http link with the local path
+        # on the manager according to the matching rule's value.
+        # If the resolver cannot read the import from the specified local path
+        # (e.g. when the manager is not in offline mode),
+        # it will fall back to the original http link.
+        import_resolver:
+          parameters:
+            rules: { get_input: import_resolver_rules }
+
+        upload_resources:
+          dsl_resources: { get_input: dsl_resources }
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/manager/scripts/configure_manager.py
+            hide_output: &hide_output
+              - running
+            fabric_env: &simple_fabric_env
+              user: { get_input: ssh_user }
+              port: { get_input: ssh_port }
+              key_filename: { get_input: ssh_key_filename }
+              host_string: { get_property: [manager_host, public_ip] }
+              always_use_pty: true
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/manager/scripts/creation_validation.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+        target_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            postconfigure:
+              implementation: components/manager/scripts/set_manager_ips.py
+              inputs:
+                public_ip: { get_property: [manager_host, public_ip] }
+                rest_host_internal_endpoint_type: { get_property: [rest_service, rest_host_internal_endpoint_type] }
+                rest_host_external_endpoint_type: { get_property: [rest_service, rest_host_external_endpoint_type] }
+
+  # #####################################################################
+  # The Python and Java nodes are used to provide runtime environments
+  # on specific hosts. It allows us to define the runtime environment
+  # and install it only once per host and then have a node depend on it.
+  # Note that Erlang and NodeJS are also installed as runtime envs as
+  # part of the RabbitMQ and Stage nodes respectively but as they're not
+  # used by multiple nodes, we're not specifying them as independent
+  # entities.
+  # #####################################################################
+  python_runtime:
+    type: manager.nodes.PythonRuntime
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+
+  java_runtime:
+    type: manager.nodes.JavaRuntime
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+
+  # ######################################################################
+  # # These are the nodes comprising the Cloudify Manager's components
+  # ######################################################################
+  consul:
+    type: manager.nodes.Consul
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+
+  rabbitmq:
+    type: manager.nodes.RabbitMQ
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/rabbitmq/scripts/creation_validation.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  syncthing:
+    type: manager.nodes.Syncthing
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: consul
+
+  postgresql:
+    type: manager.nodes.Postgresql
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: consul
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/postgresql/scripts/creation_validation.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  rabbithole:
+    type: manager.nodes.RabbitHole
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: logstash_to_postgresql
+        target: postgresql
+      - type: logstash_to_rabbitmq
+        target: rabbitmq
+
+  influxdb:
+    type: manager.nodes.InfluxDB
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/influxdb/scripts/creation_validation.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  nginx:
+    type: manager.nodes.Nginx
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: rest_service
+      - type: nginx_to_manager_configuration
+        target: manager_configuration
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/nginx/scripts/creation_validation.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  riemann:
+    type: manager.nodes.Riemann
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: java_runtime
+      - type: riemann_to_manager_configuration
+        target: manager_configuration
+      - type: riemann_to_rabbitmq
+        target: rabbitmq
+      - type: riemann_to_nginx
+        target: nginx
+      - type: riemann_to_mgmtworker
+        target: mgmt_worker
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/riemann/scripts/creation_validation.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  rest_service:
+    type: manager.nodes.RestService
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: rest_to_manager_configuration
+        target: manager_configuration
+      - type: restservice_to_postgresql
+        target: postgresql
+      - type: restservice_to_rabbitmq
+        target: rabbitmq
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/restservice/scripts/creation_validation.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  mgmt_worker:
+    type: manager.nodes.ManagementWorker
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: cloudify.relationships.depends_on
+        target: nginx
+      - type: mgmtworker_to_rabbitmq
+        target: rabbitmq
+      - type: mgmtworker_to_manager_configuration
+        target: manager_configuration
+      - type: mgmtworker_to_postgres
+        target: postgresql
+      - type: mgmtworker_to_restservice
+        target: rest_service
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/mgmtworker/scripts/creation_validation.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  amqp_influx:
+    type: manager.nodes.AmqpInfluxBroker
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: cloudify.relationships.depends_on
+        target: nginx
+      - type: amqpinflux_to_rabbitmq
+        target: rabbitmq
+      - type: amqpinflux_to_influxdb
+        target: influxdb
+    interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/amqpinflux/scripts/creation_validation.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  stage:
+    type: manager.nodes.Stage
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+      - type: stage_to_restservice
+        target: rest_service
+      - type: stage_to_influxdb
+        target: influxdb
+
+  #################################
+  # Sanity
+  #################################
+  sanity:
+    type: manager.nodes.Sanity
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: sanity_to_mgr_config
+        target: manager_configuration
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: cloudify.relationships.depends_on
+        target: java_runtime
+      - type: cloudify.relationships.depends_on
+        target: postgresql
+      - type: cloudify.relationships.depends_on
+        target: rabbithole
+      - type: cloudify.relationships.depends_on
+        target: influxdb
+      - type: cloudify.relationships.depends_on
+        target: nginx
+      - type: cloudify.relationships.depends_on
+        target: riemann
+      - type: cloudify.relationships.depends_on
+        target: rest_service
+      - type: cloudify.relationships.depends_on
+        target: mgmt_worker
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: amqp_influx
+
+  ######################################################################
+  # Enable this node if you want to have the CLI installed within
+  # the manager. This might aid in debugging problems or just
+  # controlling the manager from within itself.
+  ######################################################################
+  # cli:
+  #   type: manager.nodes.CLI
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: manager_host
+  #     - type: cloudify.relationships.depends_on
+  #       target: nginx
+  #     - type: cloudify.relationships.depends_on
+  #       target: rest_service
+
+
+plugins:
+  cli:
+    install: false
+    executor: central_deployment_agent
+
+outputs:
+  manager_ip:
+    value: { get_property: [manager_host, public_ip] }
+  rest_server_public_certificate:
+    value: { get_attribute: [manager_configuration, external_rest_cert_content] }
+  private_ip:
+    value: { get_input: private_ip }
