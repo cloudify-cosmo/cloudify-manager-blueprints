@@ -24,8 +24,8 @@ node_types:
       execute_before_bootstrap:
         default: { get_input: execute_before_bootstrap }
     interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
+      cloudify.interfaces.validation:
+        creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
@@ -38,9 +38,10 @@ node_types:
                 user: { get_input: ssh_user }
                 port: { get_input: ssh_port }
                 key_filename: { get_input: ssh_key_filename }
-                host_string: { get_attribute: [manager_configuration, public_ip] }
+                host_string: { get_attribute: [manager_host, public_ip] }
                 always_use_pty: true
-        configure:
+      cloudify.interfaces.lifecycle:
+        create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
