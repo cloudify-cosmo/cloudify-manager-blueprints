@@ -29,12 +29,6 @@ CLOUDIFY_GROUP = utils.CLOUDIFY_GROUP
 ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 
 
-def allow_snapshot_db_secrets_fixer():
-    command = '/opt/mgmtworker/resources/cloudify/fix_snapshot_ssh_db'
-    description = 'snapshot_ssh_db_fix'
-    utils.allow_user_to_sudo_command(command, description)
-
-
 def _install_optional(mgmtworker_venv):
     rest_props = utils.ctx_factory.get('restservice')
     rest_client_source_url = rest_props['rest_client_module_source_url']
@@ -131,4 +125,3 @@ def install_mgmtworker():
 
 
 install_mgmtworker()
-allow_snapshot_db_secrets_fixer()
