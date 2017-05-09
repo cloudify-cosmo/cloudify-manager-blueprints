@@ -14,4 +14,3 @@ MANAGER_FILE_SERVER_ROOT="{{ ctx.instance.runtime_properties.file_server_root }}
 CELERY_TASK_SERIALIZER="json"
 CELERY_RESULT_SERIALIZER="json"
 CELERY_RESULT_BACKEND="amqp"
-C_FORCE_ROOT=true
