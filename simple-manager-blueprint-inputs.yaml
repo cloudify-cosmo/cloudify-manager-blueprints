@@ -55,7 +55,7 @@ ssh_key_filename: ''
 #############################
 # Manager Resources Package
 #############################
-#manager_resources_package: http://repository.cloudifysource.org/cloudify/17.3.31/release/cloudify-manager-resources_17.3.31-community.tar.gz
+#manager_resources_package: http://repository.cloudifysource.org/cloudify/17.4.11/release/cloudify-manager-resources_17.4.11-community.tar.gz
 
 # Providing a checksum file url will allow validating the resources package.
 # By default, no validation is performed. Providing a checksum file will use
