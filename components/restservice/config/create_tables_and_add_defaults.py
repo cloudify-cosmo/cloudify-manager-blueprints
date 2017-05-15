@@ -19,8 +19,7 @@ import json
 
 from flask_migrate import upgrade
 
-from cloudify.amqp_manager import AMQPManager
-
+from manager_rest.amqp_manager import AMQPManager
 from manager_rest.flask_utils import setup_flask_app
 from manager_rest.storage.storage_utils import \
     create_default_user_tenant_and_roles
@@ -40,7 +39,7 @@ def _init_db_tables(config):
 
 def _add_default_user_and_tenant(config, amqp_manager):
     print 'Creating bootstrap admin, default tenant and security roles'
-    return create_default_user_tenant_and_roles(
+    create_default_user_tenant_and_roles(
         admin_username=config['admin_username'],
         admin_password=config['admin_password'],
         amqp_manager=amqp_manager
@@ -63,3 +62,4 @@ if __name__ == '__main__':
     _init_db_tables(config)
     amqp_manager = _get_amqp_manager(config)
     _add_default_user_and_tenant(config, amqp_manager)
+    print 'Finished creating bootstrap admin and default tenant'
