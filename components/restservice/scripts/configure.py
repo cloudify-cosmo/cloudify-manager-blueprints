@@ -88,11 +88,10 @@ def _create_db_tables_and_add_defaults():
     destination_script_path = join(tempfile.gettempdir(), script_name)
     ctx.download_resource(source_script_path, destination_script_path)
 
-    # Directly calling with this python bin, in order to make sure it's run
-    # in the correct venv
-    python_path = join(runtime_props['home_dir'], 'env', 'bin', 'python')
-
     args_dict = runtime_props['security_configuration']
+    args_dict['amqp_host'] = runtime_props['rabbitmq_endpoint_ip']
+    args_dict['amqp_username'] = runtime_props['rabbitmq_username']
+    args_dict['amqp_password'] = runtime_props['rabbitmq_password']
     args_dict['postgresql_host'] = runtime_props['postgresql_host']
     args_dict['db_migrate_dir'] = join(
         utils.MANAGER_RESOURCES_HOME,
@@ -106,6 +105,9 @@ def _create_db_tables_and_add_defaults():
     with open(args_file_location, 'w') as f:
         json.dump(args_dict, f)
 
+    # Directly calling with this python bin, in order to make sure it's run
+    # in the correct venv
+    python_path = join(runtime_props['home_dir'], 'env', 'bin', 'python')
     result = utils.sudo(
         [python_path, destination_script_path, args_file_location]
     )
