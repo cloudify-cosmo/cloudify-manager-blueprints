@@ -72,9 +72,7 @@ def _install_stage():
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)
-
-
-def _create_tables():
+    
     backend_dir = join(HOME_DIR, 'backend')
     npm_path = join(NODEJS_DIR, 'bin', 'npm')
     subprocess.check_call(
@@ -84,9 +82,6 @@ def _create_tables():
 
 def main():
     _install_stage()
-    skip_installation = ctx.instance.runtime_properties['skip_installation']
-    if skip_installation != "true":
-        _create_tables()
-
+    
 
 main()
