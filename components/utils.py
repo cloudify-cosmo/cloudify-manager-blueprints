@@ -1355,7 +1355,7 @@ class BlueprintResourceFactory(object):
                                     'file://'))
         filename = get_file_name_from_url(source) if is_url else source
         is_manager_package = filename.startswith(SINGLE_TAR_PREFIX)
-        if is_manager_package:
+        if is_manager_package or is_url:
             local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
         else:
             local_filepath = get_filepath_from_pkg_name(filename)
