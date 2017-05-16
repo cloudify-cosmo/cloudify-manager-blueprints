@@ -15,3 +15,5 @@ runtime_props = ctx.instance.runtime_properties
 # This makes sure that the `create` script already ran
 if runtime_props.get('service_name'):
     utils.remove_component(runtime_props)
+
+    utils.delete_cluster_component('syncthing')

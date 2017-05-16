@@ -12,6 +12,8 @@ runtime_props = ctx.instance.runtime_properties
 
 # This makes sure that the `create` script already ran
 if runtime_props.get('service_name'):
+    utils.delete_cluster_component('postgresql')
+
     runtime_props['packages_to_remove'] = ['postgresql95', 'postgresql95-libs']
     runtime_props['service_user'] = 'postgres'
     runtime_props['service_group'] = 'postgres'

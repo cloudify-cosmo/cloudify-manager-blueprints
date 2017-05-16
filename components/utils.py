@@ -70,6 +70,7 @@ INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                  INTERNAL_SSL_KEY_FILENAME)
 CERT_METADATA_FILE_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                        'certificate_metadata')
+CLUSTER_DELETE_SCRIPT = '/opt/cloudify/delete_cluster.py'
 
 
 def retry(exception, tries=4, delay=3, backoff=2):
@@ -1859,3 +1860,10 @@ def set_service_as_cloudify_service(runtime_props):
 
     runtime_props['service_user'] = CLOUDIFY_USER
     runtime_props['service_group'] = CLOUDIFY_GROUP
+
+
+def delete_cluster_component(component):
+    """If the given cluster component exists, teardown it."""
+    if os.path.exists(CLUSTER_DELETE_SCRIPT):
+        sudo(['/usr/bin/env', 'python', CLUSTER_DELETE_SCRIPT,
+              '--component', component])
