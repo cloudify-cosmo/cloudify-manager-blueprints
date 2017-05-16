@@ -72,7 +72,7 @@ def _install_stage():
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)
-    
+
     backend_dir = join(HOME_DIR, 'backend')
     npm_path = join(NODEJS_DIR, 'bin', 'npm')
     subprocess.check_call(
@@ -82,6 +82,6 @@ def _install_stage():
 
 def main():
     _install_stage()
-    
 
+    
 main()
