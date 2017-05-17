@@ -20,7 +20,7 @@ function set_manager_ip() {
   /usr/bin/sed -i -e "s#MANAGER_FILE_SERVER_URL="'"'"https://.*:53333/resources"'"'"#MANAGER_FILE_SERVER_URL="'"'"https://${ip}:53333/resources"'"'"#" /etc/sysconfig/cloudify-mgmtworker
 
   echo "Updating cloudify-manager (rest-service).."
-  /usr/bin/sed -i -e "s#amqp_address: '.*:5671/'#amqp_address: '${ip}:5671/'#" /opt/manager/cloudify-rest.conf
+  /usr/bin/sed -i -e "s#amqp_host: '.*'#amqp_host: '${ip}'#" /opt/manager/cloudify-rest.conf
   /usr/bin/sed -i -e "s#file_server_url: 'https://[^:]*:\(.*\)#file_server_url: 'https://${ip}:\1#" /opt/manager/cloudify-rest.conf
 
   echo "Updating broker_config.json.."

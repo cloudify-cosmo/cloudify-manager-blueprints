@@ -19,6 +19,7 @@ import json
 
 from flask_migrate import upgrade
 
+from manager_rest.amqp_manager import AMQPManager
 from manager_rest.flask_utils import setup_flask_app
 from manager_rest.storage.storage_utils import \
     create_default_user_tenant_and_roles
@@ -36,11 +37,20 @@ def _init_db_tables(config):
     upgrade(directory=config['db_migrate_dir'])
 
 
-def _add_default_user_and_tenant(config):
+def _add_default_user_and_tenant(config, amqp_manager):
     print 'Creating bootstrap admin, default tenant and security roles'
     create_default_user_tenant_and_roles(
         admin_username=config['admin_username'],
         admin_password=config['admin_password'],
+        amqp_manager=amqp_manager
+    )
+
+
+def _get_amqp_manager(config):
+    return AMQPManager(
+        host=config['amqp_host'],
+        username=config['amqp_username'],
+        password=config['amqp_password']
     )
 
 
@@ -50,4 +60,6 @@ if __name__ == '__main__':
     with open(sys.argv[1], 'r') as f:
         config = json.load(f)
     _init_db_tables(config)
-    _add_default_user_and_tenant(config)
+    amqp_manager = _get_amqp_manager(config)
+    _add_default_user_and_tenant(config, amqp_manager)
+    print 'Finished creating bootstrap admin and default tenant'
