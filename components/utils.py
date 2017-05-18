@@ -21,7 +21,7 @@ from distutils.version import LooseVersion
 from cloudify import ctx
 
 
-REST_VERSION = 'v3'
+REST_VERSION = 'v3.1'
 PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 MANAGER_RESOURCES_HOME = '/opt/manager/resources'
