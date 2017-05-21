@@ -101,12 +101,8 @@ def deploy_broker_configuration():
         postgresql_props.get('postgresql_db_name')
     ctx.instance.runtime_properties['postgresql_host'] = \
         postgresql_props.get('postgresql_host')
-
-    # Add certificate and select port, as applicable
     ctx.instance.runtime_properties['broker_cert_path'] = \
         utils.INTERNAL_CERT_PATH
-    # Use SSL port
-    ctx.instance.runtime_properties['broker_port'] = 5671
 
 
 def _configure_dbus(rest_venv):
