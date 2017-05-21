@@ -90,7 +90,6 @@ def deploy_broker_configuration():
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip()
 
-    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = True
     ctx.instance.runtime_properties['rabbitmq_username'] = \
         rabbit_props.get('rabbitmq_username')
     ctx.instance.runtime_properties['rabbitmq_password'] = \

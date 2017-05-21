@@ -49,7 +49,6 @@ def install_amqpinflux():
         rabbit_props.get('rabbitmq_username')
     ctx.instance.runtime_properties['rabbitmq_password'] = \
         rabbit_props.get('rabbitmq_password')
-    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = True
 
     amqpinflux_venv = '{0}/env'.format(HOME_DIR)
 

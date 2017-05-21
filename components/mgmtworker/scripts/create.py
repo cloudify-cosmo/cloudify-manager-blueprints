@@ -99,7 +99,6 @@ def install_mgmtworker():
         # sed 's/"/\\"/' | sed 's/\\/\\\\/' | sed s-/-\\/- | sed 's/\t/\\t/'
         runtime_props[key] = ctx_properties[key]
 
-    runtime_props['rabbitmq_ssl_enabled'] = True
     utils.set_service_as_cloudify_service(runtime_props)
 
     ctx.logger.info('Installing Management Worker...')
