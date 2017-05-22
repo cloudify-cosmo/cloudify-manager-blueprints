@@ -936,6 +936,11 @@ def create_service_user(user, group, home):
         ])
 
 
+def add_user_to_group(user, group):
+    """Adds the user to the group. Both must already exist"""
+    sudo(['usermod', '-aG', group, user])
+
+
 def logrotate(service):
     """Deploys a logrotate config for a service.
 
@@ -969,9 +974,14 @@ def remove_logrotate(service_name):
     remove(config_file_destination)
 
 
-def chmod(mode, path):
-    ctx.logger.debug('chmoding {0}: {1}'.format(path, mode))
-    sudo(['chmod', mode, path])
+def chmod(mode, path, recursive=False):
+    ctx.logger.debug('chmoding {0}{1}: {2}'.format(
+        'recursive ' if recursive else '', path, mode))
+    cmd = ['chmod']
+    if recursive:
+        cmd += ['-R']
+    cmd += [mode, path]
+    sudo(cmd)
 
 
 def chown(user, group, path):
