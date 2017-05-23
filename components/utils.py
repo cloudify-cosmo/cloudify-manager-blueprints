@@ -175,16 +175,17 @@ def add_entry_to_sudoers(entry, description):
         )
 
 
-def allow_user_to_sudo_command(full_command, description):
+def allow_user_to_sudo_command(full_command, description, allow_as='root'):
     entry = '{user}    ALL=({allow_as}) NOPASSWD:{full_command}'.format(
         user=CLOUDIFY_USER,
-        allow_as='root',
+        allow_as=allow_as,
         full_command=full_command
     )
     add_entry_to_sudoers(entry, description)
 
 
-def deploy_sudo_command_script(script, description, component=None):
+def deploy_sudo_command_script(script, description, component=None,
+                               allow_as='root'):
     # If passed a component, then script is a relative path, that needs to
     # be downloaded from the scripts folder. Otherwise, it's an absolute path
     if component:
@@ -200,7 +201,8 @@ def deploy_sudo_command_script(script, description, component=None):
 
     ctx.logger.info('Allowing user `{0}` to run `{1}`'
                     .format(CLOUDIFY_USER, script))
-    allow_user_to_sudo_command(full_command=script, description=description)
+    allow_user_to_sudo_command(full_command=script, description=description,
+                               allow_as=allow_as)
 
 
 def deploy_ssl_certificate(private_or_public, destination, group, cert):
