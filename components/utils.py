@@ -155,14 +155,11 @@ def add_entry_to_sudoers(entry, description):
     description = '# {0}'.format(description)
     entry = '{0}\n'.format(entry)
 
-    # `visudo` handles sudoers file. Setting EDITOR to `tee -a` means that
-    # whatever is piped should be appended to the file passed.
-    cmd_template = "echo '{line}' | sudo EDITOR='tee -a' visudo -f {file}"
-
     for line in (description, entry):
-        cmd = cmd_template.format(line=line, file=CLOUDIFY_SUDOERS_FILE)
-        # Using `shell=True` because | is a shell operator
-        run(cmd, shell=True)
+        # `visudo` handles sudoers file. Setting EDITOR to `tee -a` means that
+        # whatever is piped should be appended to the file passed.
+        sudo(['/sbin/visudo', '-f', CLOUDIFY_SUDOERS_FILE],
+             stdin=line, env={'EDITOR': '/bin/tee -a'})
 
     valid = sudo(
         ['visudo', '-cf', CLOUDIFY_SUDOERS_FILE],
