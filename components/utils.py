@@ -104,7 +104,8 @@ def escape_for_systemd(the_string):
     return the_string
 
 
-def run(command, retries=0, ignore_failures=False, globx=False, shell=False):
+def run(command, retries=0, stdin=b'', ignore_failures=False,
+        globx=False, shell=False, env=None):
     if isinstance(command, str) and not shell:
         command = shlex.split(command)
     stderr = subprocess.PIPE
@@ -115,8 +116,9 @@ def run(command, retries=0, ignore_failures=False, globx=False, shell=False):
             glob_command.append(glob.glob(arg))
         command = glob_command
     ctx.logger.debug('Running: {0}'.format(command))
-    proc = subprocess.Popen(command, stdout=stdout, stderr=stderr, shell=shell)
-    proc.aggr_stdout, proc.aggr_stderr = proc.communicate()
+    proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=stdout,
+                            stderr=stderr, shell=shell, env=env)
+    proc.aggr_stdout, proc.aggr_stderr = proc.communicate(input=stdin)
     if proc.returncode != 0:
         command_str = ' '.join(command)
         if retries:
@@ -130,12 +132,14 @@ def run(command, retries=0, ignore_failures=False, globx=False, shell=False):
     return proc
 
 
-def sudo(command, retries=0, globx=False, ignore_failures=False):
+def sudo(command, *args, **kwargs):
     if isinstance(command, str):
         command = shlex.split(command)
-    command.insert(0, 'sudo')
-    return run(command=command, globx=globx, retries=retries,
-               ignore_failures=ignore_failures)
+    if 'env' in kwargs:
+        command = ['sudo', '-E'] + command
+    else:
+        command.insert(0, 'sudo')
+    return run(command=command, *args, **kwargs)
 
 
 def sudo_write_to_file(contents, destination):
