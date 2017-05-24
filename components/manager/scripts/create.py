@@ -46,6 +46,7 @@ def deploy_manager_sources():
         # were completed and bootstrap succeeded as it is not longer
         # necessary
         utils.mkdir(utils.CLOUDIFY_SOURCES_PATH)
+        utils.chmod('o+rx', utils.CLOUDIFY_SOURCES_PATH)
         resource_name = os.path.basename(archive_path)
         destination = os.path.join(utils.CLOUDIFY_SOURCES_PATH, resource_name)
 
