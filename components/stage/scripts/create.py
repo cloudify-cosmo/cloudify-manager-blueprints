@@ -69,6 +69,8 @@ def _install_stage():
     utils.chown(STAGE_USER, STAGE_GROUP, HOME_DIR)
     utils.chown(STAGE_USER, STAGE_GROUP, NODEJS_DIR)
     utils.chown(STAGE_USER, STAGE_GROUP, LOG_DIR)
+    utils.chmod('g+w', HOME_DIR, recursive=True)
+    utils.add_user_to_group(utils.CLOUDIFY_USER, STAGE_GROUP)
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)
