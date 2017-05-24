@@ -104,7 +104,8 @@ def escape_for_systemd(the_string):
     return the_string
 
 
-def run(command, retries=0, ignore_failures=False, globx=False, shell=False):
+def run(command, retries=0, stdin=b'', ignore_failures=False,
+        globx=False, shell=False, env=None):
     if isinstance(command, str) and not shell:
         command = shlex.split(command)
     stderr = subprocess.PIPE
@@ -115,8 +116,9 @@ def run(command, retries=0, ignore_failures=False, globx=False, shell=False):
             glob_command.append(glob.glob(arg))
         command = glob_command
     ctx.logger.debug('Running: {0}'.format(command))
-    proc = subprocess.Popen(command, stdout=stdout, stderr=stderr, shell=shell)
-    proc.aggr_stdout, proc.aggr_stderr = proc.communicate()
+    proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=stdout,
+                            stderr=stderr, shell=shell, env=env)
+    proc.aggr_stdout, proc.aggr_stderr = proc.communicate(input=stdin)
     if proc.returncode != 0:
         command_str = ' '.join(command)
         if retries:
@@ -130,12 +132,14 @@ def run(command, retries=0, ignore_failures=False, globx=False, shell=False):
     return proc
 
 
-def sudo(command, retries=0, globx=False, ignore_failures=False):
+def sudo(command, *args, **kwargs):
     if isinstance(command, str):
         command = shlex.split(command)
-    command.insert(0, 'sudo')
-    return run(command=command, globx=globx, retries=retries,
-               ignore_failures=ignore_failures)
+    if 'env' in kwargs:
+        command = ['sudo', '-E'] + command
+    else:
+        command.insert(0, 'sudo')
+    return run(command=command, *args, **kwargs)
 
 
 def sudo_write_to_file(contents, destination):
@@ -151,14 +155,11 @@ def add_entry_to_sudoers(entry, description):
     description = '# {0}'.format(description)
     entry = '{0}\n'.format(entry)
 
-    # `visudo` handles sudoers file. Setting EDITOR to `tee -a` means that
-    # whatever is piped should be appended to the file passed.
-    cmd_template = "echo '{line}' | sudo EDITOR='tee -a' visudo -f {file}"
-
     for line in (description, entry):
-        cmd = cmd_template.format(line=line, file=CLOUDIFY_SUDOERS_FILE)
-        # Using `shell=True` because | is a shell operator
-        run(cmd, shell=True)
+        # `visudo` handles sudoers file. Setting EDITOR to `tee -a` means that
+        # whatever is piped should be appended to the file passed.
+        sudo(['/sbin/visudo', '-f', CLOUDIFY_SUDOERS_FILE],
+             stdin=line, env={'EDITOR': '/bin/tee -a'})
 
     valid = sudo(
         ['visudo', '-cf', CLOUDIFY_SUDOERS_FILE],
@@ -171,16 +172,17 @@ def add_entry_to_sudoers(entry, description):
         )
 
 
-def allow_user_to_sudo_command(full_command, description):
+def allow_user_to_sudo_command(full_command, description, allow_as='root'):
     entry = '{user}    ALL=({allow_as}) NOPASSWD:{full_command}'.format(
         user=CLOUDIFY_USER,
-        allow_as='root',
+        allow_as=allow_as,
         full_command=full_command
     )
     add_entry_to_sudoers(entry, description)
 
 
-def deploy_sudo_command_script(script, description, component=None):
+def deploy_sudo_command_script(script, description, component=None,
+                               allow_as='root'):
     # If passed a component, then script is a relative path, that needs to
     # be downloaded from the scripts folder. Otherwise, it's an absolute path
     if component:
@@ -196,7 +198,8 @@ def deploy_sudo_command_script(script, description, component=None):
 
     ctx.logger.info('Allowing user `{0}` to run `{1}`'
                     .format(CLOUDIFY_USER, script))
-    allow_user_to_sudo_command(full_command=script, description=description)
+    allow_user_to_sudo_command(full_command=script, description=description,
+                               allow_as=allow_as)
 
 
 def deploy_ssl_certificate(private_or_public, destination, group, cert):
