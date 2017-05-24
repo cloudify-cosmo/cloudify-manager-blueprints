@@ -1,4 +1,5 @@
 {
+  "broker_ssl_enabled": "true",
   "broker_cert_path": "{{ ctx.instance.runtime_properties.broker_cert_path }}",
   "broker_username": "{{ ctx.instance.runtime_properties.rabbitmq_username }}",
   "broker_password": "{{ ctx.instance.runtime_properties.rabbitmq_password }}",
