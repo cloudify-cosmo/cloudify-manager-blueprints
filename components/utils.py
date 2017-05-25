@@ -271,7 +271,8 @@ def remove(path, ignore_failure=False):
     sudo(['rm', '-rf', path], ignore_failures=ignore_failure)
 
 
-def _generate_ssl_certificate(ip,
+def _generate_ssl_certificate(ips,
+                              cn,
                               cert_filename,
                               key_filename,
                               pkcs12_filename=None):
@@ -281,8 +282,15 @@ def _generate_ssl_certificate(ip,
     """
     mkdir(SSL_CERTS_TARGET_DIR)
 
-    cert_metadata = \
-        'IP:{0},DNS:{0},IP:127.0.0.1,DNS:127.0.0.1,DNS:localhost'.format(ip)
+    # Remove duplicates from ips
+    ips.append('127.0.0.1')
+    ips = set(ips)
+    metadata_items = ['IP:{0},DNS:{0}'.format(x) for x in ips]
+    cert_metadata = '{0},DNS:localhost'.format(
+        ','.join(metadata_items))
+
+    ctx.logger.debug('Using certificate metadata: {0}'.format(cert_metadata))
+
     sudo_write_to_file(cert_metadata, CERT_METADATA_FILE_PATH)
     chmod('664', CERT_METADATA_FILE_PATH)
 
@@ -295,16 +303,16 @@ def _generate_ssl_certificate(ip,
 distinguished_name = req_distinguished_name
 x509_extensions=SAN
 [ req_distinguished_name ]
-commonName={ip}
+commonName={cn}
 [SAN]
 subjectAltName={metadata}
-""".format(ip=ip, metadata=cert_metadata))
+""".format(cn=cn, metadata=cert_metadata))
 
     sudo([
         'openssl', 'req', '-x509', '-newkey', 'rsa:2048',
         '-keyout', key_path, '-out', cert_path,
         '-days', '36500', '-batch', '-nodes', '-subj',
-        '/CN={0}'.format(ip), '-config', conf_file.name
+        '/CN={0}'.format(cn), '-config', conf_file.name
     ])
     # PKCS12 file required for riemann due to JVM
     # While we don't really want the private key in there, not having it
@@ -330,6 +338,7 @@ subjectAltName={metadata}
 
 def generate_internal_ssl_cert(ip):
     return _generate_ssl_certificate(
+        [ip],
         ip,
         INTERNAL_SSL_CERT_FILENAME,
         INTERNAL_SSL_KEY_FILENAME,
@@ -337,7 +346,7 @@ def generate_internal_ssl_cert(ip):
     )
 
 
-def deploy_or_generate_external_ssl_cert(ip):
+def deploy_or_generate_external_ssl_cert(ips, cn):
     user_provided_cert_path = os.path.join(
         EXTERNAL_SSL_CERTS_SOURCE_DIR,
         EXTERNAL_SSL_CERT_FILENAME
@@ -354,7 +363,9 @@ def deploy_or_generate_external_ssl_cert(ip):
         SSL_CERTS_TARGET_DIR,
         EXTERNAL_SSL_KEY_FILENAME
     )
-    try:
+
+    if os.path.isfile(user_provided_cert_path) and \
+        os.path.isfile(user_provided_key_path):
         # Try to deploy user provided certificates
         deploy_blueprint_resource(user_provided_cert_path,
                                   cert_target_path,
@@ -367,30 +378,28 @@ def deploy_or_generate_external_ssl_cert(ip):
                                   user_resource=True,
                                   load_ctx=False)
         ctx.logger.info(
-            'Deployed user-proved SSL certificate `{0}` and SSL private '
+            'Deployed user-provided SSL certificate `{0}` and SSL private '
             'key `{1}`'.format(
                 EXTERNAL_SSL_CERT_FILENAME,
                 EXTERNAL_SSL_KEY_FILENAME
             )
         )
         return cert_target_path, key_target_path
-    except Exception as e:
-        if "No such file or directory" in e.stderr:
-            # pre-existing cert not found, generating new cert
-            ctx.logger.info(
-                'Generating SSL certificate `{0}` and SSL private '
-                'key `{1}`'.format(
-                    EXTERNAL_SSL_CERT_FILENAME,
-                    EXTERNAL_SSL_KEY_FILENAME
-                )
-            )
-            return _generate_ssl_certificate(
-                ip,
+    else:
+        ctx.logger.info(
+            'Generating SSL certificate `{0}` and SSL private '
+            'key `{1}`'.format(
                 EXTERNAL_SSL_CERT_FILENAME,
-                EXTERNAL_SSL_KEY_FILENAME,
+                EXTERNAL_SSL_KEY_FILENAME
             )
-        else:
-            raise
+        )
+
+        return _generate_ssl_certificate(
+            ips,
+            cn,
+            EXTERNAL_SSL_CERT_FILENAME,
+            EXTERNAL_SSL_KEY_FILENAME,
+        )
 
 
 def install_python_package(source, venv=''):
