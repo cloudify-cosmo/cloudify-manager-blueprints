@@ -14,11 +14,11 @@ dependencies:
   override:
     - pip install pip --upgrade
     - pip install pytz
-    - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/4.1m1.zip
-    - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/4.1m1.zip
-    - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/4.1m1.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/4.1m2.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/4.1m2.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/4.1m2.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.4.zip
-    - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/4.1m1.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/4.1m2.zip
     - pip install coverage==3.7.1
     - pip install nose
     - pip install nose-cov
