@@ -4,6 +4,7 @@ Wants=cloudify-rabbitmq.service
 After=cloudify-rabbitmq.service
 
 [Service]
+UMask=0022
 TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-mgmtworker

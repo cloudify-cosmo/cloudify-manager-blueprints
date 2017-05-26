@@ -93,10 +93,13 @@ def install_mgmtworker():
 
     utils.copy_notice(SERVICE_NAME)
     utils.mkdir(HOME_DIR)
+    utils.make_path_to_dir_traversible(HOME_DIR)
     utils.mkdir(join(HOME_DIR, 'config'))
+    utils.make_path_to_dir_traversible(join(HOME_DIR, 'config'))
     utils.mkdir(join(HOME_DIR, 'work'))
-    utils.mkdir(LOG_DIR)
+    utils.make_path_to_dir_traversible(join(HOME_DIR, 'work'))
     utils.mkdir(riemann_dir)
+    utils.make_path_to_dir_traversible(riemann_dir)
 
     mgmtworker_venv = join(HOME_DIR, 'env')
 
@@ -106,13 +109,14 @@ def install_mgmtworker():
                       service_name=SERVICE_NAME)
     _install_optional(mgmtworker_venv)
 
+    utils.make_log_dir(LOG_DIR, CLOUDIFY_USER, CLOUDIFY_GROUP)
+
     # Add certificate and select port, as applicable
     runtime_props['broker_cert_path'] = utils.INTERNAL_CERT_PATH
     # Use SSL port
     runtime_props['broker_port'] = AMQP_SSL_PORT
 
     utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, HOME_DIR)
-    utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, LOG_DIR)
     # Changing perms on workdir and venv in case they are put outside homedir
     utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, mgmtworker_venv)
     # Prepare riemann dir. We will change the owner to riemann later, but the

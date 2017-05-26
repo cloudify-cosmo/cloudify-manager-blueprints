@@ -34,6 +34,10 @@ def install_consul():
         utils.download_cloudify_resource(ctx_properties['consul_package_url'],
                                          SERVICE_NAME)
 
+    package_dir = dirname(consul_package)
+    utils.make_path_to_dir_traversible(package_dir)
+    utils.take_ownership_for_install_user(consul_package)
+
     temp_dir = tempfile.mkdtemp()
     try:
         with zipfile.ZipFile(consul_package) as consul_archive:

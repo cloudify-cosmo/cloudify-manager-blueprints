@@ -102,8 +102,7 @@ def install_logstash():
     install_logstash_output_jdbc_plugin()
     install_postgresql_jdbc_driver()
 
-    utils.mkdir(LOG_DIR)
-    utils.chown('logstash', 'logstash', LOG_DIR)
+    utils.make_log_dir(LOG_DIR, 'logstash', 'logstash')
 
     ctx.logger.debug('Creating systemd unit override...')
     utils.mkdir(UNIT_OVERRIDE_PATH)

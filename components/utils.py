@@ -247,6 +247,15 @@ def mkdir(dir, use_sudo=True):
         run(cmd)
 
 
+def make_log_dir(log_dir, user=None, group=''):
+    mkdir(log_dir)
+    make_path_to_dir_traversible(log_dir)
+    if user:
+        # If group is not changed this will set the log dir's group ownership
+        # to the user's group
+        chown(user, group, log_dir)
+
+
 # idempotent move operation
 def move(source, destination, rename_only=False):
     if rename_only:
@@ -280,6 +289,7 @@ def _generate_ssl_certificate(ip,
     :return: The path to the cert and key files on the manager
     """
     mkdir(SSL_CERTS_TARGET_DIR)
+    make_path_to_dir_traversible(SSL_CERTS_TARGET_DIR)
 
     cert_metadata = \
         'IP:{0},DNS:{0},IP:127.0.0.1,DNS:127.0.0.1,DNS:localhost'.format(ip)
@@ -681,6 +691,9 @@ class RpmPackageHandler(object):
 
     def __init__(self, source_path):
         self.source_path = source_path
+        dir_name = os.path.dirname(source_path)
+        make_path_to_dir_traversible(dir_name)
+        take_ownership_for_install_user(source_path)
 
     def remove_existing_rpm_package(self):
         """Removes any version that satisfies the package name of the given
@@ -1086,6 +1099,32 @@ def repetitive(condition_func,
         time.sleep(interval)
 
 
+def make_path_to_dir_traversible(dir_path, allow_ls=False):
+    """
+        Any directory path passed to this will be made traversible by all
+        users (ignoring owner/group), as will its parent directories.
+
+        If set to allow ls, the specified dir will also have read permissions
+        set, though its parent directories will not have this permission
+        altered.
+    """
+    if allow_ls:
+        chmod('o+r', dir_path)
+
+    while dir_path != '/':
+        chmod('o+x', dir_path)
+        dir_path = os.path.dirname(dir_path)
+
+
+def take_ownership_for_install_user(path):
+    """
+        Take ownership of the target path for the user running the install.
+    """
+    me = run('whoami').aggr_stdout.strip()
+    chown(me, '', path)
+    chmod('u+r', path)
+
+
 class CtxPropertyFactory(object):
     PROPERTIES_FILE_NAME = 'properties.json'
     BASE_PROPERTIES_PATH = '/opt/cloudify'
@@ -1133,6 +1172,20 @@ class CtxPropertyFactory(object):
         ctx.logger.debug('Saving {0} input configuration to {1}'.format(
             service_name, dest_file_path))
         write_to_json_file(ctx_props, dest_file_path)
+        self._ensure_file_is_accessible(dest_file_path)
+
+    def _ensure_file_is_accessible(self, file_path):
+        # Make sure that with a restrictive umask (e.g. 037), the json file is
+        # still reachable during the install
+        file_path = os.path.abspath(file_path)
+
+        # First, make sure the tree to the file can be traversed
+        dir_name = os.path.dirname(file_path)
+        make_path_to_dir_traversible(dir_name)
+
+        # Then make sure the installer can read the file by taking possession
+        # of it and making it readable by its owner
+        take_ownership_for_install_user(file_path)
 
     def _restore_properties(self, service_name):
         """Restore previously used node properties.
@@ -1263,6 +1316,7 @@ class BlueprintResourceFactory(object):
 
         if self._is_download_required(local_resource_path, render):
             mkdir(os.path.dirname(local_resource_path))
+            make_path_to_dir_traversible(os.path.dirname(local_resource_path))
             if user_resource:
                 self._download_user_resource(source,
                                              local_resource_path,

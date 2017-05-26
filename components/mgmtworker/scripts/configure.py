@@ -55,9 +55,11 @@ def configure_logging():
     config_file_destination = join(logging_config_dir, config_name)
     config_file_source = join(CONFIG_PATH, config_name)
     utils.mkdir(logging_config_dir)
+    utils.make_path_to_dir_traversible(logging_config_dir)
     config_file_temp_destination = join(tempfile.gettempdir(), config_name)
     ctx.download_resource(config_file_source, config_file_temp_destination)
     utils.move(config_file_temp_destination, config_file_destination)
+    utils.chmod('o+r', config_file_destination)
 
 
 def prepare_snapshot_permissions():

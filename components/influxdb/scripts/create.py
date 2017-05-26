@@ -102,9 +102,9 @@ def _install_influxdb():
 
     utils.copy_notice(SERVICE_NAME)
     utils.mkdir(HOME_DIR)
-    utils.mkdir(LOG_DIR)
 
     utils.yum_install(influxdb_source_url, service_name=SERVICE_NAME)
+    utils.make_log_dir(LOG_DIR, influxdb_user, influxdb_group)
 
     ctx.logger.info('Deploying InfluxDB configuration...')
     utils.deploy_blueprint_resource(
@@ -113,7 +113,6 @@ def _install_influxdb():
         SERVICE_NAME)
 
     utils.chown(influxdb_user, influxdb_group, HOME_DIR)
-    utils.chown(influxdb_user, influxdb_group, LOG_DIR)
 
     utils.systemd.configure(SERVICE_NAME)
     # Provided with InfluxDB's package. Will be removed if it exists.

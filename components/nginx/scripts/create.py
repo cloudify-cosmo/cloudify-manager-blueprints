@@ -55,7 +55,6 @@ def install_nginx():
     utils.set_selinux_permissive()
 
     utils.copy_notice(SERVICE_NAME)
-    utils.mkdir(LOG_DIR)
     utils.mkdir(manager_resources_home)
 
     utils.mkdir(manager_agents_path)
@@ -65,6 +64,7 @@ def install_nginx():
     utils.mkdir(UNIT_OVERRIDE_PATH)
 
     utils.yum_install(nginx_source_url, service_name=SERVICE_NAME)
+    utils.make_log_dir(LOG_DIR)
 
     ctx.logger.info('Creating systemd unit override...')
     utils.deploy_blueprint_resource(

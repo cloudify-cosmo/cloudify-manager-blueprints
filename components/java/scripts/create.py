@@ -30,7 +30,7 @@ def install_java():
 
     utils.yum_install(java_source_url, SERVICE_NAME)
 
-    utils.mkdir(LOG_DIR)
+    utils.make_log_dir(LOG_DIR)
 
     # Java install log is dropped in /var/log.
     # Move it to live with the rest of the cloudify logs

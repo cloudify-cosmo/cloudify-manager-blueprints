@@ -33,7 +33,7 @@ def _create_default_db(db_name, username, password):
                                  'create_default_db.sh')
     ctx.download_resource(source=ps_config_source,
                           destination=ps_config_destination)
-    utils.chmod('+x', ps_config_destination)
+    utils.chmod('755', ps_config_destination)
     # TODO: Can't we use a rest call here? Is there such a thing?
     utils.sudo('su - postgres -c "{cmd} {db} {user} {password}"'
                .format(cmd=ps_config_destination, db=db_name,

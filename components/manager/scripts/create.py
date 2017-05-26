@@ -46,6 +46,8 @@ def deploy_manager_sources():
         # were completed and bootstrap succeeded as it is not longer
         # necessary
         utils.mkdir(utils.CLOUDIFY_SOURCES_PATH)
+        utils.make_path_to_dir_traversible(utils.CLOUDIFY_SOURCES_PATH,
+                                           allow_ls=True)
         resource_name = os.path.basename(archive_path)
         destination = os.path.join(utils.CLOUDIFY_SOURCES_PATH, resource_name)
 
@@ -136,8 +138,14 @@ def deploy_manager_sources():
             ctx.logger.info('Restoring agents...')
             restore_agent_resources(utils.AGENT_ARCHIVES_PATH)
 
-        for agent_file in os.listdir(sources_agents_path):
+        # Handle restrictive umasks
+        utils.make_path_to_dir_traversible(sources_agents_path)
+        utils.chmod('o+r', sources_agents_path)
 
+        for agent_file in os.listdir(sources_agents_path):
+            utils.take_ownership_for_install_user(
+                os.path.join(sources_agents_path, agent_file)
+            )
             agent_id = normalize_agent_name(agent_file)
             agent_extension = splitext(agent_file)
             utils.move(

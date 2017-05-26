@@ -58,6 +58,7 @@ def install_amqpinflux():
 
     utils.copy_notice(SERVICE_NAME)
     utils.mkdir(HOME_DIR)
+    utils.make_path_to_dir_traversible(HOME_DIR)
 
     utils.yum_install(amqpinflux_rpm_source_url,
                       service_name=SERVICE_NAME)

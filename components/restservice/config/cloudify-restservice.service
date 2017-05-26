@@ -4,6 +4,7 @@ Wants=network-online.target dbus.service
 After=network-online.target
 
 [Service]
+UMask=0022
 User={{ ctx.instance.runtime_properties.service_user }}
 Group={{ ctx.instance.runtime_properties.service_group }}
 TimeoutStartSec=0

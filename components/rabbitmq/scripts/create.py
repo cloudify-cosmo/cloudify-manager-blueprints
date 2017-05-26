@@ -65,11 +65,11 @@ def _install_rabbitmq():
     utils.set_selinux_permissive()
 
     utils.copy_notice(SERVICE_NAME)
-    utils.mkdir(LOG_DIR)
 
     utils.yum_install(erlang_rpm_source_url, service_name=SERVICE_NAME)
     utils.yum_install(rabbitmq_rpm_source_url, service_name=SERVICE_NAME)
 
+    utils.make_log_dir(LOG_DIR, 'rabbitmq', 'rabbitmq')
     utils.logrotate(SERVICE_NAME)
 
     utils.systemd.configure(SERVICE_NAME)
@@ -84,6 +84,7 @@ def _install_rabbitmq():
         '{0}/rabbitmq-definitions.json'.format(CONFIG_PATH),
         join(HOME_DIR, 'definitions.json'),
         SERVICE_NAME)
+    utils.chown('rabbitmq', 'rabbitmq', join(HOME_DIR, 'definitions.json'))
 
     # This stops rabbit from failing if the host name changes, e.g. when
     # a manager is deployed from an image but given a new hostname.
@@ -94,12 +95,14 @@ def _install_rabbitmq():
         '{0}/rabbitmq-env.conf'.format(CONFIG_PATH),
         '/etc/rabbitmq/rabbitmq-env.conf',
         SERVICE_NAME)
+    utils.chown('rabbitmq', 'rabbitmq', '/etc/rabbitmq/rabbitmq-env.conf')
     # Delete old mnesia node
     utils.sudo(['rm', '-rf', '/var/lib/rabbitmq/mnesia'])
 
-    utils.systemd.systemctl('daemon-reload')
+    # Ensure rabbit will be able to read SSL certs+keys
+    utils.sudo(['usermod', '-aG', utils.CLOUDIFY_GROUP, 'rabbitmq'])
 
-    utils.chown('rabbitmq', 'rabbitmq', LOG_DIR)
+    utils.systemd.systemctl('daemon-reload')
 
     # rabbitmq restart exits with 143 status code that is valid in this case.
     utils.systemd.restart(SERVICE_NAME, ignore_failure=True)
@@ -109,18 +112,33 @@ def _install_rabbitmq():
 
     ctx.logger.info('Enabling RabbitMQ Plugins...')
     # Occasional timing issues with rabbitmq starting have resulted in
-    # failures when first trying to enable plugins
-    utils.sudo(['rabbitmq-plugins', 'enable', 'rabbitmq_management'],
-               retries=5)
-    utils.sudo(['rabbitmq-plugins', 'enable', 'rabbitmq_tracing'], retries=5)
+    # failures when first trying to enable plugins, hence the retries
+    # Additionally, the umask is set in case of restrictive default system
+    # umasks, which will otherwise break the plugins
+    utils.sudo(
+        [
+            'bash', '-c',
+            'umask 0022 && rabbitmq-plugins enable rabbitmq_management'
+        ],
+        retries=5,
+    )
+    utils.sudo(
+        [
+            'bash', '-c',
+            'umask 0022 && rabbitmq-plugins enable rabbitmq_tracing'
+        ],
+        retries=5,
+    )
 
     _clear_guest_permissions_if_guest_exists()
     _create_user_and_set_permissions(rabbitmq_username, rabbitmq_password)
 
+    rabbitmq_config_path = join(HOME_DIR, 'rabbitmq.config')
     utils.deploy_blueprint_resource(
         '{0}/rabbitmq.config'.format(CONFIG_PATH),
-        join(HOME_DIR, 'rabbitmq.config'),
+        rabbitmq_config_path,
         SERVICE_NAME, user_resource=True)
+    utils.chown('rabbitmq', 'rabbitmq', rabbitmq_config_path)
 
     utils.systemd.stop(SERVICE_NAME, retries=5)
 

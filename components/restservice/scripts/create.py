@@ -128,16 +128,18 @@ def install_restservice():
 
     utils.copy_notice(SERVICE_NAME)
     utils.mkdir(HOME_DIR)
-    utils.mkdir(LOG_DIR)
-    utils.chown(utils.CLOUDIFY_USER, utils.CLOUDIFY_GROUP, LOG_DIR)
+    utils.make_path_to_dir_traversible(HOME_DIR)
     utils.mkdir(utils.MANAGER_RESOURCES_HOME)
+    utils.make_path_to_dir_traversible(utils.MANAGER_RESOURCES_HOME)
     utils.mkdir(agent_dir)
+    utils.make_path_to_dir_traversible(agent_dir)
 
     deploy_broker_configuration()
     utils.yum_install(rest_service_rpm_source_url,
                       service_name=SERVICE_NAME)
     _configure_dbus(rest_venv)
     install_optional(rest_venv)
+    utils.make_log_dir(LOG_DIR, utils.CLOUDIFY_USER, utils.CLOUDIFY_GROUP)
     utils.logrotate(SERVICE_NAME)
 
     utils.deploy_sudo_command_script(

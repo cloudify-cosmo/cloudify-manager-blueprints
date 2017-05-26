@@ -49,10 +49,13 @@ def _install_stage():
     utils.copy_notice(SERVICE_NAME)
 
     utils.mkdir(NODEJS_DIR)
+    utils.make_path_to_dir_traversible(NODEJS_DIR)
     utils.mkdir(HOME_DIR)
-    utils.mkdir(LOG_DIR)
+    utils.make_path_to_dir_traversible(HOME_DIR)
 
     utils.create_service_user(STAGE_USER, STAGE_GROUP, HOME_DIR)
+
+    utils.make_log_dir(LOG_DIR, STAGE_USER, STAGE_GROUP)
 
     ctx.logger.info('Installing NodeJS...')
     nodejs = utils.download_cloudify_resource(nodejs_source_url, SERVICE_NAME)
@@ -68,7 +71,6 @@ def _install_stage():
     ctx.logger.info('Fixing permissions...')
     utils.chown(STAGE_USER, STAGE_GROUP, HOME_DIR)
     utils.chown(STAGE_USER, STAGE_GROUP, NODEJS_DIR)
-    utils.chown(STAGE_USER, STAGE_GROUP, LOG_DIR)
     utils.deploy_sudo_command_script(
         'restore-snapshot.py',
         'Restore stage directories from a snapshot path',
