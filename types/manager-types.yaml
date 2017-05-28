@@ -26,34 +26,33 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/manager/scripts/validate.py
             hide_output: &hide_output
               default:
                 - running
-            fabric_env: &simple_fabric_env
+            ssh_env: &simple_ssh_env
               default:
                 user: { get_input: ssh_user }
                 port: { get_input: ssh_port }
                 key_filename: { get_input: ssh_key_filename }
                 host_string: { get_attribute: [manager_configuration, public_ip] }
-                always_use_pty: true
         configure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/manager/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/manager/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   cloudify.nodes.MyCloudifyManager:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -133,21 +132,21 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               # Note that this also sets SELinux to Permissive
               # mode until we find a better position for it.
               default: components/python/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/python/scripts/validate.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.JavaRuntime:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -162,26 +161,26 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/java/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/java/scripts/validate.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/java/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.Consul:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -191,19 +190,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/consul/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/consul/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.Syncthing:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -213,19 +212,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/syncthing/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/syncthing/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.RabbitMQ:
     derived_from: cloudify.nodes.MessageBusServer
@@ -275,33 +274,33 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/rabbitmq/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/rabbitmq/scripts/start.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/rabbitmq/scripts/stop.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/rabbitmq/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.Postgresql:
     derived_from: cloudify.nodes.DBMS
@@ -352,40 +351,40 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/postgresql/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         configure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/postgresql/scripts/config.sh
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/postgresql/scripts/start.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/postgresql/scripts/stop.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/postgresql/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.Logstash:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -411,40 +410,40 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/logstash/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         configure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/logstash/scripts/configure.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/logstash/scripts/start.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/logstash/scripts/stop.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/logstash/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.InfluxDB:
     derived_from: cloudify.nodes.DBMS
@@ -463,33 +462,33 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/influxdb/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/influxdb/scripts/start.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/influxdb/scripts/stop.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/influxdb/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
@@ -509,14 +508,14 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/nginx/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         configure:
-          implementation: fabric.fabric_plugin.tasks.run_task
+          implementation: paramiko.paramiko_plugin.tasks.run_task
           inputs:
             tasks_file:
               default: components/nginx/scripts/retrieve_agents.py
@@ -526,28 +525,28 @@ node_types:
               default:
                 agent_packages: { get_input: agent_package_urls }
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/nginx/scripts/start.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/nginx/scripts/stop.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/nginx/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.Riemann:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -583,39 +582,39 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/riemann/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         configure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/riemann/scripts/configure.py
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/riemann/scripts/start.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/riemann/scripts/stop.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/riemann/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.RestService:
     derived_from: cloudify.nodes.ApplicationModule
@@ -709,40 +708,40 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/restservice/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         configure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/restservice/scripts/configure.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/restservice/scripts/start.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/restservice/scripts/stop.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/restservice/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -805,39 +804,39 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/mgmtworker/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         configure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/mgmtworker/scripts/configure.py
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/mgmtworker/scripts/start.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/mgmtworker/scripts/stop.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/mgmtworker/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.AmqpInfluxBroker:
     derived_from: cloudify.nodes.ApplicationModule
@@ -865,35 +864,36 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/amqpinflux/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-            INFLUXDB_ENDPOINT_IP:
-              default: { get_attribute: [influxdb, influxdb_endpoint_ip] }
+            ssh_env: *simple_ssh_env
+            env:
+              default:
+                INFLUXDB_ENDPOINT_IP: { get_attribute: [influxdb, influxdb_endpoint_ip] }
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/amqpinflux/scripts/start.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/amqpinflux/scripts/stop.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/amqpinflux/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.ManagerIPSetter:
     derived_from: cloudify.nodes.ApplicationModule
@@ -905,21 +905,22 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/manager-ip-setter/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-            set_manager_ip_on_boot:
-              default: { get_input: set_manager_ip_on_boot }
+            ssh_env: *simple_ssh_env
+            env:
+              default:
+                set_manager_ip_on_boot: { get_input: set_manager_ip_on_boot }
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/manager-ip-setter/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.Stage:
     derived_from: cloudify.nodes.ApplicationModule
@@ -943,35 +944,35 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/stage/scripts/create.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
             INFLUXDB_ENDPOINT_IP:
               default: { get_attribute: [influxdb, influxdb_endpoint_ip] }
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/stage/scripts/start.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/stage/scripts/stop.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         delete:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/stage/scripts/delete.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.CLI:
     derived_from: cloudify.nodes.ApplicationModule
@@ -999,19 +1000,19 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/cli/scripts/create.sh
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/cli/scripts/start.sh
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   manager.nodes.Sanity:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -1023,7 +1024,7 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: fabric.fabric_plugin.tasks.run_task
+          implementation: paramiko.paramiko_plugin.tasks.run_task
           inputs:
             tasks_file:
               default: components/sanity/scripts/create.py
@@ -1033,9 +1034,9 @@ node_types:
               default:
                 local_key_path: { get_input: ssh_key_filename }
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
         start:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/sanity/scripts/start.py
@@ -1044,7 +1045,7 @@ node_types:
             manager_ip:
               default: { get_attribute: [manager_host, public_ip] }
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
 ######################################################################
 # most relationship declarations here do not provide any functionality
@@ -1059,22 +1060,22 @@ relationships:
     source_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         preconfigure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/logstash/scripts/preconfigure_rabbitmq_properties.py
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   logstash_to_postgresql:
     derived_from: cloudify.relationships.connected_to
     source_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         preconfigure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/logstash/scripts/preconfigure_postgresql_properties.py
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   restservice_to_postgresql:
     derived_from: cloudify.relationships.connected_to
@@ -1099,57 +1100,57 @@ relationships:
     target_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         preconfigure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/mgmtworker/scripts/preconfigure.py
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   riemann_to_manager_configuration:
     derived_from: cloudify.relationships.depends_on
     target_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         preconfigure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/riemann/scripts/preconfigure.py
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   nginx_to_manager_configuration:
     derived_from: cloudify.relationships.depends_on
     source_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         preconfigure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/nginx/scripts/preconfigure.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   rest_to_manager_configuration:
     derived_from: cloudify.relationships.depends_on
     source_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         preconfigure:
-          implementation: fabric.fabric_plugin.tasks.run_task
+          implementation: paramiko.paramiko_plugin.tasks.run_task
           inputs:
             tasks_file:
               default: components/restservice/scripts/install_plugins.py
             task_name:
               default: install_plugins
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
     target_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         preconfigure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path:
               default: components/restservice/scripts/preconfigure.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_ssh_env
 
   sanity_to_mgr_config:
     derived_from: cloudify.relationships.depends_on

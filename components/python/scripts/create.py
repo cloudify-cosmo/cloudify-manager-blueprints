@@ -28,6 +28,6 @@ def install_python_requirements():
         utils.yum_install('python-devel', service_name='python')
         utils.yum_install('gcc', service_name='python')
         utils.yum_install('gcc-c++', service_name='python')
-
+        utils.yum_install('openssl-devel', service_name='python')
 
 install_python_requirements()

@@ -2,10 +2,10 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/4.1m2/types.yaml
-  - http://www.getcloudify.org/spec/fabric-plugin/1.4.2/plugin.yaml
   - types/manager-types.yaml
   - inputs/manager-inputs.yaml
   - components/manager-ip-setter/node-template.yaml
+
 
 inputs:
 
@@ -151,24 +151,23 @@ node_templates:
     interfaces:
       cloudify.interfaces.lifecycle:
         configure:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/manager/scripts/configure_manager.py
             hide_output: &hide_output
               - running
-            fabric_env: &simple_fabric_env
+            ssh_env: &simple_fabric_env
               user: { get_input: ssh_user }
               port: { get_input: ssh_port }
               key_filename: { get_input: ssh_key_filename }
               host_string: { get_property: [manager_host, public_ip] }
-              always_use_pty: true
       cloudify.interfaces.validation:
         creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/manager/scripts/creation_validation.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_fabric_env
 
     relationships:
       - type: cloudify.relationships.contained_in
@@ -234,11 +233,11 @@ node_templates:
     interfaces:
       cloudify.interfaces.validation:
         creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/rabbitmq/scripts/creation_validation.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_fabric_env
 
   syncthing:
     type: manager.nodes.Syncthing
@@ -262,11 +261,11 @@ node_templates:
     interfaces:
       cloudify.interfaces.validation:
         creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/postgresql/scripts/creation_validation.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_fabric_env
 
   logstash:
     type: manager.nodes.Logstash
@@ -286,11 +285,11 @@ node_templates:
     interfaces:
       cloudify.interfaces.validation:
         creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/logstash/scripts/creation_validation.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_fabric_env
 
   influxdb:
     type: manager.nodes.InfluxDB
@@ -304,11 +303,11 @@ node_templates:
     interfaces:
       cloudify.interfaces.validation:
         creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/influxdb/scripts/creation_validation.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_fabric_env
 
   nginx:
     type: manager.nodes.Nginx
@@ -324,11 +323,11 @@ node_templates:
     interfaces:
       cloudify.interfaces.validation:
         creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/nginx/scripts/creation_validation.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_fabric_env
 
   riemann:
     type: manager.nodes.Riemann
@@ -350,11 +349,11 @@ node_templates:
     interfaces:
       cloudify.interfaces.validation:
         creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/riemann/scripts/creation_validation.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_fabric_env
 
   rest_service:
     type: manager.nodes.RestService
@@ -374,11 +373,11 @@ node_templates:
     interfaces:
       cloudify.interfaces.validation:
         creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/restservice/scripts/creation_validation.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_fabric_env
 
   mgmt_worker:
     type: manager.nodes.ManagementWorker
@@ -402,11 +401,11 @@ node_templates:
     interfaces:
       cloudify.interfaces.validation:
         creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/mgmtworker/scripts/creation_validation.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_fabric_env
 
   amqp_influx:
     type: manager.nodes.AmqpInfluxBroker
@@ -428,11 +427,11 @@ node_templates:
     interfaces:
       cloudify.interfaces.validation:
         creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
+          implementation: paramiko.paramiko_plugin.tasks.run_script
           inputs:
             script_path: components/amqpinflux/scripts/creation_validation.py
             hide_output: *hide_output
-            fabric_env: *simple_fabric_env
+            ssh_env: *simple_fabric_env
 
   stage:
     type: manager.nodes.Stage
@@ -498,6 +497,9 @@ node_templates:
 plugins:
   cli:
     install: false
+    executor: central_deployment_agent
+  paramiko:
+    source: paramiko
     executor: central_deployment_agent
 
 outputs:

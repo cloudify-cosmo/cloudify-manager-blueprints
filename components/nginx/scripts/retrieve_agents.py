@@ -1,12 +1,9 @@
 #!/bin/python
 
-import fabric.api
-from fabric.contrib.files import exists as remote_exists
-
 from cloudify import ctx
 
 
-def retrieve(agent_packages):
+def retrieve(client, agent_packages):
     ctx.logger.info('Downloading Cloudify Agents...')
 
     for agent, source in agent_packages.items():
@@ -36,8 +33,14 @@ def retrieve(agent_packages):
 
         ctx.logger.info('Downloading Agent Package {0} to {1} if it does not '
                         'already exist...'.format(source, dest_file))
-        if remote_exists(dest_file):
+        sftp = client.open_sftp()
+        try:
+            sftp.stat(dest_file)
+        except IOError:
+            pass
+        else:
             ctx.logger.info('agent package file will be '
                             'overridden: {0}'.format(dest_file))
-        dl_cmd = 'curl --retry 10 -f -s -S -L {0} --create-dirs -o {1}'
-        fabric.api.sudo(dl_cmd.format(source, dest_file))
+        sftp.close()
+        dl_cmd = 'sudo curl --retry 10 -f -s -S -L {0} --create-dirs -o {1}'
+        client.exec_command(dl_cmd.format(source, dest_file))
