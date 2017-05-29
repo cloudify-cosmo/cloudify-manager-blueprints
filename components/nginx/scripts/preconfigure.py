@@ -100,6 +100,8 @@ def preconfigure_nginx():
     if external_rest_protocol == 'https':
         external_cert_path, external_key_path = \
             utils.deploy_or_generate_external_ssl_cert(
+                [target_runtime_props['external_rest_host'],
+                 target_runtime_props['internal_rest_host']],
                 target_runtime_props['external_rest_host']
             )
 

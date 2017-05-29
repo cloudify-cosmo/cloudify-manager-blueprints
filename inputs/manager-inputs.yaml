@@ -446,6 +446,17 @@ inputs:
   # supplied within the rpm.
   # These should be pip installable tar.gz files.
 
+  pip_constraints:
+    type: string
+    description: |
+      Constraints (in standard `pip` constraints format) to pass on to `pip`
+      when installing overlays (such as `rest_service_source_url`, `dsl_parser_source_url`
+      and so on). Example:
+
+      requests==2.13.0
+      requests-toolbelt==0.7.1
+    default: ''
+
   cli_source_url:
     type: string
     default: ''

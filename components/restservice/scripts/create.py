@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from os.path import join, dirname, islink, isdir
 
 from cloudify import ctx
@@ -34,21 +35,31 @@ def install_optional(rest_venv):
     plugins_common_source_url = props['plugins_common_module_source_url']
     script_plugin_source_url = props['script_plugin_module_source_url']
     agent_source_url = props['agent_module_source_url']
+    pip_constraints = props['pip_constraints']
 
     rest_service_source_url = props['rest_service_module_source_url']
 
+    constraints_file = utils.write_to_tempfile(pip_constraints) \
+        if pip_constraints else None
+
     # this allows to upgrade modules if necessary.
     ctx.logger.info('Installing Optional Packages if supplied...')
+
     if dsl_parser_source_url:
-        utils.install_python_package(dsl_parser_source_url, rest_venv)
+        utils.install_python_package(dsl_parser_source_url, rest_venv,
+                                     constraints_file)
     if rest_client_source_url:
-        utils.install_python_package(rest_client_source_url, rest_venv)
+        utils.install_python_package(rest_client_source_url, rest_venv,
+                                     constraints_file)
     if plugins_common_source_url:
-        utils.install_python_package(plugins_common_source_url, rest_venv)
+        utils.install_python_package(plugins_common_source_url, rest_venv,
+                                     constraints_file)
     if script_plugin_source_url:
-        utils.install_python_package(script_plugin_source_url, rest_venv)
+        utils.install_python_package(script_plugin_source_url, rest_venv,
+                                     constraints_file)
     if agent_source_url:
-        utils.install_python_package(agent_source_url, rest_venv)
+        utils.install_python_package(agent_source_url, rest_venv,
+                                     constraints_file)
 
     if rest_service_source_url:
         ctx.logger.info('Downloading cloudify-manager Repository...')
@@ -61,12 +72,16 @@ def install_optional(rest_venv):
         resources_dir = join(tmp_dir, 'resources/rest-service/cloudify/')
 
         ctx.logger.info('Installing REST Service...')
-        utils.install_python_package(rest_service_dir, rest_venv)
+        utils.install_python_package(rest_service_dir, rest_venv,
+                                     constraints_file)
 
         ctx.logger.info('Deploying Required Manager Resources...')
         utils.move(resources_dir, utils.MANAGER_RESOURCES_HOME)
 
         utils.remove(tmp_dir)
+
+    if constraints_file:
+        os.remove(constraints_file)
 
 
 def deploy_broker_configuration():

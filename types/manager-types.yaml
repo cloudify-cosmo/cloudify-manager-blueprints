@@ -623,6 +623,9 @@ node_types:
       rest_service_rpm_source_url:
         type: string
         default: { get_input: rest_service_rpm_source_url }
+      pip_constraints:
+        type: string
+        default: { get_input: pip_constraints }
       dsl_parser_module_source_url:
         description: DSL Parser module Source URL
         type: string
@@ -751,6 +754,9 @@ node_types:
         description: Management Worker RPM Source URL
         type: string
         default: { get_input: management_worker_rpm_source_url }
+      pip_constraints:
+        type: string
+        default: { get_input: pip_constraints }
       rest_client_module_source_url:
         description: REST Client module Source URL
         type: string
