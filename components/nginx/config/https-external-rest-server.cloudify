@@ -22,13 +22,13 @@ server {
 # force http redirect to https
 server {
   listen 80;
-  server_name       {{ ctx.target.instance.runtime_properties.external_rest_host }};
+  server_name _;
 
   # use the 308 status code - handled correctly by requests - unlike 301,
   # when received 308, requests will also resend the request body.
 
   # the nginx version shipped with centos has no native 308 support - we need
   # to add the header manually.
-  add_header Location https://$server_name$request_uri always;
+  add_header Location https://$host$request_uri always;
   return 308;
 }
