@@ -365,7 +365,7 @@ def deploy_or_generate_external_ssl_cert(ips, cn):
     )
 
     if os.path.isfile(user_provided_cert_path) and \
-        os.path.isfile(user_provided_key_path):
+            os.path.isfile(user_provided_key_path):
         # Try to deploy user provided certificates
         deploy_blueprint_resource(user_provided_cert_path,
                                   cert_target_path,
@@ -402,15 +402,33 @@ def deploy_or_generate_external_ssl_cert(ips, cn):
         )
 
 
-def install_python_package(source, venv=''):
+def write_to_tempfile(contents):
+    fd, file_path = tempfile.mkstemp()
+    os.write(fd, contents)
+    os.close(fd)
+    return file_path
+
+
+def install_python_package(source, venv='', constraints_file=None):
+    cmdline = []
     if venv:
-        ctx.logger.info('Installing {0} in virtualenv {1}...'.format(
-            source, venv))
-        sudo(['{0}/bin/pip'.format(
-            venv), 'install', source, '--upgrade'])
+        cmdline.append('{0}/bin/pip'.format(venv))
     else:
-        ctx.logger.info('Installing {0}'.format(source))
-        sudo(['pip', 'install', source, '--upgrade'])
+        cmdline.append('pip')
+
+    cmdline.extend(['install', source, '--upgrade'])
+
+    log_message = 'Installing {0}'.format(source)
+
+    if venv:
+        log_message += ' in virtualenv {0}'.format(venv)
+    if constraints_file:
+        cmdline.extend(['-c', constraints_file])
+        log_message += ' using constraints file {0}'.format(constraints_file)
+
+    ctx.logger.info(log_message)
+
+    sudo(cmdline)
 
 
 def get_file_content(file_path):
