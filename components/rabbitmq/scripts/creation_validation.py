@@ -15,7 +15,6 @@ IMMUTABLE_PROPERTIES = [
     'rabbitmq_username',
     'rabbitmq_password',
     'rabbitmq_endpoint_ip',
-    'rabbitmq_ssl_enabled',
     'rabbitmq_cert_public',
     'rabbitmq_cert_private'
 ]
