@@ -222,7 +222,7 @@ inputs:
 
   nginx_source_url:
     type: string
-    default: nginx-1.8.0-1.el7.ngx.x86_64.rpm
+    default: nginx-1.12.0-1.el7.ngx.x86_64.rpm
 
   influxdb_source_url:
     type: string
