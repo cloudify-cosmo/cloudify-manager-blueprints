@@ -1,0 +1,17 @@
+[Unit]
+Description=Cloudify Composer Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+RestartSec=10
+EnvironmentFile=/etc/sysconfig/cloudify-composer
+User={{ ctx.instance.runtime_properties.service_user }}
+Group={{ ctx.instance.runtime_properties.service_group }}
+WorkingDirectory=/opt/cloudify-composer/backend
+ExecStart=/opt/nodejs/bin/node /opt/cloudify-composer/server.js
+
+[Install]
+WantedBy=multi-user.target

@@ -150,6 +150,10 @@ inputs:
     type: string
     default: cloudify-stage-*.tgz
 
+  composer_source_url:
+    type: string
+    default: cloudify-blueprint-composer-*.tgz
+
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
     type: string
