@@ -29,12 +29,15 @@ runtime_props['files_to_remove'] = [HOME_DIR, NODEJS_DIR, LOG_DIR]
 ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
+
 def _install_composer():
     composer_source_url = ctx_properties['composer_tar_source_url']
     composer_filename = utils.get_file_name_from_url(composer_source_url)
-    tmp_composer_source = utils.download_file(composer_source_url,
-                                              '/tmp/{}'.format(composer_filename))
-    composer_source_url = '{}/{}'.format(CLOUDIFY_SOURCES_PATH, composer_filename)
+    tmp_composer_source = utils.download_file(
+        composer_source_url,
+        '/tmp/{}'.format(composer_filename))
+    composer_source_url = '{}/{}'.format(CLOUDIFY_SOURCES_PATH,
+                                         composer_filename)
 
     utils.move(tmp_composer_source, composer_source_url)
     if not utils.resource_factory.local_resource_exists(composer_source_url):
@@ -67,12 +70,6 @@ def _install_composer():
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)
-
-    #backend_dir = join(HOME_DIR, 'backend')
-    #npm_path = join(NODEJS_DIR, 'bin', 'npm')
-    #subprocess.check_call(
-    #        'cd {0}; {1} run db-migrate'.format(backend_dir, npm_path),
-    #        shell=True)
 
 
 def main():
