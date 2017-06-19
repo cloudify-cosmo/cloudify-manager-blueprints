@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import subprocess
 from os.path import join, dirname
 
 from cloudify import ctx
@@ -70,6 +71,10 @@ def _install_composer():
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)
+
+    npm_path = join(NODEJS_DIR, 'bin', 'npm')
+    subprocess.check_call(
+        'cd {}; {} run db-migrate'.format(HOME_DIR, npm_path), shell=True)
 
 
 def main():
