@@ -62,6 +62,12 @@ inputs:
     type: integer
     default: 20
 
+  rest_service_min_available_memory_mb:
+    description: |
+      Minimum available memory for running list query on Manager host in MB.
+    type: integer
+    default: 256
+
   #############################
   # Bootstrap Validations
   #############################
