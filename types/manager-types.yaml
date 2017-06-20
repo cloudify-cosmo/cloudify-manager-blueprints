@@ -709,6 +709,10 @@ node_types:
         description: Number of log files to keep when rotating.
         type: integer
         default: { get_input: rest_service_log_files_backup_count }
+      min_available_memory_mb:
+        description: Minimum available memory for running list query on Manager host in MB.
+        type: integer
+        default: { get_input: rest_service_min_available_memory_mb }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
