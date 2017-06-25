@@ -983,6 +983,48 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
+  manager.nodes.Composer:
+    derived_from: cloudify.nodes.ApplicationModule
+    properties:
+      composer_tar_source_url:
+        description: Cloudify Composer Source URL
+        type: string
+        default: { get_input: composer_source_url }
+      use_existing_on_upgrade:
+        description: Use existing composer configuration
+        type: string
+        default: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/composer/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/composer/scripts/start.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/composer/scripts/stop.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/composer/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
   manager.nodes.CLI:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
