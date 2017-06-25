@@ -55,7 +55,7 @@ ssh_key_filename: ''
 #############################
 # Manager Resources Package
 #############################
-#manager_resources_package: http://repository.cloudifysource.org/cloudify/17.4.11/release/cloudify-manager-resources_17.4.11-community.tar.gz
+#manager_resources_package: http://repository.cloudifysource.org/cloudify/17.6.30/release/cloudify-manager-resources_17.6.30-community.tar.gz
 
 # Providing a checksum file url will allow validating the resources package.
 # By default, no validation is performed. Providing a checksum file will use
@@ -262,7 +262,7 @@ ssh_key_filename: ''
 #  - {'source_path': 'http://www.getcloudify.org/spec/openstack-plugin/2.0.1/plugin.yaml', 'destination_path': '/spec/openstack-plugin/2.0.1/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml', 'destination_path': '/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml'}
 #  - {'source_path': 'http://www.getcloudify.org/spec/vsphere-plugin/2.0.1/plugin.yaml', 'destination_path': '/spec/vsphere-plugin/2.0.1/plugin.yaml'}
-#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.1m2/types.yaml', 'destination_path': '/spec/cloudify/4.1m2/types.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.1/types.yaml', 'destination_path': '/spec/cloudify/4.1/types.yaml'}
 
 ###############################
 # Import Resolver Configuration
