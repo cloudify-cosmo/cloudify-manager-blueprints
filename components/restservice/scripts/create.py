@@ -35,6 +35,7 @@ def install_optional(rest_venv):
     plugins_common_source_url = props['plugins_common_module_source_url']
     script_plugin_source_url = props['script_plugin_module_source_url']
     agent_source_url = props['agent_module_source_url']
+    premium_source_url = props['premium_module_source_url']
     pip_constraints = props['pip_constraints']
 
     rest_service_source_url = props['rest_service_module_source_url']
@@ -79,6 +80,10 @@ def install_optional(rest_venv):
         utils.move(resources_dir, utils.MANAGER_RESOURCES_HOME)
 
         utils.remove(tmp_dir)
+
+    if premium_source_url:
+        utils.install_python_package(premium_source_url, rest_venv,
+                                     constraints_file)
 
     if constraints_file:
         os.remove(constraints_file)

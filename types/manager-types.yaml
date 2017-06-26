@@ -658,6 +658,10 @@ node_types:
         description: Agent module Source URL
         type: string
         default: { get_input: agent_source_url }
+      premium_module_source_url:
+        description: Agent module Source URL
+        type: string
+        default: { get_input: premium_source_url }
       plugins:
         description: Enables installing custom plugins on the rest service
         default: {}
