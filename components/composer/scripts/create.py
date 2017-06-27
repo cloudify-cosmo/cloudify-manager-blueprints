@@ -33,7 +33,12 @@ CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 def _install_composer():
     composer_source_url = ctx_properties['composer_tar_source_url']
-
+    if not utils.resource_factory.local_resource_exists(composer_source_url):
+        ctx.logger.info('Composer package not found in manager resources '
+                        'package. Composer will not be installed.')
+        ctx.instance.runtime_properties['skip_installation'] = 'true'
+        return
+    
     if not utils.resource_factory.local_resource_exists(composer_source_url):
         ctx.logger.info('Composer package not found in manager resources '
                         'package. Composer will not be installed.')
