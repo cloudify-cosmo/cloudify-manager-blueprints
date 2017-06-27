@@ -39,8 +39,7 @@ def _install_composer():
                         'package. Composer will not be installed.')
         ctx.logger.info("Yes")
         ctx.instance.runtime_properties['skip_installation'] = 'true'
-        pass
-        # return
+        return
 
     utils.set_selinux_permissive()
     utils.copy_notice(SERVICE_NAME)
