@@ -13,5 +13,6 @@ import utils  # NOQA
 ctx.logger.info('Removing manager resources')
 for path in ['/opt/cloudify',
              '/etc/cloudify',
-             '/var/log/cloudify']:
+             '/var/log/cloudify',
+             '/tmp/cloudify-ctx']:
     utils.remove(path)
