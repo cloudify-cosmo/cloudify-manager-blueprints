@@ -1001,9 +1001,13 @@ def remove_logrotate(service_name):
     remove(config_file_destination)
 
 
-def chmod(mode, path):
+def chmod(mode, path, recursive=False):
     ctx.logger.debug('chmoding {0}: {1}'.format(path, mode))
-    sudo(['chmod', mode, path])
+    command = ['chmod']
+    if recursive:
+        command.append('-R')
+    command += [mode, path]
+    sudo(command)
 
 
 def chown(user, group, path):

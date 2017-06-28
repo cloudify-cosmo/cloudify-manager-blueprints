@@ -21,6 +21,7 @@ runtime_props['service_user'] = COMPOSER_USER
 runtime_props['service_group'] = COMPOSER_GROUP
 
 HOME_DIR = join('/opt', 'cloudify-{0}'.format(SERVICE_NAME))
+CONF_DIR = join(HOME_DIR, 'backend/conf')
 NODEJS_DIR = join('/opt', 'nodejs')
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
@@ -49,6 +50,9 @@ def _install_composer():
     utils.mkdir(LOG_DIR)
 
     utils.create_service_user(COMPOSER_USER, COMPOSER_GROUP, HOME_DIR)
+    # adding cfyuser to the composer group so that its files are r/w for
+    # replication and snapshots
+    utils.sudo(['usermod', '-aG', COMPOSER_GROUP, utils.CLOUDIFY_USER])
 
     ctx.logger.info('Installing Cloudify Composer...')
     composer_tar = utils.download_cloudify_resource(composer_source_url,
@@ -59,6 +63,8 @@ def _install_composer():
     ctx.logger.info('Fixing permissions...')
     utils.chown(COMPOSER_USER, COMPOSER_GROUP, HOME_DIR)
     utils.chown(COMPOSER_USER, COMPOSER_GROUP, LOG_DIR)
+    utils.chmod('g+w', CONF_DIR)
+    utils.chmod('g+w', dirname(CONF_DIR))
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)
