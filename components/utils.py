@@ -71,6 +71,7 @@ INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
 CERT_METADATA_FILE_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                        'certificate_metadata')
 CLUSTER_DELETE_SCRIPT = '/opt/cloudify/delete_cluster.py'
+CFY_EXEC_TEMPDIR_ENVVAR = 'CFY_EXEC_TEMP'
 
 
 def retry(exception, tries=4, delay=3, backoff=2):
@@ -1903,3 +1904,7 @@ def delete_cluster_component(component):
     if os.path.exists(CLUSTER_DELETE_SCRIPT):
         sudo(['/usr/bin/env', 'python', CLUSTER_DELETE_SCRIPT,
               '--component', component])
+
+
+def get_exec_tempdir():
+    return os.environ.get(CFY_EXEC_TEMPDIR_ENVVAR) or tempfile.gettempdir()
