@@ -366,8 +366,7 @@ def deploy_or_generate_external_ssl_cert(ips, cn):
         EXTERNAL_SSL_KEY_FILENAME
     )
 
-    if os.path.isfile(user_provided_cert_path) and \
-            os.path.isfile(user_provided_key_path):
+    try:
         # Try to deploy user provided certificates
         deploy_blueprint_resource(user_provided_cert_path,
                                   cert_target_path,
@@ -387,21 +386,24 @@ def deploy_or_generate_external_ssl_cert(ips, cn):
             )
         )
         return cert_target_path, key_target_path
-    else:
-        ctx.logger.info(
-            'Generating SSL certificate `{0}` and SSL private '
-            'key `{1}`'.format(
-                EXTERNAL_SSL_CERT_FILENAME,
-                EXTERNAL_SSL_KEY_FILENAME
+    except Exception as e:
+        if "No such file or directory" in e.stderr:
+            ctx.logger.info(
+                'Generating SSL certificate `{0}` and SSL private '
+                'key `{1}`'.format(
+                    EXTERNAL_SSL_CERT_FILENAME,
+                    EXTERNAL_SSL_KEY_FILENAME
+                )
             )
-        )
 
-        return _generate_ssl_certificate(
-            ips,
-            cn,
-            EXTERNAL_SSL_CERT_FILENAME,
-            EXTERNAL_SSL_KEY_FILENAME,
-        )
+            return _generate_ssl_certificate(
+                ips,
+                cn,
+                EXTERNAL_SSL_CERT_FILENAME,
+                EXTERNAL_SSL_KEY_FILENAME,
+            )
+        else:
+            raise
 
 
 def write_to_tempfile(contents):
@@ -1001,9 +1003,13 @@ def remove_logrotate(service_name):
     remove(config_file_destination)
 
 
-def chmod(mode, path):
+def chmod(mode, path, recursive=False):
     ctx.logger.debug('chmoding {0}: {1}'.format(path, mode))
-    sudo(['chmod', mode, path])
+    command = ['chmod']
+    if recursive:
+        command.append('-R')
+    command += [mode, path]
+    sudo(command)
 
 
 def chown(user, group, path):

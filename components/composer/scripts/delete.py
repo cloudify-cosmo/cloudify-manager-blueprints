@@ -9,10 +9,9 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
+runtime_props = ctx.instance.runtime_properties
 
-ctx.logger.info('Removing manager resources')
-for path in ['/opt/cloudify',
-             '/etc/cloudify',
-             '/var/log/cloudify',
-             '/tmp/cloudify-ctx']:
-    utils.remove(path)
+
+# This makes sure that the `create` script already ran
+if runtime_props.get('service_name'):
+    utils.remove_component(runtime_props)
