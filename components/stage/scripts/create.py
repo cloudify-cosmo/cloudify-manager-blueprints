@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import subprocess
 from os.path import join, dirname
 
 from cloudify import ctx
@@ -15,18 +16,22 @@ SERVICE_NAME = 'stage'
 # Some runtime properties to be used in teardown
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
+STAGE_USER = '{0}_user'.format(SERVICE_NAME)
+STAGE_GROUP = '{0}_group'.format(SERVICE_NAME)
+runtime_props['service_user'] = STAGE_USER
+runtime_props['service_group'] = STAGE_GROUP
 
 HOME_DIR = join('/opt', 'cloudify-{0}'.format(SERVICE_NAME))
 NODEJS_DIR = join('/opt', 'nodejs')
 LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
+runtime_props['home_dir'] = HOME_DIR
 runtime_props['files_to_remove'] = [HOME_DIR, NODEJS_DIR, LOG_DIR]
 
 ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 
-def install_stage():
-
+def _install_stage():
     nodejs_source_url = ctx_properties['nodejs_tar_source_url']
     stage_source_url = ctx_properties['stage_tar_source_url']
 
@@ -40,20 +45,14 @@ def install_stage():
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         os.environ.get('INFLUXDB_ENDPOINT_IP')
 
-    stage_user = 'stage'
-    stage_group = 'stage'
-    runtime_props['service_user'] = stage_user
-    runtime_props['service_group'] = stage_group
-
     utils.set_selinux_permissive()
-
     utils.copy_notice(SERVICE_NAME)
 
     utils.mkdir(NODEJS_DIR)
     utils.mkdir(HOME_DIR)
     utils.mkdir(LOG_DIR)
 
-    utils.create_service_user(stage_user, HOME_DIR)
+    utils.create_service_user(STAGE_USER, STAGE_GROUP, HOME_DIR)
 
     ctx.logger.info('Installing NodeJS...')
     nodejs = utils.download_cloudify_resource(nodejs_source_url, SERVICE_NAME)
@@ -61,21 +60,34 @@ def install_stage():
     utils.remove(nodejs)
 
     ctx.logger.info('Installing Cloudify Stage (UI)...')
-    stage = utils.download_cloudify_resource(stage_source_url, SERVICE_NAME)
-    utils.untar(stage, HOME_DIR)
-    utils.remove(stage)
+    stage_tar = utils.download_cloudify_resource(stage_source_url,
+                                                 SERVICE_NAME)
+    utils.untar(stage_tar, HOME_DIR)
+    utils.remove(stage_tar)
 
     ctx.logger.info('Fixing permissions...')
-    utils.chown(stage_user, stage_group, HOME_DIR)
-    utils.chown(stage_user, stage_group, NODEJS_DIR)
-    utils.chown(stage_user, stage_group, LOG_DIR)
+    utils.chown(STAGE_USER, STAGE_GROUP, HOME_DIR)
+    utils.chown(STAGE_USER, STAGE_GROUP, NODEJS_DIR)
+    utils.chown(STAGE_USER, STAGE_GROUP, LOG_DIR)
+    utils.deploy_sudo_command_script(
+        'restore-snapshot.py',
+        'Restore stage directories from a snapshot path',
+        component=SERVICE_NAME,
+        allow_as=STAGE_USER)
+    utils.chmod('a+rx', '/opt/cloudify/stage/restore-snapshot.py')
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)
 
+    backend_dir = join(HOME_DIR, 'backend')
+    npm_path = join(NODEJS_DIR, 'bin', 'npm')
+    subprocess.check_call(
+            'cd {0}; {1} run db-migrate'.format(backend_dir, npm_path),
+            shell=True)
+
 
 def main():
-    install_stage()
+    _install_stage()
 
 
 main()

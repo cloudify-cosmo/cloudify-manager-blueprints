@@ -10,6 +10,7 @@ fi
 
 db_name=$1
 stage_db_name="stage"
+composer_db_name="composer"
 user=$2
 password=$3
 
@@ -49,7 +50,16 @@ function create_stage_database() {
     run_psql "ALTER DATABASE $db OWNER TO $user;"
 }
 
+function create_composer_database() {
+    db=$1
+    user=$2
+    run_psql "CREATE DATABASE $db"
+    run_psql "GRANT ALL PRIVILEGES ON DATABASE $db TO $user;"
+    run_psql "ALTER DATABASE $db OWNER TO $user;"
+}
+
 clean_database_and_user ${db_name} ${user}
 create_database ${db_name}
 create_admin_user ${db_name} ${user} ${password}
 create_stage_database ${stage_db_name} ${user}
+create_composer_database ${composer_db_name} ${user}

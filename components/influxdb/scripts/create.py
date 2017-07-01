@@ -16,6 +16,8 @@ SERVICE_NAME = 'influxdb'
 # Some runtime properties to be used in teardown
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
+runtime_props['service_user'] = SERVICE_NAME
+runtime_props['service_group'] = SERVICE_NAME
 
 HOME_DIR = join('/opt', SERVICE_NAME)
 LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)

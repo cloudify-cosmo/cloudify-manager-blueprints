@@ -16,6 +16,4 @@ SERVICE_NAME = runtime_props.get('service_name')
 # This makes sure that the `create` script already ran
 if SERVICE_NAME:
     runtime_props['packages_to_remove'] = [SERVICE_NAME]
-    runtime_props['service_user'] = 'influxdb'
-    runtime_props['service_group'] = 'influxdb'
     utils.remove_component(runtime_props)

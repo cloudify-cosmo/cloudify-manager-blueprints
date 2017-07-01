@@ -21,7 +21,7 @@ from distutils.version import LooseVersion
 from cloudify import ctx
 
 
-REST_VERSION = 'v3'
+REST_VERSION = 'v3.1'
 PROCESS_POLLING_INTERVAL = 0.1
 CLOUDIFY_SOURCES_PATH = '/opt/cloudify/sources'
 MANAGER_RESOURCES_HOME = '/opt/manager/resources'
@@ -58,12 +58,20 @@ UPGRADE_METADATA_FILE = '/opt/cloudify/upgrade_meta/metadata.json'
 AGENTS_ROLLBACK_PATH = '/opt/cloudify/manager-resources/agents_rollback'
 ES_UPGRADE_DUMP_PATH = '/tmp/es_upgrade_dump/'
 
+CLOUDIFY_USER = 'cfyuser'
+CLOUDIFY_GROUP = 'cfyuser'
+CLOUDIFY_HOME_DIR = '/etc/cloudify'
+SUDOERS_INCLUDE_DIR = '/etc/sudoers.d'
+CLOUDIFY_SUDOERS_FILE = os.path.join(SUDOERS_INCLUDE_DIR, CLOUDIFY_USER)
+
 INTERNAL_CERT_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                   INTERNAL_SSL_CERT_FILENAME)
 INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                  INTERNAL_SSL_KEY_FILENAME)
 CERT_METADATA_FILE_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                        'certificate_metadata')
+CLUSTER_DELETE_SCRIPT = '/opt/cloudify/delete_cluster.py'
+CFY_EXEC_TEMPDIR_ENVVAR = 'CFY_EXEC_TEMP'
 
 
 def retry(exception, tries=4, delay=3, backoff=2):
@@ -97,8 +105,9 @@ def escape_for_systemd(the_string):
     return the_string
 
 
-def run(command, retries=0, ignore_failures=False, globx=False):
-    if isinstance(command, str):
+def run(command, retries=0, stdin=b'', ignore_failures=False,
+        globx=False, shell=False, env=None):
+    if isinstance(command, str) and not shell:
         command = shlex.split(command)
     stderr = subprocess.PIPE
     stdout = subprocess.PIPE
@@ -108,8 +117,9 @@ def run(command, retries=0, ignore_failures=False, globx=False):
             glob_command.append(glob.glob(arg))
         command = glob_command
     ctx.logger.debug('Running: {0}'.format(command))
-    proc = subprocess.Popen(command, stdout=stdout, stderr=stderr)
-    proc.aggr_stdout, proc.aggr_stderr = proc.communicate()
+    proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=stdout,
+                            stderr=stderr, shell=shell, env=env)
+    proc.aggr_stdout, proc.aggr_stderr = proc.communicate(input=stdin)
     if proc.returncode != 0:
         command_str = ' '.join(command)
         if retries:
@@ -123,12 +133,14 @@ def run(command, retries=0, ignore_failures=False, globx=False):
     return proc
 
 
-def sudo(command, retries=0, globx=False, ignore_failures=False):
+def sudo(command, *args, **kwargs):
     if isinstance(command, str):
         command = shlex.split(command)
-    command.insert(0, 'sudo')
-    return run(command=command, globx=globx, retries=retries,
-               ignore_failures=ignore_failures)
+    if 'env' in kwargs:
+        command = ['sudo', '-E'] + command
+    else:
+        command.insert(0, 'sudo')
+    return run(command=command, *args, **kwargs)
 
 
 def sudo_write_to_file(contents, destination):
@@ -139,166 +151,56 @@ def sudo_write_to_file(contents, destination):
     return move(path, destination)
 
 
-def check_sudoers_includes_dir(include_dir):
-    includedirs = sudo(
-        ['grep', '#includedir', '/etc/sudoers'],
-        ignore_failures=True
-    ).aggr_stdout.splitlines()
+def add_entry_to_sudoers(entry, description):
+    # Comment out the description and add a N/L after the entry for visibility
+    description = '# {0}'.format(description)
+    entry = '{0}\n'.format(entry)
 
-    for line in includedirs:
-        if line.strip().endswith(include_dir):
-            return True
+    for line in (description, entry):
+        # `visudo` handles sudoers file. Setting EDITOR to `tee -a` means that
+        # whatever is piped should be appended to the file passed.
+        sudo(['/sbin/visudo', '-f', CLOUDIFY_SUDOERS_FILE],
+             stdin=line, env={'EDITOR': '/bin/tee -a'})
 
-    # Not found
-    return False
-
-
-def _add_entry_to_sudoers(entry, filename, sudoers_include_dir):
-    destination = os.path.join(sudoers_include_dir, filename)
-
-    # Make sure we're including the expected includedir
-    if not check_sudoers_includes_dir(sudoers_include_dir):
-        ctx.abort_operation(
-            "/etc/sudoers does not #includedir {path}.".format(
-                path=sudoers_include_dir,
-            )
-        )
-
-    # Confirm target filename won't be ignored by sudoers include
-    if '.' in filename or '~' in filename:
-        ctx.abort_operation(
-            "{filename} is invalid. "
-            "Sudoers filenames must not contain . or ~".format(
-                filename=filename,
-            )
-        )
-
-    # Confirm that our target filename does not already exist
-    # We have to sudo ls because we (hopefully) don't have access to the
-    # sudoers includedir.
-    existing = sudo(
-        ['ls', sudoers_include_dir]
-    ).aggr_stdout.splitlines()
-    if filename in existing:
-        ctx.abort_operation(
-            "{file_path} already exists for sudoers."
-            "Found {files} in {path}.".format(
-                file_path=destination,
-                files=', '.join(existing),
-                path=sudoers_include_dir,
-            )
-        )
-
-    # Generate the new entry and confirm it is valid
-    fd, tmp_path = tempfile.mkstemp()
-    with os.fdopen(fd, 'w') as tmp_handle:
-        tmp_handle.write(entry)
-    chown('root', 'root', tmp_path)
-    chmod('440', tmp_path)
     valid = sudo(
-        ['visudo', '-cf', tmp_path],
+        ['visudo', '-cf', CLOUDIFY_SUDOERS_FILE],
         ignore_failures=True,
     )
     if valid.returncode != 0:
         ctx.abort_operation(
             "Generated sudoers entry containing \"{entry}\" was "
-            "invalid.".format(
-                entry=entry,
-            )
+            "invalid.".format(entry=entry)
         )
 
-    # Now we will copy the file in and run a final check on sudoers
-    result = sudo(
-        [
-            'bash', '-c',
-            # We bash -c the following line because if for whatever reason our
-            # new entry breaks sudo we will not be able to fix it with sudo,
-            # and will thus make any post-mortem much harder.
-            'mv {tmp} {dst} && visudo -c || (mv {dst} {tmp}; false)'.format(
-                tmp=tmp_path,
-                dst=destination,
-            ),
-        ],
-        ignore_failures=True,
+
+def allow_user_to_sudo_command(full_command, description, allow_as='root'):
+    entry = '{user}    ALL=({allow_as}) NOPASSWD:{full_command}'.format(
+        user=CLOUDIFY_USER,
+        allow_as=allow_as,
+        full_command=full_command
     )
-    if result.returncode != 0:
-        ctx.abort_operation(
-            "Moving {tmp} to {dst} resulted in sudo being broken.".format(
-                tmp=tmp_path,
-                dst=destination,
-            )
-        )
+    add_entry_to_sudoers(entry, description)
 
 
-def allow_user_to_sudo_command(runtime_props,
-                               user,
-                               full_command,
-                               description,
-                               sudoers_include_dir,
+def deploy_sudo_command_script(script, description, component=None,
                                allow_as='root'):
-    entry = '{user}    ALL=({allow_as}) NOPASSWD:{full_command}\n'.format(
-        user=user,
-        allow_as=allow_as,
-        full_command=full_command,
-    )
-    filename = '{user}_{allow_as}_{description}'.format(
-        user=user,
-        allow_as=allow_as,
-        description=description,
-    )
-    _add_entry_to_sudoers(entry, filename, sudoers_include_dir)
-    extend_runtime_properties_list(
-        runtime_props,
-        'files_to_remove',
-        [os.path.join(sudoers_include_dir, filename)]
-    )
-
-
-def disable_sudo_requiretty_for_user(runtime_props, user, sudoers_include_dir):
-    entry = 'Defaults:{user} !requiretty\n'.format(user=user)
-    filename = '{user}_disable_requiretty'.format(user=user)
-    _add_entry_to_sudoers(entry, filename, sudoers_include_dir)
-    extend_runtime_properties_list(
-        runtime_props,
-        'files_to_remove',
-        [os.path.join(sudoers_include_dir, filename)]
-    )
-
-
-def deploy_sudo_command_script(runtime_props,
-                               component,
-                               user,
-                               group,
-                               script,
-                               description=None):
-    if script.startswith('/usr/bin'):
-        # script is a path to some command
-        description = description if description else \
-            script.lstrip('/usr/bin/')
-    else:
-        # script is a path to package script
-        description = description if description else script
+    # If passed a component, then script is a relative path, that needs to
+    # be downloaded from the scripts folder. Otherwise, it's an absolute path
+    if component:
         config_file_temp_destination = os.path.join(tempfile.gettempdir(),
                                                     script)
         ctx.download_resource_and_render(
             os.path.join('components', component, 'scripts', script),
             config_file_temp_destination)
-        destination_script_path = os.path.join('/opt/cloudify/', component,
-                                               script)
-        move(config_file_temp_destination, destination_script_path)
-        chmod('550', destination_script_path)
-        chown('root', group, destination_script_path)
-        script = destination_script_path
-    sudoers_include_dir = '/etc/sudoers.d'
+        script = os.path.join('/opt/cloudify/', component, script)
+        move(config_file_temp_destination, script)
+        chmod('550', script)
+        chown('root', CLOUDIFY_GROUP, script)
+
     ctx.logger.info('Allowing user `{0}` to run `{1}`'
-                    .format(user, script))
-    allow_user_to_sudo_command(
-        runtime_props=runtime_props,
-        user=user,
-        full_command=script,
-        description=description,
-        sudoers_include_dir=sudoers_include_dir,
-    )
+                    .format(CLOUDIFY_USER, script))
+    allow_user_to_sudo_command(full_command=script, description=description,
+                               allow_as=allow_as)
 
 
 def deploy_ssl_certificate(private_or_public, destination, group, cert):
@@ -370,7 +272,8 @@ def remove(path, ignore_failure=False):
     sudo(['rm', '-rf', path], ignore_failures=ignore_failure)
 
 
-def _generate_ssl_certificate(ip,
+def _generate_ssl_certificate(ips,
+                              cn,
                               cert_filename,
                               key_filename,
                               pkcs12_filename=None):
@@ -380,8 +283,15 @@ def _generate_ssl_certificate(ip,
     """
     mkdir(SSL_CERTS_TARGET_DIR)
 
-    cert_metadata = \
-        'IP:{0},DNS:{0},IP:127.0.0.1,DNS:127.0.0.1,DNS:localhost'.format(ip)
+    # Remove duplicates from ips
+    ips.append('127.0.0.1')
+    ips = set(ips)
+    metadata_items = ['IP:{0},DNS:{0}'.format(x) for x in ips]
+    cert_metadata = '{0},DNS:localhost'.format(
+        ','.join(metadata_items))
+
+    ctx.logger.debug('Using certificate metadata: {0}'.format(cert_metadata))
+
     sudo_write_to_file(cert_metadata, CERT_METADATA_FILE_PATH)
     chmod('664', CERT_METADATA_FILE_PATH)
 
@@ -394,16 +304,16 @@ def _generate_ssl_certificate(ip,
 distinguished_name = req_distinguished_name
 x509_extensions=SAN
 [ req_distinguished_name ]
-commonName={ip}
+commonName={cn}
 [SAN]
 subjectAltName={metadata}
-""".format(ip=ip, metadata=cert_metadata))
+""".format(cn=cn, metadata=cert_metadata))
 
     sudo([
         'openssl', 'req', '-x509', '-newkey', 'rsa:2048',
         '-keyout', key_path, '-out', cert_path,
         '-days', '36500', '-batch', '-nodes', '-subj',
-        '/CN={0}'.format(ip), '-config', conf_file.name
+        '/CN={0}'.format(cn), '-config', conf_file.name
     ])
     # PKCS12 file required for riemann due to JVM
     # While we don't really want the private key in there, not having it
@@ -429,6 +339,7 @@ subjectAltName={metadata}
 
 def generate_internal_ssl_cert(ip):
     return _generate_ssl_certificate(
+        [ip],
         ip,
         INTERNAL_SSL_CERT_FILENAME,
         INTERNAL_SSL_KEY_FILENAME,
@@ -436,7 +347,7 @@ def generate_internal_ssl_cert(ip):
     )
 
 
-def deploy_or_generate_external_ssl_cert(ip):
+def deploy_or_generate_external_ssl_cert(ips, cn):
     user_provided_cert_path = os.path.join(
         EXTERNAL_SSL_CERTS_SOURCE_DIR,
         EXTERNAL_SSL_CERT_FILENAME
@@ -453,6 +364,7 @@ def deploy_or_generate_external_ssl_cert(ip):
         SSL_CERTS_TARGET_DIR,
         EXTERNAL_SSL_KEY_FILENAME
     )
+
     try:
         # Try to deploy user provided certificates
         deploy_blueprint_resource(user_provided_cert_path,
@@ -466,7 +378,7 @@ def deploy_or_generate_external_ssl_cert(ip):
                                   user_resource=True,
                                   load_ctx=False)
         ctx.logger.info(
-            'Deployed user-proved SSL certificate `{0}` and SSL private '
+            'Deployed user-provided SSL certificate `{0}` and SSL private '
             'key `{1}`'.format(
                 EXTERNAL_SSL_CERT_FILENAME,
                 EXTERNAL_SSL_KEY_FILENAME
@@ -475,7 +387,6 @@ def deploy_or_generate_external_ssl_cert(ip):
         return cert_target_path, key_target_path
     except Exception as e:
         if "No such file or directory" in e.stderr:
-            # pre-existing cert not found, generating new cert
             ctx.logger.info(
                 'Generating SSL certificate `{0}` and SSL private '
                 'key `{1}`'.format(
@@ -483,8 +394,10 @@ def deploy_or_generate_external_ssl_cert(ip):
                     EXTERNAL_SSL_KEY_FILENAME
                 )
             )
+
             return _generate_ssl_certificate(
-                ip,
+                ips,
+                cn,
                 EXTERNAL_SSL_CERT_FILENAME,
                 EXTERNAL_SSL_KEY_FILENAME,
             )
@@ -492,15 +405,33 @@ def deploy_or_generate_external_ssl_cert(ip):
             raise
 
 
-def install_python_package(source, venv=''):
+def write_to_tempfile(contents):
+    fd, file_path = tempfile.mkstemp()
+    os.write(fd, contents)
+    os.close(fd)
+    return file_path
+
+
+def install_python_package(source, venv='', constraints_file=None):
+    cmdline = []
     if venv:
-        ctx.logger.info('Installing {0} in virtualenv {1}...'.format(
-            source, venv))
-        sudo(['{0}/bin/pip'.format(
-            venv), 'install', source, '--upgrade'])
+        cmdline.append('{0}/bin/pip'.format(venv))
     else:
-        ctx.logger.info('Installing {0}'.format(source))
-        sudo(['pip', 'install', source, '--upgrade'])
+        cmdline.append('pip')
+
+    cmdline.extend(['install', source, '--upgrade'])
+
+    log_message = 'Installing {0}'.format(source)
+
+    if venv:
+        log_message += ' in virtualenv {0}'.format(venv)
+    if constraints_file:
+        cmdline.extend(['-c', constraints_file])
+        log_message += ' using constraints file {0}'.format(constraints_file)
+
+    ctx.logger.info(log_message)
+
+    sudo(cmdline)
 
 
 def get_file_content(file_path):
@@ -1007,15 +938,12 @@ def get_rabbitmq_endpoint_ip(endpoint=None):
     return ctx.instance.host_ip
 
 
-def create_service_user(user, home, group=None):
+def create_service_user(user, group, home):
     """Creates a user.
 
     It will not create the home dir for it and assume that it already exists.
     This user will only be created if it didn't already exist.
     """
-    if not group:
-        group = user
-
     ctx.logger.info('Checking whether user {0} exists...'.format(user))
     try:
         pwd.getpwnam(user)
@@ -1074,9 +1002,13 @@ def remove_logrotate(service_name):
     remove(config_file_destination)
 
 
-def chmod(mode, path):
+def chmod(mode, path, recursive=False):
     ctx.logger.debug('chmoding {0}: {1}'.format(path, mode))
-    sudo(['chmod', mode, path])
+    command = ['chmod']
+    if recursive:
+        command.append('-R')
+    command += [mode, path]
+    sudo(command)
 
 
 def chown(user, group, path):
@@ -1461,7 +1393,7 @@ class BlueprintResourceFactory(object):
                                     'file://'))
         filename = get_file_name_from_url(source) if is_url else source
         is_manager_package = filename.startswith(SINGLE_TAR_PREFIX)
-        if is_manager_package:
+        if is_manager_package or is_url:
             local_filepath = os.path.join(CLOUDIFY_SOURCES_PATH, filename)
         else:
             local_filepath = get_filepath_from_pkg_name(filename)
@@ -1951,19 +1883,37 @@ def remove_component(runtime_props):
     for f in files_to_remove:
         remove(f)
 
-    group = runtime_props.get('service_group')
-    if group:
-        sudo(['groupdel', group], ignore_failures=True)
-
     user = runtime_props.get('service_user')
     if user:
         sudo(['userdel', '--force', user], ignore_failures=True)
 
+    group = runtime_props.get('service_group')
+    if group:
+        sudo(['groupdel', group], ignore_failures=True)
+
 
 def extend_runtime_properties_list(runtime_props, key_name, new_list):
     """Extend a list in the runtime properties
-    list.extend doen't call __setitem__, so we need to do it explicitly
+    list.extend doesn't call __setitem__, so we need to do it explicitly
     """
     list_to_extend = runtime_props.get(key_name, [])
     list_to_extend.extend(new_list)
     runtime_props[key_name] = list_to_extend
+
+
+def set_service_as_cloudify_service(runtime_props):
+    """Set the cloudify user and group as the user/group of a service"""
+
+    runtime_props['service_user'] = CLOUDIFY_USER
+    runtime_props['service_group'] = CLOUDIFY_GROUP
+
+
+def delete_cluster_component(component):
+    """If the given cluster component exists, teardown it."""
+    if os.path.exists(CLUSTER_DELETE_SCRIPT):
+        sudo(['/usr/bin/env', 'python', CLUSTER_DELETE_SCRIPT,
+              '--component', component])
+
+
+def get_exec_tempdir():
+    return os.environ.get(CFY_EXEC_TEMPDIR_ENVVAR) or tempfile.gettempdir()

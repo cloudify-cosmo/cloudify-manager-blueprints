@@ -15,6 +15,11 @@ SERVICE_NAME = 'amqpinflux'
 # Some runtime properties to be used in teardown
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
+AMQPINFLUX_USER = SERVICE_NAME
+AMQPINFLUX_GROUP = SERVICE_NAME
+runtime_props['service_user'] = AMQPINFLUX_USER
+runtime_props['service_group'] = AMQPINFLUX_GROUP
+
 HOME_DIR = join('/opt', SERVICE_NAME)
 runtime_props['files_to_remove'] = [HOME_DIR]
 
@@ -44,13 +49,8 @@ def install_amqpinflux():
         rabbit_props.get('rabbitmq_username')
     ctx.instance.runtime_properties['rabbitmq_password'] = \
         rabbit_props.get('rabbitmq_password')
-    ctx.instance.runtime_properties['rabbitmq_ssl_enabled'] = True
 
-    amqpinflux_user = 'amqpinflux'
-    amqpinflux_group = 'amqpinflux'
     amqpinflux_venv = '{0}/env'.format(HOME_DIR)
-    runtime_props['service_user'] = amqpinflux_user
-    runtime_props['service_group'] = amqpinflux_group
 
     ctx.logger.info('Installing AQMPInflux...')
     utils.set_selinux_permissive()
@@ -63,10 +63,10 @@ def install_amqpinflux():
     _install_optional(amqpinflux_venv)
 
     ctx.logger.info('Configuring AMQPInflux...')
-    utils.create_service_user(amqpinflux_user, HOME_DIR)
+    utils.create_service_user(AMQPINFLUX_USER, AMQPINFLUX_GROUP, HOME_DIR)
     ctx.instance.runtime_properties['broker_cert_path'] = \
         utils.INTERNAL_CERT_PATH
-    utils.chown(amqpinflux_user, amqpinflux_group, HOME_DIR)
+    utils.chown(AMQPINFLUX_USER, AMQPINFLUX_GROUP, HOME_DIR)
     utils.systemd.configure(SERVICE_NAME)
 
 

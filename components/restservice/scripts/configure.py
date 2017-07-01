@@ -35,7 +35,8 @@ SERVICE_NAME = runtime_props['service_name']
 ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
-SUDOERS_INCLUDE_DIR = ctx_properties['sudoers_include_dir']
+CLOUDIFY_USER = utils.CLOUDIFY_USER
+CLOUDIFY_GROUP = utils.CLOUDIFY_GROUP
 
 
 def _random_alphanumeric(result_len=31):
@@ -58,15 +59,12 @@ def _deploy_security_configuration():
         'encoding_min_length': 5
     }
 
-    os_user = ctx.node.properties['os_user']
-    os_group = ctx.node.properties['os_group']
-
     # Pre-creating paths so permissions fix can work correctly
     # in mgmtworker
     for path in utils.MANAGER_RESOURCES_SNAPSHOT_PATHS:
         utils.mkdir(path)
     utils.chown(
-        os_user, os_group,
+        CLOUDIFY_USER, CLOUDIFY_GROUP,
         utils.MANAGER_RESOURCES_HOME)
     utils.sudo(['ls', '-la', '/opt/manager'])
 
@@ -80,7 +78,7 @@ def _deploy_security_configuration():
         json.dump(security_configuration, f)
     rest_security_path = join(runtime_props['home_dir'], 'rest-security.conf')
     utils.move(path, rest_security_path)
-    utils.chown(os_user, os_group, rest_security_path)
+    utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, rest_security_path)
 
 
 def _create_db_tables_and_add_defaults():
@@ -90,11 +88,10 @@ def _create_db_tables_and_add_defaults():
     destination_script_path = join(tempfile.gettempdir(), script_name)
     ctx.download_resource(source_script_path, destination_script_path)
 
-    # Directly calling with this python bin, in order to make sure it's run
-    # in the correct venv
-    python_path = join(runtime_props['home_dir'], 'env', 'bin', 'python')
-
     args_dict = runtime_props['security_configuration']
+    args_dict['amqp_host'] = runtime_props['rabbitmq_endpoint_ip']
+    args_dict['amqp_username'] = runtime_props['rabbitmq_username']
+    args_dict['amqp_password'] = runtime_props['rabbitmq_password']
     args_dict['postgresql_host'] = runtime_props['postgresql_host']
     args_dict['db_migrate_dir'] = join(
         utils.MANAGER_RESOURCES_HOME,
@@ -108,6 +105,9 @@ def _create_db_tables_and_add_defaults():
     with open(args_file_location, 'w') as f:
         json.dump(args_dict, f)
 
+    # Directly calling with this python bin, in order to make sure it's run
+    # in the correct venv
+    python_path = join(runtime_props['home_dir'], 'env', 'bin', 'python')
     result = utils.sudo(
         [python_path, destination_script_path, args_file_location]
     )
@@ -140,8 +140,8 @@ def _deploy_rest_configuration():
             join(CONFIG_PATH, 'cloudify-rest.conf'),
             join(runtime_props['home_dir'], 'cloudify-rest.conf'),
             SERVICE_NAME)
-    utils.chown(ctx.node.properties['os_user'],
-                ctx.node.properties['os_group'],
+    utils.chown(CLOUDIFY_USER,
+                CLOUDIFY_GROUP,
                 join(runtime_props['home_dir'], 'cloudify-rest.conf'))
 
 
@@ -151,28 +151,18 @@ def _allow_creating_cluster():
     journalctl = '/usr/bin/journalctl'
     create_cluster_node = os.path.join(env, 'bin/create_cluster_node')
     cluster_unit_name = 'cloudify-ha-cluster'
-    os_user = ctx.node.properties['os_user']
 
-    utils.allow_user_to_sudo_command(
-        runtime_props,
-        os_user,
-        '{0} --unit {1} {2} --config *'
-        .format(systemd_run, cluster_unit_name, create_cluster_node),
-        description='cluster_start',
-        sudoers_include_dir=SUDOERS_INCLUDE_DIR,
+    command = '{0} --unit {1} {2} --config *'.format(
+        systemd_run,
+        cluster_unit_name,
+        create_cluster_node
     )
+    description = 'Start a cluster'
+    utils.allow_user_to_sudo_command(command, description)
 
-    utils.allow_user_to_sudo_command(
-        runtime_props,
-        os_user,
-        '{0} --unit {1}*'
-        .format(journalctl, cluster_unit_name),
-        description='cluster_logs',
-        sudoers_include_dir=SUDOERS_INCLUDE_DIR
-    )
-
-    utils.disable_sudo_requiretty_for_user(runtime_props, os_user,
-                                           SUDOERS_INCLUDE_DIR)
+    command = '{0} --unit {1}*'.format(journalctl, cluster_unit_name)
+    description = 'Read cluster logs'
+    utils.allow_user_to_sudo_command(command, description)
 
 
 def configure_restservice():
