@@ -15,3 +15,14 @@ server {
   # Serves the File Server (backed by the cloudify-resources upstream).
   include "/etc/nginx/conf.d/redirect-to-fileserver.cloudify";
 }
+
+# Composer server.
+server {
+  # server listening
+  listen              *:8443;
+  server_name         _;
+
+  # serve the Composer
+  include "/etc/nginx/conf.d/composer-location.cloudify";
+
+}

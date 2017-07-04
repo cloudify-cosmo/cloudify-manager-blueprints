@@ -65,6 +65,10 @@ def _deploy_nginx_config_files(external_rest_protocol):
             dst='/etc/nginx/conf.d/ui-locations.cloudify',
         ),
         resource(
+            src='{0}/composer-location.cloudify'.format(CONFIG_PATH),
+            dst='/etc/nginx/conf.d/composer-location.cloudify',
+        ),
+        resource(
             src='{0}/logs-conf.cloudify'.format(CONFIG_PATH),
             dst='/etc/nginx/conf.d/logs-conf.cloudify',
         )

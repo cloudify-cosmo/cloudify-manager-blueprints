@@ -19,6 +19,21 @@ server {
   include "/etc/nginx/conf.d/redirect-to-fileserver.cloudify";
 }
 
+# Composer external server
+server {
+  # server listening for external requests
+  listen              8443 ssl;
+  server_name         {{ ctx.target.instance.runtime_properties.external_rest_host }};
+
+  ssl_certificate     {{ ctx.source.instance.runtime_properties.external_cert_path }};
+  ssl_certificate_key {{ ctx.source.instance.runtime_properties.external_key_path }};
+  error_page 497 =307 https://$host:$server_port$request_uri;
+
+  # serve the Composer
+  include "/etc/nginx/conf.d/composer-location.cloudify";
+
+}
+
 # force http redirect to https
 server {
   listen 80;
