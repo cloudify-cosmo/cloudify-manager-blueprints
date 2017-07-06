@@ -45,6 +45,9 @@ function set_manager_ip() {
   if $(systemctl list-units | grep cloudify-stage > /dev/null); then
       systemctl restart cloudify-stage
   fi
+  if $(systemctl list-units | grep cloudify-composer> /dev/null); then
+      systemctl restart cloudify-composer
+  fi
 
   echo "Restarting rabbitmq.."
   systemctl restart cloudify-rabbitmq
