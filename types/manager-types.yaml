@@ -807,7 +807,7 @@ node_types:
           operations and concurrent workflows, separately. It cannot be bigger than the management worker
           max workers property, as that property sets the global max number of running processes.
         type: integer
-        default: { get_property: [manager_configuration, cloudify, cloudify_agent, max_workers] }
+        default: { get_input: max_parallel_operations_per_deployment }
       use_existing_on_upgrade:
         description: Use existing mgmt worker configuration
         type: string
