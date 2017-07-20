@@ -47,6 +47,8 @@ node_types:
               default: components/manager/scripts/create.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
+            MANAGER_VERSION:
+              default: { get_attribute: [manager_configuration, manager_version] }
         delete:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
@@ -71,7 +73,7 @@ node_types:
       public_ip:
         default: ''
       manager_version:
-        default: 4.0.0
+        default: { get_input: manager_version }
       cloudify:
         description: >
           Configuration for Cloudify Manager

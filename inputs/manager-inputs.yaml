@@ -1,4 +1,9 @@
 inputs:
+  #############################
+  # Version Label
+  #############################
+  manager_version:
+    default: 4.2.0-.dev1
 
   #############################
   # Security Settings
