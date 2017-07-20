@@ -292,9 +292,6 @@ def _generate_ssl_certificate(ips,
 
     ctx.logger.debug('Using certificate metadata: {0}'.format(cert_metadata))
 
-    sudo_write_to_file(cert_metadata, CERT_METADATA_FILE_PATH)
-    chmod('664', CERT_METADATA_FILE_PATH)
-
     cert_path = os.path.join(SSL_CERTS_TARGET_DIR, cert_filename)
     key_path = os.path.join(SSL_CERTS_TARGET_DIR, key_filename)
 
