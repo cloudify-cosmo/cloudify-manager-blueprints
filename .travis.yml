@@ -5,11 +5,11 @@ python:
   - 2.7
 
 install:
-    - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/master
-    - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/master
-    - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/master
+    - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/master.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/master.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/master.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.5.1.zip
-    - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/master
+    - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/master.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-openstack-plugin/archive/2.0.1.zip
     - pip install coverage==3.7.1
     - pip install nose

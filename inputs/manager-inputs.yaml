@@ -66,7 +66,7 @@ inputs:
     description: |
       Minimum available memory for running list query on Manager host in MB.
     type: integer
-    default: 256
+    default: 100
 
   #############################
   # Bootstrap Validations
