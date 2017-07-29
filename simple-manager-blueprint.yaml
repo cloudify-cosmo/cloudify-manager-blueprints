@@ -20,6 +20,10 @@ inputs:
 
   ssh_user:
     type: string
+    description: |
+      User to connect to the target machine with. This user must be allowed to run
+      `sudo` commands through SSH without being prompted for a password, and must
+      be allowed to SSH to the target machine using key authentication only.
 
   ssh_port:
     type: string
