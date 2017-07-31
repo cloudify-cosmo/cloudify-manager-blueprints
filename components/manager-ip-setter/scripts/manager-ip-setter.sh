@@ -32,26 +32,6 @@ function set_manager_ip() {
   echo "Creating internal SSL certificates.."
   /opt/mgmtworker/env/bin/python /opt/cloudify/manager-ip-setter/create-internal-ssl-certs.py ${ip}
   
-  echo "Restarting services.."
-  # Restarting all (except postgres) to avoid issues with not correctly reloading SSL certs
-  systemctl restart nginx
-  systemctl restart cloudify-amqpinflux
-  systemctl restart cloudify-influxdb
-  systemctl restart cloudify-mgmtworker
-  systemctl restart cloudify-rabbitmq
-  systemctl restart cloudify-restservice
-  systemctl restart cloudify-riemann
-  # Only on premium
-  if $(systemctl list-units | grep cloudify-stage > /dev/null); then
-      systemctl restart cloudify-stage
-  fi
-  if $(systemctl list-units | grep cloudify-composer > /dev/null); then
-      systemctl restart cloudify-composer
-  fi
-
-  echo "Restarting rabbitmq.."
-  systemctl restart cloudify-rabbitmq
-
   echo "Done!"
 
 }
