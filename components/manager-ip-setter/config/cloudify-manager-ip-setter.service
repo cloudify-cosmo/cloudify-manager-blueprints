@@ -4,10 +4,10 @@ Before=cloudify-amqpinflux.service cloudify-influxdb.service cloudify-mgmtworker
 
 [Service]
 TimeoutStartSec=0
-User={{ ctx.instance.runtime_properties.service_user }}
-Group={{ ctx.instance.runtime_properties.service_group }}
+User=root
+Group=root
 EnvironmentFile=-/etc/sysconfig/cloudify-restservice
-ExecStart=/bin/sudo /opt/cloudify/manager-ip-setter/manager-ip-setter.sh
+ExecStart=/opt/cloudify/manager-ip-setter/manager-ip-setter.sh
 
 [Install]
 WantedBy=default.target
