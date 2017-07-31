@@ -27,7 +27,7 @@ function set_manager_ip() {
   /usr/bin/sed -i -e "s/"'"'"broker_hostname"'"'": "'"'".*"'"'"/"'"'"broker_hostname"'"'": "'"'"${ip}"'"'"/" /opt/mgmtworker/work/broker_config.json
 
   echo "Updating broker_ip in provider context.."
-  /opt/mgmtworker/env/bin/python /opt/cloudify/manager-ip-setter/update-provider-context.py ${ip}
+  /opt/manager/env/bin/python /opt/cloudify/manager-ip-setter/update-provider-context.py ${ip}
 
   echo "Creating internal SSL certificates.."
   /opt/mgmtworker/env/bin/python /opt/cloudify/manager-ip-setter/create-internal-ssl-certs.py ${ip}
