@@ -16,24 +16,21 @@ NGINX_SERVICE_NAME = src_runtime_props['service_name']
 CONFIG_PATH = 'components/{0}/config'.format(NGINX_SERVICE_NAME)
 
 
-def _deploy_nginx_config_files(external_rest_protocol):
+def _deploy_nginx_config_files():
     resource = namedtuple('Resource', 'src dst')
     ctx.logger.info('Deploying Nginx configuration files...')
 
     resources = [
         resource(
-            src='{0}/{1}-external-rest-server.cloudify'.format(
-                CONFIG_PATH,
-                external_rest_protocol
-            ),
-            dst='/etc/nginx/conf.d/{0}-external-rest-server.cloudify'.format(
-                external_rest_protocol
-            )
+            src='{0}/http-external-rest-server.cloudify'.format(CONFIG_PATH),
+            dst='/etc/nginx/conf.d/http-external-rest-server.cloudify'
         ),
         resource(
-            src='{0}/https-internal-rest-server.cloudify'.format(
-                CONFIG_PATH
-            ),
+            src='{0}/https-external-rest-server.cloudify'.format(CONFIG_PATH),
+            dst='/etc/nginx/conf.d/https-external-rest-server.cloudify'
+        ),
+        resource(
+            src='{0}/https-internal-rest-server.cloudify'.format(CONFIG_PATH),
             dst='/etc/nginx/conf.d/https-internal-rest-server.cloudify'
         ),
         resource(
@@ -63,6 +60,10 @@ def _deploy_nginx_config_files(external_rest_protocol):
         resource(
             src='{0}/ui-locations.cloudify'.format(CONFIG_PATH),
             dst='/etc/nginx/conf.d/ui-locations.cloudify',
+        ),
+        resource(
+            src='{0}/composer-location.cloudify'.format(CONFIG_PATH),
+            dst='/etc/nginx/conf.d/composer-location.cloudify',
         ),
         resource(
             src='{0}/logs-conf.cloudify'.format(CONFIG_PATH),
@@ -97,23 +98,22 @@ def preconfigure_nginx():
     # Pass on the the path to the certificate to manager_configuration
     target_runtime_props['internal_cert_path'] = internal_cert_path
 
-    if external_rest_protocol == 'https':
-        external_cert_path, external_key_path = \
-            utils.deploy_or_generate_external_ssl_cert(
-                [target_runtime_props['external_rest_host'],
-                 target_runtime_props['internal_rest_host']],
-                target_runtime_props['external_rest_host']
-            )
+    external_cert_path, external_key_path = \
+        utils.deploy_or_generate_external_ssl_cert(
+            [target_runtime_props['external_rest_host'],
+             target_runtime_props['internal_rest_host']],
+            target_runtime_props['external_rest_host']
+        )
 
-        src_runtime_props['external_cert_path'] = external_cert_path
-        src_runtime_props['external_key_path'] = external_key_path
+    src_runtime_props['external_cert_path'] = external_cert_path
+    src_runtime_props['external_key_path'] = external_key_path
 
-        # The public cert content is used in the outputs later
-        external_rest_cert_content = utils.get_file_content(external_cert_path)
-        target_runtime_props['external_rest_cert_content'] = \
-            external_rest_cert_content
+    # The public cert content is used in the outputs later
+    external_rest_cert_content = utils.get_file_content(external_cert_path)
+    target_runtime_props['external_rest_cert_content'] = \
+        external_rest_cert_content
 
-    _deploy_nginx_config_files(external_rest_protocol)
+    _deploy_nginx_config_files()
     utils.systemd.enable(NGINX_SERVICE_NAME, append_prefix=False)
 
 
