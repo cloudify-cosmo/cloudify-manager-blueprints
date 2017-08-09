@@ -45,7 +45,6 @@ INTERNAL_REST_PORT = 53333
 
 BASE_LOG_DIR = '/var/log/cloudify'
 
-EXTERNAL_SSL_CERTS_SOURCE_DIR = 'resources/ssl'
 EXTERNAL_SSL_CERT_FILENAME = 'cloudify_external_cert.pem'
 EXTERNAL_SSL_KEY_FILENAME = 'cloudify_external_key.pem'
 
@@ -344,15 +343,7 @@ def generate_internal_ssl_cert(ip):
     )
 
 
-def deploy_or_generate_external_ssl_cert(ips, cn):
-    user_provided_cert_path = os.path.join(
-        EXTERNAL_SSL_CERTS_SOURCE_DIR,
-        EXTERNAL_SSL_CERT_FILENAME
-    )
-    user_provided_key_path = os.path.join(
-        EXTERNAL_SSL_CERTS_SOURCE_DIR,
-        EXTERNAL_SSL_KEY_FILENAME
-    )
+def deploy_or_generate_external_ssl_cert(ips, cn, cert_source, key_source):
     cert_target_path = os.path.join(
         SSL_CERTS_TARGET_DIR,
         EXTERNAL_SSL_CERT_FILENAME
@@ -364,12 +355,12 @@ def deploy_or_generate_external_ssl_cert(ips, cn):
 
     try:
         # Try to deploy user provided certificates
-        deploy_blueprint_resource(user_provided_cert_path,
+        deploy_blueprint_resource(cert_source,
                                   cert_target_path,
                                   NGINX_SERVICE_NAME,
                                   user_resource=True,
                                   load_ctx=False)
-        deploy_blueprint_resource(user_provided_key_path,
+        deploy_blueprint_resource(key_source,
                                   key_target_path,
                                   NGINX_SERVICE_NAME,
                                   user_resource=True,

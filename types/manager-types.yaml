@@ -494,6 +494,14 @@ node_types:
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
     properties:
+      rest_certificate:
+        description: Public certificate for rest ssl
+        type: string
+        default: { get_input: rest_certificate }
+      rest_key:
+        description: Private key for rest ssl certificate
+        type: string
+        default: { get_input: rest_key }
       nginx_rpm_source_url:
         description: Nginx RPM Source URL
         type: string
