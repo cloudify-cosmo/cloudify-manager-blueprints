@@ -8,6 +8,16 @@ inputs:
     type: boolean
     default: false
 
+  rest_certificate:
+    description: Public certificate for rest ssl
+    type: string
+    default: resources/ssl/cloudify_external_cert.pem
+
+  rest_key:
+    description: Private key for rest ssl certificate
+    type: string
+    default: resources/ssl/cloudify_external_key.pem
+
   admin_username:
     default: admin
 
