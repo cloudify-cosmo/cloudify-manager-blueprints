@@ -809,6 +809,9 @@ node_types:
         description: Min number of celery workers.
         type: integer
         default: { get_input: management_worker_min_workers }
+      extra_env:
+        description: Additional environment variables to add to service file.
+        default: { get_input: management_worker_extra_env }
       gate_keeper_bucket_size:
         description: >
           Maximum number of concurrent operations/workflows for any deployment. The limit is for concurrent
