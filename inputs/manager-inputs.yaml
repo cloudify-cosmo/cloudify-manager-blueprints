@@ -29,6 +29,24 @@ inputs:
   rest_host_internal_endpoint_type:
     default: private_ip
 
+  additional_internal_ips:
+    description: |
+      Additional IP address to add to the automatically-generated internal certificate.
+      Useful for cases when agents are connected via an intermediary proxy.
+    default: []
+
+  internal_dns_names:
+    description: |
+      DNS names to add to the automatically-generated internal certificate.
+      Useful for cases when agents are connected via an intermediary proxy.
+    default: []
+
+  external_dns_names:
+    description: |
+      DNS names to add to the automatically-generated external certificate.
+      Only used when a pre-existing certificate is not provided.
+    default: []
+
   rest_service_gunicorn_worker_count:
     description: |
       The number of worker processes for handling requests.

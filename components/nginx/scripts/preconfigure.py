@@ -86,11 +86,14 @@ def _deploy_nginx_config_files(external_rest_protocol):
 def preconfigure_nginx():
 
     target_runtime_props = ctx.target.instance.runtime_properties
+    target_props = ctx.target.node.properties
 
     # This is used by nginx's default.conf to select the relevant configuration
     external_rest_protocol = target_runtime_props['external_rest_protocol']
     internal_cert_path, internal_key_path = utils.generate_internal_ssl_cert(
-        target_runtime_props['internal_rest_host']
+        target_runtime_props['internal_rest_host'],
+        target_props['additional_ips'],
+        target_props['internal_dns_names']
     )
 
     src_runtime_props['external_rest_protocol'] = external_rest_protocol
@@ -106,6 +109,7 @@ def preconfigure_nginx():
             utils.deploy_or_generate_external_ssl_cert(
                 [target_runtime_props['external_rest_host'],
                  target_runtime_props['internal_rest_host']],
+                target_props['external_dns_names'],
                 target_runtime_props['external_rest_host']
             )
 

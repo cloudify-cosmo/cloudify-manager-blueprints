@@ -72,6 +72,12 @@ node_types:
         default: ''
       manager_version:
         default: 4.0.0
+      additional_ips:
+        default: { get_input: additional_internal_ips }
+      internal_dns_names:
+        default: { get_input: internal_dns_names }
+      external_dns_names:
+        default: { get_input: external_dns_names }
       cloudify:
         description: >
           Configuration for Cloudify Manager

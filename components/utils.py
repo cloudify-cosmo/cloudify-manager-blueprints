@@ -273,6 +273,7 @@ def remove(path, ignore_failure=False):
 
 
 def _generate_ssl_certificate(ips,
+                              dns_names,
                               cn,
                               cert_filename,
                               key_filename,
@@ -286,9 +287,11 @@ def _generate_ssl_certificate(ips,
     # Remove duplicates from ips
     ips.append('127.0.0.1')
     ips = set(ips)
-    metadata_items = ['IP:{0},DNS:{0}'.format(x) for x in ips]
-    cert_metadata = '{0},DNS:localhost'.format(
-        ','.join(metadata_items))
+    dns_names.append('localhost')
+    dns_names = set(dns_names)
+    metadata_ips = ['IP:{0}'.format(x) for x in ips]
+    metadata_dns = ['DNS:{0}'.format(x) for x in dns_names]
+    cert_metadata = ','.join(metadata_ips + metadata_dns)
 
     ctx.logger.debug('Using certificate metadata: {0}'.format(cert_metadata))
 
@@ -337,9 +340,11 @@ subjectAltName={metadata}
     return cert_path, key_path
 
 
-def generate_internal_ssl_cert(ip):
+def generate_internal_ssl_cert(ip, additional_ips=[], dns_names=[]):
+    all_ips = [ip] + additional_ips
     return _generate_ssl_certificate(
-        [ip],
+        all_ips,
+        dns_names,
         ip,
         INTERNAL_SSL_CERT_FILENAME,
         INTERNAL_SSL_KEY_FILENAME,
@@ -347,7 +352,7 @@ def generate_internal_ssl_cert(ip):
     )
 
 
-def deploy_or_generate_external_ssl_cert(ips, cn):
+def deploy_or_generate_external_ssl_cert(ips, dns_names, cn):
     user_provided_cert_path = os.path.join(
         EXTERNAL_SSL_CERTS_SOURCE_DIR,
         EXTERNAL_SSL_CERT_FILENAME
@@ -397,6 +402,7 @@ def deploy_or_generate_external_ssl_cert(ips, cn):
 
             return _generate_ssl_certificate(
                 ips,
+                dns_names,
                 cn,
                 EXTERNAL_SSL_CERT_FILENAME,
                 EXTERNAL_SSL_KEY_FILENAME,
