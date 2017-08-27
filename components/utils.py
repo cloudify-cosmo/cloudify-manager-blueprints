@@ -272,6 +272,23 @@ def remove(path, ignore_failure=False):
     sudo(['rm', '-rf', path], ignore_failures=ignore_failure)
 
 
+def _get_cert_ips_and_dns(ips, dns_names=None):
+    assert ips is not None
+    assert len(ips) > 0
+
+    # Remove duplicates from ips
+    cert_ips = set(ips)
+    cert_ips.add('127.0.0.1')
+    cert_dns = set(dns_names) if dns_names else set()
+    # Add all IP's as DNS's as well. See:
+    # http://www.michaelm.info/blog/?p=1281
+    # https://bugs.chromium.org/p/chromium/issues/detail?id=72726
+    cert_dns.update(cert_ips)
+    cert_dns.add('localhost')
+
+    return cert_ips, cert_dns
+
+
 def _generate_ssl_certificate(ips,
                               dns_names,
                               cn,
@@ -284,13 +301,9 @@ def _generate_ssl_certificate(ips,
     """
     mkdir(SSL_CERTS_TARGET_DIR)
 
-    # Remove duplicates from ips
-    ips.append('127.0.0.1')
-    ips = set(ips)
-    dns_names.append('localhost')
-    dns_names = set(dns_names)
-    metadata_ips = ['IP:{0}'.format(x) for x in ips]
-    metadata_dns = ['DNS:{0}'.format(x) for x in dns_names]
+    cert_ips, cert_dns = _get_cert_ips_and_dns(ips, dns_names)
+    metadata_ips = ['IP:{0}'.format(x) for x in cert_ips]
+    metadata_dns = ['DNS:{0}'.format(x) for x in cert_dns]
     cert_metadata = ','.join(metadata_ips + metadata_dns)
 
     ctx.logger.debug('Using certificate metadata: {0}'.format(cert_metadata))
@@ -340,8 +353,11 @@ subjectAltName={metadata}
     return cert_path, key_path
 
 
-def generate_internal_ssl_cert(ip, additional_ips=[], dns_names=[]):
-    all_ips = [ip] + additional_ips
+def generate_internal_ssl_cert(ip, additional_ips=None, dns_names=None):
+    all_ips = [ip]
+    if additional_ips:
+        all_ips.extend(additional_ips)
+
     return _generate_ssl_certificate(
         all_ips,
         dns_names,
