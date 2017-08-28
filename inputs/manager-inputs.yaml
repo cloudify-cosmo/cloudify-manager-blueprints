@@ -535,3 +535,4 @@ inputs:
   import_resolver_rules:
     default:
       - {'http://www.getcloudify.org/spec': 'file:///opt/manager/resources/spec'}
+      - {'http://cloudify.co/spec': 'file:///opt/manager/resources/spec'}
