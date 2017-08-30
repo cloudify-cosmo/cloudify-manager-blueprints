@@ -1,12 +1,12 @@
 import sys
-from manager_rest.server import app
+from manager_rest.flask_utils import setup_flask_app
 from manager_rest.storage import get_storage_manager, models
 from manager_rest.constants import PROVIDER_CONTEXT_ID
 from sqlalchemy.orm.attributes import flag_modified
 
 
 def update_provider_context(manager_ip):
-    with app.app_context():
+    with setup_flask_app().app_context():
         sm = get_storage_manager()
         ctx = sm.get(models.ProviderContext, PROVIDER_CONTEXT_ID)
         ctx.context['cloudify']['cloudify_agent']['broker_ip'] = manager_ip
