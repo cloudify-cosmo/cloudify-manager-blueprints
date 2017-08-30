@@ -30,6 +30,18 @@ inputs:
     type: boolean
     default: true
 
+  #############################
+  # Network configurations
+  #############################
+
+  manager_networks:
+    description: >
+      A list of network names and IP addresses associated with them.
+      By default, there is only a "default" network, with the manager's
+      private IP associated with it. This network can be overwritten
+    default:
+      - default: { get_input: private_ip }
+
   #################################
   # REST Configuration
   #################################
