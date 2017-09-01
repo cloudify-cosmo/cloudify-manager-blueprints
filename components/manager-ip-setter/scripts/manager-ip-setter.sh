@@ -27,28 +27,11 @@ function set_manager_ip() {
   /usr/bin/sed -i -e "s/"'"'"broker_hostname"'"'": "'"'".*"'"'"/"'"'"broker_hostname"'"'": "'"'"${ip}"'"'"/" /opt/mgmtworker/work/broker_config.json
 
   echo "Updating broker_ip in provider context.."
-  /opt/mgmtworker/env/bin/python /opt/cloudify/manager-ip-setter/update-provider-context.py ${ip}
+  /opt/manager/env/bin/python /opt/cloudify/manager-ip-setter/update-provider-context.py ${ip}
 
   echo "Creating internal SSL certificates.."
   /opt/mgmtworker/env/bin/python /opt/cloudify/manager-ip-setter/create-internal-ssl-certs.py ${ip}
   
-  echo "Restarting services.."
-  # Restarting all (except postgres) to avoid issues with not correctly reloading SSL certs
-  systemctl restart nginx
-  systemctl restart cloudify-amqpinflux
-  systemctl restart cloudify-influxdb
-  systemctl restart cloudify-mgmtworker
-  systemctl restart cloudify-rabbitmq
-  systemctl restart cloudify-restservice
-  systemctl restart cloudify-riemann
-  # Only on premium
-  if $(systemctl list-units | grep cloudify-stage > /dev/null); then
-      systemctl restart cloudify-stage
-  fi
-
-  echo "Restarting rabbitmq.."
-  systemctl restart cloudify-rabbitmq
-
   echo "Done!"
 
 }

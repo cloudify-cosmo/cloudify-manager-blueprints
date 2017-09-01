@@ -155,6 +155,10 @@ def install_restservice():
         description='Run systemctl'
     )
     utils.deploy_sudo_command_script(
+        script='/usr/bin/sed',
+        description='Run sed command'
+    )
+    utils.deploy_sudo_command_script(
         script='/usr/sbin/shutdown',
         description='Perform shutdown (reboot)'
     )

@@ -45,7 +45,6 @@ INTERNAL_REST_PORT = 53333
 
 BASE_LOG_DIR = '/var/log/cloudify'
 
-EXTERNAL_SSL_CERTS_SOURCE_DIR = 'resources/ssl'
 EXTERNAL_SSL_CERT_FILENAME = 'cloudify_external_cert.pem'
 EXTERNAL_SSL_KEY_FILENAME = 'cloudify_external_key.pem'
 
@@ -71,6 +70,7 @@ INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
 CERT_METADATA_FILE_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                        'certificate_metadata')
 CLUSTER_DELETE_SCRIPT = '/opt/cloudify/delete_cluster.py'
+CFY_EXEC_TEMPDIR_ENVVAR = 'CFY_EXEC_TEMP'
 
 
 def retry(exception, tries=4, delay=3, backoff=2):
@@ -318,9 +318,6 @@ def _generate_ssl_certificate(ips,
 
     ctx.logger.debug('Using certificate metadata: {0}'.format(cert_metadata))
 
-    sudo_write_to_file(cert_metadata, CERT_METADATA_FILE_PATH)
-    chmod('664', CERT_METADATA_FILE_PATH)
-
     cert_path = os.path.join(SSL_CERTS_TARGET_DIR, cert_filename)
     key_path = os.path.join(SSL_CERTS_TARGET_DIR, key_filename)
 
@@ -373,15 +370,7 @@ def generate_internal_ssl_cert(ip):
     )
 
 
-def deploy_or_generate_external_ssl_cert(ips, cn):
-    user_provided_cert_path = os.path.join(
-        EXTERNAL_SSL_CERTS_SOURCE_DIR,
-        EXTERNAL_SSL_CERT_FILENAME
-    )
-    user_provided_key_path = os.path.join(
-        EXTERNAL_SSL_CERTS_SOURCE_DIR,
-        EXTERNAL_SSL_KEY_FILENAME
-    )
+def deploy_or_generate_external_ssl_cert(ips, cn, cert_source, key_source):
     cert_target_path = os.path.join(
         SSL_CERTS_TARGET_DIR,
         EXTERNAL_SSL_CERT_FILENAME
@@ -393,12 +382,12 @@ def deploy_or_generate_external_ssl_cert(ips, cn):
 
     try:
         # Try to deploy user provided certificates
-        deploy_blueprint_resource(user_provided_cert_path,
+        deploy_blueprint_resource(cert_source,
                                   cert_target_path,
                                   NGINX_SERVICE_NAME,
                                   user_resource=True,
                                   load_ctx=False)
-        deploy_blueprint_resource(user_provided_key_path,
+        deploy_blueprint_resource(key_source,
                                   key_target_path,
                                   NGINX_SERVICE_NAME,
                                   user_resource=True,
@@ -1028,9 +1017,13 @@ def remove_logrotate(service_name):
     remove(config_file_destination)
 
 
-def chmod(mode, path):
+def chmod(mode, path, recursive=False):
     ctx.logger.debug('chmoding {0}: {1}'.format(path, mode))
-    sudo(['chmod', mode, path])
+    command = ['chmod']
+    if recursive:
+        command.append('-R')
+    command += [mode, path]
+    sudo(command)
 
 
 def chown(user, group, path):
@@ -1926,3 +1919,7 @@ def delete_cluster_component(component):
     if os.path.exists(CLUSTER_DELETE_SCRIPT):
         sudo(['/usr/bin/env', 'python', CLUSTER_DELETE_SCRIPT,
               '--component', component])
+
+
+def get_exec_tempdir():
+    return os.environ.get(CFY_EXEC_TEMPDIR_ENVVAR) or tempfile.gettempdir()
