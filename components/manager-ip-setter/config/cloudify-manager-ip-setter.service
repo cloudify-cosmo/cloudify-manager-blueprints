@@ -4,6 +4,7 @@ Before=cloudify-amqpinflux.service cloudify-influxdb.service cloudify-mgmtworker
 After=network-online.target
 
 [Service]
+Type=oneshot
 TimeoutStartSec=0
 User=root
 Group=root
