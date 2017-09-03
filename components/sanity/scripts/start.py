@@ -297,17 +297,5 @@ def perform_sanity():
 # operation parameter with 'true' as its value.
 # This is done to prevent the sanity test from running before the
 # provider context is available.
-if os.environ.get('run_sanity') == 'true' or \
-        utils.is_upgrade or \
-        utils.is_rollback:
+if os.environ.get('run_sanity') == 'true':
     perform_sanity()
-
-if utils.is_upgrade or utils.is_rollback:
-    utils.restore_upgrade_snapshot()
-
-if utils.is_upgrade:
-    utils.set_upgrade_success_in_upgrade_meta()
-
-if utils.is_rollback:
-    # remove data created by the upgrade process.
-    utils.remove(utils.UPGRADE_METADATA_FILE)

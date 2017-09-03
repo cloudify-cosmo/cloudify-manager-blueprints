@@ -27,14 +27,10 @@ import utils  # NOQA
 
 NODE_NAME = 'manager-config'
 
-utils.clean_upgrade_resources_if_necessary()
-# This MUST be invoked by the first node, before upgrade snapshot is created.
-utils.clean_rollback_resources_if_necessary()
-
 ctx_properties = utils.ctx_factory.create(NODE_NAME)
 
 
-def _configure_security_properties():
+def configure_security_properties():
     security_config = ctx_properties['security']
     runtime_props = ctx.instance.runtime_properties
 
@@ -56,12 +52,4 @@ def _configure_security_properties():
     runtime_props['external_rest_protocol'] = external_rest_protocol
 
 
-def main():
-    if utils.is_upgrade:
-        utils.create_upgrade_snapshot()
-    # TTY has already been disabled. Rollback may not have the script to
-    # disable TTY since it has been introduced only on 3.4.1
-    _configure_security_properties()
-
-
-main()
+configure_security_properties()

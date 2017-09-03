@@ -106,36 +106,6 @@ def deploy_manager_sources():
             # ubuntu-trusty-agent
             return filename.split('_', 1)[0].lower()
 
-        def backup_agent_resources(agents_dir):
-            ctx.logger.info('Backing up agents in {0}...'.format(agents_dir))
-            if not os.path.isdir(utils.AGENTS_ROLLBACK_PATH):
-                utils.mkdir(utils.AGENTS_ROLLBACK_PATH)
-                utils.copy(agents_dir, utils.AGENTS_ROLLBACK_PATH)
-
-        def restore_agent_resources(agents_dir):
-            ctx.logger.info('Restoring agents in {0}'.format(
-                utils.AGENTS_ROLLBACK_PATH))
-            if os.path.isdir(agents_dir):
-                utils.remove(agents_dir)
-            utils.mkdir(agents_dir)
-            utils.copy(os.path.join(utils.AGENTS_ROLLBACK_PATH, 'agents', '.'),
-                       agents_dir)
-
-        manager_scripts_path = os.path.join(
-            utils.MANAGER_RESOURCES_HOME, 'packages', 'scripts')
-        manager_templates_path = os.path.join(
-            utils.MANAGER_RESOURCES_HOME, 'packages', 'templates')
-        if utils.is_upgrade:
-            backup_agent_resources(utils.AGENT_ARCHIVES_PATH)
-            utils.remove(utils.AGENT_ARCHIVES_PATH)
-            utils.mkdir(utils.AGENT_ARCHIVES_PATH)
-            utils.remove(manager_scripts_path)
-            utils.remove(manager_templates_path)
-            ctx.logger.info('Upgrading agents...')
-        elif utils.is_rollback:
-            ctx.logger.info('Restoring agents...')
-            restore_agent_resources(utils.AGENT_ARCHIVES_PATH)
-
         for agent_file in os.listdir(sources_agents_path):
 
             agent_id = normalize_agent_name(agent_file)

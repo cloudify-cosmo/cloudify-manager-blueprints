@@ -90,10 +90,4 @@ def main():
         password=password,
     )
 
-    if utils.is_upgrade or utils.is_rollback:
-        # restore the 'provider_context' and 'snapshot' elements from file
-        # created in the 'create.py' script.
-        ctx.logger.error('NOT IMPLEMENTED - need to restore upgrade data')
-
-
 main()

@@ -23,7 +23,6 @@ runtime_props['rest_certificate'] = ctx_properties['rest_certificate']
 runtime_props['rest_key'] = ctx_properties['rest_key']
 
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
-AGENTS_ROLLBACK_PATH = '/opt/cloudify/nginx/rollback_agents'
 
 
 def install_nginx():
