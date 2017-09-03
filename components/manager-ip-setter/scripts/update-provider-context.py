@@ -9,7 +9,9 @@ def update_provider_context(manager_ip):
     with setup_flask_app().app_context():
         sm = get_storage_manager()
         ctx = sm.get(models.ProviderContext, PROVIDER_CONTEXT_ID)
-        ctx.context['cloudify']['cloudify_agent']['broker_ip'] = manager_ip
+        agent_dict = ctx.context['cloudify']['cloudify_agent']
+        agent_dict['broker_ip'] = manager_ip
+        agent_dict['networks']['default'] = manager_ip
         flag_modified(ctx, 'context')
         sm.update(ctx)
 
