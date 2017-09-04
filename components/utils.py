@@ -1079,12 +1079,6 @@ def write_to_json_file(content, file_path):
     move(tmp_file.name, file_path)
 
 
-def load_manager_config_prop(prop_name):
-    ctx.logger.debug('Loading {0} configuration'.format(prop_name))
-    manager_props = ctx_factory.get('manager-config')
-    return json.dumps(manager_props[prop_name])
-
-
 def repetitive(condition_func,
                timeout=15,
                interval=3,
@@ -1161,7 +1155,6 @@ class BlueprintResourceFactory(object):
             if user_resource:
                 self._download_user_resource(source,
                                              local_resource_path,
-                                             service_name,
                                              render=render,
                                              load_ctx=load_ctx)
             elif source_resource:
@@ -1170,7 +1163,6 @@ class BlueprintResourceFactory(object):
             elif render:
                 self._download_resource_and_render(source,
                                                    local_resource_path,
-                                                   service_name,
                                                    load_ctx)
             else:
                 self._download_resource(source, local_resource_path)
@@ -1184,12 +1176,11 @@ class BlueprintResourceFactory(object):
         except IOError:
             return False
 
-    def _download_user_resource(self, source, dest, service_name,
+    def _download_user_resource(self, source, dest,
                                 render=True, load_ctx=True):
         if not os.path.isfile(dest):
             if render:
-                self._download_resource_and_render(source, dest, service_name,
-                                                   load_ctx=load_ctx)
+                self._download_resource_and_render(source, dest, load_ctx)
             else:
                 self._download_resource(source, dest)
 
@@ -1201,13 +1192,12 @@ class BlueprintResourceFactory(object):
         tmp_file = ctx.download_resource(source)
         move(tmp_file, dest)
 
-    def _download_resource_and_render(self, source, dest, service_name,
-                                      load_ctx):
+    def _download_resource_and_render(self, source, dest, load_ctx):
         resource_name = os.path.basename(dest)
         ctx.logger.debug('Downloading resource {0} to {1}'.format(
             resource_name, dest))
         if load_ctx:
-            params = self._load_node_props(service_name)
+            params = self._get_node_props()
             tmp_file = ctx.download_resource_and_render(source, '', params)
         else:
             # rendering will be possible only for runtime properties
@@ -1242,8 +1232,8 @@ class BlueprintResourceFactory(object):
         move(tmp_path, local_resource_path)
 
     @staticmethod
-    def _load_node_props(service_name):
-        node_props = ctx_factory.get(service_name)
+    def _get_node_props():
+        node_props = ctx.node.properties.get_all()
         return {'node': {'properties': node_props}}
 
     def _is_cloudify_pkg(self,  filename):
@@ -1307,46 +1297,12 @@ def http_request(url,
                 method, url, e.reason))
 
 
-def wait_for_workflow(deployment_id,
-                      workflow_id,
-                      url_prefix='http://localhost/api/{0}'.format(
-                          REST_VERSION)):
-    headers = create_maintenance_headers()
-    params = urllib.urlencode(dict(deployment_id=deployment_id))
-    endpoint = '{0}/executions'.format(url_prefix)
-    url = endpoint + '?' + params
-    res = http_request(
-        url,
-        method='GET',
-        headers=headers)
-    res_content = res.readlines()
-    json_res = json.loads(res_content[0])
-    for execution in json_res['items']:
-        if execution['workflow_id'] == workflow_id:
-            execution_status = execution['status']
-            if execution_status == 'terminated':
-                return True
-            elif execution_status == 'failed':
-                ctx.abort_operation('Execution with id {0} failed'.
-                                    format(execution['id']))
-    return False
-
-
-def create_maintenance_headers():
-    headers = {'X-BYPASS-MAINTENANCE': 'True',
-               'tenant': 'default_tenant'}
-    headers.update(get_auth_headers())
-    return headers
-
-
-def get_auth_headers():
-    manager_config = ctx_factory.get('manager-config')
-
-    username = manager_config['security'].get('admin_username')
-    password = manager_config['security'].get('admin_password')
+def get_auth_headers(username, password):
     return {
         'Authorization': 'Basic ' + base64.b64encode('{0}:{1}'.format(
-                        username, password))
+            username, password)
+        ),
+        'tenant': 'default_tenant'
     }
 
 
