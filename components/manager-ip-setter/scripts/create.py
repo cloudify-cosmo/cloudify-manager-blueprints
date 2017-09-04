@@ -15,7 +15,7 @@ import utils  # NOQA
 
 SERVICE_NAME = 'manager-ip-setter'
 runtime_props = ctx.instance.runtime_properties
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 MANAGER_IP_SETTER_DIR = join('/opt/cloudify', SERVICE_NAME)
 

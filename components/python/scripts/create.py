@@ -9,7 +9,7 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-ctx_properties = utils.ctx_factory.create('python')
+ctx_properties = ctx.node.properties.get_all()
 
 
 def install_python_requirements():

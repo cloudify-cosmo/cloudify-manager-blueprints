@@ -27,7 +27,7 @@ LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
 runtime_props['home_dir'] = HOME_DIR
 runtime_props['files_to_remove'] = [HOME_DIR, NODEJS_DIR, LOG_DIR]
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 

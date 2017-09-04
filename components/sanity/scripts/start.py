@@ -22,7 +22,7 @@ runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
 
 manager_remote_key_path = runtime_props['manager_remote_key_path']
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def _get_headers():

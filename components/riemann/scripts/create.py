@@ -11,7 +11,7 @@ import utils  # NOQA
 
 RIEMANN_SERVICE_NAME = 'riemann'
 
-ctx_properties = utils.ctx_factory.create(RIEMANN_SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = RIEMANN_SERVICE_NAME
 runtime_props['service_user'] = RIEMANN_SERVICE_NAME

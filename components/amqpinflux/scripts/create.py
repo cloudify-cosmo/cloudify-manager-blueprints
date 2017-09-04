@@ -23,7 +23,7 @@ runtime_props['service_group'] = AMQPINFLUX_GROUP
 HOME_DIR = join('/opt', SERVICE_NAME)
 runtime_props['files_to_remove'] = [HOME_DIR]
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def _install_optional(amqpinflux_venv):

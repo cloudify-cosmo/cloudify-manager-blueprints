@@ -13,7 +13,7 @@ import utils  # NOQA
 
 NODE_NAME = 'manager-resources'
 
-ctx_properties = utils.ctx_factory.create(NODE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def execute_before_bootstrap():

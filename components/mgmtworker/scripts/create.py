@@ -27,7 +27,7 @@ runtime_props['log_dir'] = LOG_DIR
 CLOUDIFY_USER = utils.CLOUDIFY_USER
 CLOUDIFY_GROUP = utils.CLOUDIFY_GROUP
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def _install_optional(mgmtworker_venv):

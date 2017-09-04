@@ -12,7 +12,7 @@ import utils  # NOQA
 SERVICE_NAME = 'nginx'
 
 # Some runtime properties to be used in teardown
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
 

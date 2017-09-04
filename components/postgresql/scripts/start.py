@@ -12,7 +12,7 @@ ctx.download_resource(
 import utils  # NOQA
 
 PS_SERVICE_NAME = 'postgresql-9.5'
-ctx_properties = utils.ctx_factory.get(PS_SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def _start_postgres():

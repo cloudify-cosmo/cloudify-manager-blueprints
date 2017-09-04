@@ -27,7 +27,7 @@ import utils  # NOQA
 
 NODE_NAME = 'manager-config'
 
-ctx_properties = utils.ctx_factory.create(NODE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def configure_security_properties():

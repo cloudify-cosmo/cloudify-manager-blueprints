@@ -17,7 +17,7 @@ runtime_props['service_name'] = SERVICE_NAME
 HOME_DIR = join('/opt', SERVICE_NAME)
 runtime_props['files_to_remove'] = [HOME_DIR]
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def install_syncthing():

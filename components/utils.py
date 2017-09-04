@@ -1095,29 +1095,6 @@ def repetitive(condition_func,
         time.sleep(interval)
 
 
-class CtxPropertyFactory(object):
-    def __init__(self):
-        self._properties = dict()
-
-    def create(self, service_name):
-        """A Factory used to allow reuse of properties without
-
-        :param service_name: The service name
-        :return: The relevant ctx node properties dict.
-        """
-        ctx_props = ctx.node.properties.get_all()
-        self._properties[service_name] = ctx_props
-        return ctx_props
-
-    def get(self, service_name):
-        """Get node properties by service name.
-
-        :param service_name: The service name.
-        :return: The relevant ctx node properties dict.
-        """
-        return self._properties[service_name]
-
-
 class BlueprintResourceFactory(object):
 
     BASE_RESOURCES_PATH = '/opt/cloudify'
@@ -1271,7 +1248,6 @@ class BlueprintResourceFactory(object):
 
 
 resource_factory = BlueprintResourceFactory()
-ctx_factory = CtxPropertyFactory()
 
 
 def start_service(service_name, append_prefix=True):
