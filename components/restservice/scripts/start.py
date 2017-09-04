@@ -23,8 +23,11 @@ def verify_restservice(url):
     that also requires the storage backend to be up, so if it works, there's
     a good chance everything is configured correctly.
     """
-    headers = utils.get_auth_headers()
-    headers['tenant'] = 'default_tenant'
+    security_config = runtime_props['security_configuration']
+    headers = utils.get_auth_headers(
+        username=security_config['admin_username'],
+        password=security_config['admin_password']
+    )
 
     utils.verify_service_http(SERVICE_NAME, url, headers=headers)
 
