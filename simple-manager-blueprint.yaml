@@ -129,6 +129,7 @@ node_templates:
           user: { get_input: agents_user }
           broker_user: { get_input: rabbitmq_username }
           broker_pass: { get_input: rabbitmq_password }
+          networks: { get_input: manager_networks }
 
         workflows:
           task_retries: { get_input: workflow_task_retries }

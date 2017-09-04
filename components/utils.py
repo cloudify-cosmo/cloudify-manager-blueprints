@@ -283,11 +283,38 @@ def _generate_ssl_certificate(ips,
     mkdir(SSL_CERTS_TARGET_DIR)
 
     # Remove duplicates from ips
-    ips.append('127.0.0.1')
-    ips = set(ips)
-    metadata_items = ['IP:{0},DNS:{0}'.format(x) for x in ips]
-    cert_metadata = '{0},DNS:localhost'.format(
-        ','.join(metadata_items))
+    altnames = set(ips)
+
+    # Ensure we trust localhost
+    altnames.add('127.0.0.1')
+    altnames.add('localhost')
+
+    subject_altdns = [
+        'DNS:{name}'.format(name=name)
+        for name in altnames
+    ]
+    subject_altips = []
+    for name in altnames:
+        ip_address = False
+        try:
+            socket.inet_pton(socket.AF_INET, name)
+            ip_address = True
+        except socket.error:
+            # Not IPv4
+            pass
+        try:
+            socket.inet_pton(socket.AF_INET6, name)
+            ip_address = True
+        except socket.error:
+            # Not IPv6
+            pass
+        if ip_address:
+            subject_altips.append('IP:{name}'.format(name=name))
+
+    cert_metadata = ','.join([
+        ','.join(subject_altdns),
+        ','.join(subject_altips),
+    ])
 
     ctx.logger.debug('Using certificate metadata: {0}'.format(cert_metadata))
 
