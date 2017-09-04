@@ -38,8 +38,21 @@ MANAGER_RESOURCES_SNAPSHOT_PATHS = [
 SSL_CERTS_TARGET_DIR = '/etc/cloudify/ssl'
 INTERNAL_SSL_CERT_FILENAME = 'cloudify_internal_cert.pem'
 INTERNAL_SSL_KEY_FILENAME = 'cloudify_internal_key.pem'
+INTERNAL_SSL_CA_CERT_FILENAME = 'cloudify_internal_ca_cert.pem'
+INTERNAL_SSL_CA_KEY_FILENAME = 'cloudify_internal_ca_key.pem'
 INTERNAL_PKCS12_FILENAME = 'cloudify_internal.p12'
 INTERNAL_REST_PORT = 53333
+INTERNAL_CERT_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
+                                  INTERNAL_SSL_CERT_FILENAME)
+INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
+                                 INTERNAL_SSL_KEY_FILENAME)
+INTERNAL_CA_CERT_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
+                                     INTERNAL_SSL_CA_CERT_FILENAME)
+INTERNAL_CA_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
+                                    INTERNAL_SSL_CA_KEY_FILENAME)
+CERT_METADATA_FILE_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
+                                       'certificate_metadata')
+
 
 BASE_LOG_DIR = '/var/log/cloudify'
 
@@ -56,12 +69,6 @@ CLOUDIFY_HOME_DIR = '/etc/cloudify'
 SUDOERS_INCLUDE_DIR = '/etc/sudoers.d'
 CLOUDIFY_SUDOERS_FILE = os.path.join(SUDOERS_INCLUDE_DIR, CLOUDIFY_USER)
 
-INTERNAL_CERT_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
-                                  INTERNAL_SSL_CERT_FILENAME)
-INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
-                                 INTERNAL_SSL_KEY_FILENAME)
-CERT_METADATA_FILE_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
-                                       'certificate_metadata')
 CLUSTER_DELETE_SCRIPT = '/opt/cloudify/delete_cluster.py'
 CFY_EXEC_TEMPDIR_ENVVAR = 'CFY_EXEC_TEMP'
 
