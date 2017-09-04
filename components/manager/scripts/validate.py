@@ -132,13 +132,6 @@ def _validate_resources_package_url(manager_resources_package_url):
                 manager_resources_package_url, ex.args))
 
 
-def _is_bootstrap():
-    status_file_path = '/opt/cloudify/_workflow_state.json'
-    if os.path.isfile(status_file_path):
-        return False
-    return True
-
-
 def validate():
     ignore_validations = ctx.node.properties['ignore_bootstrap_validations']
     resources_package_url = ctx.node.properties['manager_resources_package']
