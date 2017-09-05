@@ -118,4 +118,17 @@ def preconfigure_nginx():
     utils.systemd.enable(NGINX_SERVICE_NAME, append_prefix=False)
 
 
+def create_certs():
+    utils.mkdir(utils.SSL_CERTS_TARGET_DIR)
+    utils.generate_ca_cert()
+    networks = \
+        ctx.target.node.properties['cloudify']['cloudify_agent']['networks']
+    internal_rest_host = \
+        ctx.target.instance.runtime_properties['internal_rest_host']
+    utils.store_cert_metadata(internal_rest_host, networks)
+    cert_ips = [internal_rest_host] + list(networks.values())
+    utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
+
+
+create_certs()
 preconfigure_nginx()

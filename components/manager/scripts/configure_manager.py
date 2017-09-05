@@ -50,16 +50,6 @@ def configure_security_properties():
     runtime_props['external_rest_protocol'] = external_rest_protocol
 
 
-def create_certs():
-    utils.mkdir(utils.SSL_CERTS_TARGET_DIR)
-    utils.generate_ca_cert()
-    networks = ctx_properties['cloudify']['cloudify_agent']['networks']
-    internal_rest_host = ctx.instance.runtime_properties['internal_rest_host']
-    utils.store_cert_metadata(internal_rest_host, networks)
-    cert_ips = [internal_rest_host] + list(networks.values())
-    utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
-
-
 def create_cloudify_user():
     utils.create_service_user(
         user=utils.CLOUDIFY_USER,
@@ -84,4 +74,3 @@ def init_cloudify_user():
 
 init_cloudify_user()
 configure_security_properties()
-create_certs()
