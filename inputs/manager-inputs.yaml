@@ -436,6 +436,11 @@ inputs:
     type: integer
     default: 2
 
+  management_worker_extra_env:
+    description: >
+      Additional environment variables to add to service file.
+    default: {}
+
   workflow_task_retries:
     description: >
       The number of times a failed task will be retried on recoverable error.

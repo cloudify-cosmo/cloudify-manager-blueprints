@@ -148,6 +148,15 @@ ssh_key_filename: ''
 # using "info" (or a more restrictive level) for production environments.
 #management_worker_log_level: debug
 
+# Maximum number of worker processes started by the management worker.
+#management_worker_max_workers: 100
+
+# Minimum number of worker processes maintained by the management worker.
+#management_worker_min_workers: 2
+
+# Additional environment variables to add to service file.
+#management_worker_extra_env: {}
+
 #############################
 # RabbitMQ Configuration
 #############################
@@ -202,15 +211,6 @@ ssh_key_filename: ''
 # Note that the port is currently not configurable and must remain 8086.
 # Also note that the database username and password are hardcoded to root:root.
 #influxdb_endpoint_ip: ''
-
-#################################
-# Management Worker Configuration
-#################################
-# Maximum number of worker processes started by the management worker.
-#management_worker_max_workers: 100
-
-# Minimum number of worker processes maintained by the management worker.
-#management_worker_min_workers: 2
 
 #################################
 # REST Configuration
