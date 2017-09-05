@@ -333,6 +333,24 @@ def _format_ips(ips):
     return cert_metadata
 
 
+def store_cert_metadata(internal_rest_host, networks=None):
+    metadata = load_cert_metadata()
+    metadata['internal_rest_host'] = internal_rest_host
+    if networks is not None:
+        metadata['networks'] = networks
+    contents = json.dumps(metadata)
+    sudo_write_to_file(contents, CERT_METADATA_FILE_PATH)
+    chown(CLOUDIFY_USER, CLOUDIFY_GROUP, CERT_METADATA_FILE_PATH)
+
+
+def load_cert_metadata():
+    try:
+        with open(CERT_METADATA_FILE_PATH) as f:
+            return json.load(f)
+    except IOError:
+        return {}
+
+
 def _generate_ssl_certificate(ips,
                               cn,
                               cert_path,

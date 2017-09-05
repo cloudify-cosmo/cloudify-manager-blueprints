@@ -55,6 +55,7 @@ def create_certs():
     utils.generate_ca_cert()
     networks = ctx_properties['cloudify']['cloudify_agent']['networks']
     internal_rest_host = ctx.instance.runtime_properties['internal_rest_host']
+    utils.store_cert_metadata(internal_rest_host, networks)
     cert_ips = [internal_rest_host] + list(networks.values())
     utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
 
