@@ -17,12 +17,12 @@ utils.ctx = CtxWithLogger()
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('Expected 1 argument - <manager-ip>')
-        print('Provided args: {0}'.format(sys.argv[1:]))
-        sys.exit(1)
-    internal_rest_host = sys.argv[1]
     cert_metadata = utils.load_cert_metadata()
+    if len(sys.argv) == 2:
+        internal_rest_host = sys.argv[1]
+    else:
+        internal_rest_host = cert_metadata['internal_rest_host']
+
     networks = cert_metadata.get('networks', {})
     cert_ips = [internal_rest_host] + list(networks.values())
     utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
