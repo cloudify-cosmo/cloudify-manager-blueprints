@@ -13,7 +13,7 @@ import utils  # NOQA
 runtime_props = ctx.instance.runtime_properties
 SERVICE_NAME = runtime_props['service_name']
 
-ctx_properties = utils.ctx_factory.get(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 RIEMANN_CONFIG_PATH = '/etc/riemann'
 

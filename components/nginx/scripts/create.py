@@ -12,7 +12,7 @@ import utils  # NOQA
 SERVICE_NAME = 'nginx'
 
 # Some runtime properties to be used in teardown
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
 
@@ -23,7 +23,6 @@ runtime_props['rest_certificate'] = ctx_properties['rest_certificate']
 runtime_props['rest_key'] = ctx_properties['rest_key']
 
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
-AGENTS_ROLLBACK_PATH = '/opt/cloudify/nginx/rollback_agents'
 
 
 def install_nginx():

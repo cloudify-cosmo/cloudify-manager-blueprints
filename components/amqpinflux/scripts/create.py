@@ -23,7 +23,7 @@ runtime_props['service_group'] = AMQPINFLUX_GROUP
 HOME_DIR = join('/opt', SERVICE_NAME)
 runtime_props['files_to_remove'] = [HOME_DIR]
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def _install_optional(amqpinflux_venv):
@@ -42,13 +42,8 @@ def install_amqpinflux():
     # injected as an input to the script
     ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
         os.environ['INFLUXDB_ENDPOINT_IP']
-    rabbit_props = utils.ctx_factory.get('rabbitmq')
     ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
         utils.get_rabbitmq_endpoint_ip()
-    ctx.instance.runtime_properties['rabbitmq_username'] = \
-        rabbit_props.get('rabbitmq_username')
-    ctx.instance.runtime_properties['rabbitmq_password'] = \
-        rabbit_props.get('rabbitmq_password')
 
     amqpinflux_venv = '{0}/env'.format(HOME_DIR)
 
