@@ -36,23 +36,6 @@ def deploy_utils():
     utils.chown('root', utils.CLOUDIFY_GROUP, utils_path)
 
 
-def create_cloudify_user():
-    utils.create_service_user(
-        user=utils.CLOUDIFY_USER,
-        group=utils.CLOUDIFY_GROUP,
-        home=utils.CLOUDIFY_HOME_DIR
-    )
-    utils.mkdir(utils.CLOUDIFY_HOME_DIR)
-
-
-def create_sudoers_file_and_disable_sudo_requiretty():
-    utils.sudo(['touch', utils.CLOUDIFY_SUDOERS_FILE])
-    utils.chmod('440', utils.CLOUDIFY_SUDOERS_FILE)
-    entry = 'Defaults:{user} !requiretty'.format(user=utils.CLOUDIFY_USER)
-    description = 'Disable sudo requiretty for {0}'.format(utils.CLOUDIFY_USER)
-    utils.add_entry_to_sudoers(entry, description)
-
-
 def deploy_sudo_scripts():
     scripts_to_deploy = {
         'manager-ip-setter.sh': 'Run manager IP setter script',
@@ -73,13 +56,7 @@ def install_manager_ip_setter():
     utils.systemd.configure(SERVICE_NAME)
 
 
-def init_cloudify_user():
-    create_cloudify_user()
-    create_sudoers_file_and_disable_sudo_requiretty()
-
-
 # Always create the cloudify user, but only install the scripts if flag is true
-init_cloudify_user()
 if os.environ.get('set_manager_ip_on_boot').lower() == 'true':
     install_manager_ip_setter()
 else:

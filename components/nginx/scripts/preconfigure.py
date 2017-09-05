@@ -87,18 +87,15 @@ def preconfigure_nginx():
     # This is used by nginx's default.conf to select the relevant configuration
     external_rest_protocol = target_runtime_props['external_rest_protocol']
     internal_rest_port = target_runtime_props['internal_rest_port']
-    internal_cert_path, internal_key_path = utils.generate_internal_ssl_cert(
-        target_runtime_props['internal_rest_host']
-    )
 
     src_runtime_props['external_rest_protocol'] = external_rest_protocol
+    src_runtime_props['internal_cert_path'] = utils.INTERNAL_CERT_PATH
+    src_runtime_props['internal_key_path'] = utils.INTERNAL_KEY_PATH
     src_runtime_props['internal_rest_port'] = internal_rest_port
-    src_runtime_props['internal_cert_path'] = internal_cert_path
-    src_runtime_props['internal_key_path'] = internal_key_path
     src_runtime_props['file_server_root'] = utils.MANAGER_RESOURCES_HOME
 
     # Pass on the the path to the certificate to manager_configuration
-    target_runtime_props['internal_cert_path'] = internal_cert_path
+    target_runtime_props['internal_cert_path'] = utils.INTERNAL_CA_CERT_PATH
 
     external_cert_path, external_key_path = \
         utils.deploy_or_generate_external_ssl_cert(

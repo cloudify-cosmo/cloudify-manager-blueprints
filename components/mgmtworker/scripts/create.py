@@ -121,7 +121,7 @@ def install_mgmtworker():
     _install_optional(mgmtworker_venv)
 
     # Add certificate and select port, as applicable
-    runtime_props['broker_cert_path'] = utils.INTERNAL_CERT_PATH
+    runtime_props['broker_cert_path'] = utils.INTERNAL_CA_CERT_PATH
     # Use SSL port
     runtime_props['broker_port'] = AMQP_SSL_PORT
 

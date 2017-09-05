@@ -60,7 +60,7 @@ def install_amqpinflux():
     ctx.logger.info('Configuring AMQPInflux...')
     utils.create_service_user(AMQPINFLUX_USER, AMQPINFLUX_GROUP, HOME_DIR)
     ctx.instance.runtime_properties['broker_cert_path'] = \
-        utils.INTERNAL_CERT_PATH
+        utils.INTERNAL_CA_CERT_PATH
     utils.chown(AMQPINFLUX_USER, AMQPINFLUX_GROUP, HOME_DIR)
     utils.systemd.configure(SERVICE_NAME)
 

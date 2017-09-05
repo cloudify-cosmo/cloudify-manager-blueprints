@@ -123,7 +123,7 @@ def install_restservice():
     utils.mkdir(agent_dir)
 
     runtime_props['rabbitmq_endpoint_ip'] = utils.get_rabbitmq_endpoint_ip()
-    runtime_props['broker_cert_path'] = utils.INTERNAL_CERT_PATH
+    runtime_props['broker_cert_path'] = utils.INTERNAL_CA_CERT_PATH
     utils.yum_install(rest_service_rpm_source_url,
                       service_name=SERVICE_NAME)
     _configure_dbus(rest_venv)
