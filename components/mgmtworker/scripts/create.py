@@ -31,13 +31,14 @@ ctx_properties = ctx.node.properties.get_all()
 
 
 def _install_optional(mgmtworker_venv):
-    rest_props = utils.ctx_factory.get('restservice')
-    rest_client_source_url = rest_props['rest_client_module_source_url']
-    plugins_common_source_url = rest_props['plugins_common_module_source_url']
-    script_plugin_source_url = rest_props['script_plugin_module_source_url']
-    rest_service_source_url = rest_props['rest_service_module_source_url']
-    agent_source_url = rest_props['agent_module_source_url']
-    pip_constraints = rest_props['pip_constraints']
+    rest_client_source_url = ctx_properties['rest_client_module_source_url']
+    plugins_common_source_url = \
+        ctx_properties['plugins_common_module_source_url']
+    script_plugin_source_url = \
+        ctx_properties['script_plugin_module_source_url']
+    rest_service_source_url = ctx_properties['rest_service_module_source_url']
+    agent_source_url = ctx_properties['agent_module_source_url']
+    pip_constraints = ctx_properties['pip_constraints']
 
     constraints_file = utils.write_to_tempfile(pip_constraints) if \
         pip_constraints else None
