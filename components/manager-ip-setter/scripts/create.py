@@ -53,11 +53,15 @@ def install_manager_ip_setter():
     utils.set_service_as_cloudify_service(runtime_props)
     deploy_utils()
     deploy_sudo_scripts()
+
+
+def enable_manager_ip_setter():
     utils.systemd.configure(SERVICE_NAME)
 
 
 # Always create the cloudify user, but only install the scripts if flag is true
+install_manager_ip_setter()
 if os.environ.get('set_manager_ip_on_boot').lower() == 'true':
-    install_manager_ip_setter()
+    enable_manager_ip_setter()
 else:
     ctx.logger.info('Set manager ip on boot is disabled.')
