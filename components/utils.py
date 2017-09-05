@@ -271,18 +271,34 @@ def remove(path, ignore_failure=False):
     sudo(['rm', '-rf', path], ignore_failures=ignore_failure)
 
 
-def _generate_ssl_certificate(ips,
-                              cn,
-                              cert_filename,
-                              key_filename,
-                              pkcs12_filename=None):
-    """Generate a public SSL certificate and a private SSL key
+def generate_ca_cert():
+    sudo([
+        'openssl', 'req',
+        '-x509',
+        '-nodes',
+        '-newkey', 'rsa:2048',
+        '-days', '3650',
+        '-batch',
+        '-out', INTERNAL_CA_CERT_PATH,
+        '-keyout', INTERNAL_CA_KEY_PATH
+    ])
+    # PKCS12 file required for riemann due to JVM
+    # While we don't really want the private key in there, not having it
+    # causes failures
+    # The password is also a bit pointless here since it's in the same place
+    # as a readable copy of the certificate and if this path can be written to
+    # maliciously then all is lost already.
+    pkcs12_path = os.path.join(SSL_CERTS_TARGET_DIR, INTERNAL_PKCS12_FILENAME)
+    sudo([
+        'openssl', 'pkcs12', '-export',
+        '-out', pkcs12_path,
+        '-in', INTERNAL_CA_CERT_PATH,
+        '-inkey', INTERNAL_CA_KEY_PATH,
+        '-password', 'pass:cloudify',
+    ])
 
-    :return: The path to the cert and key files on the manager
-    """
-    mkdir(SSL_CERTS_TARGET_DIR)
 
-    # Remove duplicates from ips
+def _format_ips(ips):
     altnames = set(ips)
 
     # Ensure we trust localhost
@@ -315,58 +331,70 @@ def _generate_ssl_certificate(ips,
         ','.join(subject_altdns),
         ','.join(subject_altips),
     ])
+    return cert_metadata
 
+
+def _generate_ssl_certificate(ips,
+                              cn,
+                              cert_path,
+                              key_path,
+                              sign_cert=INTERNAL_CA_CERT_PATH,
+                              sign_key=INTERNAL_CA_KEY_PATH):
+    """Generate a public SSL certificate and a private SSL key
+
+    :return: The path to the cert and key files on the manager
+    """
+    # Remove duplicates from ips
+    cert_metadata = _format_ips(ips)
     ctx.logger.debug('Using certificate metadata: {0}'.format(cert_metadata))
 
-    cert_path = os.path.join(SSL_CERTS_TARGET_DIR, cert_filename)
-    key_path = os.path.join(SSL_CERTS_TARGET_DIR, key_filename)
+    csr_path = '{0}.csr'.format(cert_path)
 
     with tempfile.NamedTemporaryFile(delete=False) as conf_file:
         conf_file.write("""
 [req]
 distinguished_name = req_distinguished_name
-x509_extensions=SAN
-[ req_distinguished_name ]
-commonName={cn}
-[SAN]
+req_extensions = server_req_extensions
+[ server_req_extensions ]
 subjectAltName={metadata}
+[ req_distinguished_name ]
+commonName = _common_name # ignored, _default is used instead
+commonName_default = {cn}
 """.format(cn=cn, metadata=cert_metadata))
-
     sudo([
-        'openssl', 'req', '-x509', '-newkey', 'rsa:2048',
-        '-keyout', key_path, '-out', cert_path,
-        '-days', '36500', '-batch', '-nodes', '-subj',
-        '/CN={0}'.format(cn), '-config', conf_file.name
+        'openssl', 'req',
+        '-newkey', 'rsa:2048',
+        '-nodes',
+        '-batch',
+        '-config', conf_file.name,
+        '-out', csr_path,
+        '-keyout', key_path,
     ])
-    # PKCS12 file required for riemann due to JVM
-    # While we don't really want the private key in there, not having it
-    # causes failures
-    # The password is also a bit pointless here since it's in the same place
-    # as a readable copy of the certificate and if this path can be written to
-    # maliciously then all is lost already.
-    if pkcs12_filename:
-        pkcs12_path = os.path.join(SSL_CERTS_TARGET_DIR, pkcs12_filename)
-        sudo([
-            'openssl', 'pkcs12', '-export',
-            '-out', pkcs12_path,
-            '-in', cert_path,
-            '-inkey', key_path,
-            '-password', 'pass:cloudify',
-        ])
+    sudo([
+        'openssl', 'x509',
+        '-days', '3650',
+        '-req', '-in', csr_path,
+        '-CA', sign_cert,
+        '-CAkey', sign_key,
+        '-out', cert_path,
+        '-CAcreateserial',
+        '-extensions', 'server_req_extensions',
+        '-extfile', conf_file.name
+    ])
+    remove(csr_path)
+    remove(conf_file.name)
     ctx.logger.info('Generated SSL certificate: {0} and key: {1}'.format(
-        cert_filename, key_filename
+        cert_path, key_path
     ))
-    os.remove(conf_file.name)
     return cert_path, key_path
 
 
-def generate_internal_ssl_cert(ip):
+def generate_internal_ssl_cert(ips, name):
     return _generate_ssl_certificate(
-        [ip],
-        ip,
-        INTERNAL_SSL_CERT_FILENAME,
-        INTERNAL_SSL_KEY_FILENAME,
-        INTERNAL_PKCS12_FILENAME,
+        ips,
+        name,
+        INTERNAL_CERT_PATH,
+        INTERNAL_KEY_PATH
     )
 
 
