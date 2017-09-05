@@ -59,5 +59,28 @@ def create_certs():
     utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
 
 
+def create_cloudify_user():
+    utils.create_service_user(
+        user=utils.CLOUDIFY_USER,
+        group=utils.CLOUDIFY_GROUP,
+        home=utils.CLOUDIFY_HOME_DIR
+    )
+    utils.mkdir(utils.CLOUDIFY_HOME_DIR)
+
+
+def create_sudoers_file_and_disable_sudo_requiretty():
+    utils.sudo(['touch', utils.CLOUDIFY_SUDOERS_FILE])
+    utils.chmod('440', utils.CLOUDIFY_SUDOERS_FILE)
+    entry = 'Defaults:{user} !requiretty'.format(user=utils.CLOUDIFY_USER)
+    description = 'Disable sudo requiretty for {0}'.format(utils.CLOUDIFY_USER)
+    utils.add_entry_to_sudoers(entry, description)
+
+
+def init_cloudify_user():
+    create_cloudify_user()
+    create_sudoers_file_and_disable_sudo_requiretty()
+
+
 configure_security_properties()
 create_certs()
+init_cloudify_user()
