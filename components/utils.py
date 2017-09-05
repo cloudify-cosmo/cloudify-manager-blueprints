@@ -359,6 +359,18 @@ def _generate_ssl_certificate(ips,
                               sign_key=INTERNAL_CA_KEY_PATH):
     """Generate a public SSL certificate and a private SSL key
 
+    :param ips: the ips (or names) to be used for subjectAltNames
+    :type ips: List[str]
+    :param cn: the subject commonName for the new certificate
+    :type cn: str
+    :param cert_path: path to save the new certificate to
+    :type cert_path: str
+    :param key_path: path to save the key for the new certificate to
+    :type key_path: str
+    :param sign_cert: path to the signing cert (internal CA by default)
+    :type sign_cert: str
+    :param sign_key: path to the signing cert's key (internal CA by default)
+    :type sign_key: str
     :return: The path to the cert and key files on the manager
     """
     # Remove duplicates from ips
