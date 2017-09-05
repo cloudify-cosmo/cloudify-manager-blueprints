@@ -41,7 +41,6 @@ INTERNAL_SSL_KEY_FILENAME = 'cloudify_internal_key.pem'
 INTERNAL_SSL_CA_CERT_FILENAME = 'cloudify_internal_ca_cert.pem'
 INTERNAL_SSL_CA_KEY_FILENAME = 'cloudify_internal_ca_key.pem'
 INTERNAL_PKCS12_FILENAME = 'cloudify_internal.p12'
-INTERNAL_REST_PORT = 53333
 INTERNAL_CERT_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                   INTERNAL_SSL_CERT_FILENAME)
 INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,

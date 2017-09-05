@@ -34,8 +34,6 @@ def configure_security_properties():
     security_config = ctx_properties['security']
     runtime_props = ctx.instance.runtime_properties
 
-    runtime_props['internal_rest_port'] = utils.INTERNAL_REST_PORT
-
     if security_config['ssl']['enabled']:
         # manager SSL settings
         ctx.logger.info('SSL is enabled, setting rest port to 443 and '

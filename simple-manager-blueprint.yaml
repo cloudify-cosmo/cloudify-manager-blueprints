@@ -172,7 +172,7 @@ node_templates:
         target: manager_host
         target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
-            postconfigure:
+            preconfigure:
               implementation: components/manager/scripts/set_manager_ips.py
               inputs:
                 public_ip: { get_property: [manager_host, public_ip] }
