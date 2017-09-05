@@ -82,6 +82,6 @@ def init_cloudify_user():
     create_sudoers_file_and_disable_sudo_requiretty()
 
 
+init_cloudify_user()
 configure_security_properties()
 create_certs()
-init_cloudify_user()
