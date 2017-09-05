@@ -15,6 +15,7 @@ import hashlib
 import tempfile
 import subprocess
 from functools import wraps
+from contextlib import contextmanager
 
 from cloudify import ctx
 
@@ -351,6 +352,35 @@ def load_cert_metadata():
         return {}
 
 
+CSR_CONFIG_TEMPLATE = """
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = server_req_extensions
+[ server_req_extensions ]
+subjectAltName={metadata}
+[ req_distinguished_name ]
+commonName = _common_name # ignored, _default is used instead
+commonName_default = {cn}
+"""
+
+
+@contextmanager
+def _csr_config(cn, metadata):
+    """Prepare a config file for creating a ssl CSR.
+
+    :param cn: the subject commonName
+    :param metadata: string to use as the subjectAltName, should be formatted
+                     like "IP:1.2.3.4,DNS:www.com"
+    """
+    with tempfile.NamedTemporaryFile(delete=False) as conf_file:
+        conf_file.write(CSR_CONFIG_TEMPLATE.format(cn=cn, metadata=metadata))
+
+    try:
+        yield conf_file.name
+    finally:
+        remove(conf_file.name)
+
+
 def _generate_ssl_certificate(ips,
                               cn,
                               cert_path,
@@ -379,39 +409,29 @@ def _generate_ssl_certificate(ips,
 
     csr_path = '{0}.csr'.format(cert_path)
 
-    with tempfile.NamedTemporaryFile(delete=False) as conf_file:
-        conf_file.write("""
-[req]
-distinguished_name = req_distinguished_name
-req_extensions = server_req_extensions
-[ server_req_extensions ]
-subjectAltName={metadata}
-[ req_distinguished_name ]
-commonName = _common_name # ignored, _default is used instead
-commonName_default = {cn}
-""".format(cn=cn, metadata=cert_metadata))
-    sudo([
-        'openssl', 'req',
-        '-newkey', 'rsa:2048',
-        '-nodes',
-        '-batch',
-        '-config', conf_file.name,
-        '-out', csr_path,
-        '-keyout', key_path,
-    ])
-    sudo([
-        'openssl', 'x509',
-        '-days', '3650',
-        '-req', '-in', csr_path,
-        '-CA', sign_cert,
-        '-CAkey', sign_key,
-        '-out', cert_path,
-        '-CAcreateserial',
-        '-extensions', 'server_req_extensions',
-        '-extfile', conf_file.name
-    ])
-    remove(csr_path)
-    remove(conf_file.name)
+    with _csr_config(cn, cert_metadata) as conf_path:
+        sudo([
+            'openssl', 'req',
+            '-newkey', 'rsa:2048',
+            '-nodes',
+            '-batch',
+            '-config', conf_path,
+            '-out', csr_path,
+            '-keyout', key_path,
+        ])
+        sudo([
+            'openssl', 'x509',
+            '-days', '3650',
+            '-req', '-in', csr_path,
+            '-CA', sign_cert,
+            '-CAkey', sign_key,
+            '-out', cert_path,
+            '-CAcreateserial',
+            '-extensions', 'server_req_extensions',
+            '-extfile', conf_path
+        ])
+        remove(csr_path)
+
     ctx.logger.info('Generated SSL certificate: {0} and key: {1}'.format(
         cert_path, key_path
     ))
