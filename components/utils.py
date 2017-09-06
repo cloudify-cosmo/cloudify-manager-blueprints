@@ -37,11 +37,15 @@ MANAGER_RESOURCES_SNAPSHOT_PATHS = [
 ]
 
 SSL_CERTS_TARGET_DIR = '/etc/cloudify/ssl'
+
 INTERNAL_SSL_CERT_FILENAME = 'cloudify_internal_cert.pem'
 INTERNAL_SSL_KEY_FILENAME = 'cloudify_internal_key.pem'
 INTERNAL_SSL_CA_CERT_FILENAME = 'cloudify_internal_ca_cert.pem'
 INTERNAL_SSL_CA_KEY_FILENAME = 'cloudify_internal_ca_key.pem'
 INTERNAL_PKCS12_FILENAME = 'cloudify_internal.p12'
+EXTERNAL_SSL_CERT_FILENAME = 'cloudify_external_cert.pem'
+EXTERNAL_SSL_KEY_FILENAME = 'cloudify_external_key.pem'
+
 INTERNAL_CERT_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                   INTERNAL_SSL_CERT_FILENAME)
 INTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
@@ -50,14 +54,16 @@ INTERNAL_CA_CERT_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                      INTERNAL_SSL_CA_CERT_FILENAME)
 INTERNAL_CA_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                     INTERNAL_SSL_CA_KEY_FILENAME)
+EXTERNAL_CERT_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
+                                  EXTERNAL_SSL_CERT_FILENAME)
+EXTERNAL_KEY_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
+                                 EXTERNAL_SSL_KEY_FILENAME)
 CERT_METADATA_FILE_PATH = os.path.join(SSL_CERTS_TARGET_DIR,
                                        'certificate_metadata')
 
 
 BASE_LOG_DIR = '/var/log/cloudify'
 
-EXTERNAL_SSL_CERT_FILENAME = 'cloudify_external_cert.pem'
-EXTERNAL_SSL_KEY_FILENAME = 'cloudify_external_key.pem'
 
 NGINX_SERVICE_NAME = 'nginx'
 DEFAULT_BUFFER_SIZE = 8192
@@ -448,24 +454,15 @@ def generate_internal_ssl_cert(ips, name):
 
 
 def deploy_or_generate_external_ssl_cert(ips, cn, cert_source, key_source):
-    cert_target_path = os.path.join(
-        SSL_CERTS_TARGET_DIR,
-        EXTERNAL_SSL_CERT_FILENAME
-    )
-    key_target_path = os.path.join(
-        SSL_CERTS_TARGET_DIR,
-        EXTERNAL_SSL_KEY_FILENAME
-    )
-
     try:
         # Try to deploy user provided certificates
         deploy_blueprint_resource(cert_source,
-                                  cert_target_path,
+                                  EXTERNAL_CERT_PATH,
                                   NGINX_SERVICE_NAME,
                                   user_resource=True,
                                   load_ctx=False)
         deploy_blueprint_resource(key_source,
-                                  key_target_path,
+                                  EXTERNAL_KEY_PATH,
                                   NGINX_SERVICE_NAME,
                                   user_resource=True,
                                   load_ctx=False)
@@ -476,7 +473,7 @@ def deploy_or_generate_external_ssl_cert(ips, cn, cert_source, key_source):
                 EXTERNAL_SSL_KEY_FILENAME
             )
         )
-        return cert_target_path, key_target_path
+        return EXTERNAL_CERT_PATH, EXTERNAL_KEY_PATH
     except Exception as e:
         if "No such file or directory" in e.stderr:
             ctx.logger.info(
@@ -490,8 +487,8 @@ def deploy_or_generate_external_ssl_cert(ips, cn, cert_source, key_source):
             return _generate_ssl_certificate(
                 ips,
                 cn,
-                EXTERNAL_SSL_CERT_FILENAME,
-                EXTERNAL_SSL_KEY_FILENAME,
+                EXTERNAL_CERT_PATH,
+                EXTERNAL_KEY_PATH
             )
         else:
             raise
