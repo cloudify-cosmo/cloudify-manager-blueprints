@@ -425,17 +425,25 @@ def _generate_ssl_certificate(ips,
             '-out', csr_path,
             '-keyout', key_path,
         ])
-        sudo([
+        x509_command = [
             'openssl', 'x509',
             '-days', '3650',
             '-req', '-in', csr_path,
-            '-CA', sign_cert,
-            '-CAkey', sign_key,
+            '-extfile', conf_path,
             '-out', cert_path,
-            '-CAcreateserial',
             '-extensions', 'server_req_extensions',
-            '-extfile', conf_path
-        ])
+        ]
+        if sign_cert and sign_key:
+            x509_command += [
+                '-CA', sign_cert,
+                '-CAkey', sign_key,
+                '-CAcreateserial'
+            ]
+        else:
+            x509_command += [
+                '-signkey', key_path
+            ]
+        sudo(x509_command)
         remove(csr_path)
 
     ctx.logger.info('Generated SSL certificate: {0} and key: {1}'.format(
