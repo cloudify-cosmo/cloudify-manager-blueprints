@@ -97,22 +97,20 @@ def preconfigure_nginx():
     # Pass on the the path to the certificate to manager_configuration
     target_runtime_props['internal_cert_path'] = utils.INTERNAL_CA_CERT_PATH
 
-    external_cert_path, external_key_path = \
-        utils.deploy_or_generate_external_ssl_cert(
-            [target_runtime_props['external_rest_host'],
-             target_runtime_props['internal_rest_host']],
-            target_runtime_props['external_rest_host'],
-            src_runtime_props['rest_certificate'],
-            src_runtime_props['rest_key']
-        )
+    utils.deploy_or_generate_external_ssl_cert(
+        [target_runtime_props['external_rest_host'],
+         target_runtime_props['internal_rest_host']],
+        target_runtime_props['external_rest_host'],
+        src_runtime_props['rest_certificate'],
+        src_runtime_props['rest_key']
+    )
 
-    src_runtime_props['external_cert_path'] = external_cert_path
-    src_runtime_props['external_key_path'] = external_key_path
+    src_runtime_props['external_cert_path'] = utils.EXTERNAL_CERT_PATH
+    src_runtime_props['external_key_path'] = utils.EXTERNAL_KEY_PATH
 
     # The public cert content is used in the outputs later
-    external_rest_cert_content = utils.get_file_content(external_cert_path)
     target_runtime_props['external_rest_cert_content'] = \
-        external_rest_cert_content
+        utils.get_file_content(utils.EXTERNAL_CERT_PATH)
 
     _deploy_nginx_config_files()
     utils.systemd.enable(NGINX_SERVICE_NAME, append_prefix=False)
