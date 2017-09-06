@@ -496,7 +496,10 @@ def deploy_or_generate_external_ssl_cert(ips, cn, cert_source, key_source):
                 ips,
                 cn,
                 EXTERNAL_CERT_PATH,
-                EXTERNAL_KEY_PATH
+                EXTERNAL_KEY_PATH,
+                sign_cert=None,
+                sign_key=None
+
             )
         else:
             raise
