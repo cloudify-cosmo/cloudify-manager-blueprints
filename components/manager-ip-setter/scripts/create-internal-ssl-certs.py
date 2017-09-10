@@ -24,6 +24,7 @@ if __name__ == '__main__':
         internal_rest_host = cert_metadata['internal_rest_host']
 
     networks = cert_metadata.get('networks', {})
+    networks['default'] = internal_rest_host
     cert_ips = [internal_rest_host] + list(networks.values())
     utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
-    utils.store_cert_metadata(internal_rest_host)
+    utils.store_cert_metadata(internal_rest_host, networks)
