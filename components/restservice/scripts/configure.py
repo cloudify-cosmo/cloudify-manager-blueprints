@@ -137,12 +137,24 @@ def _deploy_rest_configuration():
     ctx.logger.info('Deploying REST Service Configuration file...')
     runtime_props['file_server_root'] = utils.MANAGER_RESOURCES_HOME
     utils.deploy_blueprint_resource(
-            join(CONFIG_PATH, 'cloudify-rest.conf'),
-            join(runtime_props['home_dir'], 'cloudify-rest.conf'),
-            SERVICE_NAME)
+        join(CONFIG_PATH, 'cloudify-rest.conf'),
+        join(runtime_props['home_dir'], 'cloudify-rest.conf'),
+        SERVICE_NAME)
     utils.chown(CLOUDIFY_USER,
                 CLOUDIFY_GROUP,
                 join(runtime_props['home_dir'], 'cloudify-rest.conf'))
+
+
+def _deploy_authorization_configuration():
+    authorization_file_name = 'authorization.conf'
+    ctx.logger.info('Deploying REST authorization Configuration file...')
+    utils.deploy_blueprint_resource(
+        join(CONFIG_PATH, authorization_file_name),
+        join(runtime_props['home_dir'], authorization_file_name),
+        SERVICE_NAME)
+    utils.chown(CLOUDIFY_USER,
+                CLOUDIFY_GROUP,
+                join(runtime_props['home_dir'], authorization_file_name))
 
 
 def _allow_creating_cluster():
@@ -168,6 +180,7 @@ def _allow_creating_cluster():
 def configure_restservice():
     _deploy_rest_configuration()
     _deploy_security_configuration()
+    _deploy_authorization_configuration()
     _allow_creating_cluster()
     utils.systemd.configure(SERVICE_NAME, tmpfiles=True)
     _create_db_tables_and_add_defaults()
