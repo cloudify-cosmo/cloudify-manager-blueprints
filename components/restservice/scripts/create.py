@@ -135,8 +135,9 @@ def install_restservice():
         description='Run systemctl'
     )
     utils.deploy_sudo_command_script(
-        script='/usr/bin/sed',
-        description='Run sed command'
+        'set-manager-ssl.py',
+        'Script for setting manager SSL',
+        SERVICE_NAME
     )
     utils.deploy_sudo_command_script(
         script='/usr/sbin/shutdown',
