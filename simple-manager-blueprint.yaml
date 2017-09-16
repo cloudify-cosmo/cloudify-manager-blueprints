@@ -20,6 +20,10 @@ inputs:
 
   ssh_user:
     type: string
+    description: |
+      User to connect to the target machine with. This user must be allowed to run
+      `sudo` commands through SSH without being prompted for a password, and must
+      be allowed to SSH to the target machine using key authentication only.
 
   ssh_port:
     type: string
@@ -125,6 +129,7 @@ node_templates:
           user: { get_input: agents_user }
           broker_user: { get_input: rabbitmq_username }
           broker_pass: { get_input: rabbitmq_password }
+          networks: { get_input: manager_networks }
 
         workflows:
           task_retries: { get_input: workflow_task_retries }
@@ -161,20 +166,13 @@ node_templates:
               key_filename: { get_input: ssh_key_filename }
               host_string: { get_property: [manager_host, public_ip] }
               always_use_pty: true
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/manager/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
         target_interfaces:
           cloudify.interfaces.relationship_lifecycle:
-            postconfigure:
+            preconfigure:
               implementation: components/manager/scripts/set_manager_ips.py
               inputs:
                 public_ip: { get_property: [manager_host, public_ip] }
@@ -230,14 +228,6 @@ node_templates:
         target: manager_configuration
       - type: cloudify.relationships.depends_on
         target: manager_resources
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/rabbitmq/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   syncthing:
     type: manager.nodes.Syncthing
@@ -258,14 +248,6 @@ node_templates:
         target: manager_resources
       - type: cloudify.relationships.depends_on
         target: consul
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/postgresql/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   logstash:
     type: manager.nodes.Logstash
@@ -282,14 +264,6 @@ node_templates:
         target: postgresql
       - type: logstash_to_rabbitmq
         target: rabbitmq
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/logstash/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   influxdb:
     type: manager.nodes.InfluxDB
@@ -300,14 +274,6 @@ node_templates:
         target: manager_configuration
       - type: cloudify.relationships.depends_on
         target: manager_resources
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/influxdb/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   nginx:
     type: manager.nodes.Nginx
@@ -320,14 +286,6 @@ node_templates:
         target: rest_service
       - type: nginx_to_manager_configuration
         target: manager_configuration
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/nginx/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   riemann:
     type: manager.nodes.Riemann
@@ -346,14 +304,6 @@ node_templates:
         target: nginx
       - type: riemann_to_mgmtworker
         target: mgmt_worker
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/riemann/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   rest_service:
     type: manager.nodes.RestService
@@ -370,14 +320,6 @@ node_templates:
         target: postgresql
       - type: restservice_to_rabbitmq
         target: rabbitmq
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/restservice/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   mgmt_worker:
     type: manager.nodes.ManagementWorker
@@ -398,14 +340,6 @@ node_templates:
         target: postgresql
       - type: mgmtworker_to_restservice
         target: rest_service
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/mgmtworker/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   amqp_influx:
     type: manager.nodes.AmqpInfluxBroker
@@ -424,14 +358,6 @@ node_templates:
         target: rabbitmq
       - type: amqpinflux_to_influxdb
         target: influxdb
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/amqpinflux/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
 
   stage:
     type: manager.nodes.Stage

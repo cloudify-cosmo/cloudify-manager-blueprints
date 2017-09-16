@@ -16,24 +16,21 @@ NGINX_SERVICE_NAME = src_runtime_props['service_name']
 CONFIG_PATH = 'components/{0}/config'.format(NGINX_SERVICE_NAME)
 
 
-def _deploy_nginx_config_files(external_rest_protocol):
+def _deploy_nginx_config_files():
     resource = namedtuple('Resource', 'src dst')
     ctx.logger.info('Deploying Nginx configuration files...')
 
     resources = [
         resource(
-            src='{0}/{1}-external-rest-server.cloudify'.format(
-                CONFIG_PATH,
-                external_rest_protocol
-            ),
-            dst='/etc/nginx/conf.d/{0}-external-rest-server.cloudify'.format(
-                external_rest_protocol
-            )
+            src='{0}/http-external-rest-server.cloudify'.format(CONFIG_PATH),
+            dst='/etc/nginx/conf.d/http-external-rest-server.cloudify'
         ),
         resource(
-            src='{0}/https-internal-rest-server.cloudify'.format(
-                CONFIG_PATH
-            ),
+            src='{0}/https-external-rest-server.cloudify'.format(CONFIG_PATH),
+            dst='/etc/nginx/conf.d/https-external-rest-server.cloudify'
+        ),
+        resource(
+            src='{0}/https-internal-rest-server.cloudify'.format(CONFIG_PATH),
             dst='/etc/nginx/conf.d/https-internal-rest-server.cloudify'
         ),
         resource(
@@ -89,36 +86,47 @@ def preconfigure_nginx():
 
     # This is used by nginx's default.conf to select the relevant configuration
     external_rest_protocol = target_runtime_props['external_rest_protocol']
-    internal_cert_path, internal_key_path = utils.generate_internal_ssl_cert(
-        target_runtime_props['internal_rest_host']
-    )
+    internal_rest_port = target_runtime_props['internal_rest_port']
 
     src_runtime_props['external_rest_protocol'] = external_rest_protocol
-    src_runtime_props['internal_cert_path'] = internal_cert_path
-    src_runtime_props['internal_key_path'] = internal_key_path
+    src_runtime_props['internal_cert_path'] = utils.INTERNAL_CERT_PATH
+    src_runtime_props['internal_key_path'] = utils.INTERNAL_KEY_PATH
+    src_runtime_props['internal_rest_port'] = internal_rest_port
     src_runtime_props['file_server_root'] = utils.MANAGER_RESOURCES_HOME
 
     # Pass on the the path to the certificate to manager_configuration
-    target_runtime_props['internal_cert_path'] = internal_cert_path
+    target_runtime_props['internal_cert_path'] = utils.INTERNAL_CA_CERT_PATH
 
-    if external_rest_protocol == 'https':
-        external_cert_path, external_key_path = \
-            utils.deploy_or_generate_external_ssl_cert(
-                [target_runtime_props['external_rest_host'],
-                 target_runtime_props['internal_rest_host']],
-                target_runtime_props['external_rest_host']
-            )
+    utils.deploy_or_generate_external_ssl_cert(
+        [target_runtime_props['external_rest_host'],
+         target_runtime_props['internal_rest_host']],
+        target_runtime_props['external_rest_host'],
+        src_runtime_props['rest_certificate'],
+        src_runtime_props['rest_key']
+    )
 
-        src_runtime_props['external_cert_path'] = external_cert_path
-        src_runtime_props['external_key_path'] = external_key_path
+    src_runtime_props['external_cert_path'] = utils.EXTERNAL_CERT_PATH
+    src_runtime_props['external_key_path'] = utils.EXTERNAL_KEY_PATH
 
-        # The public cert content is used in the outputs later
-        external_rest_cert_content = utils.get_file_content(external_cert_path)
-        target_runtime_props['external_rest_cert_content'] = \
-            external_rest_cert_content
+    # The public cert content is used in the outputs later
+    target_runtime_props['external_rest_cert_content'] = \
+        utils.get_file_content(utils.EXTERNAL_CERT_PATH)
 
-    _deploy_nginx_config_files(external_rest_protocol)
+    _deploy_nginx_config_files()
     utils.systemd.enable(NGINX_SERVICE_NAME, append_prefix=False)
 
 
+def create_certs():
+    utils.mkdir(utils.SSL_CERTS_TARGET_DIR)
+    utils.generate_ca_cert()
+    networks = \
+        ctx.target.node.properties['cloudify']['cloudify_agent']['networks']
+    internal_rest_host = \
+        ctx.target.instance.runtime_properties['internal_rest_host']
+    utils.store_cert_metadata(internal_rest_host, networks)
+    cert_ips = [internal_rest_host] + list(networks.values())
+    utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
+
+
+create_certs()
 preconfigure_nginx()

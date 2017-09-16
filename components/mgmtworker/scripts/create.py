@@ -27,17 +27,18 @@ runtime_props['log_dir'] = LOG_DIR
 CLOUDIFY_USER = utils.CLOUDIFY_USER
 CLOUDIFY_GROUP = utils.CLOUDIFY_GROUP
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def _install_optional(mgmtworker_venv):
-    rest_props = utils.ctx_factory.get('restservice')
-    rest_client_source_url = rest_props['rest_client_module_source_url']
-    plugins_common_source_url = rest_props['plugins_common_module_source_url']
-    script_plugin_source_url = rest_props['script_plugin_module_source_url']
-    rest_service_source_url = rest_props['rest_service_module_source_url']
-    agent_source_url = rest_props['agent_module_source_url']
-    pip_constraints = rest_props['pip_constraints']
+    rest_client_source_url = ctx_properties['rest_client_module_source_url']
+    plugins_common_source_url = \
+        ctx_properties['plugins_common_module_source_url']
+    script_plugin_source_url = \
+        ctx_properties['script_plugin_module_source_url']
+    rest_service_source_url = ctx_properties['rest_service_module_source_url']
+    agent_source_url = ctx_properties['agent_module_source_url']
+    pip_constraints = ctx_properties['pip_constraints']
 
     constraints_file = utils.write_to_tempfile(pip_constraints) if \
         pip_constraints else None
@@ -120,7 +121,7 @@ def install_mgmtworker():
     _install_optional(mgmtworker_venv)
 
     # Add certificate and select port, as applicable
-    runtime_props['broker_cert_path'] = utils.INTERNAL_CERT_PATH
+    runtime_props['broker_cert_path'] = utils.INTERNAL_CA_CERT_PATH
     # Use SSL port
     runtime_props['broker_port'] = AMQP_SSL_PORT
 

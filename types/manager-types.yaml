@@ -494,6 +494,14 @@ node_types:
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
     properties:
+      rest_certificate:
+        description: Public certificate for rest ssl
+        type: string
+        default: { get_input: rest_certificate }
+      rest_key:
+        description: Private key for rest ssl certificate
+        type: string
+        default: { get_input: rest_key }
       nginx_rpm_source_url:
         description: Nginx RPM Source URL
         type: string
@@ -646,6 +654,14 @@ node_types:
         description: RabbitMQ password for access to queues.
         type: string
         default: { get_input: rabbitmq_password }
+      postgresql_db_name:
+        description: PostgreSQL default db name
+        type: string
+        default: { get_input: postgresql_db_name }
+      postgresql_host:
+        description: PostgreSQL default host
+        type: string
+        default: { get_input: postgresql_host }
       plugins_common_module_source_url:
         description: Plugins Common module Source URL
         type: string

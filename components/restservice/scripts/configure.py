@@ -32,7 +32,7 @@ import utils  # NOQA
 
 runtime_props = ctx.instance.runtime_properties
 SERVICE_NAME = runtime_props['service_name']
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 CLOUDIFY_USER = utils.CLOUDIFY_USER
@@ -90,9 +90,9 @@ def _create_db_tables_and_add_defaults():
 
     args_dict = runtime_props['security_configuration']
     args_dict['amqp_host'] = runtime_props['rabbitmq_endpoint_ip']
-    args_dict['amqp_username'] = runtime_props['rabbitmq_username']
-    args_dict['amqp_password'] = runtime_props['rabbitmq_password']
-    args_dict['postgresql_host'] = runtime_props['postgresql_host']
+    args_dict['amqp_username'] = ctx_properties['rabbitmq_username']
+    args_dict['amqp_password'] = ctx_properties['rabbitmq_password']
+    args_dict['postgresql_host'] = ctx_properties['postgresql_host']
     args_dict['db_migrate_dir'] = join(
         utils.MANAGER_RESOURCES_HOME,
         'cloudify',
@@ -137,12 +137,24 @@ def _deploy_rest_configuration():
     ctx.logger.info('Deploying REST Service Configuration file...')
     runtime_props['file_server_root'] = utils.MANAGER_RESOURCES_HOME
     utils.deploy_blueprint_resource(
-            join(CONFIG_PATH, 'cloudify-rest.conf'),
-            join(runtime_props['home_dir'], 'cloudify-rest.conf'),
-            SERVICE_NAME)
+        join(CONFIG_PATH, 'cloudify-rest.conf'),
+        join(runtime_props['home_dir'], 'cloudify-rest.conf'),
+        SERVICE_NAME)
     utils.chown(CLOUDIFY_USER,
                 CLOUDIFY_GROUP,
                 join(runtime_props['home_dir'], 'cloudify-rest.conf'))
+
+
+def _deploy_authorization_configuration():
+    authorization_file_name = 'authorization.conf'
+    ctx.logger.info('Deploying REST authorization Configuration file...')
+    utils.deploy_blueprint_resource(
+        join(CONFIG_PATH, authorization_file_name),
+        join(runtime_props['home_dir'], authorization_file_name),
+        SERVICE_NAME)
+    utils.chown(CLOUDIFY_USER,
+                CLOUDIFY_GROUP,
+                join(runtime_props['home_dir'], authorization_file_name))
 
 
 def _allow_creating_cluster():
@@ -168,6 +180,7 @@ def _allow_creating_cluster():
 def configure_restservice():
     _deploy_rest_configuration()
     _deploy_security_configuration()
+    _deploy_authorization_configuration()
     _allow_creating_cluster()
     utils.systemd.configure(SERVICE_NAME, tmpfiles=True)
     _create_db_tables_and_add_defaults()

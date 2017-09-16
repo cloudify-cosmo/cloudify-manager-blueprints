@@ -8,6 +8,16 @@ inputs:
     type: boolean
     default: false
 
+  rest_certificate:
+    description: Public certificate for rest ssl
+    type: string
+    default: resources/ssl/cloudify_external_cert.pem
+
+  rest_key:
+    description: Private key for rest ssl certificate
+    type: string
+    default: resources/ssl/cloudify_external_key.pem
+
   admin_username:
     default: admin
 
@@ -19,6 +29,18 @@ inputs:
     description: Disables insecure REST endpoints
     type: boolean
     default: true
+
+  #############################
+  # Network configurations
+  #############################
+
+  manager_networks:
+    description: >
+      A dict of network names and IP addresses associated with them.
+      By default, there is only a "default" network, with the manager's
+      private IP associated with it. This network can be overwritten
+    default:
+      default: { get_input: private_ip }
 
   #################################
   # REST Configuration
@@ -66,7 +88,7 @@ inputs:
     description: |
       Minimum available memory for running list query on Manager host in MB.
     type: integer
-    default: 256
+    default: 100
 
   #############################
   # Bootstrap Validations
@@ -528,3 +550,4 @@ inputs:
   import_resolver_rules:
     default:
       - {'http://www.getcloudify.org/spec': 'file:///opt/manager/resources/spec'}
+      - {'http://cloudify.co/spec': 'file:///opt/manager/resources/spec'}

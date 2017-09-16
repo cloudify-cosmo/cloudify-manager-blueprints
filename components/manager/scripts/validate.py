@@ -15,7 +15,6 @@
 #  * limitations under the License.
 
 
-import os
 import sys
 import urllib2
 import platform
@@ -130,13 +129,6 @@ def _validate_resources_package_url(manager_resources_package_url):
             "The Manager's Resources Package {0} is "
             "invalid (URL Error: {1})".format(
                 manager_resources_package_url, ex.args))
-
-
-def _is_bootstrap():
-    status_file_path = '/opt/cloudify/_workflow_state.json'
-    if os.path.isfile(status_file_path):
-        return False
-    return True
 
 
 def validate():

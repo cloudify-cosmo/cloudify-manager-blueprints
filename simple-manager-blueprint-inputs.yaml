@@ -26,8 +26,12 @@ ssh_key_filename: ''
 # Security Settings
 #############################
 # Enabling SSL limits communication with the server to SSL only.
-# NOTE: If enabled, the certificate and private key files must reside in resources/ssl.
+# The `rest_certificate` and `rest_key` are the locations of the certificate
+# and key files to be deployed to the manager.
+# If those files do not exists - they will be generated.
 #ssl_enabled: false
+#rest_certificate: 'resources/ssl/cloudify_external_cert.pem'
+#rest_key: 'resources/ssl/cloudify_external_key.pem'
 
 # Username and password of the Cloudify administrator.
 # This user will also be included in the simple userstore repostiroty if the
@@ -274,3 +278,4 @@ ssh_key_filename: ''
 
 #import_resolver_rules:
 #  - {'http://www.getcloudify.org/spec': 'file:///opt/manager/resources/spec'}
+#  - {'http://cloudify.co/spec': 'file:///opt/manager/resources/spec'}

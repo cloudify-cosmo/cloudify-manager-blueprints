@@ -5,5 +5,5 @@ EXTRA_CLASSPATH="/opt/lib/langohr.jar"
 REST_HOST="{{ ctx.instance.runtime_properties.rest_host }}"
 
 RABBITMQ_HOST="{{ ctx.instance.runtime_properties.rabbitmq_endpoint_ip }}"
-RABBITMQ_USER="{{ ctx.instance.runtime_properties.rabbitmq_username }}"
-RABBITMQ_PASS="{{ ctx.instance.runtime_properties.rabbitmq_password }}"
+RABBITMQ_USER="{{ ctx.node.properties.rabbitmq_username }}"
+RABBITMQ_PASS="{{ ctx.node.properties.rabbitmq_password }}"

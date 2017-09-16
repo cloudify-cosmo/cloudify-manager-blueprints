@@ -23,13 +23,11 @@ def verify_restservice(url):
     that also requires the storage backend to be up, so if it works, there's
     a good chance everything is configured correctly.
     """
-    if utils.is_upgrade or utils.is_rollback:
-        # if we're doing an upgrade, we're in maintenance mode - this request
-        # is safe to perform in maintenance mode, so let's bypass the check
-        headers = utils.create_maintenance_headers()
-    else:
-        headers = utils.get_auth_headers(True)
-        headers['tenant'] = 'default_tenant'
+    security_config = runtime_props['security_configuration']
+    headers = utils.get_auth_headers(
+        username=security_config['admin_username'],
+        password=security_config['admin_password']
+    )
 
     utils.verify_service_http(SERVICE_NAME, url, headers=headers)
 
