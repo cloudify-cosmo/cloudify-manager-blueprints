@@ -26,16 +26,7 @@ def check_response(response):
 utils.start_service(SERVICE_NAME, append_prefix=False)
 utils.systemd.verify_alive(SERVICE_NAME, append_prefix=False)
 
-nginx_url = '{0}://127.0.0.1/api/v2.1/version'.format(
-    runtime_props['external_rest_protocol'])
+nginx_url = 'https://127.0.0.1:{0}/api/v2.1/version'.format(
+    runtime_props['internal_rest_port'])
 
-headers = {}
-if utils.is_upgrade or utils.is_rollback:
-    headers = utils.create_maintenance_headers()
-
-utils.verify_service_http(
-    SERVICE_NAME,
-    nginx_url,
-    check_response,
-    headers=headers
-)
+utils.verify_service_http(SERVICE_NAME, nginx_url, check_response)

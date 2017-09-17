@@ -11,7 +11,7 @@ import utils  # NOQA
 
 runtime_props = ctx.instance.runtime_properties
 
-if utils.is_upgrade:
-    SERVICE_NAME = runtime_props['service_name']
-    utils.validate_upgrade_directories(SERVICE_NAME)
-    utils.systemd.verify_alive(SERVICE_NAME)
+
+# This makes sure that the `create` script already ran
+if runtime_props.get('service_name'):
+    utils.remove_component(runtime_props)

@@ -8,6 +8,16 @@ inputs:
     type: boolean
     default: false
 
+  rest_certificate:
+    description: Public certificate for rest ssl
+    type: string
+    default: resources/ssl/cloudify_external_cert.pem
+
+  rest_key:
+    description: Private key for rest ssl certificate
+    type: string
+    default: resources/ssl/cloudify_external_key.pem
+
   admin_username:
     default: admin
 
@@ -19,6 +29,18 @@ inputs:
     description: Disables insecure REST endpoints
     type: boolean
     default: true
+
+  #############################
+  # Network configurations
+  #############################
+
+  manager_networks:
+    description: >
+      A dict of network names and IP addresses associated with them.
+      By default, there is only a "default" network, with the manager's
+      private IP associated with it. This network can be overwritten
+    default:
+      default: { get_input: private_ip }
 
   #################################
   # REST Configuration
@@ -62,6 +84,12 @@ inputs:
     type: integer
     default: 20
 
+  rest_service_min_available_memory_mb:
+    description: |
+      Minimum available memory for running list query on Manager host in MB.
+    type: integer
+    default: 100
+
   #############################
   # Bootstrap Validations
   #############################
@@ -95,7 +123,7 @@ inputs:
   manager_resources_package:
     description: A URL to a tar files containing all of the manager's resources
     type: string
-    default: http://repository.cloudifysource.org/cloudify/17.3.31/release/cloudify-manager-resources_17.3.31-community.tar.gz
+    default: ''
 
   manager_resources_package_checksum_file:
     description: >
@@ -149,6 +177,10 @@ inputs:
   stage_source_url:
     type: string
     default: cloudify-stage-*.tgz
+
+  composer_source_url:
+    type: string
+    default: cloudify-blueprint-composer-*.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
@@ -222,7 +254,7 @@ inputs:
 
   nginx_source_url:
     type: string
-    default: nginx-1.8.0-1.el7.ngx.x86_64.rpm
+    default: nginx-1.12.0-1.el7.ngx.x86_64.rpm
 
   influxdb_source_url:
     type: string
@@ -426,6 +458,14 @@ inputs:
     type: integer
     default: 2
 
+  max_parallel_operations_per_deployment:
+    description: >
+      Maximum number of concurrent operations/workflows for any deployment. The limit is for concurrent
+      operations and concurrent workflows, separately. It cannot be bigger than the management worker
+      max workers property, as that property sets the global max number of running processes.
+    type: integer
+    default: { get_input: management_worker_max_workers }
+
   workflow_task_retries:
     description: >
       The number of times a failed task will be retried on recoverable error.
@@ -445,6 +485,17 @@ inputs:
   # For development purposes, you can use these, which will override the modules
   # supplied within the rpm.
   # These should be pip installable tar.gz files.
+
+  pip_constraints:
+    type: string
+    description: |
+      Constraints (in standard `pip` constraints format) to pass on to `pip`
+      when installing overlays (such as `rest_service_source_url`, `dsl_parser_source_url`
+      and so on). Example:
+
+      requests==2.13.0
+      requests-toolbelt==0.7.1
+    default: ''
 
   cli_source_url:
     type: string
@@ -499,3 +550,4 @@ inputs:
   import_resolver_rules:
     default:
       - {'http://www.getcloudify.org/spec': 'file:///opt/manager/resources/spec'}
+      - {'http://cloudify.co/spec': 'file:///opt/manager/resources/spec'}

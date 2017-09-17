@@ -495,6 +495,14 @@ node_types:
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
     properties:
+      rest_certificate:
+        description: Public certificate for rest ssl
+        type: string
+        default: { get_input: rest_certificate }
+      rest_key:
+        description: Private key for rest ssl certificate
+        type: string
+        default: { get_input: rest_key }
       nginx_rpm_source_url:
         description: Nginx RPM Source URL
         type: string
@@ -553,18 +561,6 @@ node_types:
   manager.nodes.Riemann:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      os_user:
-        description: Riemann OS username. Will be created if not existing, and used to run the service.
-        type: string
-        default: riemann
-      os_group:
-        description: Riemann OS group. Will be created if not existing, and used to run the service.
-        type: string
-        default: riemann
-      os_homedir:
-        description: Riemann OS user's home directory. Will not be created if missing.
-        type: string
-        default: /etc/cloudify
       langohr_jar_source_url:
         description: Langohr JAR Source URL
         type: string
@@ -636,6 +632,9 @@ node_types:
       rest_service_rpm_source_url:
         type: string
         default: { get_input: rest_service_rpm_source_url }
+      pip_constraints:
+        type: string
+        default: { get_input: pip_constraints }
       dsl_parser_module_source_url:
         description: DSL Parser module Source URL
         type: string
@@ -656,6 +655,14 @@ node_types:
         description: RabbitMQ password for access to queues.
         type: string
         default: { get_input: rabbitmq_password }
+      postgresql_db_name:
+        description: PostgreSQL default db name
+        type: string
+        default: { get_input: postgresql_db_name }
+      postgresql_host:
+        description: PostgreSQL default host
+        type: string
+        default: { get_input: postgresql_host }
       plugins_common_module_source_url:
         description: Plugins Common module Source URL
         type: string
@@ -719,18 +726,10 @@ node_types:
         description: Number of log files to keep when rotating.
         type: integer
         default: { get_input: rest_service_log_files_backup_count }
-      os_user:
-        description: Rest service OS username. Will be created if not existing, and used to run the service.
-        type: string
-        default: cloudify-restservice
-      os_group:
-        description: Rest service OS group. Will be created if not existing, and used to run the service.
-        type: string
-        default: cloudify-restservice
-      sudoers_include_dir:
-        description: Path to sudoers includedir.
-        type: string
-        default: /etc/sudoers.d
+      min_available_memory_mb:
+        description: Minimum available memory for running list query on Manager host in MB.
+        type: integer
+        default: { get_input: rest_service_min_available_memory_mb }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -772,26 +771,13 @@ node_types:
   manager.nodes.ManagementWorker:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
-      os_user:
-        description: Management worker OS username. Will be created if not existing, and used to run the service.
-        type: string
-        default: mgmtworker
-      os_group:
-        description: Management worker OS group. Will be created if not existing, and used to run the service.
-        type: string
-        default: mgmtworker
-      os_homedir:
-        description: Management worker OS user's home directory. Will not be created if missing.
-        type: string
-        default: /etc/cloudify
-      sudoers_include_dir:
-        description: Path to sudoers includedir.
-        type: string
-        default: /etc/sudoers.d
       management_worker_rpm_source_url:
         description: Management Worker RPM Source URL
         type: string
         default: { get_input: management_worker_rpm_source_url }
+      pip_constraints:
+        type: string
+        default: { get_input: pip_constraints }
       rest_client_module_source_url:
         description: REST Client module Source URL
         type: string
@@ -838,7 +824,7 @@ node_types:
           operations and concurrent workflows, separately. It cannot be bigger than the management worker
           max workers property, as that property sets the global max number of running processes.
         type: integer
-        default: { get_property: [manager_configuration, cloudify, cloudify_agent, max_workers] }
+        default: { get_input: max_parallel_operations_per_deployment }
       use_existing_on_upgrade:
         description: Use existing mgmt worker configuration
         type: string
@@ -939,22 +925,6 @@ node_types:
   manager.nodes.ManagerIPSetter:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
-      os_user:
-        description: IP setter's OS username. Will be created if not existing, and used to run the service.
-        type: string
-        default: cfyipsetter
-      os_group:
-        description: IP setter's OS group. Will be created if not existing, and used to run the service.
-        type: string
-        default: cfyipsetter
-      os_homedir:
-        description: IP setter's OS user's home directory. Will not be created if missing.
-        type: string
-        default: /etc/cloudify
-      sudoers_include_dir:
-        description: Path to sudoers includedir.
-        type: string
-        default: /etc/sudoers.d
       admin_username:
         default: { get_input: admin_username }
       admin_password:
@@ -1027,6 +997,48 @@ node_types:
           inputs:
             script_path:
               default: components/stage/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  manager.nodes.Composer:
+    derived_from: cloudify.nodes.ApplicationModule
+    properties:
+      composer_tar_source_url:
+        description: Cloudify Composer Source URL
+        type: string
+        default: { get_input: composer_source_url }
+      use_existing_on_upgrade:
+        description: Use existing composer configuration
+        type: string
+        default: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/composer/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        start:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/composer/scripts/start.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/composer/scripts/stop.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/composer/scripts/delete.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -1228,6 +1240,9 @@ relationships:
     derived_from: cloudify.relationships.connected_to
 
   stage_to_restservice:
+    derived_from: cloudify.relationships.connected_to
+
+  composer_to_restservice:
     derived_from: cloudify.relationships.connected_to
 
   mgmtworker_to_postgres:

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from os.path import join, dirname
 
 from cloudify import ctx
@@ -23,61 +24,40 @@ runtime_props['files_to_remove'] = [HOME_DIR, LOG_DIR]
 # Used in the service template
 runtime_props['home_dir'] = HOME_DIR
 runtime_props['log_dir'] = LOG_DIR
+CLOUDIFY_USER = utils.CLOUDIFY_USER
+CLOUDIFY_GROUP = utils.CLOUDIFY_GROUP
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
-MGMTWORKER_USER = ctx_properties['os_user']
-MGMTWORKER_GROUP = ctx_properties['os_group']
-HOMEDIR = ctx_properties['os_homedir']
-runtime_props['service_user'] = MGMTWORKER_USER
-runtime_props['service_group'] = MGMTWORKER_GROUP
-SUDOERS_INCLUDE_DIR = ctx_properties['sudoers_include_dir']
-
-
-def deploy_snapshot_permissions_fixer():
-    rest_props = utils.ctx_factory.get('restservice')
-    ctx.instance.runtime_properties['rest_service_user'] = (
-        rest_props['os_user']
-    )
-    utils.deploy_sudo_command_script(runtime_props=runtime_props,
-                                     component='mgmtworker',
-                                     script='snapshot_permissions_fixer',
-                                     user=MGMTWORKER_USER,
-                                     group=MGMTWORKER_GROUP)
-    utils.disable_sudo_requiretty_for_user(runtime_props, MGMTWORKER_USER,
-                                           SUDOERS_INCLUDE_DIR)
-
-
-def allow_snapshot_db_secrets_fixer():
-    rest_props = utils.ctx_factory.get('restservice')
-    utils.allow_user_to_sudo_command(
-        runtime_props=runtime_props,
-        user='mgmtworker',
-        full_command='/opt/mgmtworker/resources/cloudify/fix_snapshot_ssh_db',
-        description='snapshot_ssh_db_fix',
-        sudoers_include_dir=SUDOERS_INCLUDE_DIR,
-        allow_as=rest_props['os_user'],
-    )
+ctx_properties = ctx.node.properties.get_all()
 
 
 def _install_optional(mgmtworker_venv):
-    rest_props = utils.ctx_factory.get('restservice')
-    rest_client_source_url = rest_props['rest_client_module_source_url']
-    plugins_common_source_url = rest_props['plugins_common_module_source_url']
-    script_plugin_source_url = rest_props['script_plugin_module_source_url']
-    rest_service_source_url = rest_props['rest_service_module_source_url']
-    agent_source_url = rest_props['agent_module_source_url']
+    rest_client_source_url = ctx_properties['rest_client_module_source_url']
+    plugins_common_source_url = \
+        ctx_properties['plugins_common_module_source_url']
+    script_plugin_source_url = \
+        ctx_properties['script_plugin_module_source_url']
+    rest_service_source_url = ctx_properties['rest_service_module_source_url']
+    agent_source_url = ctx_properties['agent_module_source_url']
+    pip_constraints = ctx_properties['pip_constraints']
+
+    constraints_file = utils.write_to_tempfile(pip_constraints) if \
+        pip_constraints else None
 
     # this allows to upgrade modules if necessary.
     ctx.logger.info('Installing Optional Packages if supplied...')
     if rest_client_source_url:
-        utils.install_python_package(rest_client_source_url, mgmtworker_venv)
+        utils.install_python_package(rest_client_source_url, mgmtworker_venv,
+                                     constraints_file)
     if plugins_common_source_url:
         utils.install_python_package(
-            plugins_common_source_url, mgmtworker_venv)
+            plugins_common_source_url, mgmtworker_venv,
+            constraints_file)
     if script_plugin_source_url:
-        utils.install_python_package(script_plugin_source_url, mgmtworker_venv)
+        utils.install_python_package(script_plugin_source_url, mgmtworker_venv,
+                                     constraints_file)
     if agent_source_url:
-        utils.install_python_package(agent_source_url, mgmtworker_venv)
+        utils.install_python_package(agent_source_url, mgmtworker_venv,
+                                     constraints_file)
 
     if rest_service_source_url:
         ctx.logger.info('Downloading cloudify-manager Repository...')
@@ -91,10 +71,15 @@ def _install_optional(mgmtworker_venv):
         riemann_dir = join(tmp_dir, 'plugins/riemann-controller')
 
         ctx.logger.info('Installing Management Worker Plugins...')
-        utils.install_python_package(riemann_dir, mgmtworker_venv)
-        utils.install_python_package(workflows_dir, mgmtworker_venv)
+        utils.install_python_package(riemann_dir, mgmtworker_venv,
+                                     constraints_file)
+        utils.install_python_package(workflows_dir, mgmtworker_venv,
+                                     constraints_file)
 
         utils.remove(tmp_dir)
+
+    if constraints_file:
+        os.remove(constraints_file)
 
 
 def install_mgmtworker():
@@ -115,7 +100,7 @@ def install_mgmtworker():
         # sed 's/"/\\"/' | sed 's/\\/\\\\/' | sed s-/-\\/- | sed 's/\t/\\t/'
         runtime_props[key] = ctx_properties[key]
 
-    runtime_props['rabbitmq_ssl_enabled'] = True
+    utils.set_service_as_cloudify_service(runtime_props)
 
     ctx.logger.info('Installing Management Worker...')
     utils.set_selinux_permissive()
@@ -136,23 +121,17 @@ def install_mgmtworker():
     _install_optional(mgmtworker_venv)
 
     # Add certificate and select port, as applicable
-    runtime_props['broker_cert_path'] = utils.INTERNAL_CERT_PATH
+    runtime_props['broker_cert_path'] = utils.INTERNAL_CA_CERT_PATH
     # Use SSL port
     runtime_props['broker_port'] = AMQP_SSL_PORT
 
-    utils.create_service_user(
-        user=MGMTWORKER_USER,
-        home=HOMEDIR,
-        group=MGMTWORKER_GROUP,
-    )
-    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, HOME_DIR)
-    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, LOG_DIR)
+    utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, HOME_DIR)
+    utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, LOG_DIR)
     # Changing perms on workdir and venv in case they are put outside homedir
-    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, mgmtworker_venv)
-    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, LOG_DIR)
+    utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, mgmtworker_venv)
     # Prepare riemann dir. We will change the owner to riemann later, but the
     # management worker will still need access to it
-    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, riemann_dir)
+    utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, riemann_dir)
     utils.chmod('770', riemann_dir)
 
     ctx.logger.info("Using broker port: {0}".format(
@@ -160,5 +139,3 @@ def install_mgmtworker():
 
 
 install_mgmtworker()
-deploy_snapshot_permissions_fixer()
-allow_snapshot_db_secrets_fixer()

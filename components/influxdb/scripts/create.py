@@ -16,13 +16,15 @@ SERVICE_NAME = 'influxdb'
 # Some runtime properties to be used in teardown
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
+runtime_props['service_user'] = SERVICE_NAME
+runtime_props['service_group'] = SERVICE_NAME
 
 HOME_DIR = join('/opt', SERVICE_NAME)
 LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
 INIT_D_PATH = join('/etc', 'init.d', SERVICE_NAME)
 runtime_props['files_to_remove'] = [HOME_DIR, LOG_DIR, INIT_D_PATH]
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 

@@ -27,7 +27,7 @@ runtime_props['files_to_remove'] = [HOME_DIR, LOG_DIR, UNIT_OVERRIDE_PATH]
 # Used in the service template
 runtime_props['log_dir'] = LOG_DIR
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 

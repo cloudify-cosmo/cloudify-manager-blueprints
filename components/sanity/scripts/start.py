@@ -21,13 +21,41 @@ SERVICE_NAME = 'sanity'
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
 
-manager_ip = os.environ.get('manager_ip')
-ssh_user = os.environ.get('ssh_user')
-manager_remote_key_path = \
-    ctx.instance.runtime_properties['manager_remote_key_path']
-rest_protocol = ctx.instance.runtime_properties['rest_protocol']
-rest_port = ctx.instance.runtime_properties['rest_port']
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+manager_remote_key_path = runtime_props['manager_remote_key_path']
+ctx_properties = ctx.node.properties.get_all()
+
+
+def _get_headers():
+    security_config = runtime_props['security_configuration']
+    headers = utils.get_auth_headers(
+        username=security_config['admin_username'],
+        password=security_config['admin_password']
+    )
+    return headers
+
+
+def wait_for_workflow(deployment_id,
+                      workflow_id,
+                      url_prefix='http://localhost/api/{0}'.format(
+                          REST_VERSION)):
+    params = urllib.urlencode(dict(deployment_id=deployment_id))
+    endpoint = '{0}/executions'.format(url_prefix)
+    url = endpoint + '?' + params
+    res = utils.http_request(
+        url,
+        method='GET',
+        headers=_get_headers())
+    res_content = res.readlines()
+    json_res = json.loads(res_content[0])
+    for execution in json_res['items']:
+        if execution['workflow_id'] == workflow_id:
+            execution_status = execution['status']
+            if execution_status == 'terminated':
+                return True
+            elif execution_status == 'failed':
+                ctx.abort_operation('Execution with id {0} failed'.
+                                    format(execution['id']))
+    return False
 
 
 def _prepare_sanity_app():
@@ -48,7 +76,7 @@ def _upload_app_blueprint(app_tar):
         app_data = f.read()
     length = os.path.getsize(app_tar)
 
-    headers = utils.create_maintenance_headers()
+    headers = _get_headers()
     headers['Content-Length'] = length
     headers['Content-Type'] = 'application/octet-stream'
     params = urllib.urlencode(
@@ -66,14 +94,14 @@ def _deploy_app():
     if _is_sanity_dep_exist(should_fail=True):
         return
 
-    dep_inputs = {'server_ip': manager_ip,
-                  'agent_user': ssh_user,
+    dep_inputs = {'server_ip': os.environ.get('manager_ip'),
+                  'agent_user': os.environ.get('ssh_user'),
                   'agent_private_key_path': manager_remote_key_path}
     data = {
         'blueprint_id': BLUEPRINT_ID,
         'inputs': dep_inputs
     }
-    headers = utils.create_maintenance_headers()
+    headers = _get_headers()
     headers.update({'content-type': 'application/json'})
 
     utils.http_request(
@@ -83,7 +111,7 @@ def _deploy_app():
 
     # Waiting for create deployment env to end
     utils.repetitive(
-        utils.wait_for_workflow,
+        wait_for_workflow,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='create_deployment_environment',
         url_prefix=_get_url_prefix(),
@@ -97,7 +125,7 @@ def _install_sanity_app():
         'deployment_id': DEPLOYMENT_ID,
         'workflow_id': 'install'
     }
-    headers = utils.create_maintenance_headers()
+    headers = _get_headers()
     headers.update({'content-type': 'application/json'})
 
     resp = utils.http_request(
@@ -108,7 +136,7 @@ def _install_sanity_app():
 
     # Waiting for installation to complete
     utils.repetitive(
-        utils.wait_for_workflow,
+        wait_for_workflow,
         timeout=5*60,
         interval=30,
         deployment_id=DEPLOYMENT_ID,
@@ -123,7 +151,7 @@ def _install_sanity_app():
 
 
 def _assert_logs_and_events(execution_id):
-    headers = utils.create_maintenance_headers()
+    headers = _get_headers()
     params = urllib.urlencode((
         ('execution_id', execution_id),
         ('type', 'cloudify_event'),
@@ -191,7 +219,7 @@ def _uninstall_sanity_app():
         'deployment_id': DEPLOYMENT_ID,
         'workflow_id': 'uninstall'
     }
-    headers = utils.create_maintenance_headers()
+    headers = _get_headers()
     headers.update({'content-type': 'application/json'})
 
     utils.http_request(
@@ -202,7 +230,7 @@ def _uninstall_sanity_app():
 
     # Waiting for installation to complete
     utils.repetitive(
-        utils.wait_for_workflow,
+        wait_for_workflow,
         timeout=5*60,
         interval=30,
         deployment_id=DEPLOYMENT_ID,
@@ -215,7 +243,7 @@ def _uninstall_sanity_app():
 def _delete_sanity_deployment():
     if not _is_sanity_dep_exist():
         return
-    headers = utils.create_maintenance_headers()
+    headers = _get_headers()
 
     resp = utils.http_request(
         '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
@@ -231,7 +259,7 @@ def _delete_sanity_deployment():
 def _delete_sanity_blueprint():
     if not _is_sanity_blueprint_exist():
         return
-    headers = utils.create_maintenance_headers()
+    headers = _get_headers()
     resp = utils.http_request(
         '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID),
         method='DELETE',
@@ -249,7 +277,7 @@ def _delete_key_file():
 
 
 def _is_sanity_dep_exist(should_fail=False):
-    headers = utils.create_maintenance_headers()
+    headers = _get_headers()
     res = utils.http_request(
         '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
         method='GET',
@@ -261,7 +289,7 @@ def _is_sanity_dep_exist(should_fail=False):
 
 
 def _is_sanity_blueprint_exist(should_fail=False):
-    headers = utils.create_maintenance_headers()
+    headers = _get_headers()
     res = utils.http_request(
             '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID),
             method='GET',
@@ -274,9 +302,9 @@ def _is_sanity_blueprint_exist(should_fail=False):
 
 def _get_url_prefix():
     return '{0}://{1}:{2}/api/{3}'.format(
-            rest_protocol,
-            manager_ip,
-            rest_port,
+            runtime_props['rest_protocol'],
+            os.environ.get('manager_ip'),
+            runtime_props['rest_port'],
             REST_VERSION)
 
 
@@ -297,17 +325,5 @@ def perform_sanity():
 # operation parameter with 'true' as its value.
 # This is done to prevent the sanity test from running before the
 # provider context is available.
-if os.environ.get('run_sanity') == 'true' or \
-        utils.is_upgrade or \
-        utils.is_rollback:
+if os.environ.get('run_sanity') == 'true':
     perform_sanity()
-
-if utils.is_upgrade or utils.is_rollback:
-    utils.restore_upgrade_snapshot()
-
-if utils.is_upgrade:
-    utils.set_upgrade_success_in_upgrade_meta()
-
-if utils.is_rollback:
-    # remove data created by the upgrade process.
-    utils.remove(utils.UPGRADE_METADATA_FILE)

@@ -5,7 +5,7 @@ import sys
 import testtools
 from mock import patch
 
-from test_upgrade import _create_mock_context
+from cloudify.mocks import MockCloudifyContext
 
 
 validate = imp.load_source(
@@ -15,6 +15,22 @@ validate = imp.load_source(
 
 
 os_distro = ('distro', '1')
+
+TEST_SERVICE_NAME = 'service'
+
+
+class MockNodeProperties(dict):
+    def get_all(self):
+        return self
+
+
+def _create_mock_context(install_node_props,
+                         node_id='es_node',
+                         service=TEST_SERVICE_NAME):
+    mock_node_props = MockNodeProperties(install_node_props)
+    return MockCloudifyContext(node_id=node_id,
+                               node_name=service,
+                               properties=mock_node_props)
 
 
 class TestValidations(testtools.TestCase):
@@ -51,6 +67,7 @@ class TestValidations(testtools.TestCase):
     @patch('validate._get_host_total_memory', return_value=1)
     @patch('validate._get_available_host_disk_space', return_value=1)
     def test_failed_validation(self, *_):
+        # print self.CTX.get_all()
         validate.ctx.abort_operation = lambda message: sys.exit(message)
         ex = self.assertRaises(SystemExit, validate.validate)
         self.assertIn(

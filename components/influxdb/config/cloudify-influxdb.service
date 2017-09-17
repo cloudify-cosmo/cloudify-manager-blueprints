@@ -7,8 +7,8 @@ After=network-online.target
 TimeoutStartSec=0
 Restart=on-failure
 EnvironmentFile=-/etc/sysconfig/cloudify-influxdb
-User=influxdb
-Group=influxdb
+User={{ ctx.instance.runtime_properties.service_user }}
+Group={{ ctx.instance.runtime_properties.service_group }}
 ExecStart=/usr/bin/influxdb -config=${INFLUXDB_CONFIG_PATH}
 
 [Install]

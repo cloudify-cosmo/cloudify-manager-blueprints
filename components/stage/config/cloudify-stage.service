@@ -8,8 +8,8 @@ TimeoutStartSec=0
 Restart=always
 RestartSec=10
 EnvironmentFile=/etc/sysconfig/cloudify-stage
-User=stage
-Group=stage
+User={{ ctx.instance.runtime_properties.service_user }}
+Group={{ ctx.instance.runtime_properties.service_group }}
 WorkingDirectory=/opt/cloudify-stage/backend
 ExecStart=/opt/nodejs/bin/node /opt/cloudify-stage/backend/server.js
 
