@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 
 import os
-import json
-import urllib
 from os.path import join, dirname
 
 from cloudify import ctx
+from cloudify_rest_client import CloudifyClient
+from cloudify_rest_client.exceptions import CloudifyClientError
 
 ctx.download_resource(
-        join('components', 'utils.py'),
-        join(dirname(__file__), 'utils.py'))
+    join('components', 'utils.py'),
+    join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-REST_VERSION = 'v3'
+
 BLUEPRINT_ID = 'sanity_bp'
 DEPLOYMENT_ID = 'sanity_deployment'
 SERVICE_NAME = 'sanity'
@@ -25,171 +25,75 @@ manager_remote_key_path = runtime_props['manager_remote_key_path']
 ctx_properties = ctx.node.properties.get_all()
 
 
-def _get_headers():
-    security_config = runtime_props['security_configuration']
-    headers = utils.get_auth_headers(
-        username=security_config['admin_username'],
-        password=security_config['admin_password']
-    )
-    return headers
-
-
-def wait_for_workflow(deployment_id,
-                      workflow_id,
-                      url_prefix='http://localhost/api/{0}'.format(
-                          REST_VERSION)):
-    params = urllib.urlencode(dict(deployment_id=deployment_id))
-    endpoint = '{0}/executions'.format(url_prefix)
-    url = endpoint + '?' + params
-    res = utils.http_request(
-        url,
-        method='GET',
-        headers=_get_headers())
-    res_content = res.readlines()
-    json_res = json.loads(res_content[0])
-    for execution in json_res['items']:
-        if execution['workflow_id'] == workflow_id:
-            execution_status = execution['status']
+def wait_for_workflow(client, deployment_id, workflow_id):
+    executions = client.executions.list(deployment_id=deployment_id)
+    for execution in executions:
+        if execution.workflow_id == workflow_id:
+            execution_status = execution.status
             if execution_status == 'terminated':
                 return True
             elif execution_status == 'failed':
                 ctx.abort_operation('Execution with id {0} failed'.
-                                    format(execution['id']))
+                                    format(execution.id))
     return False
 
 
-def _prepare_sanity_app():
+def _prepare_sanity_app(client):
+    _upload_app_blueprint(client)
+    _deploy_app(client)
+
+
+def _upload_app_blueprint(client):
+    if _is_sanity_blueprint_exist(client):
+        return
     sanity_app_source_url = ctx_properties['sanity_app_source_url']
     app_tar = utils.download_cloudify_resource(
-              url=sanity_app_source_url,
-              service_name=SERVICE_NAME)
+        url=sanity_app_source_url,
+        service_name=SERVICE_NAME)
+    client.blueprints.publish_archive(
+        app_tar, blueprint_id=BLUEPRINT_ID,
+        blueprint_filename='no-monitoring-singlehost-blueprint.yaml')
 
-    _upload_app_blueprint(app_tar)
-    _deploy_app()
 
-
-def _upload_app_blueprint(app_tar):
-    if _is_sanity_blueprint_exist(should_fail=True):
+def _deploy_app(client):
+    if _is_sanity_dep_exist(client):
         return
 
-    with open(app_tar, 'rb') as f:
-        app_data = f.read()
-    length = os.path.getsize(app_tar)
-
-    headers = _get_headers()
-    headers['Content-Length'] = length
-    headers['Content-Type'] = 'application/octet-stream'
-    params = urllib.urlencode(
-            dict(application_file_name='no-monitoring-'
-                                       'singlehost-blueprint.yaml'))
-
-    endpoint = '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID)
-    url = endpoint + '?' + params
-    utils.http_request(url,
-                       data=app_data,
-                       headers=headers)
-
-
-def _deploy_app():
-    if _is_sanity_dep_exist(should_fail=True):
-        return
-
-    dep_inputs = {'server_ip': os.environ.get('manager_ip'),
-                  'agent_user': os.environ.get('ssh_user'),
-                  'agent_private_key_path': manager_remote_key_path}
-    data = {
-        'blueprint_id': BLUEPRINT_ID,
-        'inputs': dep_inputs
-    }
-    headers = _get_headers()
-    headers.update({'content-type': 'application/json'})
-
-    utils.http_request(
-            '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
-            data=json.dumps(data),
-            headers=headers)
+    client.deployments.create(BLUEPRINT_ID, DEPLOYMENT_ID, inputs={
+        'server_ip': os.environ.get('manager_ip'),
+        'agent_user': os.environ.get('ssh_user'),
+        'agent_private_key_path': manager_remote_key_path
+    })
 
     # Waiting for create deployment env to end
     utils.repetitive(
         wait_for_workflow,
+        client=client,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='create_deployment_environment',
-        url_prefix=_get_url_prefix(),
         timeout=60,
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to be created'.format(DEPLOYMENT_ID))
 
 
-def _install_sanity_app():
-    data = {
-        'deployment_id': DEPLOYMENT_ID,
-        'workflow_id': 'install'
-    }
-    headers = _get_headers()
-    headers.update({'content-type': 'application/json'})
-
-    resp = utils.http_request(
-            '{0}/executions'.format(_get_url_prefix()),
-            method='POST',
-            data=json.dumps(data),
-            headers=headers)
-
-    # Waiting for installation to complete
+def _install_sanity_app(client):
+    execution = client.executions.start(DEPLOYMENT_ID, 'install')
     utils.repetitive(
         wait_for_workflow,
-        timeout=5*60,
-        interval=30,
+        client=client,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='install',
-        url_prefix=_get_url_prefix(),
+        timeout=5 * 60,
+        interval=5,
         timeout_msg='Timed out while waiting for '
                     'deployment {0} to install'.format(DEPLOYMENT_ID))
-
-    resp_content = resp.readlines()
-    json_resp = json.loads(resp_content[0])
-    return json_resp['id']
+    return execution.id
 
 
-def _assert_logs_and_events(execution_id):
-    headers = _get_headers()
-    params = urllib.urlencode((
-        ('execution_id', execution_id),
-        ('type', 'cloudify_event'),
-        ('type', 'cloudify_log'),
-        ('_sort', '@timestamp'),
-        ('_size', 100),
-        ('_offset', 0),
-    ))
-
-    endpoint = '{0}/events'.format(_get_url_prefix())
-    url = endpoint + '?' + params
-    ctx.logger.debug('Sending request to url: {0}, with the following '
-                     'headers: {1}'.format(url, headers))
-    resp = utils.http_request(url, method='GET', headers=headers, timeout=30)
-    if not resp:
-        ctx.abort_operation("Can't connect to Cloudify's rest service")
-    if resp.code != 200:
-        ctx.abort_operation('Failed to retrieve logs/events')
-
-    resp_content = resp.readlines()
-    json_resp = json.loads(resp_content[0])
-
-    if 'items' not in json_resp or not json_resp['items']:
-        ctx.logger.debug('No items received. The response is: '
-                         '{0}'.format(json_resp))
+def _assert_logs_and_events(client, execution_id):
+    events = client.events.get(execution_id, include_logs=True)
+    if len(events) <= 0:
         ctx.abort_operation('No logs/events received')
-
-    db_name = 'cloudify_db'
-    for table_name in ['logs', 'events']:
-        proc = utils.run([
-            'sudo', '-u', 'postgres',
-            'psql', db_name, '-t', '-c',
-            'SELECT COUNT(*) FROM {0}'.format(table_name),
-        ])
-        count = int(proc.aggr_stdout)
-        if count <= 0:
-            ctx.abort_operation(
-                'Failed to retrieve {0} from PostgreSQL'.format(table_name))
 
 
 def _assert_webserver_running():
@@ -204,71 +108,40 @@ def _assert_webserver_running():
         ctx.abort_operation('Sanity app webserver failed to start')
 
 
-def _cleanup_sanity():
-    _uninstall_sanity_app()
-    _delete_sanity_deployment()
-    _delete_sanity_blueprint()
+def _cleanup_sanity(client):
+    _uninstall_sanity_app(client)
+    _delete_sanity_deployment(client)
+    _delete_sanity_blueprint(client)
     _delete_key_file()
 
 
-def _uninstall_sanity_app():
-    if not _is_sanity_dep_exist():
+def _uninstall_sanity_app(client):
+    if not _is_sanity_dep_exist(client):
         return
 
-    data = {
-        'deployment_id': DEPLOYMENT_ID,
-        'workflow_id': 'uninstall'
-    }
-    headers = _get_headers()
-    headers.update({'content-type': 'application/json'})
-
-    utils.http_request(
-        '{0}/executions'.format(_get_url_prefix()),
-        method='POST',
-        data=json.dumps(data),
-        headers=headers)
-
-    # Waiting for installation to complete
+    client.executions.start(DEPLOYMENT_ID, 'uninstall')
+    # Waiting for uninstallation to complete
     utils.repetitive(
         wait_for_workflow,
-        timeout=5*60,
-        interval=30,
+        client=client,
         deployment_id=DEPLOYMENT_ID,
         workflow_id='uninstall',
-        url_prefix=_get_url_prefix(),
+        timeout=5 * 60,
+        interval=5,
         timeout_msg='Timed out while waiting for '
-                    'deployment {0} to uninstall.'.format(DEPLOYMENT_ID))
+                    'deployment {0} to uninstall'.format(DEPLOYMENT_ID))
 
 
-def _delete_sanity_deployment():
-    if not _is_sanity_dep_exist():
+def _delete_sanity_deployment(client):
+    if not _is_sanity_dep_exist(client):
         return
-    headers = _get_headers()
-
-    resp = utils.http_request(
-        '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
-        method='DELETE',
-        headers=headers)
-
-    if resp.code != 200:
-        ctx.abort_operation('Failed deleting '
-                            'deployment {0}: {1}'.format(DEPLOYMENT_ID,
-                                                         resp.reason))
+    client.deployments.delete(DEPLOYMENT_ID)
 
 
-def _delete_sanity_blueprint():
-    if not _is_sanity_blueprint_exist():
+def _delete_sanity_blueprint(client):
+    if not _is_sanity_blueprint_exist(client):
         return
-    headers = _get_headers()
-    resp = utils.http_request(
-        '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID),
-        method='DELETE',
-        headers=headers)
-
-    if resp.code != 200:
-        ctx.abort_operation('Failed deleting '
-                            'deployment {0}: {1}'.format(BLUEPRINT_ID,
-                                                         resp.reason))
+    client.blueprints.delete(BLUEPRINT_ID)
 
 
 def _delete_key_file():
@@ -276,49 +149,48 @@ def _delete_key_file():
         os.remove(manager_remote_key_path)
 
 
-def _is_sanity_dep_exist(should_fail=False):
-    headers = _get_headers()
-    res = utils.http_request(
-        '{0}/deployments/{1}'.format(_get_url_prefix(), DEPLOYMENT_ID),
-        method='GET',
-        headers=headers,
-        should_fail=should_fail)
-    if not res:
+def _is_sanity_dep_exist(client):
+    try:
+        client.deployments.get(DEPLOYMENT_ID)
+    except CloudifyClientError as e:
+        if e.status_code != 404:
+            raise
         return False
-    return res.code == 200
+    else:
+        return True
 
 
-def _is_sanity_blueprint_exist(should_fail=False):
-    headers = _get_headers()
-    res = utils.http_request(
-            '{0}/blueprints/{1}'.format(_get_url_prefix(), BLUEPRINT_ID),
-            method='GET',
-            headers=headers,
-            should_fail=should_fail)
-    if not res:
+def _is_sanity_blueprint_exist(client):
+    try:
+        client.deployments.get(BLUEPRINT_ID)
+    except CloudifyClientError as e:
+        if e.status_code != 404:
+            raise
         return False
-    return res.code == 200
-
-
-def _get_url_prefix():
-    return '{0}://{1}:{2}/api/{3}'.format(
-            runtime_props['rest_protocol'],
-            os.environ.get('manager_ip'),
-            runtime_props['rest_port'],
-            REST_VERSION)
+    else:
+        return True
 
 
 def perform_sanity():
+    security_config = runtime_props['security_configuration']
+    username = security_config['admin_username']
+    password = security_config['admin_password']
+    client = CloudifyClient(
+        port=runtime_props['rest_port'],
+        protocol=runtime_props['rest_protocol'],
+        cert=utils.INTERNAL_CA_CERT_PATH,
+        username=username, password=password, tenant='default_tenant')
+
     ctx.logger.info('Starting Manager sanity check...')
-    _prepare_sanity_app()
+    _prepare_sanity_app(client)
     ctx.logger.info('Installing sanity app...')
-    exec_id = _install_sanity_app()
+    exec_id = _install_sanity_app(client)
     ctx.logger.info('Sanity app installed. Performing sanity test...')
     _assert_webserver_running()
-    _assert_logs_and_events(exec_id)
+    _assert_logs_and_events(client, exec_id)
     ctx.logger.info('Manager sanity check successful, '
                     'cleaning up sanity resources.')
-    _cleanup_sanity()
+    _cleanup_sanity(client)
 
 
 # the 'run_sanity' parameter is injected explicitly from the cli as an
