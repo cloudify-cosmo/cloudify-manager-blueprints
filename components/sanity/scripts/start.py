@@ -60,7 +60,7 @@ def _deploy_app(client):
         return
 
     client.deployments.create(BLUEPRINT_ID, DEPLOYMENT_ID, inputs={
-        'server_ip': os.environ.get('manager_ip'),
+        'server_ip': '127.0.0.1',
         'agent_user': os.environ.get('ssh_user'),
         'agent_private_key_path': manager_remote_key_path
     })
