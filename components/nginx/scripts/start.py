@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import subprocess
 from os.path import join, dirname
 
 from cloudify import ctx
@@ -28,18 +27,15 @@ def verify_nginx(url):
     # Instead, we use curl, because it behaves consistently across distro
     # versions.
     # See also CFY-7222
-    try:
-        output = subprocess.check_output([
-            'curl',
-            url,
-            '--cacert', utils.INTERNAL_CA_CERT_PATH,
-            # only output the http code
-            '-o', '/dev/null',
-            '-w', '%{http_code}'
-        ])
-    except subprocess.CalledProcessError:
-        ctx.abort_operation('Nginx HTTP check error')
-    if output.strip() not in {'200', '401'}:
+    output = utils.run([
+        'curl',
+        url,
+        '--cacert', utils.INTERNAL_CA_CERT_PATH,
+        # only output the http code
+        '-o', '/dev/null',
+        '-w', '%{http_code}'
+    ])
+    if output.aggr_stdout.strip() not in {'200', '401'}:
         ctx.abort_operation('Nginx HTTP check error: {0}'.format(output))
 
 
