@@ -113,6 +113,8 @@ def install_mgmtworker():
     utils.mkdir(riemann_dir)
 
     mgmtworker_venv = join(HOME_DIR, 'env')
+    # used to run the sanity check
+    runtime_props['python_executable'] = join(mgmtworker_venv, 'bin', 'python')
 
     # this create the mgmtworker_venv and installs the relevant
     # modules into it.
