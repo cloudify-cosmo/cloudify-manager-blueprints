@@ -34,6 +34,8 @@ server {
     return 400;
   }
 
+  test;
+
   location /resources/cloudify_agent {
     include "/etc/nginx/conf.d/redirect-to-fileserver.cloudify";
   }
