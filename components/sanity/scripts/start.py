@@ -176,7 +176,8 @@ def perform_sanity():
     username = security_config['admin_username']
     password = security_config['admin_password']
     client = CloudifyClient(
-        port=runtime_props['rest_port'], protocol='https',
+        port=runtime_props['rest_port'],
+        protocol=runtime_props['rest_protocol'],
         cert=utils.INTERNAL_CA_CERT_PATH,
         username=username, password=password, tenant='default_tenant')
 
