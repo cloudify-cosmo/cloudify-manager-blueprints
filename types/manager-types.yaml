@@ -38,7 +38,7 @@ node_types:
                 user: { get_input: ssh_user }
                 port: { get_input: ssh_port }
                 key_filename: { get_input: ssh_key_filename }
-                host_string: { get_attribute: [manager_host, public_ip] }
+                host_string: { get_property: [manager_host, public_ip] }
                 always_use_pty: true
       cloudify.interfaces.lifecycle:
         create:
