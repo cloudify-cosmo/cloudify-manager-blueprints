@@ -1110,8 +1110,6 @@ node_types:
               default: components/sanity/scripts/start.py
             ssh_user:
               default: { get_input: ssh_user }
-            manager_ip:
-              default: { get_attribute: [manager_host, public_ip] }
             process:
               default:
                 command_prefix: { get_attribute: [mgmt_worker, python_executable] }

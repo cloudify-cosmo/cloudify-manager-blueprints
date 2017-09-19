@@ -60,7 +60,7 @@ def _deploy_app(client):
         return
 
     client.deployments.create(BLUEPRINT_ID, DEPLOYMENT_ID, inputs={
-        'server_ip': os.environ.get('manager_ip'),
+        'server_ip': '127.0.0.1',
         'agent_user': os.environ.get('ssh_user'),
         'agent_private_key_path': manager_remote_key_path
     })
@@ -162,7 +162,7 @@ def _is_sanity_dep_exist(client):
 
 def _is_sanity_blueprint_exist(client):
     try:
-        client.deployments.get(BLUEPRINT_ID)
+        client.blueprints.get(BLUEPRINT_ID)
     except CloudifyClientError as e:
         if e.status_code != 404:
             raise
