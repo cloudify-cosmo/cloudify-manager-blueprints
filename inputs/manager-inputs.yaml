@@ -479,6 +479,42 @@ inputs:
     default: 15
 
   #############################
+  # Agent Workers Inputs
+  #############################
+  agent_min_workers:
+    description: >
+      Default minimum number of agent workers.
+    type: integer
+    default: 0
+
+  agent_max_workers:
+    description: >
+      Default minimum number of agent workers.
+    type: integer
+    default: 5
+
+  agent_remote_execution_port:
+    description: >
+      Default port to connect to the agent VM with.
+    type: integer
+    default: 22
+
+  #############################
+  # Workflow Engine Inputs
+  #############################
+  workflow_task_retries:
+    description: >
+      Default number of attempts to retry a task before failing the execution (-1 = unlimited).
+    type: integer
+    default: -1
+
+  workflow_task_retry_interval:
+    description: >
+      Default interval to wait before retrying a task.
+    type: integer
+    default: 30
+
+  #############################
   # Dev Inputs
   #############################
 

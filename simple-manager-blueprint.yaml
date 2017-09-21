@@ -123,9 +123,9 @@ node_templates:
         resources_prefix: { get_input: resources_prefix }
 
         cloudify_agent:
-          min_workers: 0
-          max_workers: 5
-          remote_execution_port: 22
+          min_workers: { get_input: agent_min_workers }
+          max_workers: { get_input: agent_max_workers }
+          remote_execution_port: { get_input: agent_remote_execution_port }
           user: { get_input: agents_user }
           broker_user: { get_input: rabbitmq_username }
           broker_pass: { get_input: rabbitmq_password }
