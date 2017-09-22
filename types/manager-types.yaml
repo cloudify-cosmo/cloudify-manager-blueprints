@@ -1045,40 +1045,30 @@ node_types:
   manager.nodes.CLI:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
-      rest_client_module_source_url:
-        description: REST Client module Source URL
+      cli_source_url:
+        description: CLI package URL
         type: string
-        default: { get_input: rest_client_source_url }
-      dsl_parser_module_source_url:
-        description: DSL Parser module Source URL
-        type: string
-        default: { get_input: dsl_parser_source_url }
-      plugins_common_module_source_url:
-        description: Plugins Common module Source URL
-        type: string
-        default: { get_input: plugins_common_source_url }
-      script_plugin_module_source_url:
-        description: Script Plugin module Source URL
-        type: string
-        default: { get_input: script_plugin_source_url }
-      cli_module_source_url:
-        description: Cloudify's CLI module Source URL
-        type: string
-        default: { get_input: cli_source_url }
+        default: { get_input: cli_rpm_source_url }
+      skip:
+        description: |
+          Whether to skip the CLI installation altogether. Useful when
+          the target machine already has the CLI installed.
+        type: boolean
+        default: false
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/cli/scripts/create.sh
+              default: components/cli/scripts/create.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
-        start:
+        delete:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/cli/scripts/start.sh
+              default: components/cli/scripts/delete.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -1242,6 +1232,30 @@ relationships:
 
   stage_to_restservice:
     derived_from: cloudify.relationships.connected_to
+
+  cli_to_nginx:
+    derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/cli/scripts/preconfigure.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  cli_to_restservice:
+    derived_from: cloudify.relationships.depends_on
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/cli/scripts/retrieve_creds.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
 
   composer_to_restservice:
     derived_from: cloudify.relationships.connected_to
