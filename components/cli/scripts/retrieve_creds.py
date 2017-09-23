@@ -14,4 +14,5 @@ if not ctx.source.node.properties['skip']:
     # node instance.
     for prop in ['admin_username', 'admin_password']:
         ctx.source.instance.runtime_properties[prop] = \
-            ctx.target.instance.runtime_properties['security_configuration'][prop]
+            ctx.target.instance.runtime_properties[
+                'security_configuration'][prop]
