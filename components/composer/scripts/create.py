@@ -38,7 +38,6 @@ def _install_composer():
     if not utils.resource_factory.local_resource_exists(composer_source_url):
         ctx.logger.info('Composer package not found in manager resources '
                         'package. Composer will not be installed.')
-        ctx.logger.info("Yes")
         ctx.instance.runtime_properties['skip_installation'] = 'true'
         return
 
