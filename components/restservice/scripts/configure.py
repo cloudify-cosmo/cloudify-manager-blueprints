@@ -93,6 +93,8 @@ def _create_db_tables_and_add_defaults():
     args_dict['amqp_username'] = ctx_properties['rabbitmq_username']
     args_dict['amqp_password'] = ctx_properties['rabbitmq_password']
     args_dict['postgresql_host'] = ctx_properties['postgresql_host']
+    args_dict['authorization_file_path'] = \
+        runtime_props['authorization_file_path']
     args_dict['db_migrate_dir'] = join(
         utils.MANAGER_RESOURCES_HOME,
         'cloudify',
@@ -147,14 +149,16 @@ def _deploy_rest_configuration():
 
 def _deploy_authorization_configuration():
     authorization_file_name = 'authorization.conf'
+    authorization_file_path = join(runtime_props['home_dir'],
+                                   authorization_file_name)
+    runtime_props['authorization_file_path'] = authorization_file_path
     ctx.logger.info('Deploying REST authorization Configuration file...')
-    utils.deploy_blueprint_resource(
-        join(CONFIG_PATH, authorization_file_name),
-        join(runtime_props['home_dir'], authorization_file_name),
-        SERVICE_NAME)
+    utils.deploy_blueprint_resource(join(CONFIG_PATH, authorization_file_name),
+                                    authorization_file_path,
+                                    SERVICE_NAME)
     utils.chown(CLOUDIFY_USER,
                 CLOUDIFY_GROUP,
-                join(runtime_props['home_dir'], authorization_file_name))
+                authorization_file_path)
 
 
 def _allow_creating_cluster():
