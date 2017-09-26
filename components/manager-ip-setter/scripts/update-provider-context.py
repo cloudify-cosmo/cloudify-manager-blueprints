@@ -18,7 +18,13 @@ def update_provider_context(args):
         ctx = sm.get(models.ProviderContext, PROVIDER_CONTEXT_ID)
         agent_dict = ctx.context['cloudify']['cloudify_agent']
         if networks:
-            agent_dict['networks'].update(networks)
+            for network_name, address in networks.items():
+                previous_address = agent_dict['networks'].get(network_name)
+                if previous_address and address != previous_address:
+                    raise ValueError('Cannot change network {0} address'
+                                     .format(network_name))
+                else:
+                    agent_dict['networks'][network_name] = address
         agent_dict['broker_ip'] = args.manager_ip
         agent_dict['networks']['default'] = args.manager_ip
         flag_modified(ctx, 'context')
