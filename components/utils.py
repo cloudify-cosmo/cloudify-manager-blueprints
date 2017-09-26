@@ -340,19 +340,20 @@ def _format_ips(ips):
     return cert_metadata
 
 
-def store_cert_metadata(internal_rest_host, networks=None):
+def store_cert_metadata(internal_rest_host, networks=None,
+                        filename=CERT_METADATA_FILE_PATH):
     metadata = load_cert_metadata()
     metadata['internal_rest_host'] = internal_rest_host
     if networks is not None:
         metadata['networks'] = networks
     contents = json.dumps(metadata)
-    sudo_write_to_file(contents, CERT_METADATA_FILE_PATH)
-    chown(CLOUDIFY_USER, CLOUDIFY_GROUP, CERT_METADATA_FILE_PATH)
+    sudo_write_to_file(contents, filename)
+    chown(CLOUDIFY_USER, CLOUDIFY_GROUP, filename)
 
 
-def load_cert_metadata():
+def load_cert_metadata(filename=CERT_METADATA_FILE_PATH):
     try:
-        with open(CERT_METADATA_FILE_PATH) as f:
+        with open(filename) as f:
             return json.load(f)
     except IOError:
         return {}
