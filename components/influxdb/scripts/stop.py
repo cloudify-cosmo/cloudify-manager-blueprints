@@ -15,7 +15,7 @@ SERVICE_NAME = runtime_props.get('service_name')
 
 # This makes sure that the `create` script already ran
 if SERVICE_NAME:
-    ctx_properties = utils.ctx_factory.get(SERVICE_NAME)
+    ctx_properties = ctx.node.properties.get_all()
     if not ctx_properties['influxdb_endpoint_ip']:
         ctx.logger.info('Stopping InfluxDB Service...')
         utils.systemd.stop(SERVICE_NAME)

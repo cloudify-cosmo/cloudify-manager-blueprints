@@ -28,7 +28,7 @@ LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
 runtime_props['home_dir'] = HOME_DIR
 runtime_props['files_to_remove'] = [HOME_DIR, NODEJS_DIR, LOG_DIR]
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 
@@ -38,7 +38,6 @@ def _install_composer():
     if not utils.resource_factory.local_resource_exists(composer_source_url):
         ctx.logger.info('Composer package not found in manager resources '
                         'package. Composer will not be installed.')
-        ctx.logger.info("Yes")
         ctx.instance.runtime_properties['skip_installation'] = 'true'
         return
 

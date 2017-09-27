@@ -24,8 +24,8 @@ node_types:
       execute_before_bootstrap:
         default: { get_input: execute_before_bootstrap }
     interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
+      cloudify.interfaces.validation:
+        creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
@@ -38,9 +38,10 @@ node_types:
                 user: { get_input: ssh_user }
                 port: { get_input: ssh_port }
                 key_filename: { get_input: ssh_key_filename }
-                host_string: { get_attribute: [manager_configuration, public_ip] }
+                host_string: { get_property: [manager_host, public_ip] }
                 always_use_pty: true
-        configure:
+      cloudify.interfaces.lifecycle:
+        create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
@@ -654,6 +655,14 @@ node_types:
         description: RabbitMQ password for access to queues.
         type: string
         default: { get_input: rabbitmq_password }
+      postgresql_db_name:
+        description: PostgreSQL default db name
+        type: string
+        default: { get_input: postgresql_db_name }
+      postgresql_host:
+        description: PostgreSQL default host
+        type: string
+        default: { get_input: postgresql_host }
       plugins_common_module_source_url:
         description: Plugins Common module Source URL
         type: string
@@ -818,7 +827,7 @@ node_types:
           operations and concurrent workflows, separately. It cannot be bigger than the management worker
           max workers property, as that property sets the global max number of running processes.
         type: integer
-        default: { get_property: [manager_configuration, cloudify, cloudify_agent, max_workers] }
+        default: { get_input: max_parallel_operations_per_deployment }
       use_existing_on_upgrade:
         description: Use existing mgmt worker configuration
         type: string
@@ -1104,8 +1113,9 @@ node_types:
               default: components/sanity/scripts/start.py
             ssh_user:
               default: { get_input: ssh_user }
-            manager_ip:
-              default: { get_attribute: [manager_host, public_ip] }
+            process:
+              default:
+                command_prefix: { get_attribute: [mgmt_worker, python_executable] }
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
