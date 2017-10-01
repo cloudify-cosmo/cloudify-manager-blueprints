@@ -72,6 +72,9 @@ def _deploy_security_configuration():
     current_props.update(security_configuration)
     runtime_props['security_configuration'] = current_props
 
+    for key in ['admin_username', 'admin_password']:
+        security_configuration[key] = current_props[key]
+
     fd, path = tempfile.mkstemp()
     os.close(fd)
     with open(path, 'w') as f:
