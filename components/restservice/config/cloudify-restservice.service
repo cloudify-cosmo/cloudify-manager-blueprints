@@ -14,7 +14,7 @@ ExecStart=/bin/sh -c '{{ ctx.instance.runtime_properties.home_dir }}/env/bin/gun
     -w {{ node.properties.gunicorn_worker_count or '$((${WORKER_COUNT} > ${MAX_WORKER_COUNT} ? ${MAX_WORKER_COUNT} : ${WORKER_COUNT}))' }} \
     --max-requests {{ node.properties.gunicorn_max_requests }} \
     -b 0.0.0.0:${REST_PORT} \
-    --timeout 300 manager_rest.server:app \
+    --timeout 300 manager_rest.wsgi:app \
     --log-file {{ ctx.instance.runtime_properties.log_dir }}/gunicorn.log \
     --access-logfile {{ ctx.instance.runtime_properties.log_dir }}/gunicorn-access.log'
 
