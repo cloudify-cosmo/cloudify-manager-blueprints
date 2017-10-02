@@ -62,6 +62,13 @@ def _install_stage():
     ctx.logger.info('Installing Cloudify Stage (UI)...')
     stage_tar = utils.download_cloudify_resource(stage_source_url,
                                                  SERVICE_NAME)
+    # print "stage_tar={0}".format(stage_tar)
+    if 'community' in stage_tar:
+        ctx.logger.info('Community edition')
+        ctx.instance.runtime_properties['community_mode'] = '-mode community'
+    else:
+        ctx.instance.runtime_properties['community_mode'] = ''
+
     utils.untar(stage_tar, HOME_DIR)
     utils.remove(stage_tar)
 
@@ -77,6 +84,18 @@ def _install_stage():
     utils.chmod('a+rx', '/opt/cloudify/stage/restore-snapshot.py')
 
     utils.logrotate(SERVICE_NAME)
+
+    # if 'community_edition' in runtime_props:
+        # config_file = "/opt/cloudify/stage/resources/cloudify-stage.service"
+        # with open(config_file, 'r') as file :
+        #     filedata = file.readlines()
+        #
+        # with open(config_file, 'w') as file:
+        #     for line in filedata:
+        #         if line.startswith('ExecStart='):
+        #             line = line.replace("\n", " -mode community\n")
+        #         file.write(line)
+
     utils.systemd.configure(SERVICE_NAME)
 
     backend_dir = join(HOME_DIR, 'backend')
