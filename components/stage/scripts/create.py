@@ -62,6 +62,12 @@ def _install_stage():
     ctx.logger.info('Installing Cloudify Stage (UI)...')
     stage_tar = utils.download_cloudify_resource(stage_source_url,
                                                  SERVICE_NAME)
+    if 'community' in stage_tar:
+        ctx.logger.info('Community edition')
+        ctx.instance.runtime_properties['community_mode'] = '-mode community'
+    else:
+        ctx.instance.runtime_properties['community_mode'] = ''
+
     utils.untar(stage_tar, HOME_DIR)
     utils.remove(stage_tar)
 
