@@ -81,6 +81,7 @@ def _install_stage():
         component=SERVICE_NAME,
         allow_as=STAGE_USER)
     utils.chmod('a+rx', '/opt/cloudify/stage/restore-snapshot.py')
+    utils.sudo(['usermod', '-aG', utils.CLOUDIFY_GROUP, STAGE_USER])
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)

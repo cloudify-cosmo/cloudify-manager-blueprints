@@ -82,6 +82,7 @@ def _deploy_security_configuration():
     rest_security_path = join(runtime_props['home_dir'], 'rest-security.conf')
     utils.move(path, rest_security_path)
     utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, rest_security_path)
+    utils.chmod('g+r', rest_security_path)
 
 
 def _create_db_tables_and_add_defaults():
