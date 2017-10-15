@@ -19,6 +19,7 @@ import sys
 import urllib2
 import platform
 import subprocess
+from distutils.version import LooseVersion
 
 from cloudify import ctx
 
@@ -131,6 +132,24 @@ def _validate_resources_package_url(manager_resources_package_url):
                 manager_resources_package_url, ex.args))
 
 
+def _validate_openssl_version(required_version):
+    ctx.logger.info('Validating OpenSSL version...')
+    try:
+        import ssl
+        version = ssl.OPENSSL_VERSION.split()[1]
+        if LooseVersion(version) < LooseVersion(required_version):
+            return _error(
+                "Cloudify Manager requires OpenSSL {0}, current version: {1}"
+                "".format(required_version, version))
+    except ImportError:
+        return _error(
+            "Cloudify Manager requires OpenSSL {0}".format(required_version))
+    except Exception as ex:
+        return _error(
+            "Cloudify Manager requires OpenSSL {0}, Error: {1}"
+            "".format(required_version, ex))
+
+
 def validate():
     ignore_validations = ctx.node.properties['ignore_bootstrap_validations']
     resources_package_url = ctx.node.properties['manager_resources_package']
@@ -138,6 +157,7 @@ def validate():
         ctx.node.properties['minimum_required_total_physical_memory_in_mb']
     disk_space = \
         ctx.node.properties['minimum_required_available_disk_space_in_gb']
+    required_openssl_version = '1.0.2'
 
     error_summary = []
 
@@ -150,6 +170,7 @@ def validate():
         min_memory_required_in_mb=physical_memory))
     error_summary.append(_validate_sufficient_disk_space(
         min_disk_space_required_in_gb=disk_space))
+    error_summary.append(_validate_openssl_version(required_openssl_version))
     if resources_package_url:
         error_summary.append(_validate_resources_package_url(
             resources_package_url))
