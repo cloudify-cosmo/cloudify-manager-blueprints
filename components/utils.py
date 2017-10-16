@@ -462,33 +462,6 @@ def generate_internal_ssl_cert(ips, name):
     )
 
 
-def deploy_ssl_cert(cert_source, key_source, cert_path, key_path):
-    cert_filename = os.path.basename(cert_path)
-    key_filename = os.path.basename(key_path)
-    try:
-        # Try to deploy user provided certificates
-        deploy_blueprint_resource(cert_source,
-                                  cert_path,
-                                  NGINX_SERVICE_NAME,
-                                  user_resource=True,
-                                  load_ctx=False)
-        deploy_blueprint_resource(key_source,
-                                  key_path,
-                                  NGINX_SERVICE_NAME,
-                                  user_resource=True,
-                                  load_ctx=False)
-        ctx.logger.info(
-            'Deployed user-provided SSL certificate `{0}` and SSL private '
-            'key `{1}`'.format(cert_filename, key_filename)
-        )
-        return True
-    except Exception as e:
-        if "No such file or directory" in e.stderr:
-            return False
-        else:
-            raise
-
-
 def write_to_tempfile(contents):
     fd, file_path = tempfile.mkstemp()
     os.write(fd, contents)

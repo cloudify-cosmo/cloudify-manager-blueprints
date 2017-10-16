@@ -80,11 +80,47 @@ def _deploy_nginx_config_files():
         )
 
 
-def preconfigure_nginx():
-
+def _deploy_external_cert():
     target_runtime_props = ctx.target.instance.runtime_properties
 
+    external_key_deployed = utils.deploy_blueprint_resource(
+        src_runtime_props['rest_key'],
+        utils.EXTERNAL_KEY_PATH,
+        NGINX_SERVICE_NAME,
+        user_resource=True, load_ctx=False
+    )
+    external_cert_deployed = utils.deploy_blueprint_resource(
+        src_runtime_props['rest_certificate'],
+        utils.EXTERNAL_CERT_PATH,
+        NGINX_SERVICE_NAME,
+        user_resource=True, load_ctx=False
+    )
+    if external_key_deployed and external_cert_deployed:
+        ctx.logger.info(
+            'Deployed user-provided external SSL certificate and private key')
+    elif not external_cert_deployed and not external_key_deployed:
+        utils.generate_ssl_certificate(
+            [target_runtime_props['external_rest_host'],
+             target_runtime_props['internal_rest_host']],
+            target_runtime_props['external_rest_host'],
+            utils.EXTERNAL_CERT_PATH,
+            utils.EXTERNAL_KEY_PATH,
+            sign_cert=None, sign_key=None
+        )
+    else:
+        what_deployed = 'cert' if external_cert_deployed else 'key'
+        ctx.abort_operation('Either both the external cert and the external '
+                            'key must be provided, or neither. Only the {0} '
+                            'was provided'.format(what_deployed))
+
+    src_runtime_props['external_cert_path'] = utils.EXTERNAL_CERT_PATH
+    src_runtime_props['external_key_path'] = utils.EXTERNAL_KEY_PATH
+
+
+def preconfigure_nginx():
     # This is used by nginx's default.conf to select the relevant configuration
+    target_runtime_props = ctx.target.instance.runtime_properties
+
     external_rest_protocol = target_runtime_props['external_rest_protocol']
     internal_rest_port = target_runtime_props['internal_rest_port']
 
@@ -97,23 +133,7 @@ def preconfigure_nginx():
     # Pass on the the path to the certificate to manager_configuration
     target_runtime_props['internal_cert_path'] = utils.INTERNAL_CA_CERT_PATH
 
-    if not utils.deploy_ssl_cert(
-            src_runtime_props['rest_certificate'],
-            src_runtime_props['rest_key'],
-            utils.EXTERNAL_CERT_PATH,
-            utils.EXTERNAL_KEY_PATH):
-        utils.generate_ssl_certificate(
-            [target_runtime_props['external_rest_host'],
-             target_runtime_props['internal_rest_host']],
-            target_runtime_props['external_rest_host'],
-            utils.EXTERNAL_CERT_PATH,
-            utils.EXTERNAL_KEY_PATH,
-            sign_cert=None, sign_key=None
-        )
-
-    src_runtime_props['external_cert_path'] = utils.EXTERNAL_CERT_PATH
-    src_runtime_props['external_key_path'] = utils.EXTERNAL_KEY_PATH
-
+    _deploy_external_cert()
     # The public cert content is used in the outputs later
     target_runtime_props['external_rest_cert_content'] = \
         utils.get_file_content(utils.EXTERNAL_CERT_PATH)
