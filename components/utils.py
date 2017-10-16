@@ -388,12 +388,9 @@ def _csr_config(cn, metadata):
         remove(conf_file.name)
 
 
-def _generate_ssl_certificate(ips,
-                              cn,
-                              cert_path,
-                              key_path,
-                              sign_cert=INTERNAL_CA_CERT_PATH,
-                              sign_key=INTERNAL_CA_KEY_PATH):
+def generate_ssl_certificate(ips, cn, cert_path, key_path,
+                             sign_cert=INTERNAL_CA_CERT_PATH,
+                             sign_key=INTERNAL_CA_KEY_PATH):
     """Generate a public SSL certificate and a private SSL key
 
     :param ips: the ips (or names) to be used for subjectAltNames
@@ -411,12 +408,15 @@ def _generate_ssl_certificate(ips,
     :return: The path to the cert and key files on the manager
     """
     # Remove duplicates from ips
-    cert_metadata = _format_ips(ips)
-    ctx.logger.debug('Using certificate metadata: {0}'.format(cert_metadata))
+    subject_altnames = _format_ips(ips)
+    ctx.logger.info(
+        'Generating SSL certificate {0} and key {1} with subjectAltNames: {2}'
+        .format(cert_path, key_path, subject_altnames)
+    )
 
     csr_path = '{0}.csr'.format(cert_path)
 
-    with _csr_config(cn, cert_metadata) as conf_path:
+    with _csr_config(cn, subject_altnames) as conf_path:
         sudo([
             'openssl', 'req',
             '-newkey', 'rsa:2048',
@@ -454,7 +454,7 @@ def _generate_ssl_certificate(ips,
 
 
 def generate_internal_ssl_cert(ips, name):
-    return _generate_ssl_certificate(
+    return generate_ssl_certificate(
         ips,
         name,
         INTERNAL_CERT_PATH,
@@ -462,46 +462,29 @@ def generate_internal_ssl_cert(ips, name):
     )
 
 
-def deploy_or_generate_external_ssl_cert(ips, cn, cert_source, key_source):
+def deploy_ssl_cert(cert_source, key_source, cert_path, key_path):
+    cert_filename = os.path.basename(cert_path)
+    key_filename = os.path.basename(key_path)
     try:
         # Try to deploy user provided certificates
         deploy_blueprint_resource(cert_source,
-                                  EXTERNAL_CERT_PATH,
+                                  cert_path,
                                   NGINX_SERVICE_NAME,
                                   user_resource=True,
                                   load_ctx=False)
         deploy_blueprint_resource(key_source,
-                                  EXTERNAL_KEY_PATH,
+                                  key_path,
                                   NGINX_SERVICE_NAME,
                                   user_resource=True,
                                   load_ctx=False)
         ctx.logger.info(
             'Deployed user-provided SSL certificate `{0}` and SSL private '
-            'key `{1}`'.format(
-                EXTERNAL_SSL_CERT_FILENAME,
-                EXTERNAL_SSL_KEY_FILENAME
-            )
+            'key `{1}`'.format(cert_filename, key_filename)
         )
-        return EXTERNAL_CERT_PATH, EXTERNAL_KEY_PATH
+        return True
     except Exception as e:
         if "No such file or directory" in e.stderr:
-            ctx.logger.info(
-                'Generating SSL certificate `{0}` and SSL private '
-                'key `{1}`'.format(
-                    EXTERNAL_SSL_CERT_FILENAME,
-                    EXTERNAL_SSL_KEY_FILENAME
-                )
-            )
-
-            return _generate_ssl_certificate(
-                ips,
-                cn,
-                EXTERNAL_CERT_PATH,
-                EXTERNAL_KEY_PATH,
-                sign_cert=None,
-                sign_key=None
-
-            )
+            return False
         else:
             raise
 

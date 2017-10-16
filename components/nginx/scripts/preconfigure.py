@@ -97,13 +97,19 @@ def preconfigure_nginx():
     # Pass on the the path to the certificate to manager_configuration
     target_runtime_props['internal_cert_path'] = utils.INTERNAL_CA_CERT_PATH
 
-    utils.deploy_or_generate_external_ssl_cert(
-        [target_runtime_props['external_rest_host'],
-         target_runtime_props['internal_rest_host']],
-        target_runtime_props['external_rest_host'],
-        src_runtime_props['rest_certificate'],
-        src_runtime_props['rest_key']
-    )
+    if not utils.deploy_ssl_cert(
+            src_runtime_props['rest_certificate'],
+            src_runtime_props['rest_key'],
+            utils.EXTERNAL_CERT_PATH,
+            utils.EXTERNAL_KEY_PATH):
+        utils.generate_ssl_certificate(
+            [target_runtime_props['external_rest_host'],
+             target_runtime_props['internal_rest_host']],
+            target_runtime_props['external_rest_host'],
+            utils.EXTERNAL_CERT_PATH,
+            utils.EXTERNAL_KEY_PATH,
+            sign_cert=None, sign_key=None
+        )
 
     src_runtime_props['external_cert_path'] = utils.EXTERNAL_CERT_PATH
     src_runtime_props['external_key_path'] = utils.EXTERNAL_KEY_PATH
