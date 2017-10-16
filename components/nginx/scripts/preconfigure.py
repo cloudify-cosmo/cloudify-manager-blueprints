@@ -144,14 +144,51 @@ def preconfigure_nginx():
 
 def create_certs():
     utils.mkdir(utils.SSL_CERTS_TARGET_DIR)
-    utils.generate_ca_cert()
+    ca_cert_deployed = utils.deploy_blueprint_resource(
+        src_runtime_props['ca_cert'],
+        utils.INTERNAL_CA_CERT_PATH,
+        NGINX_SERVICE_NAME,
+        user_resource=True, load_ctx=False
+    )
+    ca_key_deployed = utils.deploy_blueprint_resource(
+        src_runtime_props['ca_key'],
+        utils.INTERNAL_CA_KEY_PATH,
+        NGINX_SERVICE_NAME,
+        user_resource=True, load_ctx=False
+    )
+    has_ca_key = ca_key_deployed
+    if not ca_cert_deployed:
+        if ca_key_deployed:
+            ctx.abort_operation('Internal CA key provided, but the internal '
+                                'CA cert was not')
+        utils.generate_ca_cert()
+        has_ca_key = True
+
     networks = \
         ctx.target.node.properties['cloudify']['cloudify_agent']['networks']
     internal_rest_host = \
         ctx.target.instance.runtime_properties['internal_rest_host']
     utils.store_cert_metadata(internal_rest_host, networks)
-    cert_ips = [internal_rest_host] + list(networks.values())
-    utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
+
+    internal_cert_deployed = utils.deploy_blueprint_resource(
+        src_runtime_props['internal_cert'],
+        utils.INTERNAL_CERT_PATH,
+        NGINX_SERVICE_NAME,
+        user_resource=True, load_ctx=False
+    )
+    internal_key_deployed = utils.deploy_blueprint_resource(
+        src_runtime_props['internal_key'],
+        utils.INTERNAL_KEY_PATH,
+        NGINX_SERVICE_NAME,
+        user_resource=True, load_ctx=False
+    )
+    if not internal_cert_deployed and not internal_key_deployed:
+        if not has_ca_key:
+            ctx.abort_operation('Only the internal CA was provided, but not '
+                                'the key - the internal cert and key must be '
+                                'provided as well')
+        cert_ips = [internal_rest_host] + list(networks.values())
+        utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
 
 
 create_certs()
