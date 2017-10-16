@@ -80,21 +80,28 @@ def _deploy_nginx_config_files():
         )
 
 
+def _deploy_cert_and_key(cert_src, key_src, cert_path, key_path):
+    def _try_deploy(src, dest):
+        try:
+            utils.deploy_blueprint_resource(
+                src_runtime_props[src], dest, NGINX_SERVICE_NAME,
+                user_resource=True, load_ctx=False)
+            return True
+        except Exception as e:
+            if "No such file or directory" in e.stderr:
+                return False
+            else:
+                raise
+    return _try_deploy(cert_src, cert_path), _try_deploy(key_src, key_path)
+
+
 def _deploy_external_cert():
     target_runtime_props = ctx.target.instance.runtime_properties
 
-    external_key_deployed = utils.deploy_blueprint_resource(
-        src_runtime_props['rest_key'],
-        utils.EXTERNAL_KEY_PATH,
-        NGINX_SERVICE_NAME,
-        user_resource=True, load_ctx=False
-    )
-    external_cert_deployed = utils.deploy_blueprint_resource(
-        src_runtime_props['rest_certificate'],
-        utils.EXTERNAL_CERT_PATH,
-        NGINX_SERVICE_NAME,
-        user_resource=True, load_ctx=False
-    )
+    external_cert_deployed, external_key_deployed = _deploy_cert_and_key(
+        'rest_certificate', 'rest_key',
+        utils.EXTERNAL_CERT_PATH, utils.EXTERNAL_KEY_PATH)
+
     if external_key_deployed and external_cert_deployed:
         ctx.logger.info(
             'Deployed user-provided external SSL certificate and private key')
@@ -144,18 +151,9 @@ def preconfigure_nginx():
 
 def create_certs():
     utils.mkdir(utils.SSL_CERTS_TARGET_DIR)
-    ca_cert_deployed = utils.deploy_blueprint_resource(
-        src_runtime_props['ca_cert'],
-        utils.INTERNAL_CA_CERT_PATH,
-        NGINX_SERVICE_NAME,
-        user_resource=True, load_ctx=False
-    )
-    ca_key_deployed = utils.deploy_blueprint_resource(
-        src_runtime_props['ca_key'],
-        utils.INTERNAL_CA_KEY_PATH,
-        NGINX_SERVICE_NAME,
-        user_resource=True, load_ctx=False
-    )
+    ca_cert_deployed, ca_key_deployed = _deploy_cert_and_key(
+        'ca_cert', 'ca_key',
+        utils.INTERNAL_CA_CERT_PATH, utils.INTERNAL_CA_KEY_PATH)
     has_ca_key = ca_key_deployed
     if not ca_cert_deployed:
         if ca_key_deployed:
@@ -170,18 +168,10 @@ def create_certs():
         ctx.target.instance.runtime_properties['internal_rest_host']
     utils.store_cert_metadata(internal_rest_host, networks)
 
-    internal_cert_deployed = utils.deploy_blueprint_resource(
-        src_runtime_props['internal_cert'],
-        utils.INTERNAL_CERT_PATH,
-        NGINX_SERVICE_NAME,
-        user_resource=True, load_ctx=False
-    )
-    internal_key_deployed = utils.deploy_blueprint_resource(
-        src_runtime_props['internal_key'],
-        utils.INTERNAL_KEY_PATH,
-        NGINX_SERVICE_NAME,
-        user_resource=True, load_ctx=False
-    )
+    internal_cert_deployed, internal_key_deployed = _deploy_cert_and_key(
+        'internal_cert', 'internal_key',
+        utils.INTERNAL_CERT_PATH, utils.INTERNAL_KEY_PATH)
+
     if not internal_cert_deployed and not internal_key_deployed:
         if not has_ca_key:
             ctx.abort_operation('Only the internal CA was provided, but not '
