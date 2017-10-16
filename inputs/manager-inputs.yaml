@@ -18,6 +18,22 @@ inputs:
     type: string
     default: resources/ssl/cloudify_external_key.pem
 
+  ca_cert:
+    description: Internal CA certificate
+    type: string
+
+  ca_key:
+    description: Private key for the internal CA certificate
+    type: string
+
+  internal_cert:
+    description: Internal certificate
+    type: string
+
+  internal_key:
+    description: Private key for the internal certificate
+    type: string
+
   admin_username:
     default: admin
 

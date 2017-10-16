@@ -16,11 +16,16 @@ ctx_properties = ctx.node.properties.get_all()
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
 
+# those properties must be copied into runtime properties, for use in
+# the preconfigure script
+properties_to_copy = ['rest_key', 'rest_certificate', 'ca_cert', 'ca_key',
+                      'internal_cert', 'internal_key']
+
 LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
 UNIT_OVERRIDE_PATH = '/etc/systemd/system/nginx.service.d'
 runtime_props['files_to_remove'] = [LOG_DIR, UNIT_OVERRIDE_PATH]
-runtime_props['rest_certificate'] = ctx_properties['rest_certificate']
-runtime_props['rest_key'] = ctx_properties['rest_key']
+for property_name in properties_to_copy:
+    runtime_props[property_name] = ctx_properties[property_name]
 
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
