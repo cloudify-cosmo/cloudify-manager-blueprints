@@ -18,8 +18,8 @@ runtime_props['service_name'] = SERVICE_NAME
 
 # those properties must be copied into runtime properties, for use in
 # the preconfigure script
-properties_to_copy = ['rest_key', 'rest_certificate', 'ca_cert', 'ca_key',
-                      'internal_cert', 'internal_key']
+properties_to_copy = ['rest_key', 'rest_certificate', 'ca_certificate',
+                      'ca_key', 'internal_certificate', 'internal_key']
 
 LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
 UNIT_OVERRIDE_PATH = '/etc/systemd/system/nginx.service.d'

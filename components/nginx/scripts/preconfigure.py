@@ -152,7 +152,7 @@ def preconfigure_nginx():
 def create_certs():
     utils.mkdir(utils.SSL_CERTS_TARGET_DIR)
     ca_cert_deployed, ca_key_deployed = _deploy_cert_and_key(
-        'ca_cert', 'ca_key',
+        'ca_certificate', 'ca_key',
         utils.INTERNAL_CA_CERT_PATH, utils.INTERNAL_CA_KEY_PATH)
     has_ca_key = ca_key_deployed
     if not ca_cert_deployed:
@@ -169,7 +169,7 @@ def create_certs():
     utils.store_cert_metadata(internal_rest_host, networks)
 
     internal_cert_deployed, internal_key_deployed = _deploy_cert_and_key(
-        'internal_cert', 'internal_key',
+        'internal_certificate', 'internal_key',
         utils.INTERNAL_CERT_PATH, utils.INTERNAL_KEY_PATH)
 
     if not internal_cert_deployed and not internal_key_deployed:
