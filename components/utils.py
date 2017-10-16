@@ -1306,7 +1306,7 @@ class BlueprintResourceFactory(object):
         node_props = ctx.node.properties.get_all()
         return {'node': {'properties': node_props}}
 
-    def _is_cloudify_pkg(self,  filename):
+    def _is_cloudify_pkg(self, filename):
         """Cloudify packages start with 'cloudify' or include '-agent_'
 
         and end with one of the suffix '.rpm', '.tar.gz', '.tgz', '.exe'.
@@ -1314,8 +1314,8 @@ class BlueprintResourceFactory(object):
         packages except of single tar package.
         """
 
-        if (filename.startswith('cloudify')
-            or filename.find('-agent_') != -1) \
+        if (filename.startswith('cloudify') or
+            filename.find('-agent_') != -1) \
                 and not filename.startswith(SINGLE_TAR_PREFIX) \
                 and filename.endswith(('.rpm', '.tar.gz', '.tgz', '.exe')):
             return True
