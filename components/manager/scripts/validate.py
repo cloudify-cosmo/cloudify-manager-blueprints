@@ -14,7 +14,7 @@
 #  * See the License for the specific language governing permissions and
 #  * limitations under the License.
 
-
+import os
 import sys
 import urllib2
 import platform
@@ -135,8 +135,10 @@ def _validate_resources_package_url(manager_resources_package_url):
 def _validate_openssl_version(required_version):
     ctx.logger.info('Validating OpenSSL version...')
     try:
-        import ssl
-        version = ssl.OPENSSL_VERSION.split()[1]
+        # we can't just `import ssl` and check the version
+        # because sometimes python is referencing to the old ssl version
+        output = os.popen('openssl version').read()
+        version = output.split()[1]
         if LooseVersion(version) < LooseVersion(required_version):
             return _error(
                 "Cloudify Manager requires OpenSSL {0}, current version: {1}"
