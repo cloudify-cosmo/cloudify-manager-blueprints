@@ -83,6 +83,8 @@ def _deploy_nginx_config_files():
 
 def _deploy_cert_and_key(cert_src, key_src, cert_path, key_path):
     def _try_deploy(src, dest):
+        if not src:
+            return False
         try:
             utils.deploy_blueprint_resource(
                 src_runtime_props[src], dest, NGINX_SERVICE_NAME,
