@@ -186,12 +186,20 @@ def create_certs():
         'internal_certificate', 'internal_key',
         utils.INTERNAL_CERT_PATH, utils.INTERNAL_KEY_PATH)
 
-    if not internal_cert_deployed and not internal_key_deployed:
+    if internal_cert_deployed and internal_key_deployed:
+        ctx.logger.info(
+            'Deployed user-provided internal SSL certificate and private key')
+    elif not internal_cert_deployed and not internal_key_deployed:
         if not has_ca_key:
             ctx.abort_operation('Only the internal CA was provided, but not '
                                 'the key - the internal cert and key must be '
                                 'provided as well')
         utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
+    else:
+        what_deployed = 'cert' if internal_cert_deployed else 'key'
+        ctx.abort_operation('Either both the internal cert and the internal '
+                            'key must be provided, or neither. Only the {0} '
+                            'was provided'.format(what_deployed))
 
 
 create_certs()
