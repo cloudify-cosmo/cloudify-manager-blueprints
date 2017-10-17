@@ -12,6 +12,7 @@ ctx.download_resource(
 import utils  # NOQA
 
 src_runtime_props = ctx.source.instance.runtime_properties
+target_runtime_props = ctx.target.instance.runtime_properties
 NGINX_SERVICE_NAME = src_runtime_props['service_name']
 CONFIG_PATH = 'components/{0}/config'.format(NGINX_SERVICE_NAME)
 
@@ -96,8 +97,6 @@ def _deploy_cert_and_key(cert_src, key_src, cert_path, key_path):
 
 
 def _deploy_external_cert():
-    target_runtime_props = ctx.target.instance.runtime_properties
-
     external_cert_deployed, external_key_deployed = _deploy_cert_and_key(
         'rest_certificate', 'rest_key',
         utils.EXTERNAL_CERT_PATH, utils.EXTERNAL_KEY_PATH)
@@ -126,8 +125,6 @@ def _deploy_external_cert():
 
 def preconfigure_nginx():
     # This is used by nginx's default.conf to select the relevant configuration
-    target_runtime_props = ctx.target.instance.runtime_properties
-
     external_rest_protocol = target_runtime_props['external_rest_protocol']
     internal_rest_port = target_runtime_props['internal_rest_port']
 
