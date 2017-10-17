@@ -503,6 +503,22 @@ node_types:
         description: Private key for rest ssl certificate
         type: string
         default: { get_input: rest_key }
+      ca_certificate:
+        description: Internal CA certificate
+        type: string
+        default: { get_input: ca_certificate }
+      ca_key:
+        description: Private key for the internal CA certificate
+        type: string
+        default: { get_input: ca_key }
+      internal_certificate:
+        description: Internal certificate
+        type: string
+        default: { get_input: internal_certificate }
+      internal_key:
+        description: Private key for the internal certificate
+        type: string
+        default: { get_input: internal_key }
       nginx_rpm_source_url:
         description: Nginx RPM Source URL
         type: string
