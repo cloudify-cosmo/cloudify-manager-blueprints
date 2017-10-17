@@ -96,6 +96,17 @@ def _deploy_cert_and_key(cert_src, key_src, cert_path, key_path):
     return _try_deploy(cert_src, cert_path), _try_deploy(key_src, key_path)
 
 
+def _generate_external_cert():
+        utils.generate_ssl_certificate(
+            [target_runtime_props['external_rest_host'],
+             target_runtime_props['internal_rest_host']],
+            target_runtime_props['external_rest_host'],
+            utils.EXTERNAL_CERT_PATH,
+            utils.EXTERNAL_KEY_PATH,
+            sign_cert=None, sign_key=None
+        )
+
+
 def _deploy_external_cert():
     external_cert_deployed, external_key_deployed = _deploy_cert_and_key(
         'rest_certificate', 'rest_key',
@@ -105,14 +116,7 @@ def _deploy_external_cert():
         ctx.logger.info(
             'Deployed user-provided external SSL certificate and private key')
     elif not external_cert_deployed and not external_key_deployed:
-        utils.generate_ssl_certificate(
-            [target_runtime_props['external_rest_host'],
-             target_runtime_props['internal_rest_host']],
-            target_runtime_props['external_rest_host'],
-            utils.EXTERNAL_CERT_PATH,
-            utils.EXTERNAL_KEY_PATH,
-            sign_cert=None, sign_key=None
-        )
+        _generate_external_cert()
     else:
         what_deployed = 'cert' if external_cert_deployed else 'key'
         ctx.abort_operation('Either both the external cert and the external '
