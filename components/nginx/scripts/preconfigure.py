@@ -151,7 +151,17 @@ def preconfigure_nginx():
 
 
 def create_certs():
+    networks = \
+        ctx.target.node.properties['cloudify']['cloudify_agent']['networks']
+    internal_rest_host = \
+        ctx.target.instance.runtime_properties['internal_rest_host']
+    utils.store_cert_metadata(internal_rest_host, networks)
+    cert_ips = [internal_rest_host] + list(networks.values())
+
     utils.mkdir(utils.SSL_CERTS_TARGET_DIR)
+    # the user might provide both the CA key and the CA cert, or just the
+    # CA cert, or nothing. It is an error to only provide the CA key.
+    # If the user provided nothing, we must generate a CA cert+key.
     ca_cert_deployed, ca_key_deployed = _deploy_cert_and_key(
         'ca_certificate', 'ca_key',
         utils.INTERNAL_CA_CERT_PATH, utils.INTERNAL_CA_KEY_PATH)
@@ -163,12 +173,12 @@ def create_certs():
         utils.generate_ca_cert()
         has_ca_key = True
 
-    networks = \
-        ctx.target.node.properties['cloudify']['cloudify_agent']['networks']
-    internal_rest_host = \
-        ctx.target.instance.runtime_properties['internal_rest_host']
-    utils.store_cert_metadata(internal_rest_host, networks)
-
+    # the user might provide the internal cert and the internal key, or
+    # neither. It is an error to only provide one of them. If the user did not
+    # provide the internal cert+key, we must generate it, but we can only
+    # generate it if we have a CA key (either provided or generated).
+    # So it is an error to provide only the CA cert, and then not provide
+    # the internal cert+key.
     internal_cert_deployed, internal_key_deployed = _deploy_cert_and_key(
         'internal_certificate', 'internal_key',
         utils.INTERNAL_CERT_PATH, utils.INTERNAL_KEY_PATH)
@@ -178,7 +188,6 @@ def create_certs():
             ctx.abort_operation('Only the internal CA was provided, but not '
                                 'the key - the internal cert and key must be '
                                 'provided as well')
-        cert_ips = [internal_rest_host] + list(networks.values())
         utils.generate_internal_ssl_cert(ips=cert_ips, name=internal_rest_host)
 
 
