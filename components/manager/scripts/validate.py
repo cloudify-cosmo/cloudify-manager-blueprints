@@ -140,12 +140,9 @@ def _validate_openssl_version(required_version):
         output = os.popen('openssl version').read()
         version = output.split()[1]
         if LooseVersion(version) < LooseVersion(required_version):
-            return _error(
-                "Cloudify Manager requires OpenSSL {0}, current version: {1}"
-                "".format(required_version, version))
-    except ImportError:
-        return _error(
-            "Cloudify Manager requires OpenSSL {0}".format(required_version))
+            msg = "Cloudify Manager requires OpenSSL {0}, " \
+                  "current version: {1}".format(required_version, version)
+            ctx.logger.warn('Validating Warning: {0}'.format(msg))
     except Exception as ex:
         return _error(
             "Cloudify Manager requires OpenSSL {0}, Error: {1}"
