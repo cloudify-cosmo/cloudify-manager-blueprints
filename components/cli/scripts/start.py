@@ -1,6 +1,8 @@
-from cloudify import ctx
 
 from os.path import join, dirname
+
+from cloudify import ctx
+
 ctx.download_resource(
     join('components', 'utils.py'),
     join(dirname(__file__), 'utils.py'))
