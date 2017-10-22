@@ -143,7 +143,7 @@ inputs:
   manager_resources_package:
     description: A URL to a tar files containing all of the manager's resources
     type: string
-    default: ''
+    default: 'http://cloudify-release-eu.s3.amazonaws.com/cloudify/4.2.0/.dev1-release/cloudify-manager-resources_4.2.0-.dev1.tar.gz'
 
   manager_resources_package_checksum_file:
     description: >
@@ -189,6 +189,10 @@ inputs:
   amqpinflux_rpm_source_url:
     type: string
     default: cloudify-amqp-influx-*.x86_64.rpm
+
+  cli_rpm_url:
+    type: string
+    default: cloudify-cli-*.tar.rpm
 
   cloudify_resources_url:
     type: string

@@ -1085,14 +1085,21 @@ node_types:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/cli/scripts/create.sh
+              default: components/cli/scripts/create.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/cli/scripts/start.sh
+              default: components/cli/scripts/start.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/cli/scripts/delete.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
