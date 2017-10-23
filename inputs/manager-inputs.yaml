@@ -190,7 +190,7 @@ inputs:
     type: string
     default: cloudify-amqp-influx-*.x86_64.rpm
 
-  cli_rpm_url:
+  cli_rpm_source_url:
     type: string
     default: cloudify-cli-*.tar.rpm
 

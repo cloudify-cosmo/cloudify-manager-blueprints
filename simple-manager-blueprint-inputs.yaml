@@ -7,7 +7,7 @@ public_ip: '10.239.3.166'
 
 # The manager's private IP address. This is the address which will be used by the
 # application hosts to connect to the Manager's fileserver and message broker.
-private_ip: '172.16.0.50'
+private_ip: '172.16.0.53'
 
 # SSH user used to connect to the manager
 ssh_user: 'centos'
@@ -98,7 +98,7 @@ ssh_key_filename: '~/.ssh/os/os_jenkins_slave_kepair.pem'
 #rest_service_rpm_source_url: ''
 #management_worker_rpm_source_url: ''
 #amqpinflux_rpm_source_url: ''
-#cli_rpm_url: ''
+#cli_rpm_source_url: ''
 #cloudify_resources_url: ''
 #stage_source_url: ''
 #composer_source_url: ''

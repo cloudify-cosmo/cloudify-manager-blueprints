@@ -427,15 +427,18 @@ node_templates:
       - type: cloudify.relationships.contained_in
         target: manager_host
       - type: cloudify.relationships.depends_on
-        target: nginx
+        target: manager_configuration
       - type: cloudify.relationships.depends_on
-        target: rest_service
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: cloudify.relationships.depends_on
+        target: nginx
 
-
-plugins:
-  cli:
-    install: false
-    executor: central_deployment_agent
+#plugins:
+#  cli:
+#    install: false
+#    executor: central_deployment_agent
 
 outputs:
   manager_ip:
