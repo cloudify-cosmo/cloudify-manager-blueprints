@@ -7,7 +7,7 @@ public_ip: '10.239.3.166'
 
 # The manager's private IP address. This is the address which will be used by the
 # application hosts to connect to the Manager's fileserver and message broker.
-private_ip: '172.16.0.53'
+private_ip: '172.16.0.54'
 
 # SSH user used to connect to the manager
 ssh_user: 'centos'
