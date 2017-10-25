@@ -766,14 +766,14 @@ class RpmPackageHandler(object):
         source path.
         """
         package_name = self.get_rpm_package_name()
-        if self._is_package_installed(package_name):
+        if self.is_package_installed(package_name):
             ctx.logger.debug(
                 'Removing existing package sources for package '
                 'with name: {0}'.format(package_name))
             sudo(['rpm', '--noscripts', '-e', package_name])
 
     @staticmethod
-    def _is_package_installed(name):
+    def is_package_installed(name):
         installed = run(['rpm', '-q', name], ignore_failures=True)
         if installed.returncode == 0:
             return True
@@ -785,7 +785,7 @@ class RpmPackageHandler(object):
         src_query = run(['rpm', '-qp', self.source_path])
         source_name = src_query.aggr_stdout.rstrip('\n\r')
 
-        return self._is_package_installed(source_name)
+        return self.is_package_installed(source_name)
 
     def get_rpm_package_name(self):
         """Returns the package name according to the info provided in the
