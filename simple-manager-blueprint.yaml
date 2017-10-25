@@ -421,7 +421,7 @@ node_templates:
   # the manager. This might aid in debugging problems or just
   # controlling the manager from within itself.
   ######################################################################
-  cli:
+  cloudify_cli:
     type: manager.nodes.CLI
     relationships:
       - type: cloudify.relationships.contained_in
@@ -432,6 +432,8 @@ node_templates:
         target: manager_resources
       - type: cloudify.relationships.depends_on
         target: python_runtime
+      - type: cloudify.relationships.depends_on
+        target: rest_service
 
 plugins:
   cli:

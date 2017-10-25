@@ -1203,18 +1203,6 @@ relationships:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
-  cli_to_manager_configuration:
-    derived_from: cloudify.relationships.depends_on
-    source_interfaces:
-      cloudify.interfaces.relationship_lifecycle:
-        preconfigure:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/cli/scripts/preconfigure.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-
   rest_to_manager_configuration:
     derived_from: cloudify.relationships.depends_on
     source_interfaces:
