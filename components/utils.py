@@ -552,7 +552,7 @@ def download_file(url, destination=''):
             f = urllib.URLopener()
             # TODO: try except with @retry
             f.retrieve(final_url, destination)
-        except:
+        except Exception:
             curl_download_with_retries(url, destination)
     else:
         ctx.logger.debug('File {0} already exists...'.format(destination))
@@ -562,7 +562,7 @@ def download_file(url, destination=''):
 def get_file_name_from_url(url):
     try:
         return url.split('/')[-1]
-    except:
+    except Exception:
         # in case of irregular url. precaution.
         # note that urlparse is deprecated in Python 3
         from urlparse import urlparse
