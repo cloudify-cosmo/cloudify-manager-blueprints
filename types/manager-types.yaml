@@ -106,8 +106,6 @@ node_types:
 
           #########################################################################
           # Enabling SSL limits communication with the server to SSL only.
-          # If enabled, the certificate and private key files must be found in
-          # resources/ssl.
           # Disabled by default.
           #########################################################################
           ssl:
