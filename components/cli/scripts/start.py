@@ -20,8 +20,8 @@ def configure():
     password = security_config['admin_password']
 
     cmd = [
-        'cfy', 'profiles', 'use', 'localhost', '-u', username,
-        '-p', password, '-t', 'default_tenant'
+        'cfy', 'profiles', 'use', 'localhost', '-u',
+        username, '-p', password, '-t', 'default_tenant'
     ]
     ctx.logger.info('Setting CLI for default user...')
     utils.run(cmd)

@@ -428,34 +428,10 @@ node_templates:
         target: manager_host
       - type: cloudify.relationships.depends_on
         target: manager_configuration
-#      - type: cloudify.relationships.depends_on
-#        target: manager_resources
-#      - type: cloudify.relationships.depends_on
-#        target: python_runtime
-      - type: cloudify.relationships.depends_on
-        target: python_runtime
-      - type: cloudify.relationships.depends_on
-        target: java_runtime
-      - type: cloudify.relationships.depends_on
-        target: postgresql
-      - type: cloudify.relationships.depends_on
-        target: logstash
-      - type: cloudify.relationships.depends_on
-        target: influxdb
-      - type: cloudify.relationships.depends_on
-        target: nginx
-      - type: cloudify.relationships.depends_on
-        target: riemann
-      - type: cloudify.relationships.depends_on
-        target: rest_service
-      - type: cloudify.relationships.depends_on
-        target: mgmt_worker
       - type: cloudify.relationships.depends_on
         target: manager_resources
       - type: cloudify.relationships.depends_on
-        target: amqp_influx
-      - type: cli_to_manager_configuration
-        target: manager_configuration
+        target: python_runtime
 
 plugins:
   cli:

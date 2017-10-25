@@ -143,7 +143,7 @@ inputs:
   manager_resources_package:
     description: A URL to a tar files containing all of the manager's resources
     type: string
-    default: 'http://cloudify-release-eu.s3.amazonaws.com/cloudify/4.2.0/.dev1-release/cloudify-manager-resources_4.2.0-.dev1.tar.gz'
+    default: ''
 
   manager_resources_package_checksum_file:
     description: >
