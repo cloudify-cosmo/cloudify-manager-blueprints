@@ -3,11 +3,11 @@
 #############################
 
 # The public IP of the manager to which the CLI will connect.
-public_ip: '10.239.3.166'
+public_ip: '10.239.1.140'
 
 # The manager's private IP address. This is the address which will be used by the
 # application hosts to connect to the Manager's fileserver and message broker.
-private_ip: '172.16.0.54'
+private_ip: '172.16.0.69'
 
 # SSH user used to connect to the manager
 ssh_user: 'centos'

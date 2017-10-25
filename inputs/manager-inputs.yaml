@@ -192,7 +192,7 @@ inputs:
 
   cli_rpm_source_url:
     type: string
-    default: cloudify-cli-*.tar.rpm
+    default: cloudify-cli-*.rpm
 
   cloudify_resources_url:
     type: string
