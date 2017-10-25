@@ -259,7 +259,7 @@ node_templates:
       - type: cloudify.relationships.depends_on
         target: manager_resources
       - type: cloudify.relationships.depends_on
-        target: java_runtime       
+        target: java_runtime
       - type: logstash_to_postgresql
         target: postgresql
       - type: logstash_to_rabbitmq
@@ -421,16 +421,19 @@ node_templates:
   # the manager. This might aid in debugging problems or just
   # controlling the manager from within itself.
   ######################################################################
-  # cli:
-  #   type: manager.nodes.CLI
-  #   relationships:
-  #     - type: cloudify.relationships.contained_in
-  #       target: manager_host
-  #     - type: cloudify.relationships.depends_on
-  #       target: nginx
-  #     - type: cloudify.relationships.depends_on
-  #       target: rest_service
-
+  cli:
+    type: manager.nodes.CLI
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      # Dependency on REST service should come before the dependency
+      # on nginx
+      - type: cli_to_restservice
+        target: rest_service
+      - type: cli_to_nginx
+        target: nginx
 
 plugins:
   cli:
