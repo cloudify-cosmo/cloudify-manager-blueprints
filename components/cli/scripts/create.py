@@ -10,6 +10,7 @@ ctx.download_resource(
 import utils  # NOQA
 
 SERVICE_NAME = 'cli'
+CONFIG_PATH = 'components/{0}/scripts'.format(SERVICE_NAME)
 
 ctx_properties = ctx.node.properties.get_all()
 
@@ -25,4 +26,18 @@ def install():
     ctx.logger.info('Cloudify CLI successfully installed')
 
 
+def copy_start_script():
+    try:
+        script_name = 'start.sh'
+        script_destination = join(utils.get_exec_tempdir(), script_name)
+        ctx.download_resource(join(CONFIG_PATH, script_name),
+                              script_destination)
+        utils.sudo(['mv', script_destination,
+                    join(utils.CLOUDIFY_HOME_DIR, script_name)])
+    except Exception as ex:
+        ctx.logger.info('Failed to deploy copy script. Error: {0}'
+                        ''.format(ex))
+
+
 install()
+copy_start_script()
