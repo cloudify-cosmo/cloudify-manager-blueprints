@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 
 from os.path import join, dirname
 
@@ -11,8 +12,18 @@ import utils  # NOQA
 
 runtime_props = ctx.instance.runtime_properties
 
+def is_venv():
+    return (hasattr(sys, 'real_prefix') or
+            (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix))
 
 def configure():
+
+    if is_venv():
+        ctx.logger.info('inside virtualenv or venv')
+        ctx.logger.info(sys.executable)
+    else:
+        ctx.logger.info('outside virtualenv or venv')
+
     ctx.logger.info('Configuring Cloudify CLI...')
 
     security_config = runtime_props['security_configuration']
