@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
-export CFY_VIRTUALENV='~/cfy'
+manager_username="$1"
+manager_password="$2"
 
-ctx logger info "Activating cfy virtualenv..."
-. ${CFY_VIRTUALENV}/bin/activate
-ctx logger info "Using localhost as Manager..."
-cfy profiles use localhost
+echo "Using localhost as Manager..."
+
+cfy profiles use localhost -u $manager_username -p $manager_password -t default_tenant
