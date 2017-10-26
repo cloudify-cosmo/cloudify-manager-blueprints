@@ -50,6 +50,7 @@ class TestValidations(testtools.TestCase):
     @patch('validate._get_host_total_memory', return_value=100000000)
     @patch('validate._get_available_host_disk_space', return_value=100)
     @patch('validate._validate_resources_package_url', return_value=None)
+    @patch('validate._validate_openssl_version', return_value=None)
     def test_successful_validation(self, *_):
         validate.validate()
 

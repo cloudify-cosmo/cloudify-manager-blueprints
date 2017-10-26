@@ -62,6 +62,12 @@ def _install_stage():
     ctx.logger.info('Installing Cloudify Stage (UI)...')
     stage_tar = utils.download_cloudify_resource(stage_source_url,
                                                  SERVICE_NAME)
+    if 'community' in stage_tar:
+        ctx.logger.info('Community edition')
+        ctx.instance.runtime_properties['community_mode'] = '-mode community'
+    else:
+        ctx.instance.runtime_properties['community_mode'] = ''
+
     utils.untar(stage_tar, HOME_DIR)
     utils.remove(stage_tar)
 
@@ -75,6 +81,7 @@ def _install_stage():
         component=SERVICE_NAME,
         allow_as=STAGE_USER)
     utils.chmod('a+rx', '/opt/cloudify/stage/restore-snapshot.py')
+    utils.sudo(['usermod', '-aG', utils.CLOUDIFY_GROUP, STAGE_USER])
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)
