@@ -35,8 +35,8 @@ def copy_start_script():
         utils.sudo(['mv', script_destination,
                     join(utils.CLOUDIFY_HOME_DIR, script_name)])
     except Exception as ex:
-        ctx.logger.info('Failed to deploy copy script. Error: {0}'
-                        ''.format(ex))
+        ctx.logger.info('Failed to deploy copy cli start script. '
+                        'Error: {0}'.format(ex))
 
 
 install()
