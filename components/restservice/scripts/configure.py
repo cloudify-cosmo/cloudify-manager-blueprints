@@ -185,6 +185,21 @@ def _allow_creating_cluster():
     utils.allow_user_to_sudo_command(command, description)
 
 
+def _deploy_db_cleanup_script():
+    """ Copy the script that deletes logs and events from the
+    Cloudify DB to /etc/cloudify, so it will be available to the users."""
+    try:
+        script_name = 'delete_logs_and_events_from_db.py'
+        script_destination = join(utils.get_exec_tempdir(), script_name)
+        ctx.download_resource(join(CONFIG_PATH, script_name),
+                              script_destination)
+        utils.sudo(['mv', script_destination,
+                    join(utils.CLOUDIFY_HOME_DIR, script_name)])
+    except Exception as ex:
+        ctx.logger.info('Failed to deploy delete_logs script. Error: {0}'
+                        ''.format(ex))
+
+
 def configure_restservice():
     _deploy_rest_configuration()
     _deploy_security_configuration()
@@ -192,6 +207,7 @@ def configure_restservice():
     _allow_creating_cluster()
     utils.systemd.configure(SERVICE_NAME, tmpfiles=True)
     _create_db_tables_and_add_defaults()
+    _deploy_db_cleanup_script()
 
 
 configure_restservice()
