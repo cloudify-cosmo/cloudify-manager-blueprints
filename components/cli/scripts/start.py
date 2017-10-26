@@ -12,9 +12,11 @@ import utils  # NOQA
 
 runtime_props = ctx.instance.runtime_properties
 
+
 def is_venv():
     return (hasattr(sys, 'real_prefix') or
             (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix))
+
 
 def configure():
 
