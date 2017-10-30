@@ -14,7 +14,7 @@ import utils  # NOQA
 
 runtime_props = ctx.instance.runtime_properties
 SERVICE_NAME = runtime_props['service_name']
-ctx_properties = utils.ctx_factory.get(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 PORT = 5671
 
 

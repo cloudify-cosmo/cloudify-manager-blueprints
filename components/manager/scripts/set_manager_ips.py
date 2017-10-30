@@ -20,6 +20,7 @@ from cloudify.state import ctx_parameters as inputs
 from cloudify.exceptions import NonRecoverableError
 
 
+INTERNAL_REST_PORT = 53333
 source_runtime_props = ctx.source.instance.runtime_properties
 
 # set private ip according to the host ip (backward compatible)
@@ -66,6 +67,7 @@ else:
                               format(rest_host_internal_endpoint_type))
 ctx.logger.debug('internal_rest_host set to: {0}'.format(
     source_runtime_props['internal_rest_host']))
+source_runtime_props['internal_rest_port'] = INTERNAL_REST_PORT
 
 # Set the file server url
 file_server_url = 'https://{0}:{1}/resources'.format(

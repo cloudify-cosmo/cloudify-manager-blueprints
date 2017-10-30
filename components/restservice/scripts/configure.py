@@ -32,7 +32,7 @@ import utils  # NOQA
 
 runtime_props = ctx.instance.runtime_properties
 SERVICE_NAME = runtime_props['service_name']
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 CLOUDIFY_USER = utils.CLOUDIFY_USER
@@ -72,6 +72,9 @@ def _deploy_security_configuration():
     current_props.update(security_configuration)
     runtime_props['security_configuration'] = current_props
 
+    for key in ['admin_username', 'admin_password']:
+        security_configuration[key] = current_props[key]
+
     fd, path = tempfile.mkstemp()
     os.close(fd)
     with open(path, 'w') as f:
@@ -79,6 +82,7 @@ def _deploy_security_configuration():
     rest_security_path = join(runtime_props['home_dir'], 'rest-security.conf')
     utils.move(path, rest_security_path)
     utils.chown(CLOUDIFY_USER, CLOUDIFY_GROUP, rest_security_path)
+    utils.chmod('g+r', rest_security_path)
 
 
 def _create_db_tables_and_add_defaults():
@@ -90,9 +94,11 @@ def _create_db_tables_and_add_defaults():
 
     args_dict = runtime_props['security_configuration']
     args_dict['amqp_host'] = runtime_props['rabbitmq_endpoint_ip']
-    args_dict['amqp_username'] = runtime_props['rabbitmq_username']
-    args_dict['amqp_password'] = runtime_props['rabbitmq_password']
-    args_dict['postgresql_host'] = runtime_props['postgresql_host']
+    args_dict['amqp_username'] = ctx_properties['rabbitmq_username']
+    args_dict['amqp_password'] = ctx_properties['rabbitmq_password']
+    args_dict['postgresql_host'] = ctx_properties['postgresql_host']
+    args_dict['authorization_file_path'] = \
+        runtime_props['authorization_file_path']
     args_dict['db_migrate_dir'] = join(
         utils.MANAGER_RESOURCES_HOME,
         'cloudify',
@@ -137,12 +143,26 @@ def _deploy_rest_configuration():
     ctx.logger.info('Deploying REST Service Configuration file...')
     runtime_props['file_server_root'] = utils.MANAGER_RESOURCES_HOME
     utils.deploy_blueprint_resource(
-            join(CONFIG_PATH, 'cloudify-rest.conf'),
-            join(runtime_props['home_dir'], 'cloudify-rest.conf'),
-            SERVICE_NAME)
+        join(CONFIG_PATH, 'cloudify-rest.conf'),
+        join(runtime_props['home_dir'], 'cloudify-rest.conf'),
+        SERVICE_NAME)
     utils.chown(CLOUDIFY_USER,
                 CLOUDIFY_GROUP,
                 join(runtime_props['home_dir'], 'cloudify-rest.conf'))
+
+
+def _deploy_authorization_configuration():
+    authorization_file_name = 'authorization.conf'
+    authorization_file_path = join(runtime_props['home_dir'],
+                                   authorization_file_name)
+    runtime_props['authorization_file_path'] = authorization_file_path
+    ctx.logger.info('Deploying REST authorization Configuration file...')
+    utils.deploy_blueprint_resource(join(CONFIG_PATH, authorization_file_name),
+                                    authorization_file_path,
+                                    SERVICE_NAME)
+    utils.chown(CLOUDIFY_USER,
+                CLOUDIFY_GROUP,
+                authorization_file_path)
 
 
 def _allow_creating_cluster():
@@ -165,12 +185,29 @@ def _allow_creating_cluster():
     utils.allow_user_to_sudo_command(command, description)
 
 
+def _deploy_db_cleanup_script():
+    """ Copy the script that deletes logs and events from the
+    Cloudify DB to /etc/cloudify, so it will be available to the users."""
+    try:
+        script_name = 'delete_logs_and_events_from_db.py'
+        script_destination = join(utils.get_exec_tempdir(), script_name)
+        ctx.download_resource(join(CONFIG_PATH, script_name),
+                              script_destination)
+        utils.sudo(['mv', script_destination,
+                    join(utils.CLOUDIFY_HOME_DIR, script_name)])
+    except Exception as ex:
+        ctx.logger.info('Failed to deploy delete_logs script. Error: {0}'
+                        ''.format(ex))
+
+
 def configure_restservice():
     _deploy_rest_configuration()
     _deploy_security_configuration()
+    _deploy_authorization_configuration()
     _allow_creating_cluster()
     utils.systemd.configure(SERVICE_NAME, tmpfiles=True)
     _create_db_tables_and_add_defaults()
+    _deploy_db_cleanup_script()
 
 
 configure_restservice()

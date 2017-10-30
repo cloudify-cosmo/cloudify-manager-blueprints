@@ -11,7 +11,7 @@ import utils  # NOQA
 
 RIEMANN_SERVICE_NAME = 'riemann'
 
-ctx_properties = utils.ctx_factory.create(RIEMANN_SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = RIEMANN_SERVICE_NAME
 runtime_props['service_user'] = RIEMANN_SERVICE_NAME
@@ -24,9 +24,6 @@ def install_riemann():
     langohr_source_url = ctx_properties['langohr_jar_source_url']
     daemonize_source_url = ctx_properties['daemonize_rpm_source_url']
     riemann_source_url = ctx_properties['riemann_rpm_source_url']
-
-    rabbitmq_username = ctx_properties['rabbitmq_username']
-    rabbitmq_password = ctx_properties['rabbitmq_password']
 
     utils.create_service_user(
         user=RIEMANN_USER,
@@ -45,15 +42,14 @@ def install_riemann():
     # Components other than logstash and riemann have this handled in code.
     # Note that these are not directly used in this script, but are used by the
     # deployed resources, hence the check here.
+    rabbitmq_username = ctx_properties['rabbitmq_username']
+    rabbitmq_password = ctx_properties['rabbitmq_password']
     if not rabbitmq_username or not rabbitmq_password:
         ctx.abort_operation(
             'Both rabbitmq_username and rabbitmq_password must be supplied '
             'and at least 1 character long in the manager blueprint inputs.')
 
-    rabbit_props = utils.ctx_factory.get('rabbitmq')
     runtime_props['rabbitmq_endpoint_ip'] = utils.get_rabbitmq_endpoint_ip()
-    runtime_props['rabbitmq_username'] = rabbit_props.get('rabbitmq_username')
-    runtime_props['rabbitmq_password'] = rabbit_props.get('rabbitmq_password')
 
     ctx.logger.info('Installing Riemann...')
     utils.set_selinux_permissive()

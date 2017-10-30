@@ -24,7 +24,7 @@ runtime_props['files_to_remove'] = [HOME_DIR, LOG_DIR]
 runtime_props['home_dir'] = HOME_DIR
 runtime_props['log_dir'] = LOG_DIR
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def install_optional(rest_venv):
@@ -84,27 +84,6 @@ def install_optional(rest_venv):
         os.remove(constraints_file)
 
 
-def deploy_broker_configuration():
-    # injected as an input to the script
-    rabbit_props = utils.ctx_factory.get('rabbitmq')
-    ctx.instance.runtime_properties['rabbitmq_endpoint_ip'] = \
-        utils.get_rabbitmq_endpoint_ip()
-
-    ctx.instance.runtime_properties['rabbitmq_username'] = \
-        rabbit_props.get('rabbitmq_username')
-    ctx.instance.runtime_properties['rabbitmq_password'] = \
-        rabbit_props.get('rabbitmq_password')
-
-    ctx.logger.info('Retrieving postgresql input configuration')
-    postgresql_props = utils.ctx_factory.get('postgresql-9.5')
-    ctx.instance.runtime_properties['postgresql_db_name'] = \
-        postgresql_props.get('postgresql_db_name')
-    ctx.instance.runtime_properties['postgresql_host'] = \
-        postgresql_props.get('postgresql_host')
-    ctx.instance.runtime_properties['broker_cert_path'] = \
-        utils.INTERNAL_CERT_PATH
-
-
 def _configure_dbus(rest_venv):
     # link dbus-python-1.1.1-9.el7.x86_64 to the venv for `cfy status`
     # (module in pypi is very old)
@@ -143,7 +122,8 @@ def install_restservice():
     utils.mkdir(utils.MANAGER_RESOURCES_HOME)
     utils.mkdir(agent_dir)
 
-    deploy_broker_configuration()
+    runtime_props['rabbitmq_endpoint_ip'] = utils.get_rabbitmq_endpoint_ip()
+    runtime_props['broker_cert_path'] = utils.INTERNAL_CA_CERT_PATH
     utils.yum_install(rest_service_rpm_source_url,
                       service_name=SERVICE_NAME)
     _configure_dbus(rest_venv)
@@ -153,6 +133,11 @@ def install_restservice():
     utils.deploy_sudo_command_script(
         script='/usr/bin/systemctl',
         description='Run systemctl'
+    )
+    utils.deploy_sudo_command_script(
+        'set-manager-ssl.py',
+        'Script for setting manager SSL',
+        SERVICE_NAME
     )
     utils.deploy_sudo_command_script(
         script='/usr/sbin/shutdown',

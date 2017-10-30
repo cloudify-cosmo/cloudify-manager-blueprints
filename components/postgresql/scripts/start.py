@@ -12,7 +12,7 @@ ctx.download_resource(
 import utils  # NOQA
 
 PS_SERVICE_NAME = 'postgresql-9.5'
-ctx_properties = utils.ctx_factory.get(PS_SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def _start_postgres():
@@ -89,11 +89,6 @@ def main():
         username=username,
         password=password,
     )
-
-    if utils.is_upgrade or utils.is_rollback:
-        # restore the 'provider_context' and 'snapshot' elements from file
-        # created in the 'create.py' script.
-        ctx.logger.error('NOT IMPLEMENTED - need to restore upgrade data')
 
 
 main()

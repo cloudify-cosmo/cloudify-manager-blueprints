@@ -27,7 +27,7 @@ LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
 runtime_props['home_dir'] = HOME_DIR
 runtime_props['files_to_remove'] = [HOME_DIR, NODEJS_DIR, LOG_DIR]
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 
@@ -62,6 +62,12 @@ def _install_stage():
     ctx.logger.info('Installing Cloudify Stage (UI)...')
     stage_tar = utils.download_cloudify_resource(stage_source_url,
                                                  SERVICE_NAME)
+    if 'community' in stage_tar:
+        ctx.logger.info('Community edition')
+        ctx.instance.runtime_properties['community_mode'] = '-mode community'
+    else:
+        ctx.instance.runtime_properties['community_mode'] = ''
+
     utils.untar(stage_tar, HOME_DIR)
     utils.remove(stage_tar)
 
@@ -75,6 +81,7 @@ def _install_stage():
         component=SERVICE_NAME,
         allow_as=STAGE_USER)
     utils.chmod('a+rx', '/opt/cloudify/stage/restore-snapshot.py')
+    utils.sudo(['usermod', '-aG', utils.CLOUDIFY_GROUP, STAGE_USER])
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)
