@@ -427,13 +427,7 @@ node_templates:
       - type: cloudify.relationships.contained_in
         target: manager_host
       - type: cloudify.relationships.depends_on
-        target: manager_configuration
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: python_runtime
-      - type: cloudify.relationships.depends_on
-        target: rest_service
+        target: sanity
 
 plugins:
   cli:
