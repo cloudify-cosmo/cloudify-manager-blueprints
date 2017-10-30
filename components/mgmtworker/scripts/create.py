@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from os.path import join, dirname
 
 from cloudify import ctx
@@ -26,28 +27,37 @@ runtime_props['log_dir'] = LOG_DIR
 CLOUDIFY_USER = utils.CLOUDIFY_USER
 CLOUDIFY_GROUP = utils.CLOUDIFY_GROUP
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def _install_optional(mgmtworker_venv):
-    rest_props = utils.ctx_factory.get('restservice')
-    rest_client_source_url = rest_props['rest_client_module_source_url']
-    plugins_common_source_url = rest_props['plugins_common_module_source_url']
-    script_plugin_source_url = rest_props['script_plugin_module_source_url']
-    rest_service_source_url = rest_props['rest_service_module_source_url']
-    agent_source_url = rest_props['agent_module_source_url']
+    rest_client_source_url = ctx_properties['rest_client_module_source_url']
+    plugins_common_source_url = \
+        ctx_properties['plugins_common_module_source_url']
+    script_plugin_source_url = \
+        ctx_properties['script_plugin_module_source_url']
+    rest_service_source_url = ctx_properties['rest_service_module_source_url']
+    agent_source_url = ctx_properties['agent_module_source_url']
+    pip_constraints = ctx_properties['pip_constraints']
+
+    constraints_file = utils.write_to_tempfile(pip_constraints) if \
+        pip_constraints else None
 
     # this allows to upgrade modules if necessary.
     ctx.logger.info('Installing Optional Packages if supplied...')
     if rest_client_source_url:
-        utils.install_python_package(rest_client_source_url, mgmtworker_venv)
+        utils.install_python_package(rest_client_source_url, mgmtworker_venv,
+                                     constraints_file)
     if plugins_common_source_url:
         utils.install_python_package(
-            plugins_common_source_url, mgmtworker_venv)
+            plugins_common_source_url, mgmtworker_venv,
+            constraints_file)
     if script_plugin_source_url:
-        utils.install_python_package(script_plugin_source_url, mgmtworker_venv)
+        utils.install_python_package(script_plugin_source_url, mgmtworker_venv,
+                                     constraints_file)
     if agent_source_url:
-        utils.install_python_package(agent_source_url, mgmtworker_venv)
+        utils.install_python_package(agent_source_url, mgmtworker_venv,
+                                     constraints_file)
 
     if rest_service_source_url:
         ctx.logger.info('Downloading cloudify-manager Repository...')
@@ -61,10 +71,15 @@ def _install_optional(mgmtworker_venv):
         riemann_dir = join(tmp_dir, 'plugins/riemann-controller')
 
         ctx.logger.info('Installing Management Worker Plugins...')
-        utils.install_python_package(riemann_dir, mgmtworker_venv)
-        utils.install_python_package(workflows_dir, mgmtworker_venv)
+        utils.install_python_package(riemann_dir, mgmtworker_venv,
+                                     constraints_file)
+        utils.install_python_package(workflows_dir, mgmtworker_venv,
+                                     constraints_file)
 
         utils.remove(tmp_dir)
+
+    if constraints_file:
+        os.remove(constraints_file)
 
 
 def install_mgmtworker():
@@ -85,7 +100,6 @@ def install_mgmtworker():
         # sed 's/"/\\"/' | sed 's/\\/\\\\/' | sed s-/-\\/- | sed 's/\t/\\t/'
         runtime_props[key] = ctx_properties[key]
 
-    runtime_props['rabbitmq_ssl_enabled'] = True
     utils.set_service_as_cloudify_service(runtime_props)
 
     ctx.logger.info('Installing Management Worker...')
@@ -99,6 +113,8 @@ def install_mgmtworker():
     utils.mkdir(riemann_dir)
 
     mgmtworker_venv = join(HOME_DIR, 'env')
+    # used to run the sanity check
+    runtime_props['python_executable'] = join(mgmtworker_venv, 'bin', 'python')
 
     # this create the mgmtworker_venv and installs the relevant
     # modules into it.
@@ -107,7 +123,7 @@ def install_mgmtworker():
     _install_optional(mgmtworker_venv)
 
     # Add certificate and select port, as applicable
-    runtime_props['broker_cert_path'] = utils.INTERNAL_CERT_PATH
+    runtime_props['broker_cert_path'] = utils.INTERNAL_CA_CERT_PATH
     # Use SSL port
     runtime_props['broker_port'] = AMQP_SSL_PORT
 

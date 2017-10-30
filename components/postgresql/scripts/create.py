@@ -19,7 +19,7 @@ PGSQL_LOGS_DIR = join(utils.BASE_LOG_DIR, 'postgresql')
 runtime_props['files_to_remove'] = [
     PGSQL_LIB_DIR, PGSQL_USR_DIR, PGSQL_LOGS_DIR]
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
 def _prepare_env():

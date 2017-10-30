@@ -22,7 +22,7 @@ LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
 FD_LIMIT_PATH = '/etc/security/limits.d/rabbitmq.conf'
 runtime_props['files_to_remove'] = [HOME_DIR, LOG_DIR, FD_LIMIT_PATH]
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
 
 

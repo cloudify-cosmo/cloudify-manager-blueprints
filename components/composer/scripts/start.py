@@ -11,7 +11,7 @@ import utils  # NOQA
 
 runtime_props = ctx.instance.runtime_properties
 
-if utils.is_upgrade:
-    SERVICE_NAME = runtime_props['service_name']
-    utils.validate_upgrade_directories(SERVICE_NAME)
-    utils.systemd.verify_alive(SERVICE_NAME)
+
+if 'skip_installation' not in runtime_props:
+    ctx.logger.info('Starting Composer (UI) Service...')
+    utils.start_service(runtime_props['service_name'])
