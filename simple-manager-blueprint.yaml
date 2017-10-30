@@ -1,7 +1,7 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/4.2.dev1/types.yaml
+  - http://www.getcloudify.org/spec/cloudify/4.2/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.5.1/plugin.yaml
   - types/manager-types.yaml
   - inputs/manager-inputs.yaml
@@ -55,7 +55,7 @@ inputs:
       - {'source_path': 'http://www.getcloudify.org/spec/vsphere-plugin/2.3.0/plugin.yaml', 'destination_path': '/spec/vsphere-plugin/2.3.0/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/fabric-plugin/1.5.1/plugin.yaml', 'destination_path': '/spec/fabric-plugin/1.5.1/plugin.yaml'}
       - {'source_path': 'http://www.getcloudify.org/spec/diamond-plugin/1.3.6/plugin.yaml', 'destination_path': '/spec/diamond-plugin/1.3.6/plugin.yaml'}
-      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.2.dev1/types.yaml', 'destination_path': '/spec/cloudify/4.2.dev1/types.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.2/types.yaml', 'destination_path': '/spec/cloudify/4.2/types.yaml'}
 
   #############################
   # Dev Inputs
@@ -421,16 +421,19 @@ node_templates:
   # the manager. This might aid in debugging problems or just
   # controlling the manager from within itself.
   ######################################################################
-  # cli:
-  #   type: manager.nodes.CLI
-  #   relationships:
-  #     - type: cloudify.relationships.contained_in
-  #       target: manager_host
-  #     - type: cloudify.relationships.depends_on
-  #       target: nginx
-  #     - type: cloudify.relationships.depends_on
-  #       target: rest_service
-
+  cloudify_cli:
+    type: manager.nodes.CLI
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: manager_configuration
+      - type: cloudify.relationships.depends_on
+        target: manager_resources
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: cloudify.relationships.depends_on
+        target: rest_service
 
 plugins:
   cli:
