@@ -14,4 +14,5 @@ runtime_props = ctx.instance.runtime_properties
 
 # This makes sure that the `create` script already ran
 if runtime_props.get('service_name'):
+    utils.delete_cluster_component('consul')
     utils.remove_component(runtime_props)

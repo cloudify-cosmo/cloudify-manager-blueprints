@@ -12,16 +12,22 @@ import utils  # NOQA
 SERVICE_NAME = 'nginx'
 
 # Some runtime properties to be used in teardown
+ctx_properties = ctx.node.properties.get_all()
 runtime_props = ctx.instance.runtime_properties
 runtime_props['service_name'] = SERVICE_NAME
+
+# those properties must be copied into runtime properties, for use in
+# the preconfigure script
+properties_to_copy = ['rest_key', 'rest_certificate', 'ca_certificate',
+                      'ca_key', 'internal_certificate', 'internal_key']
 
 LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
 UNIT_OVERRIDE_PATH = '/etc/systemd/system/nginx.service.d'
 runtime_props['files_to_remove'] = [LOG_DIR, UNIT_OVERRIDE_PATH]
+for property_name in properties_to_copy:
+    runtime_props[property_name] = ctx_properties[property_name]
 
-ctx_properties = utils.ctx_factory.create(SERVICE_NAME)
 CONFIG_PATH = 'components/{0}/config'.format(SERVICE_NAME)
-AGENTS_ROLLBACK_PATH = '/opt/cloudify/nginx/rollback_agents'
 
 
 def install_nginx():

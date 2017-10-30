@@ -12,6 +12,6 @@ location / {
 }
 
 location /auth {
-    proxy_pass http://cloudify-rest/api/v3/file-server-auth;
+    proxy_pass http://cloudify-rest/api/v3.1/file-server-auth;
     proxy_set_header X-Original-URI $request_uri;
 }

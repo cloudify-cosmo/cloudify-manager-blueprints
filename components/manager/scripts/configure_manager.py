@@ -27,18 +27,12 @@ import utils  # NOQA
 
 NODE_NAME = 'manager-config'
 
-utils.clean_upgrade_resources_if_necessary()
-# This MUST be invoked by the first node, before upgrade snapshot is created.
-utils.clean_rollback_resources_if_necessary()
-
-ctx_properties = utils.ctx_factory.create(NODE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 
-def _configure_security_properties():
+def configure_security_properties():
     security_config = ctx_properties['security']
     runtime_props = ctx.instance.runtime_properties
-
-    runtime_props['internal_rest_port'] = utils.INTERNAL_REST_PORT
 
     if security_config['ssl']['enabled']:
         # manager SSL settings
@@ -56,12 +50,27 @@ def _configure_security_properties():
     runtime_props['external_rest_protocol'] = external_rest_protocol
 
 
-def main():
-    if utils.is_upgrade:
-        utils.create_upgrade_snapshot()
-    # TTY has already been disabled. Rollback may not have the script to
-    # disable TTY since it has been introduced only on 3.4.1
-    _configure_security_properties()
+def create_cloudify_user():
+    utils.create_service_user(
+        user=utils.CLOUDIFY_USER,
+        group=utils.CLOUDIFY_GROUP,
+        home=utils.CLOUDIFY_HOME_DIR
+    )
+    utils.mkdir(utils.CLOUDIFY_HOME_DIR)
 
 
-main()
+def create_sudoers_file_and_disable_sudo_requiretty():
+    utils.sudo(['touch', utils.CLOUDIFY_SUDOERS_FILE])
+    utils.chmod('440', utils.CLOUDIFY_SUDOERS_FILE)
+    entry = 'Defaults:{user} !requiretty'.format(user=utils.CLOUDIFY_USER)
+    description = 'Disable sudo requiretty for {0}'.format(utils.CLOUDIFY_USER)
+    utils.add_entry_to_sudoers(entry, description)
+
+
+def init_cloudify_user():
+    create_cloudify_user()
+    create_sudoers_file_and_disable_sudo_requiretty()
+
+
+init_cloudify_user()
+configure_security_properties()

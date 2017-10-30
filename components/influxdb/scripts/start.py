@@ -13,7 +13,7 @@ runtime_props = ctx.instance.runtime_properties
 SERVICE_NAME = runtime_props['service_name']
 
 
-ctx_properties = utils.ctx_factory.get(SERVICE_NAME)
+ctx_properties = ctx.node.properties.get_all()
 
 INFLUXDB_ENDPOINT_IP = ctx_properties['influxdb_endpoint_ip']
 INFLUXDB_ENDPOINT_PORT = 8086

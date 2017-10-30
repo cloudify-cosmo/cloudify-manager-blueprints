@@ -24,8 +24,8 @@ node_types:
       execute_before_bootstrap:
         default: { get_input: execute_before_bootstrap }
     interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
+      cloudify.interfaces.validation:
+        creation:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
@@ -38,9 +38,10 @@ node_types:
                 user: { get_input: ssh_user }
                 port: { get_input: ssh_port }
                 key_filename: { get_input: ssh_key_filename }
-                host_string: { get_attribute: [manager_configuration, public_ip] }
+                host_string: { get_property: [manager_host, public_ip] }
                 always_use_pty: true
-        configure:
+      cloudify.interfaces.lifecycle:
+        create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
@@ -105,8 +106,6 @@ node_types:
 
           #########################################################################
           # Enabling SSL limits communication with the server to SSL only.
-          # If enabled, the certificate and private key files must be found in
-          # resources/ssl.
           # Disabled by default.
           #########################################################################
           ssl:
@@ -494,6 +493,30 @@ node_types:
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
     properties:
+      rest_certificate:
+        description: Public certificate for rest ssl
+        type: string
+        default: { get_input: rest_certificate }
+      rest_key:
+        description: Private key for rest ssl certificate
+        type: string
+        default: { get_input: rest_key }
+      ca_certificate:
+        description: Internal CA certificate
+        type: string
+        default: { get_input: ca_certificate }
+      ca_key:
+        description: Private key for the internal CA certificate
+        type: string
+        default: { get_input: ca_key }
+      internal_certificate:
+        description: Internal certificate
+        type: string
+        default: { get_input: internal_certificate }
+      internal_key:
+        description: Private key for the internal certificate
+        type: string
+        default: { get_input: internal_key }
       nginx_rpm_source_url:
         description: Nginx RPM Source URL
         type: string
@@ -623,6 +646,9 @@ node_types:
       rest_service_rpm_source_url:
         type: string
         default: { get_input: rest_service_rpm_source_url }
+      pip_constraints:
+        type: string
+        default: { get_input: pip_constraints }
       dsl_parser_module_source_url:
         description: DSL Parser module Source URL
         type: string
@@ -643,6 +669,14 @@ node_types:
         description: RabbitMQ password for access to queues.
         type: string
         default: { get_input: rabbitmq_password }
+      postgresql_db_name:
+        description: PostgreSQL default db name
+        type: string
+        default: { get_input: postgresql_db_name }
+      postgresql_host:
+        description: PostgreSQL default host
+        type: string
+        default: { get_input: postgresql_host }
       plugins_common_module_source_url:
         description: Plugins Common module Source URL
         type: string
@@ -706,6 +740,10 @@ node_types:
         description: Number of log files to keep when rotating.
         type: integer
         default: { get_input: rest_service_log_files_backup_count }
+      min_available_memory_mb:
+        description: Minimum available memory for running list query on Manager host in MB.
+        type: integer
+        default: { get_input: rest_service_min_available_memory_mb }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -751,6 +789,9 @@ node_types:
         description: Management Worker RPM Source URL
         type: string
         default: { get_input: management_worker_rpm_source_url }
+      pip_constraints:
+        type: string
+        default: { get_input: pip_constraints }
       rest_client_module_source_url:
         description: REST Client module Source URL
         type: string
@@ -797,7 +838,7 @@ node_types:
           operations and concurrent workflows, separately. It cannot be bigger than the management worker
           max workers property, as that property sets the global max number of running processes.
         type: integer
-        default: { get_property: [manager_configuration, cloudify, cloudify_agent, max_workers] }
+        default: { get_input: max_parallel_operations_per_deployment }
       use_existing_on_upgrade:
         description: Use existing mgmt worker configuration
         type: string
@@ -973,43 +1014,69 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
-  manager.nodes.CLI:
+  manager.nodes.Composer:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
-      rest_client_module_source_url:
-        description: REST Client module Source URL
+      composer_tar_source_url:
+        description: Cloudify Composer Source URL
         type: string
-        default: { get_input: rest_client_source_url }
-      dsl_parser_module_source_url:
-        description: DSL Parser module Source URL
+        default: { get_input: composer_source_url }
+      use_existing_on_upgrade:
+        description: Use existing composer configuration
         type: string
-        default: { get_input: dsl_parser_source_url }
-      plugins_common_module_source_url:
-        description: Plugins Common module Source URL
-        type: string
-        default: { get_input: plugins_common_source_url }
-      script_plugin_module_source_url:
-        description: Script Plugin module Source URL
-        type: string
-        default: { get_input: script_plugin_source_url }
-      cli_module_source_url:
-        description: Cloudify's CLI module Source URL
-        type: string
-        default: { get_input: cli_source_url }
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/cli/scripts/create.sh
+              default: components/composer/scripts/create.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
             script_path:
-              default: components/cli/scripts/start.sh
+              default: components/composer/scripts/start.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        stop:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/composer/scripts/stop.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/composer/scripts/delete.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+
+  manager.nodes.CLI:
+    derived_from: cloudify.nodes.ApplicationModule
+    properties:
+      cli_rpm_source_url:
+        description: CLI RPM Source URL
+        type: string
+        default: { get_input: cli_rpm_source_url }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/cli/scripts/create.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
+        delete:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/cli/scripts/delete.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -1041,8 +1108,9 @@ node_types:
               default: components/sanity/scripts/start.py
             ssh_user:
               default: { get_input: ssh_user }
-            manager_ip:
-              default: { get_attribute: [manager_host, public_ip] }
+            process:
+              default:
+                command_prefix: { get_attribute: [mgmt_worker, python_executable] }
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
@@ -1171,6 +1239,9 @@ relationships:
     derived_from: cloudify.relationships.connected_to
 
   stage_to_restservice:
+    derived_from: cloudify.relationships.connected_to
+
+  composer_to_restservice:
     derived_from: cloudify.relationships.connected_to
 
   mgmtworker_to_postgres:

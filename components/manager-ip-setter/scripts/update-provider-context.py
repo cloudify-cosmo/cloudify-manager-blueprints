@@ -1,60 +1,43 @@
-#!/bin/python
-
 import json
-import sys
-import time
+import argparse
 
-import requests
-
-
-def update_provider_context(manager_ip):
-    username = "{{ ctx.node.properties.admin_username }}"
-    password = "{{ ctx.node.properties.admin_password }}"
-    auth = (username, password)
-    headers = {"Tenant": "default_tenant", 'Content-Type': 'application/json'}
-    print('- Getting provider context...')
-    attempt = 1
-    while True:
-        try:
-            r = requests.get(
-                'http://localhost/api/version', auth=auth, headers=headers)
-            if r.status_code == 200:
-                print('- REST API is up!')
-                break
-            if attempt == 10:
-                break
-        except Exception as e:
-            print('- Error accessing REST API: {}'.format(e))
-        print('- REST API not yet up.. retrying in 5 seconds..')
-        time.sleep(5)
-        attempt += 1
-
-    r = requests.get(
-        'http://localhost/api/v3/provider/context', auth=auth, headers=headers)
-    if r.status_code != 200:
-        print("Failed getting provider context.")
-        print(r.text)
-        sys.exit(1)
-    response = r.json()
-    name = response['name']
-    context = response['context']
-    context['cloudify']['cloudify_agent']['broker_ip'] = manager_ip
-    print('- Updating provider context...')
-    data = {'name': name, 'context': context}
-    r = requests.post(
-        'http://localhost/api/v3/provider/context',
-        auth=auth, headers=headers,
-        params={'update': 'true'},
-        data=json.dumps(data))
-    if r.status_code != 200:
-        print("Failed updating provider context.")
-        print(r.text)
-        sys.exit(1)
+from manager_rest.flask_utils import setup_flask_app
+from manager_rest.storage import get_storage_manager, models
+from manager_rest.constants import PROVIDER_CONTEXT_ID
+from sqlalchemy.orm.attributes import flag_modified
 
 
+def update_provider_context(args):
+    if args.networks:
+        networks = json.load(args.networks)['networks']
+    else:
+        networks = None
+
+    with setup_flask_app().app_context():
+        sm = get_storage_manager()
+        ctx = sm.get(models.ProviderContext, PROVIDER_CONTEXT_ID)
+        agent_dict = ctx.context['cloudify']['cloudify_agent']
+        if networks:
+            for network_name, address in networks.items():
+                previous_address = agent_dict['networks'].get(network_name)
+                if previous_address and address != previous_address:
+                    raise ValueError('Cannot change network {0} address'
+                                     .format(network_name))
+                else:
+                    agent_dict['networks'][network_name] = address
+        agent_dict['broker_ip'] = args.manager_ip
+        agent_dict['networks']['default'] = args.manager_ip
+        flag_modified(ctx, 'context')
+        sm.update(ctx)
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--networks', type=argparse.FileType('r'),
+                    help='File containing the manager networks dict. It '
+                         'should be a JSON file containing an object with a '
+                         '"networks" field.')
+parser.add_argument('manager_ip',
+                    help='The IP of this machine on the default network')
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('Expected 1 argument - <manager-ip>')
-        print('Provided args: {0}'.format(sys.argv[1:]))
-        sys.exit(1)
-    update_provider_context(sys.argv[1])
+    args = parser.parse_args()
+    update_provider_context(args)

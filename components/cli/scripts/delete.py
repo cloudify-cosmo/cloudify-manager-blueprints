@@ -9,10 +9,11 @@ ctx.download_resource(
     join(dirname(__file__), 'utils.py'))
 import utils  # NOQA
 
-IMMUTABLE_PROPERTIES = [
-    'security',
-    'ssh_user'
-]
 
-if utils.is_upgrade:
-    utils.verify_immutable_properties('manager-config', IMMUTABLE_PROPERTIES)
+def remove():
+    ctx.logger.info('Removing Cloudify CLI...')
+    utils.yum_remove('cloudify')
+    ctx.logger.info('Cloudify CLI successfully removed  ')
+
+
+remove()

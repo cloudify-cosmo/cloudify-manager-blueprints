@@ -15,7 +15,7 @@ ExecStart=/opt/amqpinflux/env/bin/python /opt/amqpinflux/env/bin/cloudify-amqp-i
     --amqp-hostname ${AMQP_HOST} \
     --amqp-username "${AMQP_USERNAME}" \
     --amqp-password "${AMQP_PASSWORD}" \
-    --amqp-ssl-enabled "${AMQP_SSL_ENABLED}" \
+    --amqp-ssl-enabled "True" \
     --amqp-ca-cert-path "${AMQP_CA_CERT_PATH}" \
     --influx-database cloudify \
     --influx-hostname ${INFLUXDB_HOST}
