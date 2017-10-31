@@ -482,6 +482,11 @@ inputs:
     type: integer
     default: 2
 
+  management_worker_extra_env:
+    description: >
+      Additional environment variables to add to service file.
+    default: {}
+
   max_parallel_operations_per_deployment:
     description: >
       Maximum number of concurrent operations/workflows for any deployment. The limit is for concurrent
