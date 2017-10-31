@@ -723,7 +723,7 @@ def yum_install(source, service_name):
                 source))
             return
     ctx.logger.info('yum installing {0}...'.format(source_path))
-    sudo(['yum', 'install', '-y', source_path])
+    sudo(['yum', 'install', '-y', '--disablerepo=*', source_path])
 
 
 def yum_remove(package, ignore_failures=False):
