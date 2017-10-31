@@ -78,6 +78,8 @@ CLOUDIFY_SUDOERS_FILE = os.path.join(SUDOERS_INCLUDE_DIR, CLOUDIFY_USER)
 CLUSTER_DELETE_SCRIPT = '/opt/cloudify/delete_cluster.py'
 CFY_EXEC_TEMPDIR_ENVVAR = 'CFY_EXEC_TEMP'
 
+CFY_EXEC_TEMPDIR_ENVVAR = 'CFY_EXEC_TEMP'
+
 
 def retry(exception, tries=4, delay=3, backoff=2):
     """Retry calling the decorated function using an exponential backoff.
