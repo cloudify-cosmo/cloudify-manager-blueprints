@@ -1238,6 +1238,9 @@ relationships:
   stage_to_influxdb:
     derived_from: cloudify.relationships.connected_to
 
+  stage_to_mgmtworker:
+    derived_from: cloudify.relationships.connected_to
+
   stage_to_restservice:
     derived_from: cloudify.relationships.connected_to
 
