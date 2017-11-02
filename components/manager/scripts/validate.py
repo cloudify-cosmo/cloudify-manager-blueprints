@@ -19,6 +19,7 @@ import sys
 import urllib2
 import platform
 import subprocess
+import getpass
 from distutils.version import LooseVersion
 
 from cloudify import ctx
@@ -149,6 +150,20 @@ def _validate_openssl_version(required_version):
             "".format(required_version, ex))
 
 
+def _validate_ssh_user():
+    current_user = getpass.getuser()
+    ctx.logger.info('Validating SSH user ({0})...'.format(current_user))
+    try:
+        subprocess.check_call(['sudo', '-n', 'true'])
+    except Exception as ex:
+        return _error("Failed executing 'sudo'. Please ensure that the "
+                      "provided SSH user ({0}) is allowed to SSH to the "
+                      "manager's machine without a password (using key-"
+                      "based authentication), execute 'sudo' commands "
+                      "over SSH, and impersonate other users using "
+                      "'sudo -u'. (Error: {1})".format(current_user, ex))
+
+
 def validate():
     ignore_validations = ctx.node.properties['ignore_bootstrap_validations']
     resources_package_url = ctx.node.properties['manager_resources_package']
@@ -160,6 +175,7 @@ def validate():
 
     error_summary = []
 
+    error_summary.append(_validate_ssh_user())
     error_summary.append(_validate_python_version(
         expected_major_version=2, expected_minor_version=7))
     error_summary.append(_validate_supported_distros(
