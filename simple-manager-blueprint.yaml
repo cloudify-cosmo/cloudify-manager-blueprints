@@ -370,6 +370,8 @@ node_templates:
         target: rest_service
       - type: stage_to_influxdb
         target: influxdb
+      - type: stage_to_mgmtworker
+        target: mgmt_worker
 
   composer:
     type: manager.nodes.Composer
