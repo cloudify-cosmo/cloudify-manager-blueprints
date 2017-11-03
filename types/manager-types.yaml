@@ -125,19 +125,20 @@ node_types:
       pip_source_rpm_url:
         type: string
         default: { get_input: pip_source_rpm_url }
+      python_backports_rpm_url:
+        type: string
+        default: { get_input: python_backports_rpm_url }
+      python_backports_ssl_match_hostname_rpm_url:
+        type: string
+        default: { get_input: python_backports_ssl_match_hostname_rpm_url }
+      python_setuptools_rpm_url:
+        type: string
+        default: { get_input: python_setuptools_rpm_url }
       use_existing_on_upgrade:
         description: Use existing python configuration
         type: string
         default: true
     interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/python/scripts/bootstrap_validate.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
       cloudify.interfaces.lifecycle:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script

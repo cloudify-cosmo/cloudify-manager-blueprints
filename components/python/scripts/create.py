@@ -15,13 +15,22 @@ ctx_properties = ctx.node.properties.get_all()
 def install_python_requirements():
 
     pip_source_rpm_url = ctx_properties['pip_source_rpm_url']
+    python_backports_rpm_url = ctx_properties['python_backports_rpm_url']
+    python_backports_ssl_match_hostname_rpm_url =\
+        ctx_properties['python_backports_ssl_match_hostname_rpm_url']
+    python_setuptools_rpm_url = ctx_properties['python_setuptools_rpm_url']
+
     install_python_compilers = ctx_properties['install_python_compilers']
 
     ctx.logger.info('Installing Python Requirements...')
     utils.set_selinux_permissive()
     utils.copy_notice('python')
 
-    utils.yum_install(pip_source_rpm_url, service_name='python')
+    for rpm in [pip_source_rpm_url,
+                python_backports_rpm_url,
+                python_backports_ssl_match_hostname_rpm_url,
+                python_setuptools_rpm_url]:
+        utils.yum_install(rpm, service_name='python')
 
     if install_python_compilers:
         ctx.logger.info('Installing Compilers...')
