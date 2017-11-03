@@ -370,6 +370,8 @@ node_templates:
         target: rest_service
       - type: stage_to_influxdb
         target: influxdb
+      - type: stage_to_mgmtworker
+        target: mgmt_worker
 
   composer:
     type: manager.nodes.Composer
@@ -427,13 +429,7 @@ node_templates:
       - type: cloudify.relationships.contained_in
         target: manager_host
       - type: cloudify.relationships.depends_on
-        target: manager_configuration
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: python_runtime
-      - type: cloudify.relationships.depends_on
-        target: rest_service
+        target: sanity
 
 plugins:
   cli:

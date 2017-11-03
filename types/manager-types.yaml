@@ -130,6 +130,14 @@ node_types:
         type: string
         default: true
     interfaces:
+      cloudify.interfaces.validation:
+        creation:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path:
+              default: components/python/scripts/bootstrap_validate.py
+            hide_output: *hide_output
+            fabric_env: *simple_fabric_env
       cloudify.interfaces.lifecycle:
         create:
           implementation: fabric.fabric_plugin.tasks.run_script
@@ -832,6 +840,9 @@ node_types:
         description: Min number of celery workers.
         type: integer
         default: { get_input: management_worker_min_workers }
+      extra_env:
+        description: Additional environment variables to add to service file.
+        default: { get_input: management_worker_extra_env }
       gate_keeper_bucket_size:
         description: >
           Maximum number of concurrent operations/workflows for any deployment. The limit is for concurrent
@@ -1236,6 +1247,9 @@ relationships:
     derived_from: cloudify.relationships.connected_to
 
   stage_to_influxdb:
+    derived_from: cloudify.relationships.connected_to
+
+  stage_to_mgmtworker:
     derived_from: cloudify.relationships.connected_to
 
   stage_to_restservice:
