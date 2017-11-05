@@ -28,9 +28,10 @@ def install_python_requirements():
 
     for rpm in [python_backports_rpm_url,
                 python_backports_ssl_match_hostname_rpm_url,
-                python_setuptools_rpm_url,
-                pip_source_rpm_url]:
-        utils.yum_install(rpm, service_name='python')
+                python_setuptools_rpm_url]:
+        utils.yum_install(rpm, service_name='python', skip_remove=True)
+
+    utils.yum_install(pip_source_rpm_url, service_name='python')
 
     if install_python_compilers:
         ctx.logger.info('Installing Compilers...')

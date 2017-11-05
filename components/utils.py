@@ -661,7 +661,7 @@ def wait_for_port(port, host='localhost'):
     ctx.abort_operation('Failed to connect to {0}:{1}...'.format(host, port))
 
 
-def yum_install(source, service_name):
+def yum_install(source, service_name, skip_remove=False):
     """Installs a package using yum.
 
     yum supports installing from URL, path and the default yum repo
@@ -714,7 +714,8 @@ def yum_install(source, service_name):
 
         # removes any existing versions of the package that do not match
         # the provided package source version
-        rpm_handler.remove_existing_rpm_package()
+        if not skip_remove:
+            rpm_handler.remove_existing_rpm_package()
     else:
         installed = run(['yum', '-q', 'list', 'installed', source_path],
                         ignore_failures=True)
