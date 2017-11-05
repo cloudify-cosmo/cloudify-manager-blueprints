@@ -26,10 +26,10 @@ def install_python_requirements():
     utils.set_selinux_permissive()
     utils.copy_notice('python')
 
-    for rpm in [pip_source_rpm_url,
-                python_backports_rpm_url,
+    for rpm in [python_backports_rpm_url,
                 python_backports_ssl_match_hostname_rpm_url,
-                python_setuptools_rpm_url]:
+                python_setuptools_rpm_url,
+                pip_source_rpm_url]:
         utils.yum_install(rpm, service_name='python')
 
     if install_python_compilers:
