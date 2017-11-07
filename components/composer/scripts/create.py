@@ -53,6 +53,9 @@ def _install_composer():
     # replication and snapshots (restart of mgmtworker necessary for change
     # to take effect)
     utils.sudo(['usermod', '-aG', COMPOSER_GROUP, utils.CLOUDIFY_USER])
+    # This makes sure that the composer folders will be writable after
+    # snapshot restore
+    utils.sudo(['usermod', '-aG', utils.CLOUDIFY_GROUP, COMPOSER_USER])
     utils.systemd.restart('mgmtworker')
 
     ctx.logger.info('Installing Cloudify Composer...')
