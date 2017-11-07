@@ -50,8 +50,10 @@ def _install_composer():
 
     utils.create_service_user(COMPOSER_USER, COMPOSER_GROUP, HOME_DIR)
     # adding cfyuser to the composer group so that its files are r/w for
-    # replication and snapshots
+    # replication and snapshots (restart of mgmtworker necessary for change
+    # to take effect)
     utils.sudo(['usermod', '-aG', COMPOSER_GROUP, utils.CLOUDIFY_USER])
+    utils.systemd.restart('mgmtworker')
 
     ctx.logger.info('Installing Cloudify Composer...')
     composer_tar = utils.download_cloudify_resource(composer_source_url,
