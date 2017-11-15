@@ -9,8 +9,11 @@ HOME_DIR = "{{ ctx.instance.runtime_properties.home_dir}}"
 
 def _restore(snapshot_root):
     for folder in ['conf', 'dist/widgets', 'dist/templates']:
-        destination = os.path.join(HOME_DIR, folder)
+        destination = os.path.join(HOME_DIR, folder, 'from_snapshot')
         if os.path.exists(destination):
+            # This shouldn't exist as we don't support restoring on a non-empty
+            # manager, but we'll carry on the convention of squashing what is
+            # present if something is in the way (see DB restore's DROP)
             shutil.rmtree(destination)
         shutil.copytree(os.path.join(snapshot_root, folder), destination)
 
