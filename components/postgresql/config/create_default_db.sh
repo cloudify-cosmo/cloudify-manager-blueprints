@@ -24,6 +24,8 @@ function clean_database_and_user() {
     db_name=$1
     user=$2
     run_psql "DROP DATABASE IF EXISTS $db_name;"
+    run_psql "DROP DATABASE IF EXISTS $stage_db_name;"
+    run_psql "DROP DATABASE IF EXISTS $composer_db_name;"
     run_psql "DROP USER IF EXISTS $user;"
 }
 

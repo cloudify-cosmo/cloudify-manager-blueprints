@@ -1,7 +1,7 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/4.2/types.yaml
+  - http://www.getcloudify.org/spec/cloudify/4.3.dev1/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.5.1/plugin.yaml
   - types/manager-types.yaml
   - inputs/manager-inputs.yaml
@@ -49,7 +49,7 @@ inputs:
     description: >
       DSL resources to upload to the manager's file server.
     default:
-      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.2/types.yaml', 'destination_path': '/spec/cloudify/4.2/types.yaml'}
+      - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.3.dev1/types.yaml', 'destination_path': '/spec/cloudify/4.3.dev1/types.yaml'}
 
   #############################
   # Dev Inputs
@@ -364,6 +364,8 @@ node_templates:
         target: rest_service
       - type: stage_to_influxdb
         target: influxdb
+      - type: stage_to_mgmtworker
+        target: mgmt_worker
 
   composer:
     type: manager.nodes.Composer
