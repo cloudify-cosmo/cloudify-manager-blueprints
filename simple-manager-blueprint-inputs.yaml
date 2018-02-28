@@ -260,7 +260,7 @@ ssh_key_filename: ''
 # should contain any resource needed in the parsing process (i.e. plugin.yaml files)
 
 #dsl_resources:
-#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.3/types.yaml', 'destination_path': '/spec/cloudify/4.3/types.yaml'}
+#  - {'source_path': 'http://www.getcloudify.org/spec/cloudify/4.4.dev1/types.yaml', 'destination_path': '/spec/cloudify/4.4.dev1/types.yaml'}
 
 ###############################
 # Import Resolver Configuration
