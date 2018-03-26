@@ -17,7 +17,7 @@ dependencies:
     - pip install https://github.com/cloudify-cosmo/cloudify-rest-client/archive/master.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/master.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/master.zip
-    - pip install https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.5.2.zip
+    - pip install https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.5.3.zip
     - pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/master.zip
     - pip install coverage==3.7.1
     - pip install nose
