@@ -1026,10 +1026,6 @@ def logrotate(service):
     and override it. This is done as such so that if a service deploys
     its own logrotate configuration, we will override it.
     """
-    if not os.path.isfile('/etc/cron.hourly/logrotate'):
-        ctx.logger.info('Deploying logrotate hourly cron job...')
-        move('/etc/cron.daily/logrotate', '/etc/cron.hourly/logrotate')
-
     ctx.logger.debug('Deploying logrotate config...')
     config_file_source = 'components/{0}/config/logrotate'.format(service)
     logrotated_path = '/etc/logrotate.d'
