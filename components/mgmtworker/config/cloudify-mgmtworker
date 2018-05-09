@@ -15,3 +15,6 @@ CELERY_TASK_SERIALIZER="json"
 CELERY_RESULT_SERIALIZER="json"
 CELERY_RESULT_BACKEND="amqp"
 C_FORCE_ROOT=true
+{% for key, value in node.properties.extra_env.iteritems() %}
+{{ key }}="{{ value }}"
+{% endfor %}

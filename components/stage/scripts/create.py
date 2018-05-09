@@ -24,6 +24,7 @@ runtime_props['service_group'] = STAGE_GROUP
 HOME_DIR = join('/opt', 'cloudify-{0}'.format(SERVICE_NAME))
 NODEJS_DIR = join('/opt', 'nodejs')
 LOG_DIR = join(utils.BASE_LOG_DIR, SERVICE_NAME)
+RESOURCES_DIR = join(HOME_DIR, 'resources')
 runtime_props['home_dir'] = HOME_DIR
 runtime_props['files_to_remove'] = [HOME_DIR, NODEJS_DIR, LOG_DIR]
 
@@ -51,6 +52,7 @@ def _install_stage():
     utils.mkdir(NODEJS_DIR)
     utils.mkdir(HOME_DIR)
     utils.mkdir(LOG_DIR)
+    utils.mkdir(RESOURCES_DIR)
 
     utils.create_service_user(STAGE_USER, STAGE_GROUP, HOME_DIR)
 
@@ -62,6 +64,12 @@ def _install_stage():
     ctx.logger.info('Installing Cloudify Stage (UI)...')
     stage_tar = utils.download_cloudify_resource(stage_source_url,
                                                  SERVICE_NAME)
+    if 'community' in stage_tar:
+        ctx.logger.info('Community edition')
+        ctx.instance.runtime_properties['community_mode'] = '-mode community'
+    else:
+        ctx.instance.runtime_properties['community_mode'] = ''
+
     utils.untar(stage_tar, HOME_DIR)
     utils.remove(stage_tar)
 
@@ -69,12 +77,25 @@ def _install_stage():
     utils.chown(STAGE_USER, STAGE_GROUP, HOME_DIR)
     utils.chown(STAGE_USER, STAGE_GROUP, NODEJS_DIR)
     utils.chown(STAGE_USER, STAGE_GROUP, LOG_DIR)
-    utils.deploy_sudo_command_script(
+    configure_script(
         'restore-snapshot.py',
         'Restore stage directories from a snapshot path',
-        component=SERVICE_NAME,
-        allow_as=STAGE_USER)
-    utils.chmod('a+rx', '/opt/cloudify/stage/restore-snapshot.py')
+    )
+    configure_script(
+        'make-auth-token.py',
+        'Update auth token for stage user',
+    )
+    # Allow snapshot restores to restore token
+    utils.allow_user_to_sudo_command(
+        '/opt/manager/env/bin/python',
+        'Snapshot update auth token for stage user',
+        allow_as=STAGE_USER,
+    )
+    subprocess.check_call([
+        'sudo', '-u', 'stage_user',
+        '/opt/manager/env/bin/python',
+        '/opt/cloudify/stage/make-auth-token.py',
+    ])
 
     utils.logrotate(SERVICE_NAME)
     utils.systemd.configure(SERVICE_NAME)
@@ -84,6 +105,17 @@ def _install_stage():
     subprocess.check_call(
             'cd {0}; {1} run db-migrate'.format(backend_dir, npm_path),
             shell=True)
+
+
+def configure_script(script_name, description):
+    utils.deploy_sudo_command_script(
+        script_name,
+        description,
+        component=SERVICE_NAME,
+        allow_as=STAGE_USER,
+    )
+    utils.chmod('a+rx', '/opt/cloudify/stage/' + script_name)
+    utils.sudo(['usermod', '-aG', utils.CLOUDIFY_GROUP, STAGE_USER])
 
 
 def main():

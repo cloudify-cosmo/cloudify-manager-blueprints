@@ -14,11 +14,13 @@
 #  * See the License for the specific language governing permissions and
 #  * limitations under the License.
 
-
+import os
 import sys
 import urllib2
 import platform
 import subprocess
+import getpass
+from distutils.version import LooseVersion
 
 from cloudify import ctx
 
@@ -131,6 +133,37 @@ def _validate_resources_package_url(manager_resources_package_url):
                 manager_resources_package_url, ex.args))
 
 
+def _validate_openssl_version(required_version):
+    ctx.logger.info('Validating OpenSSL version...')
+    try:
+        # we can't just `import ssl` and check the version
+        # because sometimes python is referencing to the old ssl version
+        output = os.popen('openssl version').read()
+        version = output.split()[1]
+        if LooseVersion(version) < LooseVersion(required_version):
+            msg = "Cloudify Manager requires OpenSSL {0}, " \
+                  "current version: {1}".format(required_version, version)
+            ctx.logger.warn('Validating Warning: {0}'.format(msg))
+    except Exception as ex:
+        return _error(
+            "Cloudify Manager requires OpenSSL {0}, Error: {1}"
+            "".format(required_version, ex))
+
+
+def _validate_ssh_user():
+    current_user = getpass.getuser()
+    ctx.logger.info('Validating SSH user ({0})...'.format(current_user))
+    try:
+        subprocess.check_call(['sudo', '-n', 'true'])
+    except Exception as ex:
+        return _error("Failed executing 'sudo'. Please ensure that the "
+                      "provided SSH user ({0}) is allowed to SSH to the "
+                      "manager's machine without a password (using key-"
+                      "based authentication), execute 'sudo' commands "
+                      "over SSH, and impersonate other users using "
+                      "'sudo -u'. (Error: {1})".format(current_user, ex))
+
+
 def validate():
     ignore_validations = ctx.node.properties['ignore_bootstrap_validations']
     resources_package_url = ctx.node.properties['manager_resources_package']
@@ -138,9 +171,11 @@ def validate():
         ctx.node.properties['minimum_required_total_physical_memory_in_mb']
     disk_space = \
         ctx.node.properties['minimum_required_available_disk_space_in_gb']
+    required_openssl_version = '1.0.2'
 
     error_summary = []
 
+    error_summary.append(_validate_ssh_user())
     error_summary.append(_validate_python_version(
         expected_major_version=2, expected_minor_version=7))
     error_summary.append(_validate_supported_distros(
@@ -150,6 +185,7 @@ def validate():
         min_memory_required_in_mb=physical_memory))
     error_summary.append(_validate_sufficient_disk_space(
         min_disk_space_required_in_gb=disk_space))
+    error_summary.append(_validate_openssl_version(required_openssl_version))
     if resources_package_url:
         error_summary.append(_validate_resources_package_url(
             resources_package_url))

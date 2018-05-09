@@ -12,6 +12,9 @@ server {
   # serve the UI
   include "/etc/nginx/conf.d/ui-locations.cloudify";
 
+  # serve the Composer
+  include "/etc/nginx/conf.d/composer-location.cloudify";
+
   # Serves the Rest Service (backed by the cloudify-rest upstream).
   include "/etc/nginx/conf.d/rest-location.cloudify";
 
@@ -19,32 +22,20 @@ server {
   include "/etc/nginx/conf.d/redirect-to-fileserver.cloudify";
 }
 
-# Composer external server
-server {
-  # server listening for external requests
-  listen              8443 ssl;
-  server_name         {{ ctx.target.instance.runtime_properties.external_rest_host }};
-
-  ssl_certificate     {{ ctx.source.instance.runtime_properties.external_cert_path }};
-  ssl_certificate_key {{ ctx.source.instance.runtime_properties.external_key_path }};
-  error_page 497 =307 https://$host:$server_port$request_uri;
-
-  # serve the Composer
-  include "/etc/nginx/conf.d/composer-location.cloudify";
-
-}
-
-# force http redirect to https
 server {
   listen 80;
   server_name _;
 
-  location / {
-  # use the 308 status code - handled correctly by requests - unlike 301,
-  # when received 308, requests will also resend the request body.
-  # the nginx version shipped with centos has no native 308 support - we need
-  # to add the header manually.
+  # For REST API requests, return HTTP 400.
+  # We don't want to automatically redirect API requests which
+  # may contain sensitive info.
+  location ~ ^/api/ {
+    return 400;
+  }
 
+  # Other than API requests, and unless otherwise noted: redirect
+  # to HTTPS using HTTP code 308 to preserve the request's body.
+  location / {
     add_header Location https://$host$request_uri always;
     return 308;
   }

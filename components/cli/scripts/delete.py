@@ -10,8 +10,10 @@ ctx.download_resource(
 import utils  # NOQA
 
 
-ctx.logger.info('Removing manager resources')
-for path in ['/opt/cloudify',
-             '/etc/cloudify',
-             join(utils.get_exec_tempdir(), 'cloudify-ctx')]:
-    utils.remove(path)
+def remove():
+    ctx.logger.info('Removing Cloudify CLI...')
+    utils.yum_remove('cloudify')
+    ctx.logger.info('Cloudify CLI successfully removed  ')
+
+
+remove()
