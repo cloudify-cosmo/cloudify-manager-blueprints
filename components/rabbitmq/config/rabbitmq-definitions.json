@@ -18,5 +18,10 @@
       "internal": false,
       "arguments": {}
     }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
   ]
 }
