@@ -130,7 +130,7 @@ def run(command, retries=0, stdin=b'', ignore_failures=False,
         if retries:
             ctx.logger.warn('Failed running command: {0}. Retrying. '
                             '({1} left)'.format(command_str, retries))
-            proc = run(command, retries - 1)
+            proc = run(command, retries - 1, ignore_failures=ignore_failures)
         elif not ignore_failures:
             msg = 'Failed running command: {0} ({1}).'.format(
                 command_str, proc.aggr_stderr)
