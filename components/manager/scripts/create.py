@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from datetime import datetime
 from os.path import join, dirname
 
 from cloudify import ctx
@@ -117,5 +118,15 @@ def deploy_manager_sources():
             )
 
 
+def store_manager_version():
+    version = os.environ.get('MANAGER_VERSION', '')
+    build_date = datetime.now().strftime('%Y-%m-%d %H:%M')
+    motd = ' '.join(['Cloudify Manager', version,
+                     '(bootstrap {0})'.format(build_date)])
+    # easiest way to sudo-append to file without changing its chmod...
+    utils.sudo(['bash', '-c', "echo '{0}' >> /etc/motd".format(motd)])
+
+
 execute_before_bootstrap()
 deploy_manager_sources()
+store_manager_version()
