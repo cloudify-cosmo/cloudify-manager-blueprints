@@ -110,6 +110,12 @@ inputs:
     type: integer
     default: 100
 
+  rest_service_plugins:
+    description: |
+      List of URL's or files, containing additional Python packages to install
+      in the REST service's virtualenv.
+    default: {}
+
   #############################
   # Bootstrap Validations
   #############################

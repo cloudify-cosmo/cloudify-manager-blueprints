@@ -699,7 +699,7 @@ node_types:
         default: { get_input: agent_source_url }
       plugins:
         description: Enables installing custom plugins on the rest service
-        default: {}
+        default: { get_input: rest_service_plugins }
       # what we would really like is to have the ref to cloudify security here (in the type) and not in the template
       # defined in each manager blueprint
       # and we also need just the security section...
