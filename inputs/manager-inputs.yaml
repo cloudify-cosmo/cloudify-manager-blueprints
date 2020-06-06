@@ -558,6 +558,10 @@ inputs:
     type: string
     default: ''
 
+  premium_source_url:
+    type: string
+    default: ''
+
   sanity_app_source_url:
     type: string
     default: cloudify-hello-world-example-*.tar.gz
