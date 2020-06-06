@@ -27,14 +27,15 @@ from manager_rest.storage.storage_utils import \
 
 def _init_db_tables(config):
     print 'Setting up a Flask app'
-    setup_flask_app(
+    app = setup_flask_app(
         manager_ip=config['postgresql_host'],
         hash_salt=config['hash_salt'],
         secret_key=config['secret_key']
     )
 
-    print 'Creating tables in the DB'
-    upgrade(directory=config['db_migrate_dir'])
+    with app.app_context():
+        print 'Creating tables in the DB'
+        upgrade(directory=config['db_migrate_dir'])
 
 
 def _add_default_user_and_tenant(config, amqp_manager):
