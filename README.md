@@ -7,4 +7,4 @@ This repository contains blueprints for bootstrapping Cloudify
 ## Usage
 
 See [Bootstrapping Cloudify](http://docs.getcloudify.org/latest/installation/bootstrapping/)
-for shpadman
+for
